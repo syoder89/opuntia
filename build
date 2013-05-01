@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# If a git push fails with an odd error 22, http error 404 or whatever, use this:
+# git config http.postBuffer 524288000
+
+OPUNTIA_CFG="config-opuntia-4.7"
+if [ ! -f .config ] ; then
+	cp -f $OPUNTIA_CFG .config
+elif [ -f .config ] && ! diff .config $OPUNTIA_CFG > /dev/null ; then
+	echo "Configuration change detected!"
+	echo "Backing up your previous configuration to .config.old..."
+	sleep 3
+	mv -f .config .config.old
+	cp -f $OPUNTIA_CFG .config
+fi
+
+# Update feeds if Luci is not present
+if [ ! -f feeds/luci.index ] ; then
+	./scripts/feeds update -a
+	# Feeds script runs defconfig so we need to re-copy .config again.
+	cp -f $OPUNTIA_CFG .config
+	./scripts/feeds install -a
+	make oldconfig
+fi
+
+# OpenWRT sucks for building in parallel!
+# The toolchain must be single-thread built
+make tools/install
+
+# The rest can *mostly* be built in parallel
+make -j $((`cat /proc/cpuinfo | grep bogomips | wc -l` * 2))
