@@ -167,7 +167,7 @@ hostapd_set_bss_options() {
 
 	[ -n "$wps_possible" -a -n "$config_methods" ] && {
 		config_get device_type "$vif" wps_device_type "6-0050F204-1"
-		config_get device_name "$vif" wps_device_name "OpenWrt AP"
+		config_get device_name "$vif" wps_device_name "Opuntia AP"
 		config_get manufacturer "$vif" wps_manufacturer "openwrt.org"
 
 		append "$var" "eap_server=1" "$N"

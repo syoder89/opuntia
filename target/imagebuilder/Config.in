@@ -1,5 +1,5 @@
 config IB
-	bool "Build the OpenWrt Image Builder"
+	bool "Build the Opuntia Image Builder"
 	depends !TARGET_ROOTFS_INITRAMFS
 	depends !PROFILE_KCONFIG
 	depends !EXTERNAL_TOOLCHAIN

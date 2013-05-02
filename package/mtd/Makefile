@@ -24,7 +24,7 @@ endef
 
 define Package/mtd/description
  This package contains an utility useful to upgrade from other firmware or
- older OpenWrt releases.
+ older Opuntia releases.
 endef
 
 define Build/Prepare

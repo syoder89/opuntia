@@ -1,5 +1,5 @@
 /*
- * owipcalc - OpenWrt IP Calculator
+ * owipcalc - Opuntia IP Calculator
  *
  *   Copyright (C) 2012 Jo-Philipp Wich <jow@openwrt.org>
  *

@@ -33,7 +33,7 @@ endef
 
 define MkImageLzma
 	mkimage -A mips -O linux -T kernel -a 0x80002000 -C lzma \
-		-e 0x80002000 -n 'MIPS OpenWrt Linux-$(LINUX_VERSION)' \
+		-e 0x80002000 -n 'MIPS Opuntia Linux-$(LINUX_VERSION)' \
 		-d $(KDIR)/vmlinux-$(1).lzma $(KDIR)/uImage-$(1)
 endef
 
@@ -55,7 +55,7 @@ endef
 
 define MkImageGzip
 	mkimage -A mips -O linux -T kernel -a 0x80002000 -C gzip \
-		-e 0x80002000 -n 'MIPS OpenWrt Linux-$(LINUX_VERSION)' \
+		-e 0x80002000 -n 'MIPS Opuntia Linux-$(LINUX_VERSION)' \
 		-d $(KDIR)/vmlinux-$(1).gzip $(KDIR)/uImage-$(1)
 endef
 

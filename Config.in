@@ -4,7 +4,7 @@
 # See /LICENSE for more information.
 #
 
-mainmenu "OpenWrt Configuration"
+mainmenu "Opuntia Configuration"
 
 config HAVE_DOT_CONFIG
 	bool
@@ -158,7 +158,7 @@ menu "Global build settings"
 		bool "Compile with full language support"
 		help
 		  When this option is enabled, packages are built with the full versions of iconv and GNU gettext
-		  instead of the default OpenWrt stubs. If uClibc is used, it is also built with locale support.
+		  instead of the default Opuntia stubs. If uClibc is used, it is also built with locale support.
 
 	config BUILD_STATIC_TOOLS
 		default n

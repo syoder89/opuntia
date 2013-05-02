@@ -25,14 +25,14 @@ define Package/ubus
   CATEGORY:=LuCI2
   SUBMENU:=System
   DEPENDS:=+libubus +libblobmsg-json +ubusd
-  TITLE:=OpenWrt RPC client utility
+  TITLE:=Opuntia RPC client utility
 endef
 
 define Package/ubusd
   SECTION:=luci2
   CATEGORY:=LuCI2
   SUBMENU:=System
-  TITLE:=OpenWrt RPC daemon
+  TITLE:=Opuntia RPC daemon
   DEPENDS:=+libubox
 endef
 
@@ -41,7 +41,7 @@ define Package/libubus
   CATEGORY:=LuCI2
   SUBMENU:=Libraries
   DEPENDS:=+libubox
-  TITLE:=OpenWrt RPC client library
+  TITLE:=Opuntia RPC client library
 endef
 
 define Package/libubus-lua
@@ -49,7 +49,7 @@ define Package/libubus-lua
   CATEGORY:=LuCI2
   SUBMENU:=Libraries
   DEPENDS:=+libubus +liblua
-  TITLE:=Lua binding for the OpenWrt RPC client
+  TITLE:=Lua binding for the Opuntia RPC client
 endef
 
 TARGET_CFLAGS += -I$(STAGING_DIR)/usr/include

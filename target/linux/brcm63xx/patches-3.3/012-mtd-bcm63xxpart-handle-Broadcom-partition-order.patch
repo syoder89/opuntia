@@ -57,7 +57,7 @@ Signed-off-by: Artem Bityutskiy <Artem.Bityutskiy@linux.intel.com>
 +			rootfslen = kerneladdr - rootfsaddr;
 +			rootfs_first = true;
 +		} else {
-+			/* OpenWrt layout */
++			/* Opuntia layout */
 +			rootfsaddr = kerneladdr + kernellen;
 +			rootfslen = spareaddr - rootfsaddr;
 +		}

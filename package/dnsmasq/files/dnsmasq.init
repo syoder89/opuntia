@@ -504,7 +504,7 @@ start() {
 	# add own hostname
 	[ $ADD_LOCAL_HOSTNAME -eq 1 ] && [ -n "$lanaddr" ] && {
 		local hostname="$(uci_get system.@system[0].hostname)"
-		dhcp_domain_add "" "${hostname:-OpenWrt}" "$lanaddr"
+		dhcp_domain_add "" "${hostname:-Opuntia}" "$lanaddr"
 	}
 
 	service_start /usr/sbin/dnsmasq -C $CONFIGFILE && {

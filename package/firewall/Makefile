@@ -17,14 +17,14 @@ define Package/firewall
   SECTION:=net
   CATEGORY:=Base system
   URL:=http://openwrt.org/
-  TITLE:=OpenWrt firewall
+  TITLE:=Opuntia firewall
   MAINTAINER:=Jo-Philipp Wich <xm@subsignal.org>
   DEPENDS:=+iptables +kmod-ipt-conntrack +kmod-ipt-nat
   PKGARCH:=all
 endef
 
 define Package/firewall/description
- UCI based firewall for OpenWrt
+ UCI based firewall for Opuntia
 endef
 
 define Build/Compile

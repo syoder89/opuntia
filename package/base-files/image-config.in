@@ -139,16 +139,16 @@ menuconfig VERSIONOPT
 		These options allow to override the version information embedded in
 		the /etc/openwrt_version, /etc/openwrt_release, /etc/banner and
 		/etc/opkg.conf files. Usually there is no need to set these, but
-		they're useful for release builds or custom OpenWrt redistributions
+		they're useful for release builds or custom Opuntia redistributions
 		that should carry custom version tags.
 
 	config VERSION_DIST
 		string
 		prompt "Release distribution" if VERSIONOPT
-		default "OpenWrt" if VERSIONOPT
+		default "Opuntia" if VERSIONOPT
 		help
 			This is the name of the release distribution.
-			If unspecified, it defaults to OpenWrt.
+			If unspecified, it defaults to Opuntia.
 
 	config VERSION_NICK
 		string
@@ -180,7 +180,7 @@ menuconfig VERSIONOPT
 			 %c .. Release version or "bleeding_edge", lowercase
 			 %N .. Release name, uppercase
 			 %n .. Release name, lowercase
-			 %D .. Distribution name or "OpenWrt", uppercase
+			 %D .. Distribution name or "Opuntia", uppercase
 			 %d .. Distribution name or "openwrt", lowercase
 			 %T .. Target name
 			 %S .. Target/Subtarget name

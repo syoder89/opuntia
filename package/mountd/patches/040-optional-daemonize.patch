@@ -10,4 +10,4 @@
 +
  	daemonize = 1;
  	log_start();
- 	log_printf("Starting OpenWrt (auto)mountd V1\n");
+ 	log_printf("Starting Opuntia (auto)mountd V1\n");

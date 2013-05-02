@@ -5,7 +5,7 @@
  	default y
  
 +config LOGO_OPENWRT_CLUT224
-+	bool "224-color OpenWrt Linux logo"
++	bool "224-color Opuntia Linux logo"
 +	default y
 +
  endif # LOGO
@@ -24,7 +24,7 @@
  		logo = &logo_m32r_clut224;
  #endif
 +#ifdef CONFIG_LOGO_OPENWRT_CLUT224
-+		/* OpenWrt logo */
++		/* Opuntia logo */
 +		logo = &logo_openwrt_clut224;
 +#endif
  	}

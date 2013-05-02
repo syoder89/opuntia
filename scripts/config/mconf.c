@@ -30,7 +30,7 @@ static char menu_backtitle[128];
 static const char mconf_readme[] = N_(
 "Overview\n"
 "--------\n"
-"Some OpenWrt features may be built directly into the image.\n"
+"Some Opuntia features may be built directly into the image.\n"
 "Some may be made into installable ipkg packages. Some features\n"
 "may be completely removed altogether.\n"
 "\n"
@@ -114,7 +114,7 @@ static const char mconf_readme[] = N_(
 "-----------------------------\n"
 "Menuconfig supports the use of alternate configuration files for\n"
 "those who, for various reasons, find it necessary to switch\n"
-"between different OpenWrt configurations.\n"
+"between different Opuntia configurations.\n"
 "\n"
 "At the end of the main menu you will find two options.  One is\n"
 "for saving the current configuration to a file of your choosing.\n"
@@ -192,11 +192,11 @@ load_config_text[] = N_(
 	"last retrieved.  Leave blank to abort."),
 load_config_help[] = N_(
 	"\n"
-	"For various reasons, one may wish to keep several different OpenWrt\n"
+	"For various reasons, one may wish to keep several different Opuntia\n"
 	"configurations available on a single machine.\n"
 	"\n"
 	"If you have saved a previous configuration in a file other than\n"
-	"OpenWrt's default, entering the name of the file here will allow you\n"
+	"Opuntia's default, entering the name of the file here will allow you\n"
 	"to modify that configuration.\n"
 	"\n"
 	"If you are uncertain, then you have probably never used alternate\n"
@@ -206,7 +206,7 @@ save_config_text[] = N_(
 	"as an alternate.  Leave blank to abort."),
 save_config_help[] = N_(
 	"\n"
-	"For various reasons, one may wish to keep different OpenWrt\n"
+	"For various reasons, one may wish to keep different Opuntia\n"
 	"configurations available on a single machine.\n"
 	"\n"
 	"Entering a file name here will allow you to later retrieve, modify\n"
@@ -1086,7 +1086,7 @@ int main(int ac, char **av)
 
 	sym = sym_lookup("OPENWRTVERSION", 0);
 	sym_calc_value(sym);
-	sprintf(menu_backtitle, _("OpenWrt %s Configuration"),
+	sprintf(menu_backtitle, _("Opuntia %s Configuration"),
 		sym_get_string_value(sym));
 
 	mode = getenv("MENUCONFIG_MODE");
@@ -1103,7 +1103,7 @@ int main(int ac, char **av)
 	do {
 		cprint_init();
 		cprint("--yesno");
-		cprint(_("Do you wish to save your new OpenWrt configuration?"));
+		cprint(_("Do you wish to save your new Opuntia configuration?"));
 		cprint("5");
 		cprint("60");
 		stat = exec_conf();
@@ -1112,14 +1112,14 @@ int main(int ac, char **av)
 	if (stat == 0) {
 		if (conf_write(NULL)) {
 			fprintf(stderr, _("\n\n"
-				"Error during writing of the OpenWrt configuration.\n"
+				"Error during writing of the Opuntia configuration.\n"
 				"Your configuration changes were NOT saved."
 				"\n\n"));
 			return 1;
 		}
 		printf(_("\n\n"
-			"*** End of OpenWrt configuration.\n"
-			"*** Execute 'make' to build the OpenWrt or try 'make help'."
+			"*** End of Opuntia configuration.\n"
+			"*** Execute 'make' to build the Opuntia or try 'make help'."
 			"\n\n"));
 	} else {
 		fprintf(stderr, _("\n\n"

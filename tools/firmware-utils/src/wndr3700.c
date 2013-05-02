@@ -1,5 +1,5 @@
 /*
- * wndr3700.c - partially based on OpenWrt's add_header.c
+ * wndr3700.c - partially based on Opuntia's add_header.c
  *
  * Copyright (C) 2009 Anael Orlinski  <naouel@naouel.org>
  *

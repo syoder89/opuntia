@@ -25,7 +25,7 @@ define Package/netifd
   SECTION:=base
   CATEGORY:=Base system
   DEPENDS:=+libuci +libnl-tiny +libubus +ubus +ubusd +jshn
-  TITLE:=OpenWrt Network Interface Configuration Daemon
+  TITLE:=Opuntia Network Interface Configuration Daemon
 endef
 
 TARGET_CFLAGS += \

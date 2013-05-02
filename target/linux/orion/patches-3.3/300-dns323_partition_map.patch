@@ -5,7 +5,7 @@
   *  0x001a0000-0x007d0000 : "File System"
   *  0x007d0000-0x00800000 : "u-boot"
 + *
-+ * Layout as used by OpenWrt
++ * Layout as used by Opuntia
 + *  0x00000000-0x00010000 : "MTD1"
 + *  0x00010000-0x00020000 : "MTD2"
 + *  0x00020000-0x001a0000 : "kernel"

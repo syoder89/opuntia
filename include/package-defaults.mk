@@ -21,7 +21,7 @@ define Package/Default
   MDEPENDS:=
   PROVIDES:=
   EXTRA_DEPENDS:=
-  MAINTAINER:=OpenWrt Developers Team <openwrt-devel@openwrt.org>
+  MAINTAINER:=Opuntia Developers Team <openwrt-devel@openwrt.org>
   SOURCE:=$(patsubst $(TOPDIR)/%,%,$(CURDIR))
   ifneq ($(PKG_VERSION),)
     ifneq ($(PKG_RELEASE),)

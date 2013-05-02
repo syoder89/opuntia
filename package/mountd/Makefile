@@ -16,7 +16,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/mountd
   SECTION:=utils
   CATEGORY:=Utilities
-  TITLE:=OpenWrt automount daemon
+  TITLE:=Opuntia automount daemon
   DEPENDS:=@USB_SUPPORT +uci +kmod-usb-storage +kmod-fs-autofs4
   URL:=http://www.openwrt.org
 endef

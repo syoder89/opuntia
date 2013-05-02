@@ -38,7 +38,7 @@ Package/owsip-oss=$(call Package/owsip-template,oss,OSS,BROKEN)
 Package/owsip-ltq-tapi=$(call Package/owsip-template,ltq-tapi,Lantiq VMMC,$(LTQ_TAPI_DEPENDS) +kmod-ltq-kpi2udp)
 
 define Package/owsip-$(BUILD_VARIANT)/description
-	OpenWrt sip daemon - $(BUILD_VARIANT)
+	Opuntia sip daemon - $(BUILD_VARIANT)
 endef
 
 USE_LOCAL=$(shell ls ./src/ 2>/dev/null >/dev/null && echo 1)
