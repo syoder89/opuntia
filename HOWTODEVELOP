@@ -1,0 +1,56 @@
+Notes for developers of Opuntia.
+
+All code should be developed using Git Flow (http://nvie.com/posts/a-successful-git-branching-model)
+
+The Remine Git repository is set to track the develop branch by default and this is the branch you will receive when you clone.
+Unfortunately git flow needs the branch set to master when you initialize git flow.
+
+So here's how to set up git flow correctly.
+
+1) Install the git flow addon
+	git clone https://github.com/nvie/gitflow.git
+	cd gitflow
+	sudo make install
+2) Change to your opuntia git checkout directory
+	cd { your git opuntia checkout }
+3) Change to the master branch of opuntia
+	git checkout master
+4) Initialize git flow and select the defaults (releases go to master NOT DEVELOP!!!)
+	git flow init
+
+Output should look like this:
+
+Which branch should be used for bringing forth production releases?
+   - develop
+   - master
+Branch name for production releases: [master] 
+
+Which branch should be used for integration of the "next release"?
+   - develop
+Branch name for "next release" development: [develop] 
+
+How to name your supporting branch prefixes?
+Feature branches? [feature/] 
+Release branches? [release/] 
+Hotfix branches? [hotfix/] 
+Support branches? [support/] 
+Version tag prefix? [] 
+
+*******************************************************
+MAIN DEVELOPMENT LOOP
+
+5) Start a new feature
+	git flow feature start SomeCoolFeature
+6) Develop, commit often, develop, commit more, etc
+	git commit
+7) Build and test
+	Run the build script in the git checkout
+	Testing: We should have VMs and real hardware
+		to test on
+8) Publish your feature for review
+	git flow feature publish SomeCoolFeature
+9) When approved/finalized finish the feature
+	git flow feature finish SomeCoolFeature
+10) GOTO step 5 (start a new feature - can reuse names)
+
+*******************************************************
