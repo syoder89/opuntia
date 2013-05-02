@@ -4,7 +4,7 @@ menuconfig EXTERNAL_TOOLCHAIN
 	bool
 	prompt "Use external toolchain"  if DEVEL
 	help
-	  If enabled, OpenWrt will compile using an existing toolchain instead of compiling one
+	  If enabled, Opuntia will compile using an existing toolchain instead of compiling one
 
 	config NATIVE_TOOLCHAIN
 		bool
@@ -12,7 +12,7 @@ menuconfig EXTERNAL_TOOLCHAIN
 		depends EXTERNAL_TOOLCHAIN
 		select NO_STRIP
 		help
-		  If enabled, OpenWrt will compile using the native toolchain for your host instead of compiling one
+		  If enabled, Opuntia will compile using the native toolchain for your host instead of compiling one
 
 	config TARGET_NAME
 		string

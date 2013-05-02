@@ -1,4 +1,4 @@
-# QoS configuration for OpenWrt
+# QoS configuration for Opuntia
 
 # INTERFACES:
 config interface wan

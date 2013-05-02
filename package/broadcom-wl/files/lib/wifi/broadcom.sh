@@ -384,7 +384,7 @@ config wifi-iface
 	option device   wl${i}
 	option network	lan
 	option mode     ap
-	option ssid     OpenWrt${i#0}
+	option ssid     Opuntia${i#0}
 	option encryption none
 
 EOF

@@ -177,5 +177,5 @@ module_init (gpio_mod_init);
 module_exit (gpio_mod_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("John Crispin / OpenWrt +");
+MODULE_AUTHOR("John Crispin / Opuntia +");
 MODULE_DESCRIPTION("Character device for for generic gpio api");

@@ -5,7 +5,7 @@
  	def_bool n
  
 +config IMAGE_CMDLINE_HACK
-+	bool "OpenWrt specific image command line hack"
++	bool "Opuntia specific image command line hack"
 +	default n
 +
  config NO_IOPORT

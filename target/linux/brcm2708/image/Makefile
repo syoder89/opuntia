@@ -29,7 +29,7 @@ define Image/Build/RaspberryPi
 	mcopy -i $(KDIR)/boot.img $(BUILD_DIR)/brcm2708-gpu-fw-boot/loader.bin ::
 	mcopy -i $(KDIR)/boot.img $(BUILD_DIR)/brcm2708-gpu-fw-boot/arm$(2)_start.elf ::start.elf  #Copy file for memory/gpu division
 	mcopy -i $(KDIR)/boot.img cmdline.txt ::
-	mcopy -i $(KDIR)/boot.img $(KDIR)/Image ::kernel.img  # Copy OpenWrt built kernel
+	mcopy -i $(KDIR)/boot.img $(KDIR)/Image ::kernel.img  # Copy Opuntia built kernel
 	./gen_rpi_sdcard_img.sh $(BIN_DIR)/$(IMG_PREFIX)-sdcard-vfat-$(1)_$(2).img $(KDIR)/boot.img $(KDIR)/root.$(1) \
 		$(CONFIG_BRCM2708_SD_BOOT_PARTSIZE) $(CONFIG_TARGET_ROOTFS_PARTSIZE)
 endef

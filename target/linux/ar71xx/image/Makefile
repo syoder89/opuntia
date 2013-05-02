@@ -86,7 +86,7 @@ endef
 
 define MkuImage
 	mkimage -A mips -O linux -T kernel -a 0x80060000 -C $(1) $(2) \
-		-e 0x80060000 -n 'MIPS OpenWrt Linux-$(LINUX_VERSION)' \
+		-e 0x80060000 -n 'MIPS Opuntia Linux-$(LINUX_VERSION)' \
 		-d $(3) $(4)
 endef
 
@@ -407,7 +407,7 @@ define Image/Build/UBNTXM
 	$(call Sysupgrade/KRuImage,$(1),$(2),1048576,6684672)
 	dd if=$(KDIR_TMP)/vmlinux-$(2).uImage of=$(KDIR_TMP)/vmlinux-$(2).uImage.bin bs=1024k conv=sync
 	-$(STAGING_DIR_HOST)/bin/mkfwimage \
-		-B $(4) -v $(5).$(6).v6.0.0-OpenWrt-$(REVISION) \
+		-B $(4) -v $(5).$(6).v6.0.0-Opuntia-$(REVISION) \
 		-k $(KDIR_TMP)/vmlinux-$(2).uImage.bin \
 		-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
 		-o $(call factoryname,$(1),$(2))
@@ -419,7 +419,7 @@ define Image/Build/UBDEV
 	$(call Sysupgrade/KRuImage,$(1),$(2),1048576,6684672)
 	dd if=$(KDIR_TMP)/vmlinux-$(2).uImage of=$(KDIR_TMP)/vmlinux-$(2).uImage.bin bs=1024k conv=sync
 	-$(STAGING_DIR_HOST)/bin/mkfwimage \
-		-B $(4) -v $(5).$(6).v6.0.0-OpenWrt-$(REVISION) \
+		-B $(4) -v $(5).$(6).v6.0.0-Opuntia-$(REVISION) \
 		-k $(KDIR_TMP)/vmlinux-$(2).uImage.bin \
 		-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
 		-o $(call factoryname,$(1),$(2))
@@ -429,7 +429,7 @@ define Image/Build/UBNT
 	$(call PatchKernelLzma,$(2),$(3))
 	dd if=$(KDIR_TMP)/vmlinux-$(2).bin.lzma of=$(KDIR_TMP)/vmlinux-$(2).lzma bs=64k conv=sync
 	-$(STAGING_DIR_HOST)/bin/mkfwimage \
-		-B $(4) -v $(5).$(6).OpenWrt.$(REVISION) \
+		-B $(4) -v $(5).$(6).Opuntia.$(REVISION) \
 		-k $(KDIR_TMP)/vmlinux-$(2).lzma \
 		-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
 		-o $(call factoryname,$(1),$(2))
@@ -494,12 +494,12 @@ define Image/Build/TPLINKOLD
 		dd if=$(KDIR_TMP)/vmlinux-$(2).okli conv=sync; \
 	) > $(KDIR_TMP)/kernel-$(2).bin
 	-$(STAGING_DIR_HOST)/bin/mktplinkfw \
-		-H $(4) -W $(5) -F $(6) -N OpenWrt -V $(REVISION)\
+		-H $(4) -W $(5) -F $(6) -N Opuntia -V $(REVISION)\
 		-k $(KDIR_TMP)/kernel-$(2).bin \
 		-r $(KDIR)/root.$(1) \
 		-o $(call factoryname,$(1),$(2))
 	-$(STAGING_DIR_HOST)/bin/mktplinkfw \
-		-H $(4) -W $(5) -F $(6) -N OpenWrt -V $(REVISION) -s\
+		-H $(4) -W $(5) -F $(6) -N Opuntia -V $(REVISION) -s\
 		-k $(KDIR_TMP)/kernel-$(2).bin \
 		-r $(KDIR)/root.$(1) \
 		-o $(call sysupname,$(1),$(2))
@@ -508,7 +508,7 @@ endef
 define Image/Build/TPLINKOLD/initramfs
 	$(call Image/BuildLoader,$(2),gz,$(3),0x80060000)
 	-$(STAGING_DIR_HOST)/bin/mktplinkfw -c \
-		-H $(4) -W $(5) -F $(6) -N OpenWrt -V $(REVISION) -s\
+		-H $(4) -W $(5) -F $(6) -N Opuntia -V $(REVISION) -s\
 		-k $(KDIR)/loader-$(2).gz \
 		-o $(call imgname,$(1),$(2))-uImage.bin
 endef
@@ -525,13 +525,13 @@ define Image/Build/TPLINK
 		dd if=$(KDIR_TMP)/vmlinux-$(2).okli conv=sync; \
 	) > $(KDIR_TMP)/kernel-$(2).bin
 	-$(STAGING_DIR_HOST)/bin/mktplinkfw \
-		-H $(4) -W $(5) -F $(6) -N OpenWrt -V $(REVISION)\
+		-H $(4) -W $(5) -F $(6) -N Opuntia -V $(REVISION)\
 		-k $(KDIR_TMP)/kernel-$(2).bin \
 		-r $(KDIR)/root.$(1) \
 		-a $(call rootfs_align,$(1)) -j \
 		-o $(call factoryname,$(1),$(2))
 	-$(STAGING_DIR_HOST)/bin/mktplinkfw \
-		-H $(4) -W $(5) -F $(6) -N OpenWrt -V $(REVISION) -s\
+		-H $(4) -W $(5) -F $(6) -N Opuntia -V $(REVISION) -s\
 		-k $(KDIR_TMP)/kernel-$(2).bin \
 		-r $(KDIR)/root.$(1) \
 		-a $(call rootfs_align,$(1)) -j \
@@ -541,7 +541,7 @@ endef
 define Image/Build/TPLINK/initramfs
 	$(call Image/BuildLoader,$(2),gz,$(3),0x80060000)
 	-$(STAGING_DIR_HOST)/bin/mktplinkfw -c \
-		-H $(4) -W $(5) -F $(6) -N OpenWrt -V $(REVISION) -s\
+		-H $(4) -W $(5) -F $(6) -N Opuntia -V $(REVISION) -s\
 		-k $(KDIR)/loader-$(2).gz \
 		-o $(call imgname,$(1),$(2))-uImage.bin
 endef
@@ -549,13 +549,13 @@ endef
 define Image/Build/TPLINK-LZMA
 	$(call PatchKernelLzma,$(2),$(3))
 	-$(STAGING_DIR_HOST)/bin/mktplinkfw \
-		-H $(4) -W $(5) -F $(6) -N OpenWrt -V $(REVISION) $(7) \
+		-H $(4) -W $(5) -F $(6) -N Opuntia -V $(REVISION) $(7) \
 		-k $(KDIR_TMP)/vmlinux-$(2).bin.lzma \
 		-r $(KDIR)/root.$(1) \
 		-a $(call rootfs_align,$(1)) -j \
 		-o $(call factoryname,$(1),$(2))
 	-$(STAGING_DIR_HOST)/bin/mktplinkfw \
-		-H $(4) -W $(5) -F $(6) -N OpenWrt -V $(REVISION) $(7) -s \
+		-H $(4) -W $(5) -F $(6) -N Opuntia -V $(REVISION) $(7) -s \
 		-k $(KDIR_TMP)/vmlinux-$(2).bin.lzma \
 		-r $(KDIR)/root.$(1) \
 		-a $(call rootfs_align,$(1)) -j \
@@ -565,7 +565,7 @@ endef
 define Image/Build/TPLINK-LZMA/initramfs
 	$(call PatchKernelLzma,$(2),$(3))
 	-$(STAGING_DIR_HOST)/bin/mktplinkfw -c \
-		-H $(4) -W $(5) -F $(6) -N OpenWrt -V $(REVISION) $(7) -s \
+		-H $(4) -W $(5) -F $(6) -N Opuntia -V $(REVISION) $(7) -s \
 		-k $(KDIR_TMP)/vmlinux-$(2).bin.lzma \
 		-o $(call imgname,$(1),$(2))-uImage.bin
 endef
@@ -597,7 +597,7 @@ define Image/Build/Netgear/Build_uImage
 	-rm -rf $(KDIR)/$(1)
 	mkimage -A mips -O linux -T filesystem -C none \
 		-a 0xbf070000 -e 0xbf070000 \
-		-n 'MIPS OpenWrt Linux-$(LINUX_VERSION)' \
+		-n 'MIPS Opuntia Linux-$(LINUX_VERSION)' \
 		-d $(KDIR_TMP)/vmlinux-$(1).uImage.squashfs.tmp \
 		$(KDIR_TMP)/vmlinux-$(1).uImage.squashfs.tmp2
 	$(STAGING_DIR_HOST)/bin/wndr3700 \
@@ -651,7 +651,7 @@ define Image/Build/Netgear
 		for r in $(7) ; do \
 			[ -n "$$$$r" ] && dashr="-$$$$r" || dashr= ; \
 			$(STAGING_DIR_HOST)/bin/mkdniimg \
-				-B $(6) -v OpenWrt.$(REVISION) -r "$$$$r" $(8) \
+				-B $(6) -v Opuntia.$(REVISION) -r "$$$$r" $(8) \
 				-i $(call sysupname,$(1),$(2)) \
 				-o $(call imgname,$(1),$(2))-factory$$$$dashr.img; \
 		done; \

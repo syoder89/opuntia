@@ -598,7 +598,7 @@
 +	}
 +
 +
-+	/* OpenWrt default tone */
++	/* Opuntia default tone */
 +	memset(&tone, 0, sizeof(IFX_TAPI_TONE_t));
 +	tone.simple.format = IFX_TAPI_TONE_TYPE_SIMPLE;
 +	tone.simple.index = TAPI_TONE_LOCALE_NONE;
@@ -621,7 +621,7 @@
 +	tone.simple.loop = 0;
 +	tone.simple.pause = 0;
 +	for (c = 0; c < TAPI_AUDIO_PORT_NUM; c++) {
-+		/* OpenWrt default tone */
++		/* Opuntia default tone */
 +		status = ioctl(ch_fd[c], IFX_TAPI_TONE_TABLE_CFG_SET, &tone);
 +		if (status != PJ_SUCCESS)
 +			TRACE_((THIS_FILE, "IFX_TAPI_TONE_TABLE_CFG_SET failed!\n"));

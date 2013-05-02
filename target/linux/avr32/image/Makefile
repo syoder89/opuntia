@@ -27,7 +27,7 @@ define Image/BuildKernel
 	$(STAGING_DIR_HOST)/bin/lzma e $(LINUX_DIR)/arch/avr32/boot/images/vmlinux.bin $(KDIR)/vmlinux.lzma
 	mkimage -A avr32 -O linux -T kernel -a 0x10000000 -C lzma \
 		-e 0x90000000 \
-		-n 'OpenWrt Linux-$(LINUX_VERSION)' \
+		-n 'Opuntia Linux-$(LINUX_VERSION)' \
 		-d $(KDIR)/vmlinux.lzma $(KDIR)/uImage-lzma
 
 	cp $(KDIR)/uImage-lzma $(BIN_DIR)/$(IMG_PREFIX)-uImage-lzma

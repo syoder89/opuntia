@@ -17,7 +17,7 @@
 +++ b/drivers/mtd/bcm63xxpart.c
 @@ -131,7 +131,8 @@ static int bcm63xx_parse_cfe_partitions(
  		} else {
- 			/* OpenWrt layout */
+ 			/* Opuntia layout */
  			rootfsaddr = kerneladdr + kernellen;
 -			rootfslen = spareaddr - rootfsaddr;
 +			rootfslen = buf->real_rootfs_length;

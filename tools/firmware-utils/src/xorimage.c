@@ -1,5 +1,5 @@
 /*
- * xorimage.c - partially based on OpenWrt's addpattern.c
+ * xorimage.c - partially based on Opuntia's addpattern.c
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

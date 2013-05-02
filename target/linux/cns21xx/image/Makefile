@@ -46,7 +46,7 @@ endef
 define prepare_uimage
 	$(call prepare_zimage,$(1),$(2),$(3))
 	mkimage -A arm -O linux -T kernel -a 0x100000 -e 0x100000 -C none \
-		-n 'OpenWrt Linux-$(LINUX_VERSION)' \
+		-n 'Opuntia Linux-$(LINUX_VERSION)' \
 		-d $(KDIR)/$(call zimage_name,$(1)) \
 		$(KDIR)/$(call uimage_name,$(1))
 endef

@@ -224,7 +224,7 @@ config BUSYBOX_CONFIG_PAM
 	help
 	  Use PAM in login(1) instead of direct access to password database.
 
-	  OpenWrt specific:
+	  Opuntia specific:
 	    You should install libpam from the packages feed and compile it
 	    before trying to build busysbox.
 

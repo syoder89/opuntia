@@ -1,4 +1,4 @@
-# Makefile for OpenWrt
+# Makefile for Opuntia
 #
 # Copyright (C) 2007-2011 OpenWrt.org
 #

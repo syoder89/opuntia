@@ -1,5 +1,5 @@
 # ===========================================================================
-# OpenWrt configuration targets
+# Opuntia configuration targets
 # These targets are used from top-level makefile
 
 # ===========================================================================

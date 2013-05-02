@@ -21,7 +21,7 @@
 +There are several variants of what the linux kernel refers to generically
 +as RDC321X:  R8610, R321x, S3282 and AMRISC20000.
 +
-+R321x: Found in various routers, see the OpenWrt project for details,
++R321x: Found in various routers, see the Opuntia project for details,
 +   http://wiki.openwrt.org/oldwiki/rdcport
 +
 +R8610: Found on the RDC evaluation board
