@@ -26,6 +26,24 @@ fi
 # OpenWRT sucks for building in parallel!
 # The toolchain must be single-thread built
 make tools/install
+if [ "$?" != "0" ] ; then
+	echo "Failed to build tools! Trying again..."
+	sleep 5
+	make tools/install
+	if [ "$?" != "0" ] ; then
+		echo "Failed to build tools!"
+		exit 5
+	fi
+fi
 
 # The rest can *mostly* be built in parallel
-make -j $((`cat /proc/cpuinfo | grep bogomips | wc -l` * 2))
+let retries=5
+
+while [ $((retries)) -gt 0 ] ; do
+	make -j $((`cat /proc/cpuinfo | grep bogomips | wc -l` * 2))
+	if [ "$?" != "0" ] ; then
+		exit 0
+	fi
+	echo "Failed to build! Probably just a transient error, trying again ($retries left)"
+	let retries=retries-1
+done
