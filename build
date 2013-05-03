@@ -47,3 +47,4 @@ while [ $((retries)) -gt 0 ] ; do
 	echo "Failed to build! Probably just a transient error, trying again ($retries left)"
 	let retries=retries-1
 done
+exit 1
