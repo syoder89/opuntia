@@ -17,13 +17,13 @@ define Image/BuildKernel
 	$(STAGING_DIR_HOST)/bin/mkimage -A arm -O linux -T kernel \
 	-C none -a 0x00008000 -e 0x00008000 -n 'Linux-$(LINUX_VERSION)' \
 	-d $(KDIR)/dns323-zImage $(KDIR)/dns323-uImage
-	cp $(KDIR)/dns323-uImage $(BIN_DIR)/openwrt-dns323-uImage
+	cp $(KDIR)/dns323-uImage $(BIN_DIR)/opuntia-dns323-uImage
 endef
 
 define Image/Build/D-Link
 	# Orion DNS-323 Images
  # mtd image
-	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/openwrt-dns323-rootfs bs=128k
+	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/opuntia-dns323-rootfs bs=128k
 endef
 
 define Image/Build

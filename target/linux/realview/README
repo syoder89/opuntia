@@ -6,7 +6,7 @@ hardware.
 To use the images built by Opuntia with qemu, use the following commands:
 
 qemu-system-arm -M realview-eb-mpcore \
--kernel bin/realview/openwrt-realview-vmlinux.elf \
+-kernel bin/realview/opuntia-realview-vmlinux.elf \
 -nographic -m 128
 
 and enjoy the system booting.

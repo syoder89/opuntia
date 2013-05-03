@@ -13,7 +13,7 @@ endef
 
 define Image/BuildKernel
 	mkimage -A arm -O linux -T script -C none -a 0 -e 0 -n 'Boot Image' -d boot.script $(BIN_DIR)/boot.scr
-	cp $(KDIR)/uImage $(BIN_DIR)/openwrt-$(BOARD)-uImage
+	cp $(KDIR)/uImage $(BIN_DIR)/opuntia-$(BOARD)-uImage
 endef
 
 define Image/Build
@@ -21,16 +21,16 @@ define Image/Build
 endef
 
 define Image/Build/jffs2-64k
-	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/openwrt-$(BOARD)-$(1).img bs=65536 conv=sync
+	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/opuntia-$(BOARD)-$(1).img bs=65536 conv=sync
 endef
 
 define Image/Build/jffs2-128k
-	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/openwrt-$(BOARD)-$(1).img bs=131072 conv=sync
+	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/opuntia-$(BOARD)-$(1).img bs=131072 conv=sync
 endef
 
 define Image/Build/squashfs
 	$(call prepare_generic_squashfs,$(KDIR)/root.squashfs)
-	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/openwrt-$(BOARD)-$(1).img bs=131072 conv=sync
+	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/opuntia-$(BOARD)-$(1).img bs=131072 conv=sync
 endef
 
 $(eval $(call BuildImage))

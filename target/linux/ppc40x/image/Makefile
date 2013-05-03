@@ -11,7 +11,7 @@ JFFS2_BLOCKSIZE=128k 64k
 
 define Image/Prepare
 	cp $(LINUX_DIR)/arch/powerpc/boot/uImage $(KDIR)/uImage
-	$(LINUX_DIR)/scripts/dtc/dtc -O dtb -R 4 -S 0x20000 $(LINUX_DIR)/arch/powerpc/boot/dts/kilauea.dts > $(KDIR)/openwrt-kilauea.dtb
+	$(LINUX_DIR)/scripts/dtc/dtc -O dtb -R 4 -S 0x20000 $(LINUX_DIR)/arch/powerpc/boot/dts/kilauea.dts > $(KDIR)/opuntia-kilauea.dtb
 endef
 
 define Image/BuildKernel
@@ -30,7 +30,7 @@ endef
 define Image/Build/jffs2-128k
 	( \
 		dd if=$(LINUX_DIR)/arch/powerpc/boot/uImage bs=1920k conv=sync; \
-		dd if=$(KDIR)/openwrt-kilauea.dtb bs=128k conv=sync; \
+		dd if=$(KDIR)/opuntia-kilauea.dtb bs=128k conv=sync; \
 		dd if=$(KDIR)/root.$(1) bs=128k conv=sync; \
 	) > $(BIN_DIR)/$(IMG_PREFIX)-kilauea-jffs2.img
 endef
@@ -50,7 +50,7 @@ define Image/Build/squashfs
 	$(call prepare_generic_squashfs,$(KDIR)/root.squashfs)
 	( \
 		dd if=$(LINUX_DIR)/arch/powerpc/boot/uImage bs=1920k conv=sync; \
-		dd if=$(KDIR)/openwrt-kilauea.dtb bs=128k conv=sync; \
+		dd if=$(KDIR)/opuntia-kilauea.dtb bs=128k conv=sync; \
 		dd if=$(KDIR)/root.$(1) bs=128k conv=sync; \
 	) > $(BIN_DIR)/$(IMG_PREFIX)-kilauea-$(1).img
 	( \
@@ -65,8 +65,8 @@ endef
 
 ifneq ($(CONFIG_TARGET_ROOTFS_INITRAMFS),)
 define Image/Build/Initramfs
-	cp $(LINUX_DIR)/arch/powerpc/boot/cuImage.magicbox $(BIN_DIR)/openwrt-$(BOARD)-magicbox-initramfs.bin
-	cp $(LINUX_DIR)/arch/powerpc/boot/cuImage.openrb $(BIN_DIR)/openwrt-$(BOARD)-openrb-initramfs.bin
+	cp $(LINUX_DIR)/arch/powerpc/boot/cuImage.magicbox $(BIN_DIR)/opuntia-$(BOARD)-magicbox-initramfs.bin
+	cp $(LINUX_DIR)/arch/powerpc/boot/cuImage.openrb $(BIN_DIR)/opuntia-$(BOARD)-openrb-initramfs.bin
 endef
 endif
 

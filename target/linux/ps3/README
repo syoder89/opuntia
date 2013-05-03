@@ -18,7 +18,7 @@ can be found here:
 
   http://www.kernel.org/pub/linux/kernel/people/geoff/cell/
 
-The 2nd stage image file is bin/openwrt-ps3-vmlinux.elf.  It can
+The 2nd stage image file is bin/opuntia-ps3-vmlinux.elf.  It can
 be loaded with an entry in the bootloader config file.  It has
 no initrd file.
 

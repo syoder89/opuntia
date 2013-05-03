@@ -59,27 +59,27 @@ endef
 
 define Image/Build/CyberTAN
 	(dd if=/dev/zero bs=16 count=1; cat $(BIN_DIR)/$(IMG_PREFIX)-$(1).bin) | \
-		$(STAGING_DIR_HOST)/bin/addpattern -p $(3) -o $(BIN_DIR)/openwrt-$(2)-$(4)-code.bin
+		$(STAGING_DIR_HOST)/bin/addpattern -p $(3) -o $(BIN_DIR)/opuntia-$(2)-$(4)-code.bin
 endef
 
 define Image/Build/Titan
-	$(STAGING_DIR_HOST)/bin/mktitanimg -o $(BIN_DIR)/openwrt-$(2)-$(4)-code.bin -i $(KDIR)/loader.bin $(KDIR)/root.$(1) -a 0x10000 0x10000 -h 2  -p 0x4C575943 -s 0x0b010000
-	$(STAGING_DIR_HOST)/bin/mktitanimg -o $(BIN_DIR)/openwrt-$(2)-na-$(4)-code.bin -i $(KDIR)/loader.bin $(KDIR)/root.$(1) -a 0x10000 0x10000 -h 2  -p 0x4D575943 -s 0x0b010000
+	$(STAGING_DIR_HOST)/bin/mktitanimg -o $(BIN_DIR)/opuntia-$(2)-$(4)-code.bin -i $(KDIR)/loader.bin $(KDIR)/root.$(1) -a 0x10000 0x10000 -h 2  -p 0x4C575943 -s 0x0b010000
+	$(STAGING_DIR_HOST)/bin/mktitanimg -o $(BIN_DIR)/opuntia-$(2)-na-$(4)-code.bin -i $(KDIR)/loader.bin $(KDIR)/root.$(1) -a 0x10000 0x10000 -h 2  -p 0x4D575943 -s 0x0b010000
 endef
 
 
 #define Image/Build/sErCoMm
 #	cat sercomm/adam2.bin "$(BIN_DIR)/$(IMG_PREFIX)-$(1).bin" > "$(KDIR)/dgfw.tmp"
 #	dd if=sercomm/$(2) of="$(KDIR)/dgfw.tmp" bs=$$$$((0x3e0000 - 80)) seek=1 conv=notrunc
-#	$(STAGING_DIR_HOST)/bin/dgfirmware -f -w "$(BIN_DIR)/openwrt-$(2)-$(3).img" "$(KDIR)/dgfw.tmp"
+#	$(STAGING_DIR_HOST)/bin/dgfirmware -f -w "$(BIN_DIR)/opuntia-$(2)-$(3).img" "$(KDIR)/dgfw.tmp"
 #	rm -f "$(KDIR)/dgfw.tmp"
 #endef
 
 define Image/Build/EVA
 	$(STAGING_DIR_HOST)/bin/lzma2eva $(EVA_LOADADDR) 0x$${shell $(TARGET_CROSS)nm $(KDIR)/linux-*/vmlinux | grep -w kernel_entry | cut -d' ' -f1} $(KDIR)/vmlinux.lzma $(KDIR)/loader.eva
-	dd if=$(KDIR)/loader.eva $(call align/$(1)) > $(BIN_DIR)/openwrt-$(2)-$(KERNEL)-$(1).bin
-	cat $(KDIR)/root.$(1) >> $(BIN_DIR)/openwrt-$(2)-$(KERNEL)-$(1).bin
-	$(call prepare_generic_squashfs,$(BIN_DIR)/openwrt-$(2)-$(KERNEL)-$(1).bin)
+	dd if=$(KDIR)/loader.eva $(call align/$(1)) > $(BIN_DIR)/opuntia-$(2)-$(KERNEL)-$(1).bin
+	cat $(KDIR)/root.$(1) >> $(BIN_DIR)/opuntia-$(2)-$(KERNEL)-$(1).bin
+	$(call prepare_generic_squashfs,$(BIN_DIR)/opuntia-$(2)-$(KERNEL)-$(1).bin)
 endef
 
 define Image/Build/Initramfs

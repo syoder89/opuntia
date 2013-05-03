@@ -17,13 +17,13 @@ define Image/Prepare
 endef
 
 define Image/BuildKernel
-	cp $(KDIR)/uImage-old $(BIN_DIR)/openwrt-$(BOARD)-old-uboot-uImage
-	cp $(KDIR)/uImage-new $(BIN_DIR)/openwrt-$(BOARD)-uImage
+	cp $(KDIR)/uImage-old $(BIN_DIR)/opuntia-$(BOARD)-old-uboot-uImage
+	cp $(KDIR)/uImage-new $(BIN_DIR)/opuntia-$(BOARD)-uImage
 endef
 
 # Build sysupgrade image
 define BuildFirmware/Generic
-	dd if=$(BIN_DIR)/openwrt-$(BOARD)-uImage of=$(KDIR)/uImage.pad bs=64k conv=sync; \
+	dd if=$(BIN_DIR)/opuntia-$(BOARD)-uImage of=$(KDIR)/uImage.pad bs=64k conv=sync; \
 	dd if=$(KDIR)/root.$(1) of=$(KDIR)/root.$(1).pad bs=128k conv=sync; \
 	sh $(TOPDIR)/scripts/combined-image.sh \
 		$(KDIR)/uImage.pad \
@@ -37,16 +37,16 @@ define Image/Build
 endef
 
 define Image/Build/jffs2-64k
-	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/openwrt-$(BOARD)-$(1).img bs=64k conv=sync
+	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/opuntia-$(BOARD)-$(1).img bs=64k conv=sync
 endef
 
 define Image/Build/jffs2-128k
-	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/openwrt-$(BOARD)-$(1).img bs=128k conv=sync
+	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/opuntia-$(BOARD)-$(1).img bs=128k conv=sync
 endef
 
 define Image/Build/squashfs
 	$(call prepare_generic_squashfs,$(KDIR)/root.$(1))
-	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/openwrt-$(BOARD)-$(1).img bs=128k conv=sync
+	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/opuntia-$(BOARD)-$(1).img bs=128k conv=sync
 endef
 
 $(eval $(call BuildImage))

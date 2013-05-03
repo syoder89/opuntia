@@ -11,7 +11,7 @@ JFFS2_BLOCKSIZE=256k
 
 define Image/Prepare
 	cp $(LINUX_DIR)/arch/powerpc/boot/cuImage.taishan $(KDIR)/uImage
-	$(LINUX_DIR)/scripts/dtc/dtc -O dtb -R 4 -S 0x20000 $(LINUX_DIR)/arch/powerpc/boot/dts/canyonlands.dts > $(KDIR)/openwrt-canyonlands.dtb
+	$(LINUX_DIR)/scripts/dtc/dtc -O dtb -R 4 -S 0x20000 $(LINUX_DIR)/arch/powerpc/boot/dts/canyonlands.dts > $(KDIR)/opuntia-canyonlands.dtb
 endef
 
 define Image/BuildKernel
@@ -37,7 +37,7 @@ define Image/Build/squashfs
 	) > $(BIN_DIR)/$(IMG_PREFIX)-taishan-$(1).img
 	( \
 		dd if=$(LINUX_DIR)/arch/powerpc/boot/uImage bs=1920k conv=sync; \
-		dd if=$(KDIR)/openwrt-canyonlands.dtb bs=128k conv=sync; \
+		dd if=$(KDIR)/opuntia-canyonlands.dtb bs=128k conv=sync; \
 		dd if=$(KDIR)/root.$(1) bs=256k conv=sync; \
 	) > $(BIN_DIR)/$(IMG_PREFIX)-canyonlands-$(1).img
 endef
