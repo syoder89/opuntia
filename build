@@ -49,13 +49,11 @@ if [ ! -f feeds/luci.index ] ; then
 	make oldconfig
 fi
 
-if [ "$BUILD_NUMBER" != "" ] ; then
-	eval `grep CONFIG_VERSION_NUMBER= .config`
-	sed -i 's/CONFIG_VERSION_NUMBER=.*$/CONFIG_VERSION_NUMBER="${CONFIG_VERSION_NUMBER}.${BUILD_NUMBER}"/g' .config
-fi
 eval `grep CONFIG_VERSION_NUMBER= .config`
-echo "$CONFIG_VERSION_NUMBER"
-exit
+if [ "$BUILD_NUMBER" != "" ] ; then
+	echo "$BUILD_NUMBER" > version
+	export REVISION="$BUILD_NUMBER"
+fi
 
 case "$CMD" in
 	install)
