@@ -41,7 +41,7 @@ let retries=5
 
 while [ $((retries)) -gt 0 ] ; do
 	make -j $((`cat /proc/cpuinfo | grep bogomips | wc -l` * 2))
-	if [ "$?" != "0" ] ; then
+	if [ "$?" = "0" ] ; then
 		exit 0
 	fi
 	echo "Failed to build! Probably just a transient error, trying again ($retries left)"
