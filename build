@@ -1,7 +1,33 @@
 #!/bin/bash
 
+CMD=$1
+ROUTER="$2"
+DESTDIR="$3"
+RELEASE="$4"
+
 # If a git push fails with an odd error 22, http error 404 or whatever, use this:
 # git config http.postBuffer 524288000
+
+function install_img()
+{
+	if [ "$DESTDIR" = "" ] ; then
+		DESTDIR="bin/x86"
+	fi
+	if [ "$ROUTER" = "" ] ; then
+		ROUTER="envoy"
+	fi
+	if [ "$RELEASE" = "" ] ; then
+		if [ "$BUILD_NUMBER" != "" ] ; then
+			RELEASE="devel_${BUILD_NUMBER}"
+		else
+			RELEASE="devel"
+		fi
+	fi
+	mkdir -p "$DESTDIR"
+	install bin/x86/opuntia-x86-alix2-combined-squashfs.img "$DESTDIR/opuntia-$ROUTER-${CONFIG_VERSION_NUMBER}_${RELEASE}.img"
+	mkdir "$DESTDIR/packages"
+	cp bin/x86/packages/* "$DESTDIR/packages"
+}
 
 OPUNTIA_CFG="config-opuntia-4.7"
 if [ ! -f .config ] ; then
@@ -23,28 +49,35 @@ if [ ! -f feeds/luci.index ] ; then
 	make oldconfig
 fi
 
-# OpenWRT sucks for building in parallel!
-# The toolchain must be single-thread built
-make tools/install
-if [ "$?" != "0" ] ; then
-	echo "Failed to build tools! Trying again..."
-	sleep 5
-	make tools/install
-	if [ "$?" != "0" ] ; then
-		echo "Failed to build tools!"
-		exit 5
-	fi
-fi
+eval `grep CONFIG_VERSION_NUMBER= .config`
 
-# The rest can *mostly* be built in parallel
-let retries=5
-
-while [ $((retries)) -gt 0 ] ; do
-	make -j $((`cat /proc/cpuinfo | grep bogomips | wc -l` * 2))
-	if [ "$?" = "0" ] ; then
-		exit 0
-	fi
-	echo "Failed to build! Probably just a transient error, trying again ($retries left)"
-	let retries=retries-1
-done
-exit 1
+case "$CMD" in
+	install)
+		# OpenWRT sucks for building in parallel!
+		# The toolchain must be single-thread built
+		make tools/install
+		if [ "$?" != "0" ] ; then
+			echo "Failed to build tools! Trying again..."
+			sleep 5
+			make tools/install
+			if [ "$?" != "0" ] ; then
+				echo "Failed to build tools!"
+				exit 5
+			fi
+		fi
+		
+		# The rest can *mostly* be built in parallel
+		let retries=5
+		
+		while [ $((retries)) -gt 0 ] ; do
+			make -j $((`cat /proc/cpuinfo | grep bogomips | wc -l` * 2))
+			if [ "$?" = "0" ] ; then
+				install_img
+				exit 0
+			fi
+			echo "Failed to build! Probably just a transient error, trying again ($retries left)"
+			let retries=retries-1
+		done
+		exit 1
+	;;
+esac
