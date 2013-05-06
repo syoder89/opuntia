@@ -89,10 +89,10 @@ ifneq ($(CONFIG_X86_GRUB_IMAGES),)
   define Image/Prepare/grub
 	# for the image builder
 	$(CP) \
-		$(STAGING_DIR)/usr/lib/grub/i386-openwrt/stage1 \
-		$(STAGING_DIR)/usr/lib/grub/i386-openwrt/stage2 \
-		$(STAGING_DIR)/usr/lib/grub/i386-openwrt/stage2_eltorito \
-		$(STAGING_DIR)/usr/lib/grub/i386-openwrt/e2fs_stage1_5 \
+		$(STAGING_DIR)/usr/lib/grub/i386-opuntia/stage1 \
+		$(STAGING_DIR)/usr/lib/grub/i386-opuntia/stage2 \
+		$(STAGING_DIR)/usr/lib/grub/i386-opuntia/stage2_eltorito \
+		$(STAGING_DIR)/usr/lib/grub/i386-opuntia/e2fs_stage1_5 \
 		$(KDIR)/
   endef
 

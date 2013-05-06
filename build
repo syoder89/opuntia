@@ -25,8 +25,10 @@ function install_img()
 	fi
 	mkdir -p "$DESTDIR"
 	install bin/x86/opuntia-x86-alix2-combined-squashfs.img "$DESTDIR/opuntia-$ROUTER-${CONFIG_VERSION_NUMBER}_${RELEASE}.img"
-	mkdir "$DESTDIR/packages"
-	cp bin/x86/packages/* "$DESTDIR/packages"
+	if [ ! -d "$DESTDIR/packages" ] ; then
+		mkdir "$DESTDIR/packages"
+		cp bin/x86/packages/* "$DESTDIR/packages"
+	fi
 }
 
 OPUNTIA_CFG="config-opuntia-4.7"
@@ -56,32 +58,58 @@ if [ "$BUILD_NUMBER" != "" ] ; then
 fi
 
 case "$CMD" in
-	install)
+	install|*)
 		# OpenWRT sucks for building in parallel!
 		# The toolchain must be single-thread built
-		make tools/install
-		if [ "$?" != "0" ] ; then
-			echo "Failed to build tools! Trying again..."
-			sleep 5
-			make tools/install
-			if [ "$?" != "0" ] ; then
-				echo "Failed to build tools!"
-				exit 5
+		NUM_CPUS=$((`cat /proc/cpuinfo | grep bogomips | wc -l` * 2))
+		for section in tools/bison/install tools/install toolchain/install target/linux/compile package/cleanup package/compile package/toolchain/compile world ; do
+			let retries=2
+			while [ $((retries)) -gt 0 ] ; do
+				echo "*** Building $section ***"
+				make -j $NUM_CPUS $section
+				if [ "$?" = "0" ] ; then
+					break;
+				fi
+				echo "Failed to build $section! Probably just a transient error, trying again ($retries left)"
+				let retries=retries-1
+			done
+			if [ $((retries)) -eq 0 ] ; then
+				echo "Trying in single-threaded mode..."
+				make -j 1 $section
+				if [ "$?" = "0" ] ; then
+					echo "Success in single-threaded mode!"
+				else
+					echo "Failed to build after 3 retries, giving up..."
+					exit 5
+				fi
 			fi
-		fi
-		
-		# The rest can *mostly* be built in parallel
-		let retries=5
-		
-		while [ $((retries)) -gt 0 ] ; do
-			make -j $((`cat /proc/cpuinfo | grep bogomips | wc -l` * 2))
-			if [ "$?" = "0" ] ; then
-				install_img
-				exit 0
-			fi
-			echo "Failed to build! Probably just a transient error, trying again ($retries left)"
-			let retries=retries-1
 		done
-		exit 1
+		echo "Build successful! Installing image..."
+		install_img
+		exit 0
+#		make tools/install
+#		if [ "$?" != "0" ] ; then
+#			echo "Failed to build tools! Trying again..."
+#			sleep 5
+#			make tools/install
+#			if [ "$?" != "0" ] ; then
+#				echo "Failed to build tools!"
+#				exit 5
+#			fi
+#		fi
+#		
+#		# The rest can *mostly* be built in parallel
+#		let retries=5
+#		
+#		while [ $((retries)) -gt 0 ] ; do
+#			make -j $((`cat /proc/cpuinfo | grep bogomips | wc -l` * 2))
+#			if [ "$?" = "0" ] ; then
+#				install_img
+#				exit 0
+#			fi
+#			echo "Failed to build! Probably just a transient error, trying again ($retries left)"
+#			let retries=retries-1
+#		done
+#		exit 1
 	;;
 esac
