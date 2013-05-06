@@ -48,7 +48,6 @@ if [ ! -f feeds/luci.index ] ; then
 	# Feeds script runs defconfig so we need to re-copy .config again.
 	cp -f $OPUNTIA_CFG .config
 	./scripts/feeds install -a
-	make oldconfig
 fi
 
 eval `grep CONFIG_VERSION_NUMBER= .config`
@@ -61,6 +60,7 @@ case "$CMD" in
 	install|*)
 		# OpenWRT sucks for building in parallel!
 		# The toolchain must be single-thread built
+		make oldconfig
 		NUM_CPUS=$((`cat /proc/cpuinfo | grep bogomips | wc -l` * 2))
 		for section in tools/bison/install tools/install toolchain/install target/linux/compile package/cleanup package/compile package/toolchain/compile world ; do
 			let retries=2

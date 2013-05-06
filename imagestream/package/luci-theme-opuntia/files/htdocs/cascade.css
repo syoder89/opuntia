@@ -161,7 +161,7 @@ body {
 
 .container {
 	width: 100%;
-	max-width: 940px;
+	max-width: 1170px;
 	margin-left: auto;
 	margin-right: auto;
 	zoom: 1;
@@ -234,7 +234,7 @@ h6 small {
 }
 
 h1 {
-	margin-bottom: 18px;
+	margin-bottom: 8px;
 	font-size: 30px;
 	line-height: 36px;
 }
@@ -286,7 +286,7 @@ h6 {
 }
 
 ul, ol {
-	margin: 0 0 18px 25px;
+	margin: 0 0 8px 15px;
 }
 
 ul ul,
@@ -315,11 +315,11 @@ ul.unstyled {
 }
 
 dl {
-	margin-bottom: 18px;
+	margin-bottom: 8px;
 }
 
 dl dt, dl dd {
-	line-height: 18px;
+	line-height: 8px;
 }
 
 dl dt {
@@ -331,7 +331,7 @@ dl dd {
 }
 
 hr {
-	margin: 20px 0 19px;
+	margin: 10px 0 9px;
 	border: 0;
 	border-bottom: 1px solid #eee;
 }
@@ -352,7 +352,7 @@ small { font-size: 0.9em }
 address {
 	display: block;
 	line-height: 18px;
-	margin-bottom: 18px;
+	margin-bottom: 8px;
 }
 
 code, pre {
@@ -374,7 +374,7 @@ pre {
 	background-color: #f5f5f5;
 	display: block;
 	padding: 8.5px;
-	margin: 0 0 18px;
+	margin: 0 0 8px;
 	line-height: 18px;
 	font-size: 12px;
 	border: 1px solid #ccc;
@@ -391,12 +391,12 @@ pre {
  * Base styles for various input types, form layouts, and states
  * ------------------------------------------------------------- */
 form {
-	margin-bottom: 18px;
+	margin-bottom: 8px;
 }
 
 fieldset {
-	margin-bottom: 9px;
-	padding-top: 9px;
+	margin-bottom: 3px;
+	padding-top: 3px;
 }
 
 fieldset legend {
@@ -404,7 +404,7 @@ fieldset legend {
 	font-size: 19.5px;
 	line-height: 1;
 	color: #404040;
-	padding-top: 20px;
+	padding-top: 10px;
 	*padding: 0 0 5px 0px;
 	/* IE6-7 */
 
@@ -415,7 +415,7 @@ fieldset legend {
 
 form .clearfix,
 form .cbi-value {
-	margin-bottom: 18px;
+	margin-bottom: 8px;
 	zoom: 1;
 	overflow: hidden;
 }
@@ -648,8 +648,8 @@ textarea[readonly] {
 .actions,
 .cbi-page-actions {
 	background: #f5f5f5;
-	margin-bottom: 18px;
-	padding: 17px 20px 18px 150px;
+	margin-bottom: 8px;
+	padding: 7px 10px 8px 140px;
 	border-top: 1px solid #ddd;
 	-webkit-border-radius: 0 0 3px 3px;
 	-moz-border-radius: 0 0 3px 3px;
@@ -699,20 +699,20 @@ textarea[readonly] {
  * ---------------------------------------- */
 table {
 	width: 100%;
-	margin-bottom: 18px;
+	margin-bottom: 8px;
 	padding: 0;
 	font-size: 13px;
 	border-collapse: collapse;
 }
 
 table th, table td {
-	padding: 10px 10px 9px;
+	padding: 4px 4px 3px;
 	line-height: 18px;
 	text-align: left;
 }
 
 table th {
-	padding-top: 9px;
+	padding-top: 3px;
 	font-weight: bold;
 	vertical-align: middle;
 }
@@ -760,7 +760,7 @@ header h3 {
 header h3 a, header .brand {
 	float: left;
 	display: block;
-	padding: 8px 20px 12px;
+	padding: 4px 10px 6px;
 	margin-left: -20px;
 	color: #ffffff;
 	font-size: 20px;
@@ -794,7 +794,7 @@ header .fill {
 header div > ul, .nav {
 	display: block;
 	float: left;
-	margin: 0 10px 0 0;
+	margin: 0 4px 0 0;
 	position: relative;
 	left: 0;
 }
@@ -807,7 +807,7 @@ header div > ul > li, .nav > li {
 header div > ul a, .nav a {
 	display: block;
 	float: none;
-	padding: 10px 10px 11px;
+	padding: 4px 4px 5px;
 	line-height: 19px;
 	text-decoration: none;
 }
@@ -824,7 +824,7 @@ header div > ul .active > a, .nav .active > a {
 
 header div > ul.secondary-nav, .nav.secondary-nav {
 	float: right;
-	margin-left: 10px;
+	margin-left: 4px;
 	margin-right: 0;
 }
 
