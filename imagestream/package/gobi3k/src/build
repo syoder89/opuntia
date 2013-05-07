@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Only 128 GB flash for testing! Only extract the AT&T firmware for now...
+#FIRMWARES="opt/Qualcomm/Gobi/firmware/2/"
+FIRMWARES=""
+
+VERSION="2011.07.29.1026"
+RELEASE="14"
+TARBALL_NAME="Gobi3k_${VERSION}_${RELEASE}_tar.bz2"
+RPM_BUILD_ROOT=/tmp/Gobi3k
+kernel=2.6.23.9-rc1a
+ksrc=/rs/kernel/router-4.4
+
+make -C GobiNet KDIR=${ksrc}
+make -C GobiSerial KDIR=${ksrc}
+make -C GobiAPI/GobiConnectionMgmt
+make -C GobiAPI/GobiImageMgmt
+make -C GobiAPI/GobiQDLService
+make -C util
+
+rm -rf $RPM_BUILD_ROOT
+
+make -C GobiNet KDIR=${ksrc} OUTPUTDIR=$RPM_BUILD_ROOT/Qualcomm/lib/modules/$kernel/kernel/drivers/net/usb/ install
+make -C GobiSerial KDIR=${ksrc} OUTPUTDIR=$RPM_BUILD_ROOT/Qualcomm/lib/modules/$kernel/kernel/drivers/usb/serial/ install
+make -C GobiAPI/GobiConnectionMgmt DESTDIR=$RPM_BUILD_ROOT/Qualcomm install
+make -C GobiAPI/GobiImageMgmt DESTDIR=$RPM_BUILD_ROOT/Qualcomm install
+make -C GobiAPI/GobiQDLService DESTDIR=$RPM_BUILD_ROOT/Qualcomm install
+make -C util DESTDIR=$RPM_BUILD_ROOT/Qualcomm install
+
+CURDIR=`pwd`
+cd $RPM_BUILD_ROOT/Qualcomm
+cd opt; mv Qualcomm/* ../; cd ..; rm -rf opt
+rm -rf etc
+cp -a ${CURDIR}/providers.txt Gobi
+cd ..
+# Make firmware a separate package
+#tar xjf $CURDIR/Gobi3kfirmware.tar.bz2 ${FIRMWARES}
+tar cjf ${CURDIR}/$TARBALL_NAME *
+echo "Created $TARBALL_NAME"
+cd $CURDIR
