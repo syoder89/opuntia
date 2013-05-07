@@ -10,6 +10,7 @@ start() {
         fi
         insmod GobiSerial
         insmod GobiNet
+	ifconfig usb0 up
         man3g start-session --auto-connect
 }
 
