@@ -688,7 +688,7 @@ int GetSignalQuality(BYTE *rssq)
 	fclose(fp);
 	fp = NULL;
 	err = -1;
-	sprintf(Command, "/usr/bin/chat -f /tmp/chat.%d -r /tmp/results.%d < %s > %s",
+	sprintf(Command, "/usr/sbin/chat -f /tmp/chat.%d -r /tmp/results.%d < %s > %s",
 			pid, pid, MODEM_TTY, MODEM_TTY);
 	if ((ret = system(Command)) != 0) {
 		printf("Unable to determine signal quality, error %d.\n", ret);
@@ -742,7 +742,7 @@ int GetAPN(char *APNName)
 	fp = NULL;
 
 	err = -1;
-	sprintf(Command, "/usr/bin/chat -f /tmp/chat.%d -r /tmp/results.%d < %s > %s",
+	sprintf(Command, "/usr/sbin/chat -f /tmp/chat.%d -r /tmp/results.%d < %s > %s",
 			pid, pid, MODEM_TTY, MODEM_TTY);
 	if ((ret = system(Command)) != 0) {
 		printf("Unable to determine APN, error %d.\n", ret);
@@ -954,8 +954,8 @@ void unload_modules(void)
 
 void load_modules(void)
 {
-	system("modprobe GobiSerial");
-	system("modprobe GobiNet");
+	system("insmod GobiSerial");
+	system("insmod GobiNet");
 }
 
 void load_firmware(ULONG loadFirmwareID)

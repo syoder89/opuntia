@@ -21,7 +21,7 @@ define Package/gobi3k
   TITLE:=Gobi3k
   AUTOLOAD:=$(call AutoLoad,51,GobiSerial)
   AUTOLOAD:=$(call AutoLoad,52,GobiNet)
-  DEPENDS:=$(ICONV_DEPENDS) +libpthread +librt +libstdcpp +glib2
+  DEPENDS:=$(ICONV_DEPENDS) +libpthread +librt +libstdcpp +glib2 +chat
 endef
 
 define Package/gobi3k/description
@@ -54,6 +54,7 @@ define Package/gobi3k/install
 	mkdir -p $(1)/usr/lib
 	mv $(1)/opt/Qualcomm/Gobi/*so $(1)/usr/lib
 	cd $(1)/opt; tar xjf $(PKG_BUILD_DIR)/$(GOBI_FIRMWARE)
+	$(CP) -a ./files/* $(1)/ 2>/dev/null || true
 endef
 
 $(eval $(call BuildPackage,gobi3k))
