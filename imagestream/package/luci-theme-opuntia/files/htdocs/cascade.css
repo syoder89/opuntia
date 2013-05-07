@@ -794,7 +794,7 @@ header .fill {
 header div > ul, .nav {
 	display: block;
 	float: left;
-	margin: 0 4px 0 0;
+	margin: 0 10px 0 0;
 	position: relative;
 	left: 0;
 }
@@ -807,7 +807,7 @@ header div > ul > li, .nav > li {
 header div > ul a, .nav a {
 	display: block;
 	float: none;
-	padding: 4px 4px 5px;
+	padding: 10px 10px 11px;
 	line-height: 19px;
 	text-decoration: none;
 }
@@ -824,7 +824,7 @@ header div > ul .active > a, .nav .active > a {
 
 header div > ul.secondary-nav, .nav.secondary-nav {
 	float: right;
-	margin-left: 4px;
+	margin-left: 10px;
 	margin-right: 0;
 }
 
