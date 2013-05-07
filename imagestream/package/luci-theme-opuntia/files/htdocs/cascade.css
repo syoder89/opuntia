@@ -760,7 +760,7 @@ header h3 {
 header h3 a, header .brand {
 	float: left;
 	display: block;
-	padding: 4px 10px 6px;
+	padding: 10px 10px 6px;
 	margin-left: -20px;
 	color: #ffffff;
 	font-size: 20px;
@@ -1932,6 +1932,21 @@ td.cbi-value-field var {
   background-color: #ffffff;
 }
 body {
-  background-color: #29457b;
+/*  background-color: #29457b; */
+  background-color: black;
 /*  background-color: #54629c; */
+}
+#background {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    z-index: -1; /* Ensure div tag stays behind content; -999 might work,        
+too. */
+}
+
+.stretch {
+    width:100%;
+    height:100%;
 }
