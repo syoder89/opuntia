@@ -1001,7 +1001,7 @@ void up_3g() {
 		link_state = 1;
 		system("/bin/net_carrier usb0 on");
 		// Tell the DHCP client to renew
-		system("/bin/kill -10 `cat /var/run/udhcpc.usb0.pid`");
+		system("/bin/kill -10 `cat /var/run/udhcpc-usb0.pid`");
 	}
 }
 

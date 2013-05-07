@@ -12,6 +12,7 @@ start() {
         insmod GobiNet
 	ifconfig usb0 up
         man3g start-session --auto-connect
+	3g_connmgr &
 }
 
 stop() {
@@ -19,4 +20,5 @@ stop() {
         ifconfig usb0 down
         rmmod GobiNet
         rmmod GobiSerial
+	killall 3g_connmgr
 }
