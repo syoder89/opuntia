@@ -156,7 +156,7 @@ body {
 	font-weight: normal;
 	line-height: 18px;
 	color: #404040;
-	padding-top: 58px;
+	padding-top: 40px;
 }
 
 .container {
@@ -808,7 +808,8 @@ header div > ul a, .nav a {
 	display: block;
 	float: none;
 	padding: 10px 10px 11px;
-	line-height: 19px;
+        line-height: 14px;
+        font-size: 14px;
 	text-decoration: none;
 }
 
@@ -949,7 +950,7 @@ a.menu:after, .dropdown-toggle:after {
 	float: left;
 	display: none;
 	position: absolute;
-	top: 40px;
+	top: 34px;
 	z-index: 900;
 	min-width: 160px;
 	max-width: 220px;
