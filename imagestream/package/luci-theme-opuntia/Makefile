@@ -11,11 +11,10 @@ include $(INCLUDE_DIR)/package.mk
 
 define Package/luci-theme-$(THEME_NAME)
   SECTION:=luci
-  CATEGORY:=LuCI
-  SUBMENU:=4. Themes
+  CATEGORY:=ImageStream
   DEPENDS:=+luci-theme-base
   TITLE:=$(THEME_TITLE)
-  URL:=http://example.org/
+  DEFAULT:=y
 endef
 
 define Build/Configure
