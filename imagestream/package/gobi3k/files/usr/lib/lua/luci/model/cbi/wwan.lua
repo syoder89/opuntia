@@ -1,4 +1,4 @@
-m = Map("3g", "3G Settings") -- We want to edit the uci config file /etc/config/network
+m = Map("wwan", "Cellular/Wireless WAN Settings") -- We want to edit the uci config file /etc/config/network
 
 s = m:section(TypedSection, "interface", "Interfaces") -- Especially the "interface"-sections
 s.addremove = true -- Allow the user to create and remove the interfaces
