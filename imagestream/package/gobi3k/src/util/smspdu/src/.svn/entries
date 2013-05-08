@@ -1,0 +1,52 @@
+8
+
+dir
+20
+http://smspdu-cpp.googlecode.com/svn/trunk/src
+http://smspdu-cpp.googlecode.com/svn
+
+
+
+2011-02-04T22:26:38.845727Z
+20
+effractor
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+ce12c22d-465e-9864-fc69-74bad64dc156
+
+main.cpp
+file
+
+
+
+
+2012-04-11T03:21:22.000000Z
+c041912e2af657c0e83226208ed3c1c1
+2011-01-06T15:41:34.406163Z
+18
+effractor
+
+pdu.cpp
+file
+
+
+
+
+2012-04-11T03:21:22.000000Z
+e8706adbc3dd5458c640a68fe2f9238f
+2011-02-04T22:26:38.845727Z
+20
+effractor
+

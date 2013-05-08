@@ -1,0 +1,1 @@
+#define APN "wap.cingular"
