@@ -17,7 +17,7 @@ include $(INCLUDE_DIR)/nls.mk
 
 define Package/gobi3k
   SECTION:=net
-  CATEGORY:=Network
+  CATEGORY:=ImageStream
   TITLE:=Gobi3k
   AUTOLOAD:=$(call AutoLoad,51,GobiSerial)
   AUTOLOAD:=$(call AutoLoad,52,GobiNet)
