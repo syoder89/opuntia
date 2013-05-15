@@ -19,8 +19,8 @@ define Package/gobi3k
   SECTION:=net
   CATEGORY:=ImageStream
   TITLE:=Gobi3k
-  AUTOLOAD:=$(call AutoLoad,51,GobiSerial)
-  AUTOLOAD:=$(call AutoLoad,52,GobiNet)
+  FILES:=$(PKG_BUILD_DIR)/GobiNet/GobiNet.ko $(PKG_BUILD_DIR)/GobiSerial/GobiSerial.ko
+  AUTOLOAD:=$(call AutoLoad,51,GobiSerial GobiNet)
   DEPENDS:=$(ICONV_DEPENDS) +libpthread +librt +libstdcpp +glib2 +chat
 endef
 
