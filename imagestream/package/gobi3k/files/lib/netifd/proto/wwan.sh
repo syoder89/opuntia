@@ -1,6 +1,9 @@
 #!/bin/sh
+INCLUDE_ONLY=1
 
-. ./dhcp.sh "$@"
+. ../netifd-proto.sh
+. ./dhcp.sh
+init_proto "$@"
 
 proto_wwan_init_config() {
 	no_ifname=1
@@ -21,10 +24,6 @@ proto_wwan_setup() {
 	json_get_var service service
 	json_get_var pincode pincode
 
-	[ -e "$ifname" ] || {
-		proto_set_available "$interface" 0
-		return 1
-	}
 
 #	case "$service" in
 #		cdma|evdo)
@@ -84,6 +83,8 @@ proto_wwan_setup() {
 #		lock \
 #		crtscts \
 #		115200 "$ifname"
+	ifconfig $ifname up
+	man3g start-session --auto-connect
 	proto_dhcp_setup $interface $ifname
 	return 0
 }
