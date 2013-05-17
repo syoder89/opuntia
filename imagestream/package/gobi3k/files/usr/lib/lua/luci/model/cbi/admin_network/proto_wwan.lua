@@ -17,27 +17,73 @@ local ipv6, maxwait, defaultroute, metric, peerdns, dns,
       keepalive_failure, keepalive_interval, demand
 
 
-service = section:taboption("general", Value, "service", translate("Service Type"))
-service:value("", translate("-- Please choose --"))
-service:value("umts", "UMTS/EDGE/GPRS")
-service:value("umts_only", translate("UMTS only"))
-service:value("gprs_only", translate("GPRS/EDGE only"))
-service:value("cdma", "CDMA/EV-DO")
+--radiotype = section:taboption("general", Value, "radiotype", translate("Radio Type"))
+--radiotype:value("gsm", translate("GSM/UTMS"))
+--radiotype:value("cdma", translate("CDMA/EV-DO"))
+--radiotype.default="gsm"
 
+--firmware = section:taboption("advanced", Value, "firmware", translate("Provider Firmware"))
+--firmware:value("2", "AT&T")
+--firmware:value("4", "T-Mobile")
+--firmware:value("6", "Other GSM/UTMS (TELCEL/Movistar/Iusacell/Tigo)")
+--firmware:value("7", "Telefonica")
+--firmware:value("8", "Telecom Italia")
+--firmware:value("9", "Orange")
+
+provider = section:taboption("general", ListValue, "provider", translate("Provider"))
+provider:value("verizon", "Verizon") --1 310 12
+provider:value("sprint", "Sprint") --3 310 120
+provider:value("att", "AT&T") --2 310 410 wap.cingular
+provider:value("tmobile", "T-Mobile") --4 310 260 epc.tmobile.com
+provider:value("telcel", "TELCEL") --6 334 20 internet.itelcel.com webgprs webgprs2002
+provider:value("movistar", "Movistar") --6 334 3 internet.movistar.mx movistar movistar
+provider:value("iusacell", "Iusacell") --6 334 50 web.iusacellgsm.mx iusacellgsm iusacellgsm
+provider:value("tigo_colombia", "Tigo Colombia") --6 732 103 web.colombiamovil.com.co
+provider:value("movistar_columbia", "Movistar Colombia") --6 732 123 internet.movistar.com.co movistar movistar
+provider:value("comcel", "Comcel") --6 732 101 internet.comcel.com.co comcel comcel
+provider:value("vodafone", "Vodafone") --0 222 10 ppbundle.internet web web
+provider:value("telefonica", "Telefonica") --7 234 15 wap.vodafone.co.uk wap wap
+provider:value("telecom_italia", "Telecom Italia") --8 222 1 wap.tim.it WAPTIM WAPTIM
+provider:value("orange", "Orange") --9 208 2 orange.fr
+provider:value("gsm", translate("Other GSM/UTMS"))
+provider:value("cdma", translate("Other CDMA/EV-DO"))
+provider.default="att"
+
+--provider_cdma = section:taboption("general", Value, "provider_cdma", translate("Provider"))
+--provider_cdma:value("cdma", translate("Generic CDMA/EV-DO"))
+--provider_cdma:value("verizon", "Verizon") --1 310 12
+--provider_cdma:value("sprint", "Sprint") --3 310 120
+--provider_cdma.default="verizon"
+--provider_cdma:depends("radiotype", "cdma")
+
+service = section:taboption("general", ListValue, "service", translate("Service Type"))
+service:value("auto", "Automatic")
+service:value("3g", translate("3G Only"))
+service:value("2g", translate("2G Only"))
+service.default="auto"
+
+username = section:taboption("general", Value, "mcc", translate("Mobile Country Code (MCC)"))
+username:depends("provider", "gsm")
+username = section:taboption("general", Value, "mnc", translate("Mobile Network Code (MNC)"))
+username:depends("provider", "gsm")
 
 apn = section:taboption("general", Value, "apn", translate("APN"))
-apn:depends("service", "umts")
-apn:depends("service", "umts_only")
-apn:depends("service", "gprs_only")
+apn:depends("provider", "gsm")
 
-pincode = section:taboption("general", Value, "pincode", translate("PIN"))
-pincode:depends("service", "umts")
-pincode:depends("service", "umts_only")
-pincode:depends("service", "gprs_only")
+--pincode = section:taboption("general", Value, "pincode", translate("PIN"))
+--pincode:depends("provider", "gsm")
 
 username = section:taboption("general", Value, "username", translate("PAP/CHAP username"))
+username:depends("provider", "gsm")
+username:depends("provider", "cdma")
+username:depends("provider", "verizon")
+username:depends("provider", "sprint")
 password = section:taboption("general", Value, "password", translate("PAP/CHAP password"))
 password.password = true
+password:depends("provider", "gsm")
+password:depends("provider", "cdma")
+password:depends("provider", "verizon")
+password:depends("provider", "sprint")
 
 local hostname, accept_ra, send_rs
 local bcast, defaultroute, peerdns, dns, metric, clientid, vendorclass

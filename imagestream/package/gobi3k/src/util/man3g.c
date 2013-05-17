@@ -75,13 +75,16 @@ int getIntOption(char *option){
 	if(strcmp(option, "set-sim") == 0){		
 		return 13;
 	}
+	if(strcmp(option, "check-firmware-loaded") == 0){
+		return 14;
+	}
 	return 0;
 }
 
 int help(){
 	printf("Usage: man3g [OPTION] [ARGUMENTS]\n");
 	printf("Commands:\n");
-	printf("  register | status | scan | start-session | stop-session | set-sim | list-firmware | display-serno | display-sms | mark-sms | delete-sms | load-firmware\n");
+	printf("  register | status | scan | start-session | stop-session | set-sim | list-firmware | display-serno | display-sms | mark-sms | delete-sms | load-firmware | check-firmware-loaded\n");
 	return 0;
 }
 
@@ -213,6 +216,54 @@ void list_firmware() {
          gps == 2 ? "Assisted (including XTRA)" :
          gps == 3 ? " Assisted (without XTRA)" :
          "Unknown");
+}
+
+int check_firmware_loaded(ULONG FirmwareID) {
+  ULONG firmware, technology, carrier, region, gps;
+  ULONG l_firmware, l_technology, l_carrier, l_region, l_gps;
+  ULONG ret;
+  char file[256];
+
+  sprintf(file, "/opt/Qualcomm/Gobi/Images/3000/Generic/%d/", FirmwareID);
+  ret = GetImageInfo(file, &firmware, &technology, &carrier, &region, &gps);
+  if (ret)
+  {
+    fail(ret, "GetImageInfo");
+  }
+
+  ret = GetFirmwareInfo(&l_firmware, &l_technology, &l_carrier, &l_region, &l_gps);
+  if (ret)
+  {
+    fail(ret, "GetFirmwareInfo");
+  }
+  if (firmware == l_firmware && technology == l_technology && carrier == l_carrier &&
+		region == l_region && gps == l_gps) {
+	printf("Firmware %d is loaded.\n", FirmwareID);
+	return 0;
+  }
+  else {
+	printf("Firmware %d is NOT loaded.\n", FirmwareID);
+  	printf("Firmware %d image version: %lu technology: %s carrier: %lu region: %lu gps: %s\n",
+		FirmwareID,
+         	firmware,
+         	technology == 0 ? "CDMA" : technology == 1 ? "UMTS" : "Unknown",
+         	carrier, region,
+         	gps == 0 ? "None" :
+         	gps == 1 ? "Standalone" :
+         	gps == 2 ? "Assisted (including XTRA)" :
+         	gps == 3 ? " Assisted (without XTRA)" :
+         	"Unknown");
+  	printf("Loaded firmware image version: %lu technology: %s carrier: %lu region: %lu gps: %s\n",
+         	l_firmware,
+         	l_technology == 0 ? "CDMA" : l_technology == 1 ? "UMTS" : "Unknown",
+         	l_carrier, l_region,
+         	l_gps == 0 ? "None" :
+         	l_gps == 1 ? "Standalone" :
+         	l_gps == 2 ? "Assisted (including XTRA)" :
+         	l_gps == 3 ? " Assisted (without XTRA)" :
+         	"Unknown");
+	}
+	return 1;
 }
 
 void scan() {
@@ -1337,6 +1388,16 @@ int main(int argc, char **argv){
 			else
 				printf("Must specify SIM id (0=internal, 1=external)!\n");
 			card_disconnect();
+			break;
+		case 14: // check-firmware-loaded
+			card_connect();
+			if (firmware == NULL) {
+				printf("Must specify firmware id! (--firmware)\n");
+				exit(1);
+			}
+			ret = check_firmware_loaded(atoi(firmware));
+			card_disconnect();
+			exit(ret);
 			break;
 		default:
 			printf("Unknown option '%s'.\n", argv[1]);
