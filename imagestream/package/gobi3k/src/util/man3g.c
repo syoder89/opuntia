@@ -18,7 +18,6 @@
 #define RAT_UMTS	5
 #define MSGTYPE_READ	1
 #define MSGTYPE_UNREAD	2
-#define MODEM_TTY "/dev/ttyUSB0"
 #define MAX_RSSQ 31
 
 // status formats
@@ -26,8 +25,10 @@
 #define STATUS_FORMAT_MACHINE 2
 
 const char *APNLIST = "apnlist.txt";
+char MODEM_TTY[256] = { '\0' };
 int machine = 0;
 void binary2pdu(char* binary, int length, char* pdu);
+int get_sim();
 
 void error(char *message){
 	printf("Error: %s\n", message);
@@ -71,13 +72,19 @@ int getIntOption(char *option){
 	if(strcmp(option, "delete-sms") == 0){		
 		return 12;
 	}
+	if(strcmp(option, "set-sim") == 0){		
+		return 13;
+	}
+	if(strcmp(option, "check-firmware-loaded") == 0){
+		return 14;
+	}
 	return 0;
 }
 
 int help(){
 	printf("Usage: man3g [OPTION] [ARGUMENTS]\n");
 	printf("Commands:\n");
-	printf("  register | status | scan | start-session | stop-session | list-firmware | display-serno | display-sms | mark-sms | delete-sms | load-firmware\n");
+	printf("  register | status | scan | start-session | stop-session | set-sim | list-firmware | display-serno | display-sms | mark-sms | delete-sms | load-firmware | check-firmware-loaded\n");
 	return 0;
 }
 
@@ -89,6 +96,22 @@ int usage() {
 int invalidOption(char *option) {
    printf("Invalid option: '%s'\n", option);
    return 1;
+}
+
+void GetModemTTY() {
+	int idx = 0;
+	struct stat buffer;
+
+	if (!strlen(MODEM_TTY)) {
+		while (1) {
+			sprintf(MODEM_TTY, "/sys/bus/usb-serial/drivers/GobiSerial driver/ttyUSB%d", idx);
+			if ((stat(MODEM_TTY, &buffer) == 0)) {
+				sprintf(MODEM_TTY, "/dev/ttyUSB%d", idx);
+				return;
+			}
+			idx++;
+		}
+	}
 }
 
 struct Connection{
@@ -193,6 +216,54 @@ void list_firmware() {
          gps == 2 ? "Assisted (including XTRA)" :
          gps == 3 ? " Assisted (without XTRA)" :
          "Unknown");
+}
+
+int check_firmware_loaded(ULONG FirmwareID) {
+  ULONG firmware, technology, carrier, region, gps;
+  ULONG l_firmware, l_technology, l_carrier, l_region, l_gps;
+  ULONG ret;
+  char file[256];
+
+  sprintf(file, "/opt/Qualcomm/Gobi/Images/3000/Generic/%d/", FirmwareID);
+  ret = GetImageInfo(file, &firmware, &technology, &carrier, &region, &gps);
+  if (ret)
+  {
+    fail(ret, "GetImageInfo");
+  }
+
+  ret = GetFirmwareInfo(&l_firmware, &l_technology, &l_carrier, &l_region, &l_gps);
+  if (ret)
+  {
+    fail(ret, "GetFirmwareInfo");
+  }
+  if (firmware == l_firmware && technology == l_technology && carrier == l_carrier &&
+		region == l_region && gps == l_gps) {
+	printf("Firmware %d is loaded.\n", FirmwareID);
+	return 0;
+  }
+  else {
+	printf("Firmware %d is NOT loaded.\n", FirmwareID);
+  	printf("Firmware %d image version: %lu technology: %s carrier: %lu region: %lu gps: %s\n",
+		FirmwareID,
+         	firmware,
+         	technology == 0 ? "CDMA" : technology == 1 ? "UMTS" : "Unknown",
+         	carrier, region,
+         	gps == 0 ? "None" :
+         	gps == 1 ? "Standalone" :
+         	gps == 2 ? "Assisted (including XTRA)" :
+         	gps == 3 ? " Assisted (without XTRA)" :
+         	"Unknown");
+  	printf("Loaded firmware image version: %lu technology: %s carrier: %lu region: %lu gps: %s\n",
+         	l_firmware,
+         	l_technology == 0 ? "CDMA" : l_technology == 1 ? "UMTS" : "Unknown",
+         	l_carrier, l_region,
+         	l_gps == 0 ? "None" :
+         	l_gps == 1 ? "Standalone" :
+         	l_gps == 2 ? "Assisted (including XTRA)" :
+         	l_gps == 3 ? " Assisted (without XTRA)" :
+         	"Unknown");
+	}
+	return 1;
 }
 
 void scan() {
@@ -688,6 +759,7 @@ int GetSignalQuality(BYTE *rssq)
 	fclose(fp);
 	fp = NULL;
 	err = -1;
+	GetModemTTY();
 	sprintf(Command, "/usr/sbin/chat -f /tmp/chat.%d -r /tmp/results.%d < %s > %s",
 			pid, pid, MODEM_TTY, MODEM_TTY);
 	if ((ret = system(Command)) != 0) {
@@ -742,6 +814,7 @@ int GetAPN(char *APNName)
 	fp = NULL;
 
 	err = -1;
+	GetModemTTY();
 	sprintf(Command, "/usr/sbin/chat -f /tmp/chat.%d -r /tmp/results.%d < %s > %s",
 			pid, pid, MODEM_TTY, MODEM_TTY);
 	if ((ret = system(Command)) != 0) {
@@ -797,6 +870,7 @@ void status(int format) {
 	ULONGLONG Tx, Rx, duration;
 	ULONG currentTxRate, currentRxRate, maxTxRate, maxRxRate;
 	BYTE rssq;
+	int simid;
 
   	ret = GetVoiceNumber(255, VoiceNumber, 255, MIN_string);
   	if (ret) {
@@ -827,8 +901,10 @@ void status(int format) {
 	}
 
 	GetSignalQuality(&rssq);
+	simid = get_sim();
 
   	if(format == STATUS_FORMAT_HUMAN) {
+		printf("SIM: %s (%d)\n", simid == 0 ? "Internal" : "External", simid);
   		switch (RAN) {
 			case 1: // CDMA
 				printf("Carrier: CDMA\n");
@@ -907,6 +983,7 @@ void status(int format) {
   		printf("%d\n", duration);
   		printf("%d\n", Roaming);
   		printf("%s\n", VoiceNumber);
+		printf("%d\n", simid);
 /*
   	  	ret = GetSessionDuration(&duration);
 		if (ret == 0) {
@@ -1064,6 +1141,79 @@ void stop_session()
 	printf("Session stopped\n");
 }
 
+void write_sysctl(char *file, char *value)
+{
+	FILE *fp;
+	if (!(fp = fopen(file, "w"))) {
+		printf("Unable to write to %s!\n", file);
+		return;
+	}
+	fprintf(fp, "%s", value);
+	fclose(fp);
+}
+
+void read_sysctl(char *file, char *value, int len)
+{
+	FILE *fp;
+	if (!(fp = fopen(file, "r"))) {
+		return;
+	}
+	fgets(value, len, fp);
+	fclose(fp);
+}
+
+int get_sim()
+{
+	char csimid[10] = "0";
+	read_sysctl("/sys/class/gpio/GPIO1/value", csimid, 9);
+	return atoi(csimid);
+}
+
+int set_sim(int simid)
+{
+	pid_t pid = getpid();
+	FILE *fp;
+	int ret, err;
+	char Command[256], *ptr, chat_fname[128], results_fname[128], csimid[10];
+
+	snprintf(csimid, 3, "%d", simid);
+	/* Set the GPIO1 pin to 0 for internal, 1 to external */
+	write_sysctl("/sys/class/gpio/export", "1");
+        write_sysctl("/sys/class/gpio/GPIO1/direction", "out");
+        write_sysctl("/sys/class/gpio/GPIO1/value", csimid);
+
+	/* Reset the modem by issuing AT+CFUN=1,1 */
+	sprintf(chat_fname, "/tmp/chat.%d", pid);
+	sprintf(results_fname, "/tmp/results.%d", pid);
+
+	fp = fopen(chat_fname, "w");
+	if (!fp) {
+		printf("Unable to open chat file, error %d!\n", errno);
+		return errno;
+	}
+	fprintf(fp, "TIMEOUT 6\n");
+	fprintf(fp, "'' 'AT+CFUN=1,1'\n");
+	fprintf(fp, "OK ''\n");
+	fclose(fp);
+	fp = NULL;
+
+	err = -1;
+	GetModemTTY();
+	sprintf(Command, "/usr/sbin/chat -f /tmp/chat.%d -r /tmp/results.%d < %s > %s",
+			pid, pid, MODEM_TTY, MODEM_TTY);
+	if ((ret = system(Command)) != 0) {
+		printf("Unable to reset modem, error %d.\n", ret);
+		goto out;
+	}
+
+out:
+	if (fp)
+		fclose(fp);
+	unlink(chat_fname);
+	unlink(results_fname);
+	return err;
+}
+
 int main(int argc, char **argv){		
 	int ret;
 
@@ -1079,6 +1229,7 @@ int main(int argc, char **argv){
 	int auto_connect = 0;
 	int status_arg = 0;
 	int msgid = 0;
+	int simid=0;
 	ULONG rat = RAT_UMTS;
 	ULONG msgtype = 0;
 	for(counter = 2; counter < argc; counter++){
@@ -1140,6 +1291,10 @@ int main(int argc, char **argv){
 				msgtype = MSGTYPE_READ;
 			else
 				msgtype = MSGTYPE_UNREAD;
+			continue;
+		}
+		if(strcmp("--sim", argv[counter]) == 0){
+			simid = atoi(argv[++counter]);
 			continue;
 		}
 		return invalidOption(argv[counter]);
@@ -1225,6 +1380,24 @@ int main(int argc, char **argv){
 			else
 				delete_sms(msgid-1);
 			card_disconnect();
+			break;
+		case 13: // set-sim
+			card_connect();
+			if (simid == 0 || simid == 1)
+				set_sim(simid);
+			else
+				printf("Must specify SIM id (0=internal, 1=external)!\n");
+			card_disconnect();
+			break;
+		case 14: // check-firmware-loaded
+			card_connect();
+			if (firmware == NULL) {
+				printf("Must specify firmware id! (--firmware)\n");
+				exit(1);
+			}
+			ret = check_firmware_loaded(atoi(firmware));
+			card_disconnect();
+			exit(ret);
 			break;
 		default:
 			printf("Unknown option '%s'.\n", argv[1]);

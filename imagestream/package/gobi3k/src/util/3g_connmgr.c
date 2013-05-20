@@ -23,10 +23,10 @@
 #define RAT_UMTS	5
 #define MSGTYPE_READ	1
 #define MSGTYPE_UNREAD	2
-#define MODEM_TTY "/dev/ttyUSB0"
 #define MAX_RSSQ 31
 
 const char *APNLIST = "apnlist.txt";
+char MODEM_TTY[256] = { '\0' };
 int machine = 0;
 void binary2pdu(char* binary, int length, char* pdu);
 int min_rssq = 0;
@@ -34,6 +34,22 @@ int min_rssq = 0;
 void error(char *message){
 	printf("Error: %s\n", message);
 	exit(1);
+}
+
+void GetModemTTY() {
+	int idx = 0;
+	struct stat buffer;
+
+	if (!strlen(MODEM_TTY)) {
+		while (1) {
+			sprintf(MODEM_TTY, "/sys/bus/usb-serial/drivers/GobiSerial driver/ttyUSB%d", idx);
+			if ((stat(MODEM_TTY, &buffer) == 0)) {
+				sprintf(MODEM_TTY, "/dev/ttyUSB%d", idx);
+				return;
+			}
+			idx++;
+		}
+	}
 }
 
 struct Connection{
@@ -744,6 +760,7 @@ int GetSignalQuality(BYTE *rssq)
 	fclose(fp);
 	fp = NULL;
 	err = -1;
+	GetModemTTY();
 	sprintf(Command, "/usr/bin/chat -f /tmp/chat.%d -r /tmp/results.%d < %s > %s",
 			pid, pid, MODEM_TTY, MODEM_TTY);
 	if ((ret = system(Command)) > 0) {
@@ -799,6 +816,7 @@ int GetAPN(char *APNName)
 	fp = NULL;
 
 	err = -1;
+	GetModemTTY();
 	sprintf(Command, "/usr/bin/chat -f /tmp/chat.%d -r /tmp/results.%d < %s > %s",
 			pid, pid, MODEM_TTY, MODEM_TTY);
 	if ((ret = system(Command)) != 0) {

@@ -41,8 +41,10 @@ MAIN DEVELOPMENT LOOP
 
 5) Update your repository
 	git pull
-6) Start a new feature
-	git flow feature start SomeCoolFeature
+6) Start a new feature, name it using the Redmine feature ID
+   using this template: ID<Redmine ID>
+   example:
+	git flow feature start ID88
 7) Develop, commit often, develop, commit more, etc
 	git commit
 8) Build and test
