@@ -1,8 +1,10 @@
 #!/bin/sh
 
-. /lib/functions.sh
-. ../netifd-proto.sh
-init_proto "$@"
+[ -n "$INCLUDE_ONLY" ] || {
+	. /lib/functions.sh
+	. ../netifd-proto.sh
+	init_proto "$@"
+}
 
 proto_dhcp_init_config() {
 	proto_config_add_string "ipaddr"
@@ -45,5 +47,7 @@ proto_dhcp_teardown() {
 	proto_kill_command "$interface"
 }
 
-add_protocol dhcp
+[ -n "$INCLUDE_ONLY" ] || {
+	add_protocol dhcp
+}
 
