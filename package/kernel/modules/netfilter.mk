@@ -229,6 +229,7 @@ $(eval $(call KernelPackage,ipt-nathelper-extra))
 define KernelPackage/ipt-queue
   TITLE:=Module for user-space packet queueing
   KCONFIG:=$(KCONFIG_IPT_QUEUE)
+  DEPENDS:=@!LINUX_3_6
   FILES:=$(foreach mod,$(IPT_QUEUE-m),$(LINUX_DIR)/net/$(mod).ko)
   AUTOLOAD:=$(call AutoLoad,45,$(notdir $(IPT_QUEUE-m)))
   $(call AddDepends/ipt)
@@ -376,6 +377,7 @@ endef
 define KernelPackage/ipt-extra/description
  Other Netfilter (IPv4) kernel modules
  Includes:
+ - addrtype
  - owner
  - physdev (if bridge support was enabled in kernel)
  - pkttype
@@ -400,7 +402,7 @@ endef
 
 $(eval $(call KernelPackage,ip6tables))
 
-
+ARP_MODULES = arp_tables arpt_mangle arptable_filter
 define KernelPackage/arptables
   SUBMENU:=$(NF_MENU)
   TITLE:=ARP firewalling modules
@@ -408,7 +410,7 @@ define KernelPackage/arptables
   KCONFIG:=CONFIG_IP_NF_ARPTABLES \
     CONFIG_IP_NF_ARPFILTER \
     CONFIG_IP_NF_ARP_MANGLE
-  AUTOLOAD:=$(call AutoLoad,49,$(notdir $(patsubst %.ko,%,$(wildcard $(LINUX_DIR)/net/ipv4/netfilter/arp*.ko))))
+  AUTOLOAD:=$(call AutoLoad,49,$(ARP_MODULES))
 endef
 
 define KernelPackage/arptables/description
@@ -551,7 +553,7 @@ define KernelPackage/nf-conntrack-netlink
 endef
 
 define KernelPackage/nf-conntrack-netlink/description
- Kernel modules support for a netlink-based connection tracking 
+ Kernel modules support for a netlink-based connection tracking
  userspace interface
 endef
 

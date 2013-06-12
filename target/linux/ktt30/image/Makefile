@@ -23,40 +23,40 @@ define Image/Build
 	$(call Image/Build/$(1))
 	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/$(IMG_PREFIX)-root.$(1) bs=128k conv=sync
 
-	-$(STAGING_DIR_HOST)/bin/mkfwimage \
-		-B XS2 -v XS2.ar2316.Opuntia.$(REVISION) \
-		-k $(BIN_DIR)/$(IMG_PREFIX)-vmlinux.lzma \
-		-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
-		-o $(BIN_DIR)/$(IMG_PREFIX)-ubnt2-$(1).bin
-
-	-$(STAGING_DIR_HOST)/bin/mkfwimage \
-		-B XS5 -v XS5.ar2313.Opuntia.$(REVISION) \
-		-k $(BIN_DIR)/$(IMG_PREFIX)-vmlinux.lzma \
-		-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
-		-o $(BIN_DIR)/$(IMG_PREFIX)-ubnt5-$(1).bin
-
-	-$(STAGING_DIR_HOST)/bin/mkfwimage \
-		-B XS2-8 -v XS2.ar2316.Opuntia.$(REVISION) \
-		-k $(BIN_DIR)/$(IMG_PREFIX)-vmlinux.lzma \
-		-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
-		-o $(BIN_DIR)/$(IMG_PREFIX)-ubnt2-pico2-$(1).bin
-
-	-$(STAGING_DIR_HOST)/bin/mkmylofw -B np25g \
-		-p0x020000:0x130000:ah:0x80041000:linux:$(KDIR)/vmlinux.bin.gz  \
-		-p0x150000:0x2a0000:::rootfs:$(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
-		$(BIN_DIR)/$(IMG_PREFIX)-np25g-$(1).bin
-
-	-$(STAGING_DIR_HOST)/bin/mkmylofw -B wpe53g \
-		-p0x020000:0x130000:ah:0x80041000:linux:$(KDIR)/vmlinux.bin.gz  \
-		-p0x150000:0x2a0000:::rootfs:$(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
-		$(BIN_DIR)/$(IMG_PREFIX)-wpe53g-$(1).bin
-
-  ifeq ($(BOARD), ktt30)
-	-sh $(TOPDIR)/scripts/combined-image.sh \
-		"$(BIN_DIR)/$(IMG_PREFIX)-vmlinux.lzma" \
-		"$(BIN_DIR)/$(IMG_PREFIX)-root.$(1)" \
-		"$(BIN_DIR)/$(IMG_PREFIX)-combined.$(1).img"
-  endif
+#	-$(STAGING_DIR_HOST)/bin/mkfwimage \
+#		-B XS2 -v XS2.ar2316.Opuntia.$(REVISION) \
+#		-k $(BIN_DIR)/$(IMG_PREFIX)-vmlinux.lzma \
+#		-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
+#		-o $(BIN_DIR)/$(IMG_PREFIX)-ubnt2-$(1).bin
+#
+#	-$(STAGING_DIR_HOST)/bin/mkfwimage \
+#		-B XS5 -v XS5.ar2313.Opuntia.$(REVISION) \
+#		-k $(BIN_DIR)/$(IMG_PREFIX)-vmlinux.lzma \
+#		-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
+#		-o $(BIN_DIR)/$(IMG_PREFIX)-ubnt5-$(1).bin
+#
+#	-$(STAGING_DIR_HOST)/bin/mkfwimage \
+#		-B XS2-8 -v XS2.ar2316.Opuntia.$(REVISION) \
+#		-k $(BIN_DIR)/$(IMG_PREFIX)-vmlinux.lzma \
+#		-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
+#		-o $(BIN_DIR)/$(IMG_PREFIX)-ubnt2-pico2-$(1).bin
+#
+#	-$(STAGING_DIR_HOST)/bin/mkmylofw -B np25g \
+#		-p0x020000:0x130000:ah:0x80041000:linux:$(KDIR)/vmlinux.bin.gz  \
+#		-p0x150000:0x2a0000:::rootfs:$(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
+#		$(BIN_DIR)/$(IMG_PREFIX)-np25g-$(1).bin
+#
+#	-$(STAGING_DIR_HOST)/bin/mkmylofw -B wpe53g \
+#		-p0x020000:0x130000:ah:0x80041000:linux:$(KDIR)/vmlinux.bin.gz  \
+#		-p0x150000:0x2a0000:::rootfs:$(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
+#		$(BIN_DIR)/$(IMG_PREFIX)-wpe53g-$(1).bin
+#
+#  ifeq ($(BOARD), ktt30)
+#	-sh $(TOPDIR)/scripts/combined-image.sh \
+#		"$(BIN_DIR)/$(IMG_PREFIX)-vmlinux.lzma" \
+#		"$(BIN_DIR)/$(IMG_PREFIX)-root.$(1)" \
+#		"$(BIN_DIR)/$(IMG_PREFIX)-combined.$(1).img"
+#  endif
 endef
 
 $(eval $(call BuildImage))
