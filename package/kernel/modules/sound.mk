@@ -8,11 +8,12 @@
 SOUND_MENU:=Sound Support
 
 # allow targets to override the soundcore stuff
+#	snd-hwdep \
+
 SOUNDCORE_LOAD ?= \
 	soundcore \
 	snd \
 	snd-page-alloc \
-	snd-hwdep \
 	snd-seq-device \
 	snd-rawmidi \
 	snd-timer \
@@ -20,11 +21,12 @@ SOUNDCORE_LOAD ?= \
 	snd-mixer-oss \
 	snd-pcm-oss
 
+#	$(LINUX_DIR)/sound/core/snd-hwdep.ko \
+
 SOUNDCORE_FILES ?= \
 	$(LINUX_DIR)/sound/soundcore.ko \
 	$(LINUX_DIR)/sound/core/snd.ko \
 	$(LINUX_DIR)/sound/core/snd-page-alloc.ko \
-	$(LINUX_DIR)/sound/core/snd-hwdep.ko \
 	$(LINUX_DIR)/sound/core/seq/snd-seq-device.ko \
 	$(LINUX_DIR)/sound/core/snd-rawmidi.ko \
 	$(LINUX_DIR)/sound/core/snd-timer.ko \
