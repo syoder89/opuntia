@@ -1,0 +1,44 @@
+#!/bin/sh
+
+#gst-launch -v videotestsrc ! ffmpegcolorspace ! 'video/x-raw-yuv' ! nv_omx_h264enc ! fakesink silent=0
+#gst-launch -v videotestsrc ! ffmpegcolorspace ! 'video/x-raw-yuv' ! nv_omx_h264enc ! rtph264pay ! fakesink silent=1
+#gst-launch -v videotestsrc ! ffmpegcolorspace ! 'video/x-raw-yuv' ! nv_omx_h264enc ! rtph264pay ! udpsink
+
+#gst-launch filesrc location=Game.of.Thrones.S01E02.720p.HDTV.x264-CTU.mkv ! decodebin ! nv_omx_videosink
+#gst-launch filesrc location=Game.of.Thrones.S01E02.720p.HDTV.x264-CTU.mkv ! decodebin ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true
+#gst-launch filesrc location=Videos/big_buck_bunny_1080p_h264.mov ! decodebin ! xvimagesink 
+
+#gst-launch filesrc location=Videos/big_buck_bunny_1080p_h264.mov ! qtdemux name=demux demux.video_00 ! decodebin ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true demux.audio_00 ! alsasink
+#gst-launch filesrc location=Videos/big_buck_bunny_1080p_h264.mov ! qtdemux name=demux demux.video_00 ! decodebin ! nv_omx_videosink force-aspect-ratio=true demux.audio_00 
+#gst-launch filesrc location=Videos/big_buck_bunny_1080p_h264.mov ! decodebin ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true
+#gst-launch-0.10 playbin2 uri=file:///home/ktt30/Videos/big_buck_bunny_1080p_h264.mov video-sink=nvxvimagesink 
+#nvgstplayer -i  file:///home/ktt30/Videos/big_buck_bunny_1080p_h264.mov --sas="nv_omx_audiosink" --svs="nvxvimagesink"
+#gst-launch filesrc location=Videos/big_buck_bunny_1080p_h264.mov ! qtdemux name=q ! queue ! nv_omx_h264dec ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true q. ! queue ! faad ! alsasink
+
+#gst-launch filesrc location=Game.of.Thrones.S01E02.720p.HDTV.x264-CTU.mkv ! decodebin2 name=q ! queue ! nv_omx_h264dec ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true q. ! queue ! faad ! alsasink
+#gst-launch filesrc location=Game.of.Thrones.S01E02.720p.HDTV.x264-CTU.mkv ! decodebin2 name=q ! queue ! fakesink q. ! queue ! faad ! alsasink
+
+#nvgstplayer -i  file:///home/ktt30/Videos/big_buck_bunny_1080p_h264.mov --sad="nv_omx_aacdec" --svd="nv_omx_h264dec" --sas="nv_omx_audiosink" --svs="nvxvimagesink"
+#nvgstplayer -i  file:///home/ktt30/Game.of.Thrones.S01E02.720p.HDTV.x264-CTU.mkv --sas="alsasink" --svs="nvxvimagesink"
+#gst-launch filesrc location=Game.of.Thrones.S01E02.720p.HDTV.x264-CTU.mkv ! decodebin2 name=q ! { queue ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true } q. ! { queue ! audioconvert ! audioresample ! autoaudiosink }
+#gst-launch filesrc location=Videos/big_buck_bunny_1080p_h264.mov ! decodebin2 name=q ! { queue ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true } q. ! { queue ! audioconvert ! audioresample ! autoaudiosink }
+# This doesn't work - is the audio stream really aac?
+#gst-launch filesrc location=Videos/big_buck_bunny_1080p_h264.mov ! decodebin2 name=q ! { queue ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true } q. ! { queue ! nv_omx_aacdec ! nv_omx_audiosink }
+#gst-launch filesrc location=/mnt/home/ktt30/Game.of.Thrones.S01E02.720p.HDTV.x264-CTU.mkv ! decodebin ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true
+#gst-launch -i filesrc location=/mnt/home/ktt30/Videos/big_buck_bunny_1080p_h264.mov ! decodebin2 name=q ! { queue ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true 
+#gst-launch -vvvi filesrc location=/mnt/home/ktt30/Game.of.Thrones.S01E02.720p.HDTV.x264-CTU.mkv ! decodebin2 name=q ! { queue ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true } q. ! { queue ! nv_omx_aacdec ! nv_omx_audiosink }
+#gst-launch -i filesrc location=/mnt/home/ktt30/Game.of.Thrones.S01E02.720p.HDTV.x264-CTU.mkv ! decodebin2 name=q ! { queue ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true } q. ! { queue ! audioconvert ! audioresample ! alsasink }
+#gst-launch -i filesrc location=/mnt/home/ktt30/Game.of.Thrones.S01E02.720p.HDTV.x264-CTU.mkv ! decodebin2 name=q { ! audioconvert ! audioresample ! alsasink device=hdmi }
+#gst-launch filesrc location=/mnt/home/ktt30/Game.of.Thrones.S01E02.720p.HDTV.x264-CTU.mkv ! decodebin2 name=q ! nvxvimagesink force-fullscreen=true force-aspect-ratio=true 
+#gst-launch -i filesrc location=/mnt/home/ktt30/Game.of.Thrones.S01E02.720p.HDTV.x264-CTU.mkv ! decodebin2 name=q ! { queue ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true } q. ! { queue ! audioconvert ! audioresample ! alsasink device=default:CARD=tegrawm8903 }
+#gst-launch -i filesrc location=/mnt/home/ktt30/Videos/big_buck_bunny_1080p_h264.mov ! decodebin2 name=q ! { queue ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true } q. ! { queue ! audioconvert ! audioresample ! alsasink device=default:CARD=tegrawm8903  }
+#gst-launch -i filesrc location=/mnt/home/ktt30/Videos/big_buck_bunny_1080p_h264.mov ! decodebin2 name=q ! { queue ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true } q. ! { queue ! audioconvert ! audioresample ! autoaudiosink }
+
+
+#gst-launch -i filesrc location=/mnt/home/ktt30/Game.of.Thrones.S01E02.720p.HDTV.x264-CTU.mkv ! decodebin2 name=q ! { queue ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true } q. ! { queue ! audioconvert ! audioresample ! autoaudiosink }
+#gst-launch -i playbin2 uri=https://link:link@notflix.cheetahfox.com:3492/Tv/Animated/Archer/Season%204/Archer.2009.S04E05.PROPER.HDTV.x264-2HD.mp4 ! decodebin2 name=q ! { queue ! nvxvimagesink force-aspect-ratio=true force-fullscreen=true } q. ! { queue ! audioconvert ! audioresample ! autoaudiosink }
+#gst-launch -i playbin2 uri=file:///mnt/home/ktt30/Game.of.Thrones.S01E02.720p.HDTV.x264-CTU.mkv video-sink="nvxvimagesink force-aspect-ratio=true force-fullscreen=true"
+#gst-launch -i playbin2 uri=https://link:link@notflix.cheetahfox.com:3492/Tv/Animated/Archer/Season%204/Archer.2009.S04E05.PROPER.HDTV.x264-2HD.mp4 video-sink="nvxvimagesink force-aspect-ratio=true force-fullscreen=true"
+export DISPLAY=localhost:0
+URL=`echo $1 | sed 's/notflix.cheetahfox.com/link:link@notflix.cheetahfox.com/g'`
+gst-launch -i playbin2 uri="$URL" video-sink="nvxvimagesink force-aspect-ratio=true force-fullscreen=true"
