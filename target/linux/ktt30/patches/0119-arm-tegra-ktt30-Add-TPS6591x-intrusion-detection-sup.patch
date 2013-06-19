@@ -1,0 +1,53 @@
+From 1740c406ddadac83d8e8e6fa7a2cc9bd47f167d1 Mon Sep 17 00:00:00 2001
+From: Maxim Yu. Osipov <mosipov@dev.rtsoft.ru>
+Date: Wed, 29 May 2013 13:43:46 +0200
+Subject: [PATCH 119/127] arm: tegra: ktt30: Add TPS6591x intrusion detection
+ support
+
+This adds platform-specific definitions for TPS6591x intrusion
+detection driver.
+
+Signed-off-by: Maxim Yu. Osipov <mosipov@dev.rtsoft.ru>
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-power.c |   17 +++++++++++++++++
+ 1 files changed, 17 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-power.c b/arch/arm/mach-tegra/board-ktt30-power.c
+index 06079db..ece771a 100644
+--- a/arch/arm/mach-tegra/board-ktt30-power.c
++++ b/arch/arm/mach-tegra/board-ktt30-power.c
+@@ -211,6 +211,20 @@ static struct tps6591x_rtc_platform_data rtc_data = {
+ 	}
+ #endif
+ 
++#if defined(CONFIG_SENSORS_TPS6591X) || defined(CONFIG_SENSORS_TPS6591X_MODULE)
++static struct tps6591x_hwmon_platform_data hwmon_data = {
++	.gpio_num	= TPS6591X_GPIO_GP5,
++	.edge_type	= IRQF_TRIGGER_FALLING
++};
++
++#define TPS_HWMON_REG()					\
++	{						\
++		.id	= 0,				\
++		.name	= "tps6591x-hwmon",		\
++		.platform_data = &hwmon_data,		\
++	}
++#endif
++
+ #define TPS_REG(_id, _name, _sname)				\
+ 	{							\
+ 		.id	= TPS6591X_ID_##_id,			\
+@@ -237,6 +251,9 @@ static struct tps6591x_subdev_info tps_devs_ktt30_0[] = {
+ #if defined(CONFIG_RTC_DRV_TPS6591x)
+ 	TPS_RTC_REG(),
+ #endif
++#if defined(CONFIG_SENSORS_TPS6591X) || defined(CONFIG_SENSORS_TPS6591X_MODULE)
++	TPS_HWMON_REG(),
++#endif
+ };
+ 
+ 
+-- 
+1.7.4.4
+

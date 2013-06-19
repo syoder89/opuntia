@@ -1,0 +1,56 @@
+From 45a3016ee6361770ca7c38be16e6b7fe9d0f4c65 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Fri, 17 May 2013 15:01:43 +0400
+Subject: [PATCH 113/127] arm: tegra: ktt30: Enable rear USB connector by
+ default
+
+This sets GPIO_PL5 low, which enables rear USB connector J24
+and disables 3G USB modem J27 by default.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-pinmux.c |    3 ++-
+ arch/arm/mach-tegra/board-ktt30.c        |    6 +++---
+ 2 files changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-pinmux.c b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+index 292f6ca..61e1b2a 100644
+--- a/arch/arm/mach-tegra/board-ktt30-pinmux.c
++++ b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+@@ -237,7 +237,8 @@ static __initdata struct tegra_pingroup_config ktt30_pinmux_common[] = {
+ 	/* ETH_EN (Intel 82574L chip) */
+ 	DEFAULT_PINMUX(VI_D4,           RSVD1,           PULL_DOWN, NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(VI_D5,           RSVD1,           NORMAL,    NORMAL,     INPUT),
+-	DEFAULT_PINMUX(VI_D7,           RSVD1,           PULL_UP,   NORMAL,     OUTPUT),
++	/* USB_SEL_T30 J24/J27 switch */
++	DEFAULT_PINMUX(VI_D7,           RSVD1,           PULL_DOWN, NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(VI_D10,          RSVD1,           NORMAL,    NORMAL,     INPUT),
+ 
+ 	DEFAULT_PINMUX(UART3_TXD,       UARTC,           NORMAL,    NORMAL,     OUTPUT),
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index f3630ac..32072fc 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -868,7 +868,7 @@ static struct platform_device __initdata *ktt30_usb_devices[] = {
+ static void __init ktt30_usb2_fixup(void)
+ {
+ 	int gpio = TEGRA_GPIO_PL5;
+-	u32 flags = GPIOF_OUT_INIT_HIGH;
++	u32 flags = GPIOF_OUT_INIT_LOW;
+ #ifdef CONFIG_OF
+ 	struct device_node *node;
+ 	int retval;
+@@ -886,8 +886,8 @@ static void __init ktt30_usb2_fixup(void)
+ 		goto put;
+ 
+ 	gpio = retval;
+-	if (!(val & 0x2))
+-		flags = GPIOF_OUT_INIT_LOW;
++	if (val & 0x2)
++		flags = GPIOF_OUT_INIT_HIGH;
+ put:
+ 	of_node_put(node);
+ out:
+-- 
+1.7.4.4
+

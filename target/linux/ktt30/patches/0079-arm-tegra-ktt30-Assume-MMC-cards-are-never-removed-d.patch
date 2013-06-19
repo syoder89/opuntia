@@ -1,0 +1,29 @@
+From 62c71d8cd5770d23ed81633821bb3952a7ecea08 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Tue, 7 May 2013 21:44:10 +0400
+Subject: [PATCH 079/127] arm: tegra: ktt30: Assume MMC cards are never
+ removed during suspend
+
+This option is enabled for other Tegra boards.
+Let's have it on for KTT30 as well.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index 5da21b7..451cca9 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -362,6 +362,7 @@ CONFIG_USB_TEGRA=y
+ CONFIG_USB_MASS_STORAGE=m
+ CONFIG_USB_TEGRA_OTG=y
+ CONFIG_MMC=y
++CONFIG_MMC_UNSAFE_RESUME=y
+ CONFIG_MMC_SDHCI=y
+ CONFIG_MMC_SDHCI_PLTFM=y
+ CONFIG_MMC_SDHCI_TEGRA=y
+-- 
+1.7.4.4
+

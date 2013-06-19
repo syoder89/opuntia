@@ -1,0 +1,85 @@
+From a4947ee3ab2c7f731f883036236ec8add5fdde0e Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 2 May 2013 01:58:05 +0400
+Subject: [PATCH 110/127] arm: tegra: ktt30: Use OF FDT for configuring
+ built-in Ethernet power
+
+Use PCIe port 0 status instead of command line parameters
+to control built-in Intel 82574L Ethernet power.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-power.c |   21 ---------------------
+ arch/arm/mach-tegra/board-ktt30.c       |    6 ++++++
+ 2 files changed, 6 insertions(+), 21 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-power.c b/arch/arm/mach-tegra/board-ktt30-power.c
+index 22c5c72..06079db 100644
+--- a/arch/arm/mach-tegra/board-ktt30-power.c
++++ b/arch/arm/mach-tegra/board-ktt30-power.c
+@@ -429,11 +429,6 @@ static struct regulator_consumer_supply fixed_reg_en_vdd_pnl1_supply[] = {
+ 	REGULATOR_SUPPLY("vdd_lcd_panel", NULL),
+ };
+ 
+-/* EN_VDD_ETH from  GPIO VI_D4 PL2*/
+-static struct regulator_consumer_supply fixed_reg_en_vdd_eth_supply[] = {
+-	REGULATOR_SUPPLY("vdd_eth", NULL),
+-};
+-
+ /* EN_VDD_SDMMC1 from AP GPIO VI_HSYNC D07*/
+ static struct regulator_consumer_supply fixed_reg_en_vdd_sdmmc1_supply[] = {
+ 	REGULATOR_SUPPLY("vddio_sd_slot", "sdhci-tegra.0"),
+@@ -529,7 +524,6 @@ FIXED_REG(1, en_5v0,		en_5v0,		NULL,				0,      0,      TPS6591X_GPIO_2,	true,	0
+ FIXED_REG(2, en_ddr,		en_ddr,		NULL,				1,      0,      TPS6591X_GPIO_7,	true,	1, 1500);
+ FIXED_REG(3, en_3v3_sys,	en_3v3_sys,	NULL,				0,      0,      TPS6591X_GPIO_6,	true,	1, 3300);
+ FIXED_REG(5, en_3v3_mini,	en_3v3_mini,	NULL,				1,      0,      TEGRA_GPIO_PD6,		true,	1, 3300);
+-FIXED_REG(7, en_vdd_eth,	en_vdd_eth,	NULL,				1,      1,      TEGRA_GPIO_PL2,		true,	1, 3300);
+ FIXED_REG(9, en_3v3_fuse,	en_3v3_fuse,	FIXED_SUPPLY(en_3v3_sys),	0,      0,      TEGRA_GPIO_PL6,		true,	0, 3300);
+ FIXED_REG(10, en_3v3_emmc,	en_3v3_emmc,	FIXED_SUPPLY(en_3v3_sys),	1,      0,      TEGRA_GPIO_PD1,		true,	1, 3300);
+ FIXED_REG(11, en_vdd_sdmmc1,	en_vdd_sdmmc1,	FIXED_SUPPLY(en_3v3_sys),	0,      0,      TEGRA_GPIO_PD7,		true,	1, 3300);
+@@ -559,7 +553,6 @@ FIXED_REG_OD(17, en_vddio_vid_oc,	en_vddio_vid_oc,	FIXED_SUPPLY(dis_5v_switch),
+ 	ADD_FIXED_REG(en_3v3_sys),		\
+ 	ADD_FIXED_REG(en_3v3_mini),		\
+ 	ADD_FIXED_REG(en_3v3_fuse),		\
+-	ADD_FIXED_REG(en_vdd_eth),		\
+ 	ADD_FIXED_REG(en_3v3_emmc),		\
+ 	ADD_FIXED_REG(en_vdd_sdmmc1),		\
+ 	ADD_FIXED_REG(en_3v3_pex_hvdd),		\
+@@ -662,17 +655,3 @@ static int __init ktt30_charger_late_init(void)
+ }
+ 
+ late_initcall(ktt30_charger_late_init);
+-
+-/* Built-in Intel 82574L Ethernet on PCIE#0 port */
+-static int __init ktt30_setup_lan(char *options)
+-{
+-	if (!strcmp(options, "no")) {
+-		/* Disable built-in Intel 82574L Ethernet */
+-		ri_data_en_vdd_eth.constraints.always_on = false;
+-		fixed_reg_en_vdd_eth_pdata.enabled_at_boot = false;
+-		ri_data_en_vdd_eth.constraints.boot_on = false;
+-	}
+-
+-	return 1;
+-}
+-__setup("lan=", ktt30_setup_lan);
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index 1ed3f8c..5b307a1 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -923,6 +923,12 @@ static void __init ktt30_pci_init(void)
+ {
+ 	ktt30_of_pci_fixup();
+ 
++	/* Built-in Intel 82574L Ethernet on PCIE#0 port */
++	gpio_request_one(TEGRA_GPIO_PL2,
++			ktt30_pci_platform_data.port_status[0] ?
++			GPIOF_OUT_INIT_HIGH : GPIOF_OUT_INIT_LOW,
++			"en_3v3_eth");
++
+ 	if (ktt30_pci_platform_data.port_status[0] ||
+ 			ktt30_pci_platform_data.port_status[1] ||
+ 			ktt30_pci_platform_data.port_status[2]) {
+-- 
+1.7.4.4
+

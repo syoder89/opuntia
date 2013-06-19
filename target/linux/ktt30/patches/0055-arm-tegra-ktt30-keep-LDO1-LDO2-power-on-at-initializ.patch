@@ -1,0 +1,34 @@
+From 728c5c3e30c1ed8d07344b9429b7a59be966fd1b Mon Sep 17 00:00:00 2001
+From: Victor Vengerov <vvengerov@dev.rtsoft.ru>
+Date: Wed, 3 Apr 2013 19:07:22 +0400
+Subject: [PATCH 055/127] arm: tegra: ktt30: keep LDO1, LDO2 power on at
+ initialization
+
+Some power rails of TPS65910 are temporarily disabled during the kernel
+booting.  To avoid unneeded power switching, configure power LDO1 and LDO2
+outputs enabled during regulator driver initialization.
+
+Signed-off-by: Victor Vengerov <vvengerov@dev.rtsoft.ru>
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-power.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-power.c b/arch/arm/mach-tegra/board-ktt30-power.c
+index 8801c0f..d9d3f54 100644
+--- a/arch/arm/mach-tegra/board-ktt30-power.c
++++ b/arch/arm/mach-tegra/board-ktt30-power.c
+@@ -179,8 +179,8 @@ TPS_PDATA_INIT(vdd2, 0,         600,  1500, 0, 1, 1, 0, -1, 0, 0, 0, 0);
+ TPS_PDATA_INIT(vddctrl, 0,      600,  1400, 0, 1, 1, 0, -1, 0, 0, EXT_CTRL_EN1, 0);
+ TPS_PDATA_INIT(vio,  0,         1800, 1800, 0, 1, 1, 0, -1, 0, 0, 0, 0);
+ 
+-TPS_PDATA_INIT(ldo1, 0,         1050, 1050, tps6591x_rails(VDD_2), 0, 0, 0, -1, 0, 1, 0, 0);
+-TPS_PDATA_INIT(ldo2, 0,         1050, 1050, tps6591x_rails(VDD_2), 0, 0, 1, -1, 0, 1, 0, 0);
++TPS_PDATA_INIT(ldo1, 0,         1050, 1050, tps6591x_rails(VDD_2), 0, 0, 0, -1, 1, 1, 0, 0);
++TPS_PDATA_INIT(ldo2, 0,         1050, 1050, tps6591x_rails(VDD_2), 0, 0, 1, -1, 1, 1, 0, 0);
+ 
+ TPS_PDATA_INIT(ldo3, 0,         1000, 3300, 0, 0, 0, 0, -1, 0, 0, 0, 0);
+ TPS_PDATA_INIT(ldo4, 0,         1000, 1200, 0, 1, 0, 0, -1, 0, 0, 0, 0);
+-- 
+1.7.4.4
+

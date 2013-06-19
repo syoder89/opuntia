@@ -1,0 +1,29 @@
+From 5e97371ba7a6b48152ae843718534a1602da9046 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sat, 29 Dec 2012 22:13:14 +0400
+Subject: [PATCH 019/127] arm: tegra: ktt30: Enable watchdog in
+ ktt30_defconfig
+
+This adds tegra_wdt driver built-in.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index c59bc19..4ac4529 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -274,6 +274,8 @@ CONFIG_SENSORS_LM90=y
+ CONFIG_SENSORS_TEGRA_TSENSOR=y
+ CONFIG_SENSORS_INA219=y
+ CONFIG_THERMAL=y
++CONFIG_WATCHDOG=y
++CONFIG_TEGRA_WATCHDOG=y
+ CONFIG_MFD_TPS6591X=y
+ CONFIG_REGULATOR=y
+ CONFIG_REGULATOR_FIXED_VOLTAGE=y
+-- 
+1.7.4.4
+

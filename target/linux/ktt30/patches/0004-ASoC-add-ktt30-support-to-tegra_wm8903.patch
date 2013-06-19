@@ -1,0 +1,69 @@
+From 2d9fc114a0ab1eaa0c055eb7eee886338345c64d Mon Sep 17 00:00:00 2001
+From: Dmitry Artamonov <dartamonov@dev.rtsoft.ru>
+Date: Wed, 13 Jun 2012 09:33:06 +0200
+Subject: [PATCH 004/127] ASoC: add ktt30 support to tegra_wm8903
+
+Currently do the same as cardhu
+
+Signed-off-by: Dmitry Artamonov <dartamonov@dev.rtsoft.ru>
+---
+ sound/soc/tegra/tegra_wm8903.c |   13 +++++++------
+ 1 files changed, 7 insertions(+), 6 deletions(-)
+
+diff --git a/sound/soc/tegra/tegra_wm8903.c b/sound/soc/tegra/tegra_wm8903.c
+index dcd0312..bf380b2 100644
+--- a/sound/soc/tegra/tegra_wm8903.c
++++ b/sound/soc/tegra/tegra_wm8903.c
+@@ -700,10 +700,10 @@ static int tegra_wm8903_init(struct snd_soc_pcm_runtime *rtd)
+ 
+ 	/* FIXME: Calculate automatically based on DAPM routes? */
+ 	if (!machine_is_harmony() && !machine_is_ventana() &&
+-	    !machine_is_cardhu())
++	    !machine_is_cardhu() && !machine_is_ktt30())
+ 		snd_soc_dapm_nc_pin(dapm, "IN1L");
+ 	if (!machine_is_seaboard() && !machine_is_aebl() &&
+-	    !machine_is_cardhu())
++	    !machine_is_cardhu() && !machine_is_ktt30())
+ 		snd_soc_dapm_nc_pin(dapm, "IN1R");
+ 	snd_soc_dapm_nc_pin(dapm, "IN2L");
+ 	if (!machine_is_kaen())
+@@ -845,7 +845,7 @@ static __devinit int tegra_wm8903_driver_probe(struct platform_device *pdev)
+ 	if (ret)
+ 		goto err_free_machine;
+ 
+-	if (machine_is_cardhu() || machine_is_ventana()) {
++	if (machine_is_cardhu() || machine_is_ventana() || machine_is_ktt30()) {
+ 		machine->spk_reg = regulator_get(&pdev->dev, "vdd_spk_amp");
+ 		if (IS_ERR(machine->spk_reg)) {
+ 			dev_info(&pdev->dev, "No speaker regulator found\n");
+@@ -862,7 +862,7 @@ static __devinit int tegra_wm8903_driver_probe(struct platform_device *pdev)
+ 		}
+ 	}
+ 
+-	if (machine_is_cardhu()) {
++	if (machine_is_cardhu() || machine_is_ktt30()) {
+ 		tegra_wm8903_dai[0].codec_name = "wm8903.4-001a",
+ 		tegra_wm8903_dai[0].cpu_dai_name = "tegra30-i2s.1";
+ 
+@@ -882,7 +882,7 @@ static __devinit int tegra_wm8903_driver_probe(struct platform_device *pdev)
+ 	platform_set_drvdata(pdev, card);
+ 	snd_soc_card_set_drvdata(card, machine);
+ 
+-	if (machine_is_cardhu() || machine_is_ventana()) {
++	if (machine_is_cardhu() || machine_is_ventana() || machine_is_ktt30()) {
+ 		card->controls = cardhu_controls;
+ 		card->num_controls = ARRAY_SIZE(cardhu_controls);
+ 
+@@ -899,7 +899,8 @@ static __devinit int tegra_wm8903_driver_probe(struct platform_device *pdev)
+ 	if (machine_is_harmony()) {
+ 		card->dapm_routes = harmony_audio_map;
+ 		card->num_dapm_routes = ARRAY_SIZE(harmony_audio_map);
+-	} else if (machine_is_ventana() || machine_is_cardhu()) {
++	} else if (machine_is_ventana() || machine_is_cardhu() ||
++						machine_is_ktt30()) {
+ 		card->dapm_routes = cardhu_audio_map;
+ 		card->num_dapm_routes = ARRAY_SIZE(cardhu_audio_map);
+ 	} else if (machine_is_seaboard()) {
+-- 
+1.7.4.4
+

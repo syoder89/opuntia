@@ -1,0 +1,32 @@
+From 3b5807a4dcb0210d8528db35c79cfa1c29ad8bb5 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 8 May 2013 02:44:30 +0400
+Subject: [PATCH 082/127] hwmon: ina219: Use swab16 to swap bytes in a word
+
+Use swab16 to swap bytes in a word instead of custom implementation.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/hwmon/ina219.c |    5 ++---
+ 1 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/hwmon/ina219.c b/drivers/hwmon/ina219.c
+index 7685fee..52ff287 100644
+--- a/drivers/hwmon/ina219.c
++++ b/drivers/hwmon/ina219.c
+@@ -90,10 +90,9 @@ struct ina219_data {
+ #define DEBUG_INA219(x)
+ #endif
+ 
+-static s16 reorder_bytes(s16 a)
++static inline s16 reorder_bytes(s16 a)
+ {
+-	s16 ret = ((a >> 8) & 0xff) | ((a & 0xff) << 8);
+-	return ret;
++	return swab16(a);
+ }
+ 
+ /* set ina219 to power down mode */
+-- 
+1.7.4.4
+

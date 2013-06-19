@@ -1,0 +1,72 @@
+From 86259540b4d2781eaa29112687636bfe9d362440 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sat, 2 Mar 2013 16:00:38 +0400
+Subject: [PATCH 034/127] arm: tegra: ktt30: Add PWM0 support to backlight
+ init/exit
+
+This cleans up panel code a bit and adds PWM0 support to it.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-panel.c |   29 ++++++++++++++++++++++++-----
+ 1 files changed, 24 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-panel.c b/arch/arm/mach-tegra/board-ktt30-panel.c
+index 206565b..9b20395 100644
+--- a/arch/arm/mach-tegra/board-ktt30-panel.c
++++ b/arch/arm/mach-tegra/board-ktt30-panel.c
+@@ -101,27 +101,46 @@ static p_tegra_dc_bl_output bl_output = ktt30_bl_output_measured;
+ 
+ static int ktt30_backlight_init(struct device *dev)
+ {
+-	int ret = 0;
++	int ret;
+ 
+ 	if (WARN_ON(ARRAY_SIZE(ktt30_bl_output_measured) != 256))
+ 		pr_err("bl_output array does not have 256 elements\n");
+ 
+-	ret = gpio_request(ktt30_bl_enb, "backlight_enb");
++	ret = gpio_request(ktt30_bl_pwm, "bl_pwm");
+ 	if (ret < 0)
+ 		return ret;
+ 
++	ret = gpio_direction_output(ktt30_bl_pwm, 1);
++	if (ret < 0)
++		goto err1;
++
++	mdelay(20);
++
++	ret = gpio_request(ktt30_bl_enb, "bl_enb");
++	if (ret < 0)
++		goto err2;
++
+ 	ret = gpio_direction_output(ktt30_bl_enb, 1);
+ 	if (ret < 0)
+-		gpio_free(ktt30_bl_enb);
++		goto err3;
++
++	return 0;
+ 
++err3:
++	gpio_free(ktt30_bl_enb);
++err2:
++	gpio_set_value(ktt30_bl_pwm, 0);
++err1:
++	gpio_free(ktt30_bl_pwm);
+ 	return ret;
+ };
+ 
+ static void ktt30_backlight_exit(struct device *dev)
+ {
+-	/* int ret; */
+-	/*ret = gpio_request(ktt30_bl_enb, "backlight_enb");*/
+ 	gpio_set_value(ktt30_bl_enb, 0);
++	gpio_free(ktt30_bl_pwm);
++	mdelay(20);
++	gpio_set_value(ktt30_bl_pwm, 0);
+ 	gpio_free(ktt30_bl_enb);
+ }
+ 
+-- 
+1.7.4.4
+

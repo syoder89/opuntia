@@ -1,0 +1,58 @@
+From b4bd4fc705192ccbc72c38fc90a57f3890ab200b Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Fri, 29 Mar 2013 19:59:30 +0400
+Subject: [PATCH 046/127] arm: tegra: ktt30: Enable input on feature connector
+ GPIO pins
+
+This enables input on KTT30 feature connector GPIO pins.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-pinmux.c |   20 ++++++++++----------
+ 1 files changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-pinmux.c b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+index 71471e2..ecc8422 100644
+--- a/arch/arm/mach-tegra/board-ktt30-pinmux.c
++++ b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+@@ -247,8 +247,8 @@ static __initdata struct tegra_pingroup_config ktt30_pinmux_common[] = {
+ 
+ 	DEFAULT_PINMUX(GMI_WP_N,        GMI,             NORMAL,    NORMAL,     INPUT),
+ 
+-	DEFAULT_PINMUX(KB_ROW5,         OWR,             NORMAL,    NORMAL,     OUTPUT),
+-	DEFAULT_PINMUX(KB_ROW12,        KBC,             NORMAL,    NORMAL,     OUTPUT),
++	DEFAULT_PINMUX(KB_ROW5,         OWR,             NORMAL,    NORMAL,     INPUT),
++	DEFAULT_PINMUX(KB_ROW12,        KBC,             NORMAL,    NORMAL,     INPUT),
+ 	/* LVDS_SINGLE_PIXEL */
+ 	DEFAULT_PINMUX(KB_ROW15,        KBC,             PULL_UP,   NORMAL,     OUTPUT),
+ 
+@@ -280,18 +280,18 @@ static __initdata struct tegra_pingroup_config ktt30_pinmux_common[] = {
+ 	DEFAULT_PINMUX(GPIO_PCC2,       I2S4,            NORMAL,    NORMAL,     INPUT),
+ 
+ 	/*  KBC keys */
+-	DEFAULT_PINMUX(KB_ROW0,         RSVD3,           NORMAL,    NORMAL,     OUTPUT),
+-	DEFAULT_PINMUX(KB_ROW1,         RSVD3,           NORMAL,    NORMAL,     OUTPUT),
+-	DEFAULT_PINMUX(KB_ROW2,         RSVD3,           NORMAL,    NORMAL,     OUTPUT),
+-	DEFAULT_PINMUX(KB_ROW3,         RSVD2,           NORMAL,    NORMAL,     OUTPUT),
++	DEFAULT_PINMUX(KB_ROW0,         RSVD3,           NORMAL,    NORMAL,     INPUT),
++	DEFAULT_PINMUX(KB_ROW1,         RSVD3,           NORMAL,    NORMAL,     INPUT),
++	DEFAULT_PINMUX(KB_ROW2,         RSVD3,           NORMAL,    NORMAL,     INPUT),
++	DEFAULT_PINMUX(KB_ROW3,         RSVD2,           NORMAL,    NORMAL,     INPUT),
+ 	DEFAULT_PINMUX(KB_ROW10,        KBC,             NORMAL,    NORMAL,     INPUT),
+-	DEFAULT_PINMUX(KB_ROW11,        KBC,             NORMAL,    NORMAL,     OUTPUT),
+-	DEFAULT_PINMUX(KB_ROW13,        KBC,             NORMAL,    NORMAL,     OUTPUT),
+-	DEFAULT_PINMUX(KB_ROW4,         RSVD3,           NORMAL,    NORMAL,     OUTPUT),
++	DEFAULT_PINMUX(KB_ROW11,        KBC,             NORMAL,    NORMAL,     INPUT),
++	DEFAULT_PINMUX(KB_ROW13,        KBC,             NORMAL,    NORMAL,     INPUT),
++	DEFAULT_PINMUX(KB_ROW4,         RSVD3,           NORMAL,    NORMAL,     INPUT),
+ 	DEFAULT_PINMUX(KB_ROW6,         KBC,             NORMAL,    NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(KB_ROW7,         KBC,             NORMAL,    NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(KB_ROW8,         KBC,             NORMAL,    NORMAL,     OUTPUT),
+-	DEFAULT_PINMUX(KB_ROW9,         KBC,             NORMAL,    NORMAL,     OUTPUT),
++	DEFAULT_PINMUX(KB_ROW9,         KBC,             NORMAL,    NORMAL,     INPUT),
+ 
+ 	/* Feature connector */
+ 	DEFAULT_PINMUX(KB_COL0,         KBC,             PULL_UP,   NORMAL,     INPUT),
+-- 
+1.7.4.4
+

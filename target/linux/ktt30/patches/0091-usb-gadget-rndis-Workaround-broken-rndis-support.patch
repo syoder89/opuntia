@@ -1,0 +1,96 @@
+From 4164f28e9fadeae5fa0e7dd6a5881e61177e862d Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 22 May 2013 18:18:22 +0400
+Subject: [PATCH 091/127] usb: gadget: rndis: Workaround broken rndis support
+
+Commit 63fc2625d029bb01844f3b6cd4510cb1fffcac27 breaks RNDIS support
+on a non-android system. This is a workaround that should fix RNDIS
+and use android approach with the predefined RNDIS vendorID and
+manufacturer.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/usb/gadget/android.c |    4 ++--
+ drivers/usb/gadget/f_rndis.c |   20 +++++++++++++++++++-
+ drivers/usb/gadget/u_ether.h |    9 +++++++--
+ 3 files changed, 28 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/usb/gadget/android.c b/drivers/usb/gadget/android.c
+index 7b3185f..052c84d 100644
+--- a/drivers/usb/gadget/android.c
++++ b/drivers/usb/gadget/android.c
+@@ -399,8 +399,8 @@ static int rndis_function_bind_config(struct android_usb_function *f,
+ 		rndis_control_intf.bInterfaceProtocol =	 0x03;
+ 	}
+ 
+-	return rndis_bind_config(c, rndis->ethaddr, rndis->vendorID,
+-				    rndis->manufacturer);
++	return rndis_bind_config_android(c, rndis->ethaddr, rndis->vendorID,
++					    rndis->manufacturer);
+ }
+ 
+ static void rndis_function_unbind_config(struct android_usb_function *f,
+diff --git a/drivers/usb/gadget/f_rndis.c b/drivers/usb/gadget/f_rndis.c
+index f187b9e..2d9cf26 100644
+--- a/drivers/usb/gadget/f_rndis.c
++++ b/drivers/usb/gadget/f_rndis.c
+@@ -857,7 +857,25 @@ static inline bool can_support_rndis(struct usb_configuration *c)
+  * for calling @gether_cleanup() before module unload.
+  */
+ int
+-rndis_bind_config(struct usb_configuration *c, u8 ethaddr[ETH_ALEN],
++rndis_bind_config(struct usb_configuration *c, u8 ethaddr[ETH_ALEN])
++{
++	return rndis_bind_config_android(c, ethaddr, 0, "Linux");
++}
++
++/**
++ * rndis_bind_config_android - add RNDIS network link to a configuration
++ * @c: the configuration to support the network link
++ * @ethaddr: a buffer in which the ethernet address of the host side
++ *	side of the link was recorded
++ * Context: single threaded during gadget setup
++ *
++ * Returns zero on success, else negative errno.
++ *
++ * Caller must have called @gether_setup().  Caller is also responsible
++ * for calling @gether_cleanup() before module unload.
++ */
++int
++rndis_bind_config_android(struct usb_configuration *c, u8 ethaddr[ETH_ALEN],
+ 				u32 vendorID, const char *manufacturer)
+ {
+ 	struct f_rndis	*rndis;
+diff --git a/drivers/usb/gadget/u_ether.h b/drivers/usb/gadget/u_ether.h
+index 4677241..5a1fe34 100644
+--- a/drivers/usb/gadget/u_ether.h
++++ b/drivers/usb/gadget/u_ether.h
+@@ -111,18 +111,23 @@ int eem_bind_config(struct usb_configuration *c);
+ 
+ #ifdef USB_ETH_RNDIS
+ 
+-int rndis_bind_config(struct usb_configuration *c, u8 ethaddr[ETH_ALEN],
++int rndis_bind_config_android(struct usb_configuration *c, u8 ethaddr[ETH_ALEN],
+ 				u32 vendorID, const char *manufacturer);
+ 
++int rndis_bind_config(struct usb_configuration *c, u8 ethaddr[ETH_ALEN]);
+ #else
+ 
+ static inline int
+-rndis_bind_config(struct usb_configuration *c, u8 ethaddr[ETH_ALEN],
++rndis_bind_config_android(struct usb_configuration *c, u8 ethaddr[ETH_ALEN],
+ 				u32 vendorID, const char *manufacturer)
+ {
+ 	return 0;
+ }
+ 
++int rndis_bind_config(struct usb_configuration *c, u8 ethaddr[ETH_ALEN])
++{
++	return 0;
++}
+ #endif
+ 
+ #endif /* __U_ETHER_H */
+-- 
+1.7.4.4
+

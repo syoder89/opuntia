@@ -1,0 +1,65 @@
+From ca60070e709615ef4d8524cd8c21c17bee028d1c Mon Sep 17 00:00:00 2001
+From: Dmitry Artamonov <dartamonov@dev.rtsoft.ru>
+Date: Fri, 25 May 2012 21:21:23 +0400
+Subject: [PATCH 005/127] i2c: drop log spam from tegra-i2c driver
+
+Make all those messages about missing acks etc. dev_dbg instead
+of dev_warn
+
+Signed-off-by: Dmitry Artamonov <dartamonov@dev.rtsoft.ru>
+---
+ drivers/i2c/busses/i2c-tegra.c |   16 ++++++++--------
+ 1 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/i2c/busses/i2c-tegra.c b/drivers/i2c/busses/i2c-tegra.c
+index b3c7a76..c84e98e 100644
+--- a/drivers/i2c/busses/i2c-tegra.c
++++ b/drivers/i2c/busses/i2c-tegra.c
+@@ -545,28 +545,28 @@ static irqreturn_t tegra_i2c_isr(int irq, void *dev_id)
+ 	}
+ 
+ 	if (unlikely(status & status_err)) {
+-		dev_warn(i2c_dev->dev, "I2c error status 0x%08x\n", status);
++		dev_dbg(i2c_dev->dev, "I2c error status 0x%08x\n", status);
+ 		if (status & I2C_INT_NO_ACK) {
+ 			i2c_dev->msg_err |= I2C_ERR_NO_ACK;
+-			dev_warn(i2c_dev->dev, "no acknowledge from address"
++			dev_dbg(i2c_dev->dev, "no acknowledge from address"
+ 					" 0x%x\n", i2c_dev->msg_add);
+-			dev_warn(i2c_dev->dev, "Packet status 0x%08x\n",
++			dev_dbg(i2c_dev->dev, "Packet status 0x%08x\n",
+ 				i2c_readl(i2c_dev, I2C_PACKET_TRANSFER_STATUS));
+ 		}
+ 
+ 		if (status & I2C_INT_ARBITRATION_LOST) {
+ 			i2c_dev->msg_err |= I2C_ERR_ARBITRATION_LOST;
+-			dev_warn(i2c_dev->dev, "arbitration lost during "
++			dev_dbg(i2c_dev->dev, "arbitration lost during "
+ 				" communicate to add 0x%x\n", i2c_dev->msg_add);
+-			dev_warn(i2c_dev->dev, "Packet status 0x%08x\n",
++			dev_dbg(i2c_dev->dev, "Packet status 0x%08x\n",
+ 				i2c_readl(i2c_dev, I2C_PACKET_TRANSFER_STATUS));
+ 		}
+ 
+ 		if (status & I2C_INT_TX_FIFO_OVERFLOW) {
+ 			i2c_dev->msg_err |= I2C_INT_TX_FIFO_OVERFLOW;
+-			dev_warn(i2c_dev->dev, "Tx fifo overflow during "
++			dev_dbg(i2c_dev->dev, "Tx fifo overflow during "
+ 				" communicate to add 0x%x\n", i2c_dev->msg_add);
+-			dev_warn(i2c_dev->dev, "Packet status 0x%08x\n",
++			dev_dbg(i2c_dev->dev, "Packet status 0x%08x\n",
+ 				i2c_readl(i2c_dev, I2C_PACKET_TRANSFER_STATUS));
+ 		}
+ 		goto err;
+@@ -576,7 +576,7 @@ static irqreturn_t tegra_i2c_isr(int irq, void *dev_id)
+ 				&& (status == I2C_INT_TX_FIFO_DATA_REQ)
+ 				&& i2c_dev->msg_read
+ 				&& i2c_dev->msg_buf_remaining)) {
+-		dev_warn(i2c_dev->dev, "unexpected status\n");
++		dev_dbg(i2c_dev->dev, "unexpected status\n");
+ 		i2c_dev->msg_err |= I2C_ERR_UNEXPECTED_STATUS;
+ 
+ 		if (!i2c_dev->irq_disabled) {
+-- 
+1.7.4.4
+

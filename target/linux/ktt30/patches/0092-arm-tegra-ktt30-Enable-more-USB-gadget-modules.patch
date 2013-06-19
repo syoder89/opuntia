@@ -1,0 +1,32 @@
+From f4708f50d42192ea2defb27617ae3241532ecfd1 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 22 May 2013 19:01:32 +0400
+Subject: [PATCH 092/127] arm: tegra: ktt30: Enable more USB gadget modules
+
+This enables File storage, Ethernet, Serial
+and CDC composite USB gadget driver modules.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index 451cca9..060ff28 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -359,7 +359,11 @@ CONFIG_USB_SERIAL_BASEBAND=m
+ CONFIG_USB_GADGET=y
+ CONFIG_USB_GADGET_VBUS_DRAW=500
+ CONFIG_USB_TEGRA=y
++CONFIG_USB_ETH=m
++CONFIG_USB_FILE_STORAGE=m
+ CONFIG_USB_MASS_STORAGE=m
++CONFIG_USB_G_SERIAL=m
++CONFIG_USB_CDC_COMPOSITE=m
+ CONFIG_USB_TEGRA_OTG=y
+ CONFIG_MMC=y
+ CONFIG_MMC_UNSAFE_RESUME=y
+-- 
+1.7.4.4
+

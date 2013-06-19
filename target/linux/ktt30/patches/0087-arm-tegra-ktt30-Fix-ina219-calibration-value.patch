@@ -1,0 +1,43 @@
+From c633e9298d8f2e649a26cb95b142b78e9df9d2a6 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 9 May 2013 01:20:14 +0400
+Subject: [PATCH 087/127] arm: tegra: ktt30: Fix ina219 calibration value
+
+The calibration value for KTT30 VDD_AC_BAT can be calculated,
+using the following formula:
+  calibration_data = 4096 * divisor / (100 * power_lsb * Rshunt)
+
+Maximum current (before overflow) is calculated as follows:
+  Imax = 32767 * power_lsb / divisor
+
+  Rshunt  = 0.015;
+  divisor = 20;
+
+We choose power_lsb = 3 to have maximum current close to 5A.
+In this case we get the following values:
+  calibration_data = 0x471c
+  Imax = 4.915A
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-powermon.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-powermon.c b/arch/arm/mach-tegra/board-ktt30-powermon.c
+index b701388..04ccfe1 100644
+--- a/arch/arm/mach-tegra/board-ktt30-powermon.c
++++ b/arch/arm/mach-tegra/board-ktt30-powermon.c
+@@ -25,8 +25,8 @@
+ #include "board-ktt30.h"
+ 
+ static struct ina219_platform_data power_mon_info = {
+-	.calibration_data  = 0xa000,
+-	.power_lsb = 2,
++	.calibration_data  = 0x471c,
++	.power_lsb = 3,
+ 	.rail_name = "VDD_AC_BAT",
+ 	.divisor = 20,
+ };
+-- 
+1.7.4.4
+

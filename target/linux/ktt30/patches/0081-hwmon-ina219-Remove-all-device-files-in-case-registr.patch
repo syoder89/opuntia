@@ -1,0 +1,31 @@
+From 5a3f062decda2e22f70c30b310da51d0e12fc7df Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 8 May 2013 03:27:38 +0400
+Subject: [PATCH 081/127] hwmon: ina219: Remove all device files in case
+ registration fails
+
+This makes the driver remove all previously registered sysfs
+device files in case one fails to register.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/hwmon/ina219.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/hwmon/ina219.c b/drivers/hwmon/ina219.c
+index cc5b85f..7685fee 100644
+--- a/drivers/hwmon/ina219.c
++++ b/drivers/hwmon/ina219.c
+@@ -345,6 +345,9 @@ static int __devinit ina219_probe(struct i2c_client *client,
+ 	for (i = 0; i < ARRAY_SIZE(ina219); i++) {
+ 		err = device_create_file(&client->dev, &ina219[i].dev_attr);
+ 		if (err) {
++			while (i)
++				device_remove_file(&client->dev,
++							&ina219[--i].dev_attr);
+ 			dev_err(&client->dev, "device_create_file failed.\n");
+ 			goto exit_free;
+ 		}
+-- 
+1.7.4.4
+

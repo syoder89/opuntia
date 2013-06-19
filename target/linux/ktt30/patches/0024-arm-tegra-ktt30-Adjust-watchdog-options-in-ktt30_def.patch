@@ -1,0 +1,31 @@
+From 1027cd33578d448d1931d5ef2038693c87d50bb2 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Mon, 14 Jan 2013 18:03:08 +0400
+Subject: [PATCH 024/127] arm: tegra: ktt30: Adjust watchdog options in
+ ktt30_defconfig
+
+Enable CONFIG_WATCHDOG_NOWAYOUT and disable
+CONFIG_TEGRA_WATCHDOG_ENABLE_ON_PROBE.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index 30da6fd..06ce7d7 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -275,8 +275,8 @@ CONFIG_SENSORS_TEGRA_TSENSOR=y
+ CONFIG_SENSORS_INA219=y
+ CONFIG_THERMAL=y
+ CONFIG_WATCHDOG=y
++CONFIG_WATCHDOG_NOWAYOUT=y
+ CONFIG_TEGRA_WATCHDOG=y
+-CONFIG_TEGRA_WATCHDOG_ENABLE_ON_PROBE=y
+ CONFIG_MFD_TPS6591X=y
+ CONFIG_REGULATOR=y
+ CONFIG_REGULATOR_FIXED_VOLTAGE=y
+-- 
+1.7.4.4
+

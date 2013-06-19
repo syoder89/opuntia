@@ -1,0 +1,28 @@
+From a480e33ca4cf2bd63c27416055568d9de38ba9f3 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 31 Oct 2012 17:47:13 +0400
+Subject: [PATCH 013/127] arm: tegra: ktt30: Add ADT7461 thermal sensor to
+ defconfig
+
+This adds CONFIG_SENSORS_ADT7461=y to ktt30_defconfig.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index 735d771..f37c4a3 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -269,6 +269,7 @@ CONFIG_POWER_SUPPLY=y
+ CONFIG_BATTERY_BQ20Z75=y
+ CONFIG_BATTERY_BQ27x00=y
+ CONFIG_CHARGER_GPIO=y
++CONFIG_SENSORS_ADT7461=y
+ CONFIG_SENSORS_LM90=y
+ CONFIG_SENSORS_TEGRA_TSENSOR=y
+ CONFIG_SENSORS_INA219=y
+-- 
+1.7.4.4
+

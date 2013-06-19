@@ -1,0 +1,38 @@
+From e5b66527a19827193f5efb19adaccffab686f1c8 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 30 May 2013 00:17:49 +0400
+Subject: [PATCH 121/127] arm: tegra: ktt30: TPS6591x RTC module support
+
+This also enables TPS6591x RTC platform data
+when the driver is built as a module.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-power.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-power.c b/arch/arm/mach-tegra/board-ktt30-power.c
+index ece771a..4517988 100644
+--- a/arch/arm/mach-tegra/board-ktt30-power.c
++++ b/arch/arm/mach-tegra/board-ktt30-power.c
+@@ -190,7 +190,7 @@ TPS_PDATA_INIT(ldo6, 0,         1200, 1200, tps6591x_rails(VIO), 0, 0, 1, -1, 0,
+ TPS_PDATA_INIT(ldo7, 0,         1200, 1200, tps6591x_rails(VIO), 1, 1, 1, -1, 0, 0, EXT_CTRL_SLEEP_OFF, LDO_LOW_POWER_ON_SUSPEND);
+ TPS_PDATA_INIT(ldo8, 0,         1000, 1000, tps6591x_rails(VIO), 1, 0, 0, -1, 0, 0, EXT_CTRL_SLEEP_OFF, LDO_LOW_POWER_ON_SUSPEND);
+ 
+-#if defined(CONFIG_RTC_DRV_TPS6591x)
++#if defined(CONFIG_RTC_DRV_TPS6591x) || defined(CONFIG_RTC_DRV_TPS6591x_MODULE)
+ static struct tps6591x_rtc_platform_data rtc_data = {
+ 	.irq = TEGRA_NR_IRQS + TPS6591X_INT_RTC_ALARM,
+ 	.time = {
+@@ -248,7 +248,7 @@ static struct tps6591x_subdev_info tps_devs_ktt30_0[] = {
+ 	TPS_REG(VIO, vio, 0),
+ 	TPS_REG(VDD_1, vdd1, 0),
+ 	TPS6591X_DEV_COMMON_KTT30,
+-#if defined(CONFIG_RTC_DRV_TPS6591x)
++#if defined(CONFIG_RTC_DRV_TPS6591x) || defined(CONFIG_RTC_DRV_TPS6591x_MODULE)
+ 	TPS_RTC_REG(),
+ #endif
+ #if defined(CONFIG_SENSORS_TPS6591X) || defined(CONFIG_SENSORS_TPS6591X_MODULE)
+-- 
+1.7.4.4
+

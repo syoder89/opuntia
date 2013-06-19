@@ -1,0 +1,32 @@
+From cf139f8bbe14ed6c9217bca7962a0a3aae745c9f Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sat, 13 Apr 2013 05:35:56 +0400
+Subject: [PATCH 057/127] arm: tegra: ktt30: Set 24MHz frequency for the SPI
+ flash
+
+This sets maximum SPI flash frequency to 24MHz.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30.c |    5 +----
+ 1 files changed, 1 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index b417e10..7b67ef0 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -440,10 +440,7 @@ static struct spi_board_info __initdata ktt30_spi_info[] = {
+ 		.platform_data		= &ktt30_spiflash_data,
+ 		.controller_data	= &ktt30_spiflash_cdata,
+ 		.mode			= SPI_MODE_0,
+-		/*
+-		 * FIXME: debugging at lower speed
+-		 */
+-		.max_speed_hz		= 300000,
++		.max_speed_hz		= 24000000,
+ 		.bus_num		= 3,
+ 		.chip_select		= 1,
+ 	},
+-- 
+1.7.4.4
+

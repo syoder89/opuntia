@@ -1,0 +1,69 @@
+From f632b58839bc8cecee2167d4a89c8a2348baa0da Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Mon, 25 Mar 2013 15:57:09 +0400
+Subject: [PATCH 048/127] arm: tegra: pci: KTT30 uses 2x3 PCIe configuration
+
+This change enables PCIe support on all 3 PCIe ports on KTT30.
+KTT30 uses 2x3 (number of lanes by number of controllers) PCIe
+configuration.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/pcie.c |   22 +++++++++++++++++++++-
+ 1 files changed, 21 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/pcie.c b/arch/arm/mach-tegra/pcie.c
+index 6233e50..6c31a3c 100644
+--- a/arch/arm/mach-tegra/pcie.c
++++ b/arch/arm/mach-tegra/pcie.c
+@@ -41,6 +41,7 @@
+ 
+ #include <asm/sizes.h>
+ #include <asm/mach/pci.h>
++#include <asm/mach-types.h>
+ 
+ #include <mach/pinmux.h>
+ #include <mach/iomap.h>
+@@ -143,6 +144,18 @@
+ 
+ #define AFI_FUSE							0x104
+ #define AFI_FUSE_PCIE_T0_GEN2_DIS				(1 << 2)
++#define AFI_FUSE_PCIE_T0_X1_MODE	0x1
++#define AFI_FUSE_PCIE_T0_X2_MODE	0x2
++#define AFI_FUSE_PCIE_T0_X4_MODE	0x3
++#define AFI_FUSE_PCIE_T0_X8_MODE	0x4
++#define AFI_FUSE_PCIE_T0_X16_MODE	0x6
++#define AFI_FUSE_PCIE_T0_MODE_MASK	0x7
++#define AFI_FUSE_PCIE_T0C0_MODE(m)	((m) << 4)
++#define AFI_FUSE_PCIE_T0C1_MODE(m)	((m) << 8)
++#define AFI_FUSE_PCIE_T0C2_MODE(m)	((m) << 12)
++#define AFI_FUSE_PCIE_T0_MODE(m)	(AFI_FUSE_PCIE_T0C0_MODE(m) | \
++					AFI_FUSE_PCIE_T0C1_MODE(m) | \
++					AFI_FUSE_PCIE_T0C2_MODE(m))
+ 
+ #define AFI_PEX0_CTRL							0x110
+ #define AFI_PEX1_CTRL							0x118
+@@ -820,12 +833,19 @@ static void tegra_pcie_enable_controller(void)
+ #ifdef CONFIG_ARCH_TEGRA_2x_SOC
+ 	val |= AFI_PCIE_CONFIG_SM2TMS0_XBAR_CONFIG_DUAL;
+ #else
+-	val |= AFI_PCIE_CONFIG_SM2TMS0_XBAR_CONFIG_411;
++	if (machine_is_ktt30())
++		val |= AFI_PCIE_CONFIG_SM2TMS0_XBAR_CONFIG_DUAL;
++	else
++		val |= AFI_PCIE_CONFIG_SM2TMS0_XBAR_CONFIG_411;
+ #endif
+ 	afi_writel(val, AFI_PCIE_CONFIG);
+ 
+ 	/* Disable Gen 2 capability of PCIE */
+ 	val = afi_readl(AFI_FUSE) & ~AFI_FUSE_PCIE_T0_GEN2_DIS;
++	if (machine_is_ktt30()) {
++		val &= ~AFI_FUSE_PCIE_T0_MODE(AFI_FUSE_PCIE_T0_MODE_MASK);
++		val |= AFI_FUSE_PCIE_T0_MODE(AFI_FUSE_PCIE_T0_X2_MODE);
++	}
+ 	afi_writel(val, AFI_FUSE);
+ 
+ 	/* Initialze internal PHY, enable up to 16 PCIE lanes */
+-- 
+1.7.4.4
+

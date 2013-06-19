@@ -1,0 +1,228 @@
+From 91a7e084614f3f60000bafadc2a91b3c746e8ca8 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Mon, 15 Apr 2013 18:37:22 +0400
+Subject: [PATCH 068/127] arm: tegra: ktt30: Consolidate panel power
+ regulators
+
+This consolidates handling of the LCD and HDMI power regulators,
+and fixes power sequences, so that the regulators are always
+disabled in reverse order.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-panel.c |  165 +++++++++++++------------------
+ 1 files changed, 70 insertions(+), 95 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-panel.c b/arch/arm/mach-tegra/board-ktt30-panel.c
+index 632f5ab..83972f9 100644
+--- a/arch/arm/mach-tegra/board-ktt30-panel.c
++++ b/arch/arm/mach-tegra/board-ktt30-panel.c
+@@ -211,34 +211,65 @@ static struct platform_device ktt30_backlight_device = {
+ };
+ 
+ #ifdef CONFIG_TEGRA_DC
+-static int ktt30_panel_enable(void)
++static int ktt30_regulator_enable(struct regulator **pr, const char *name)
+ {
+-	if (ktt30_lvds_reg == NULL) {
+-		ktt30_lvds_reg = regulator_get(NULL, "vdd_lvds");
+-		if (WARN_ON(IS_ERR(ktt30_lvds_reg))) {
+-			pr_err("%s: couldn't get regulator vdd_lvds: %ld\n",
+-				__func__, PTR_ERR(ktt30_lvds_reg));
+-			ktt30_lvds_reg = NULL;
+-		} else {
+-			regulator_enable(ktt30_lvds_reg);
+-		}
++	struct regulator *r;
++	int retval;
++
++	r = *pr;
++
++	if (!IS_ERR_OR_NULL(r))
++		goto enable;
++
++	r = regulator_get(NULL, name);
++	if (IS_ERR(r)) {
++		retval = PTR_ERR(r);
++		pr_err("Couldn't get regulator %s: %d\n", name, retval);
++		return retval;
+ 	}
+ 
+-	if (ktt30_lvds_vdd_panel == NULL) {
+-		ktt30_lvds_vdd_panel = regulator_get(NULL, "vdd_lcd_panel");
+-		if (WARN_ON(IS_ERR(ktt30_lvds_vdd_panel))) {
+-			pr_err("%s: couldn't get regulator vdd_lcd_panel: %ld\n",
+-				__func__, PTR_ERR(ktt30_lvds_vdd_panel));
+-			ktt30_lvds_vdd_panel = NULL;
+-		} else {
+-			regulator_enable(ktt30_lvds_vdd_panel);
+-		}
++enable:
++	retval = regulator_enable(r);
++	if (retval) {
++		pr_err("Couldn't enable regulator %s: %d\n", name, retval);
++		regulator_put(r);
++		r = NULL;
+ 	}
+ 
++	*pr = r;
++	return retval;
++}
++
++static void ktt30_regulator_disable(struct regulator **pr)
++{
++	struct regulator *r = *pr;
++
++	if (!IS_ERR_OR_NULL(r)) {
++		regulator_disable(r);
++		regulator_put(r);
++	}
++
++	*pr = NULL;
++}
++
++static int ktt30_panel_enable(void)
++{
++	int retval;
++
++	retval = ktt30_regulator_enable(&ktt30_lvds_reg, "vdd_lvds");
++	if (retval)
++		return retval;
++
++	retval = ktt30_regulator_enable(&ktt30_lvds_vdd_panel, "vdd_lcd_panel");
++	if (retval)
++		goto err;
++
+ 	msleep(20);
+ 	ktt30_pnl_gpio_set(KTT30_LVDS_SHTDN_N, true);
+-
+ 	return 0;
++err:
++	ktt30_regulator_disable(&ktt30_lvds_reg);
++	return retval;
+ }
+ 
+ static int ktt30_panel_disable(void)
+@@ -246,100 +277,44 @@ static int ktt30_panel_disable(void)
+ 	ktt30_pnl_gpio_set(KTT30_LVDS_SHTDN_N, false);
+ 	msleep(20);
+ 
+-	if (ktt30_lvds_reg) {
+-		regulator_disable(ktt30_lvds_reg);
+-		regulator_put(ktt30_lvds_reg);
+-		ktt30_lvds_reg = NULL;
+-	}
+-
+-	if (ktt30_lvds_vdd_panel) {
+-		regulator_disable(ktt30_lvds_vdd_panel);
+-		regulator_put(ktt30_lvds_vdd_panel);
+-		ktt30_lvds_vdd_panel = NULL;
+-	}
++	ktt30_regulator_disable(&ktt30_lvds_vdd_panel);
++	ktt30_regulator_disable(&ktt30_lvds_reg);
+ 	return 0;
+ }
+ 
+ static int ktt30_hdmi_vddio_enable(void)
+ {
+-	int ret;
+-	if (!ktt30_hdmi_vddio) {
+-		ktt30_hdmi_vddio = regulator_get(NULL, "vdd_hdmi_con");
+-		if (IS_ERR_OR_NULL(ktt30_hdmi_vddio)) {
+-			ret = PTR_ERR(ktt30_hdmi_vddio);
+-			pr_err("hdmi: couldn't get regulator vdd_hdmi_con\n");
+-			ktt30_hdmi_vddio = NULL;
+-			return ret;
+-		}
+-	}
+-	ret = regulator_enable(ktt30_hdmi_vddio);
+-	if (ret < 0) {
+-		pr_err("hdmi: couldn't enable regulator vdd_hdmi_con\n");
+-		regulator_put(ktt30_hdmi_vddio);
+-		ktt30_hdmi_vddio = NULL;
+-		return ret;
+-	}
+-	return ret;
++	return ktt30_regulator_enable(&ktt30_hdmi_vddio, "vdd_hdmi_con");
+ }
+ 
+ static int ktt30_hdmi_vddio_disable(void)
+ {
+-	if (ktt30_hdmi_vddio) {
+-		regulator_disable(ktt30_hdmi_vddio);
+-		regulator_put(ktt30_hdmi_vddio);
+-		ktt30_hdmi_vddio = NULL;
+-	}
++	ktt30_regulator_disable(&ktt30_hdmi_vddio);
+ 	return 0;
+ }
+ 
+ static int ktt30_hdmi_enable(void)
+ {
+-	int ret;
+-	if (!ktt30_hdmi_reg) {
+-		ktt30_hdmi_reg = regulator_get(NULL, "avdd_hdmi");
+-		if (IS_ERR_OR_NULL(ktt30_hdmi_reg)) {
+-			pr_err("hdmi: couldn't get regulator avdd_hdmi\n");
+-			ktt30_hdmi_reg = NULL;
+-			return PTR_ERR(ktt30_hdmi_reg);
+-		}
+-	}
+-	ret = regulator_enable(ktt30_hdmi_reg);
+-	if (ret < 0) {
+-		pr_err("hdmi: couldn't enable regulator avdd_hdmi\n");
+-		return ret;
+-	}
+-	if (!ktt30_hdmi_pll) {
+-		ktt30_hdmi_pll = regulator_get(NULL, "avdd_hdmi_pll");
+-		if (IS_ERR_OR_NULL(ktt30_hdmi_pll)) {
+-			pr_err("hdmi: couldn't get regulator avdd_hdmi_pll\n");
+-			ktt30_hdmi_pll = NULL;
+-			regulator_disable(ktt30_hdmi_reg);
+-			regulator_put(ktt30_hdmi_reg);
+-			ktt30_hdmi_reg = NULL;
+-			return PTR_ERR(ktt30_hdmi_pll);
+-		}
+-	}
+-	ret = regulator_enable(ktt30_hdmi_pll);
+-	if (ret < 0) {
+-		pr_err("hdmi: couldn't enable regulator avdd_hdmi_pll\n");
+-		return ret;
+-	}
++	int retval;
++
++	retval = ktt30_regulator_enable(&ktt30_hdmi_reg, "avdd_hdmi");
++	if (retval)
++		return retval;
++
++	retval = ktt30_regulator_enable(&ktt30_hdmi_pll, "avdd_hdmi_pll");
++	if (retval)
++		goto err;
++
+ 	return 0;
++err:
++	ktt30_regulator_disable(&ktt30_hdmi_reg);
++	return retval;
+ }
+ 
+ static int ktt30_hdmi_disable(void)
+ {
+-	if (ktt30_hdmi_reg) {
+-		regulator_disable(ktt30_hdmi_reg);
+-		regulator_put(ktt30_hdmi_reg);
+-		ktt30_hdmi_reg = NULL;
+-	}
+-
+-	if (ktt30_hdmi_pll) {
+-		regulator_disable(ktt30_hdmi_pll);
+-		regulator_put(ktt30_hdmi_pll);
+-		ktt30_hdmi_pll = NULL;
+-	}
++	ktt30_regulator_disable(&ktt30_hdmi_pll);
++	ktt30_regulator_disable(&ktt30_hdmi_reg);
+ 	return 0;
+ }
+ 
+-- 
+1.7.4.4
+

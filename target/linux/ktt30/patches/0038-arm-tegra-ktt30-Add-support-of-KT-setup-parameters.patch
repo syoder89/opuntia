@@ -1,0 +1,552 @@
+From 6ac9e4984313230e1f392e20d202579b23e31b20 Mon Sep 17 00:00:00 2001
+From: Maxim Yu. Osipov <mosipov@dev.rtsoft.ru>
+Date: Mon, 18 Feb 2013 14:37:09 +0400
+Subject: [PATCH 038/127] arm: tegra: ktt30: Add support of KT setup
+ parameters
+
+The KT-specific setup is located in the SPI flash.
+U-Boot reads the data and updates kernel command line,
+based on the KT setup.
+
+This adds KT-specific setup parameters parsing at
+the early stage, using kernel command line arguments.
+Board configuration is finalized, based on the parameters.
+
+This also adjusts SPI MTD partition table accordingly.
+
+Signed-off-by: Maxim Osipov <mosipov@dev.rtsoft.ru>
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-panel.c   |  158 ++++++++++++++++++++++-------
+ arch/arm/mach-tegra/board-ktt30-power.c   |   14 +++
+ arch/arm/mach-tegra/board-ktt30-sensors.c |   27 +++++-
+ arch/arm/mach-tegra/board-ktt30.c         |   92 ++++++++++++++++-
+ arch/arm/mach-tegra/board.h               |    6 +
+ arch/arm/mach-tegra/common.c              |   18 ++++
+ 6 files changed, 273 insertions(+), 42 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-panel.c b/arch/arm/mach-tegra/board-ktt30-panel.c
+index 78cca20..c3e5bfc 100644
+--- a/arch/arm/mach-tegra/board-ktt30-panel.c
++++ b/arch/arm/mach-tegra/board-ktt30-panel.c
+@@ -60,6 +60,18 @@ static struct regulator *ktt30_lvds_reg = NULL;
+ static struct regulator *ktt30_lvds_vdd_panel = NULL;
+ #endif
+ 
++enum ktt30_disp_type {
++	ktt30_disp_type_auto = 0,
++	ktt30_disp_type_lcd,
++	ktt30_disp_type_hdmi,
++	ktt30_disp_type_none,
++};
++
++static enum ktt30_disp_type ktt30_setup_disp1;
++static enum ktt30_disp_type ktt30_setup_disp2;
++
++static int ktt30_setup_bl_enb_low;
++
+ static atomic_t sd_brightness = ATOMIC_INIT(255);
+ 
+ static tegra_dc_bl_output ktt30_bl_output_measured = {
+@@ -106,42 +118,24 @@ static int ktt30_backlight_init(struct device *dev)
+ 	if (WARN_ON(ARRAY_SIZE(ktt30_bl_output_measured) != 256))
+ 		pr_err("bl_output array does not have 256 elements\n");
+ 
+-	ret = gpio_request(ktt30_bl_pwm, "bl_pwm");
+-	if (ret < 0)
+-		return ret;
+-
+ 	ret = gpio_direction_output(ktt30_bl_pwm, 1);
+ 	if (ret < 0)
+-		goto err1;
++		return ret;
+ 
+ 	mdelay(20);
+ 
+-	ret = gpio_request(ktt30_bl_enb, "bl_enb");
++	ret = gpio_direction_output(ktt30_bl_enb, !ktt30_setup_bl_enb_low);
+ 	if (ret < 0)
+-		goto err2;
+-
+-	ret = gpio_direction_output(ktt30_bl_enb, 1);
+-	if (ret < 0)
+-		goto err3;
++		return ret;
+ 
+ 	return 0;
+-
+-err3:
+-	gpio_free(ktt30_bl_enb);
+-err2:
+-	gpio_set_value(ktt30_bl_pwm, 0);
+-err1:
+-	gpio_free(ktt30_bl_pwm);
+-	return ret;
+ };
+ 
+ static void ktt30_backlight_exit(struct device *dev)
+ {
+ 	gpio_set_value(ktt30_bl_enb, 0);
+-	gpio_free(ktt30_bl_pwm);
+ 	mdelay(20);
+ 	gpio_set_value(ktt30_bl_pwm, 0);
+-	gpio_free(ktt30_bl_enb);
+ }
+ 
+ static int ktt30_backlight_notify(struct device *unused, int brightness)
+@@ -651,13 +645,7 @@ static struct platform_device tegra_ion_device = {
+ };
+ #endif
+ 
+-static struct platform_device *ktt30_gfx_devices[] __initdata = {
+-#if defined(CONFIG_TEGRA_NVMAP)
+-	&ktt30_nvmap_device,
+-#endif
+-#if defined(CONFIG_ION_TEGRA)
+-	&tegra_ion_device,
+-#endif
++static struct platform_device *ktt30_bl_devices[] __initdata = {
+ 	&tegra_pwfm0_device,
+ 	&ktt30_backlight_device,
+ };
+@@ -691,6 +679,16 @@ int __init ktt30_panel_init(void)
+ {
+ 	int err;
+ 	struct resource __maybe_unused *res;
++	int lcd_enabled;
++	int hdmi_enabled;
++
++	lcd_enabled = (ktt30_setup_disp1 == ktt30_disp_type_auto) ||
++		(ktt30_setup_disp1 == ktt30_disp_type_lcd) ||
++		(ktt30_setup_disp2 == ktt30_disp_type_lcd);
++
++	hdmi_enabled = (ktt30_setup_disp2 == ktt30_disp_type_auto) ||
++		(ktt30_setup_disp2 == ktt30_disp_type_hdmi) ||
++		(ktt30_setup_disp1 == ktt30_disp_type_hdmi);
+ 
+ #if defined(CONFIG_TEGRA_NVMAP)
+ 	ktt30_carveouts[1].base = tegra_carveout_start;
+@@ -702,12 +700,23 @@ int __init ktt30_panel_init(void)
+ 	tegra_ion_data.heaps[0].size = tegra_carveout_size;
+ #endif
+ 
+-#if defined(CONFIG_TEGRA_DC)
+-	gpio_request(ktt30_lvds_shutdown, "lvds_shutdown");
+-	gpio_direction_output(ktt30_lvds_shutdown, 1);
+-#endif
++	err = gpio_request(ktt30_lvds_shutdown, "lvds_shutdown");
++	if (err < 0)
++		return err;
++
++	err = gpio_request(ktt30_bl_pwm, "bl_pwm");
++	if (err < 0)
++		goto free_lvds_shutdown;
++
++	err = gpio_request(ktt30_bl_enb, "bl_enb");
++	if (err < 0)
++		goto free_bl_pwm;
+ 
+-	gpio_request(ktt30_hdmi_hpd, "hdmi_hpd");
++	err = gpio_request(ktt30_hdmi_hpd, "hdmi_hpd");
++	if (err)
++		goto free_bl_enb;
++
++	gpio_direction_output(ktt30_lvds_shutdown, lcd_enabled);
+ 	gpio_direction_input(ktt30_hdmi_hpd);
+ 
+ #ifdef CONFIG_HAS_EARLYSUSPEND
+@@ -723,10 +732,26 @@ int __init ktt30_panel_init(void)
+ 		return err;
+ #endif
+ 
+-	err = platform_add_devices(ktt30_gfx_devices,
+-				ARRAY_SIZE(ktt30_gfx_devices));
++#if defined(CONFIG_TEGRA_NVMAP)
++	platform_device_register(&ktt30_nvmap_device);
++#endif
++#if defined(CONFIG_ION_TEGRA)
++	platform_device_register(&tegra_ion_device);
++#endif
++
++	if (lcd_enabled) {
++		platform_add_devices(ktt30_bl_devices,
++					ARRAY_SIZE(ktt30_bl_devices));
++	} else {
++		gpio_direction_output(ktt30_bl_pwm, 0);
++		gpio_direction_output(ktt30_bl_enb, ktt30_setup_bl_enb_low);
++	}
++
+ 
+ #if defined(CONFIG_TEGRA_GRHOST) && defined(CONFIG_TEGRA_DC)
++	if (!lcd_enabled)
++		goto disp2;
++
+ 	res = nvhost_get_resource_byname(&ktt30_disp1_device,
+ 					 IORESOURCE_MEM, "fbmem");
+ 	res->start = tegra_fb_start;
+@@ -739,6 +764,10 @@ int __init ktt30_panel_init(void)
+ 	if (!err)
+ 		err = nvhost_device_register(&ktt30_disp1_device);
+ 
++disp2:
++	if (!hdmi_enabled)
++		goto out;
++
+ 	res = nvhost_get_resource_byname(&ktt30_disp2_device,
+ 					 IORESOURCE_MEM, "fbmem");
+ 	res->start = tegra_fb2_start;
+@@ -757,6 +786,7 @@ int __init ktt30_panel_init(void)
+ 
+ 	if (!err)
+ 		err = nvhost_device_register(&ktt30_disp2_device);
++out:
+ #endif
+ 
+ #if defined(CONFIG_TEGRA_GRHOST) && defined(CONFIG_TEGRA_NVAVP)
+@@ -764,4 +794,62 @@ int __init ktt30_panel_init(void)
+ 		err = nvhost_device_register(&nvavp_device);
+ #endif
+ 	return err;
++
++free_bl_enb:
++	gpio_free(ktt30_bl_enb);
++free_bl_pwm:
++	gpio_free(ktt30_bl_pwm);
++free_lvds_shutdown:
++	gpio_free(ktt30_lvds_shutdown);
++
++	return err;
++}
++
++static int __init ktt30_setup_bl(char *options)
++{
++	if (!strcmp(options, "low"))
++		ktt30_setup_bl_enb_low = 1;
++	return 1;
++}
++__setup("bl_enb=", ktt30_setup_bl);
++
++static int __init ktt30_setup_bl_level(char *options)
++{
++	int bl_level;
++
++	get_option(&options, &bl_level);
++
++	if (bl_level < 0)
++		bl_level = 0;
++	else if (bl_level > ktt30_backlight_data.max_brightness)
++		bl_level = ktt30_backlight_data.max_brightness;
++
++	ktt30_backlight_data.dft_brightness = bl_level;
++	return 1;
++}
++__setup("bl_level=", ktt30_setup_bl_level);
++
++static enum ktt30_disp_type __init ktt30_get_disp_type(char *options)
++{
++	if (!strcmp(options, "lcd"))
++		return ktt30_disp_type_lcd;
++	if (!strcmp(options, "hdmi"))
++		return ktt30_disp_type_hdmi;
++	if (!strcmp(options, "none"))
++		return ktt30_disp_type_none;
++	return ktt30_disp_type_auto;
++}
++
++static int __init ktt30_setup_bootdisp1(char *options)
++{
++	ktt30_setup_disp1 =  ktt30_get_disp_type(options);
++	return 1;
++}
++__setup("bootdisp1=", ktt30_setup_bootdisp1);
++
++static int __init ktt30_setup_bootdisp2(char *options)
++{
++	ktt30_setup_disp2 =  ktt30_get_disp_type(options);
++	return 1;
+ }
++__setup("bootdisp2=", ktt30_setup_bootdisp2);
+diff --git a/arch/arm/mach-tegra/board-ktt30-power.c b/arch/arm/mach-tegra/board-ktt30-power.c
+index 6115b68..8801c0f 100644
+--- a/arch/arm/mach-tegra/board-ktt30-power.c
++++ b/arch/arm/mach-tegra/board-ktt30-power.c
+@@ -662,3 +662,17 @@ static int __init ktt30_charger_late_init(void)
+ }
+ 
+ late_initcall(ktt30_charger_late_init);
++
++/* Built-in Intel 82574L Ethernet on PCIE#0 port */
++static int __init ktt30_setup_lan(char *options)
++{
++	if (!strcmp(options, "no")) {
++		/* Disable built-in Intel 82574L Ethernet */
++		ri_data_en_vdd_eth.constraints.always_on = false;
++		fixed_reg_en_vdd_eth_pdata.enabled_at_boot = false;
++		ri_data_en_vdd_eth.constraints.boot_on = false;
++	}
++
++	return 1;
++}
++__setup("lan=", ktt30_setup_lan);
+diff --git a/arch/arm/mach-tegra/board-ktt30-sensors.c b/arch/arm/mach-tegra/board-ktt30-sensors.c
+index d16cd52..b166ef1 100644
+--- a/arch/arm/mach-tegra/board-ktt30-sensors.c
++++ b/arch/arm/mach-tegra/board-ktt30-sensors.c
+@@ -58,7 +58,7 @@ static struct adt7461_platform_data ktt30_adt7461_pdata = {
+ 	.hysteresis = 0,
+ 	.shutdown_ext_limit = 100,
+ 	.shutdown_local_limit = 100,
+-	.throttling_ext_limit = 80,
++	.throttling_ext_limit = 85,
+ 	.alarm_fn = ktt30_adt7461_alarm_fn,
+ 	.irq_gpio = TEGRA_GPIO_PCC2,
+ };
+@@ -147,3 +147,28 @@ int __init ktt30_sensors_init(void)
+ 	mpuirq_init();
+ 	return 0;
+ }
++
++static int __init ktt30_setup_tempalert(char *options)
++{
++	if (!strcmp(options, "no")) {
++		ktt30_adt7461_pdata.irq_gpio = -1;
++		ktt30_adt7461_pdata.alarm_fn = NULL;
++		adt7461_board_info.irq = 0;
++	}
++	return 1;
++}
++__setup("tempalert=", ktt30_setup_tempalert);
++
++static int __init ktt30_setup_temphigh(char *options)
++{
++	int temp;
++
++	get_option(&options, &temp);
++
++	if ((temp > 0) && (temp < ktt30_adt7461_pdata.shutdown_ext_limit))
++		ktt30_adt7461_pdata.throttling_ext_limit = temp;
++
++	return 1;
++}
++__setup("temphigh=", ktt30_setup_temphigh);
++
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index dbe3103..17b5c08 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -265,7 +265,8 @@ static void ktt30_i2c_init(void)
+ 	platform_device_register(&tegra_i2c_device2);
+ 	platform_device_register(&tegra_i2c_device1);
+ 
+-	i2c_register_board_info(4, &ktt30_codec_wm8903_info, 1);
++	if (get_audio_codec_type() == audio_codec_wm8903)
++		i2c_register_board_info(4, &ktt30_codec_wm8903_info, 1);
+ }
+ 
+ static struct platform_device *ktt30_uart_devices[] __initdata = {
+@@ -380,19 +381,38 @@ static struct tegra_spi_platform_data ktt30_spi_pdata = {
+ /*
+  * TODO: Check the actual partitioning and adjust the partition table.
+  */
++
+ static struct mtd_partition ktt30_spiflash_part[] = {
+ 	[0] = {
+-		.name		= "UBL",
++		.name		= "U-Boot",
+ 		.offset		= 0,
+-		.size		= SZ_64K,
++		.size		= SZ_1M,
+ 		.mask_flags	= MTD_WRITEABLE,
+ 	},
+ 	[1] = {
+-		.name		= "unknown",
++		.name		= "User",
+ 		.offset		= MTDPART_OFS_APPEND,
+-		.size		= 0x003ef000,
++		.size		= SZ_4M - SZ_1M - SZ_16K,
+ 	},
+ 	[2] = {
++		.name		= "KT-user-setup",
++		.offset		= MTDPART_OFS_APPEND,
++		.size		= SZ_4K,
++		.mask_flags	= MTD_WRITEABLE,
++	},
++	[3] = {
++		.name		= "KT-system-setup",
++		.offset		= MTDPART_OFS_APPEND,
++		.size		= SZ_4K,
++		.mask_flags	= MTD_WRITEABLE,
++	},
++	[4] = {
++		.name		= "Reserved",
++		.offset		= MTDPART_OFS_APPEND,
++		.size		= SZ_4K,
++		.mask_flags	= MTD_WRITEABLE,
++	},
++	[5] = {
+ 		.name		= "U-Boot-Env",
+ 		/* the last 4K according to U-Boot */
+ 		.offset		= SZ_4M - SZ_4K,
+@@ -588,6 +608,9 @@ static struct i2c_board_info __initdata atmel_i2c_info[] = {
+ 
+ static int __init ktt30_touch_init(void)
+ {
++	if (get_touch_screen_type() != atmel_mxt_ts)
++		return -ENODEV;
++
+ 	tegra_gpio_enable(TEGRA_GPIO_PH4);
+ 	tegra_gpio_enable(TEGRA_GPIO_PH6);
+ 
+@@ -717,6 +740,8 @@ static struct platform_device __initdata *ktt30_usb_devices[] = {
+ 	&tegra_ehci3_device,
+ };
+ 
++static int ktt30_setup_usb2_disabled;
++
+ static void ktt30_usb_init(void)
+ {
+ 	tegra_otg_device.dev.platform_data = &tegra_otg_pdata;
+@@ -724,6 +749,11 @@ static void ktt30_usb_init(void)
+ 	tegra_ehci2_device.dev.platform_data = &tegra_ehci2_utmi_pdata;
+ 	tegra_ehci3_device.dev.platform_data = &tegra_ehci3_utmi_pdata;
+ 
++	tegra_gpio_enable(TEGRA_GPIO_PL5);
++	gpio_request(TEGRA_GPIO_PL5, "usb2-port");
++	gpio_direction_output(TEGRA_GPIO_PL5, !ktt30_setup_usb2_disabled);
++	msleep(20);
++
+ 	platform_add_devices(ktt30_usb_devices, ARRAY_SIZE(ktt30_usb_devices));
+ }
+ #else
+@@ -757,10 +787,14 @@ static void ktt30_pci_init(void)
+ 	platform_device_register(&tegra_pci_device);
+ }
+ 
++
+ #ifdef CONFIG_SATA_AHCI_TEGRA
++static int ktt30_setup_sata_disable;
++
+ static void ktt30_sata_init(void)
+ {
+-	platform_device_register(&tegra_sata_device);
++	if (!ktt30_setup_sata_disable)
++		platform_device_register(&tegra_sata_device);
+ }
+ #else
+ static void ktt30_sata_init(void) { }
+@@ -814,6 +848,52 @@ static void __init tegra_ktt30_reserve(void)
+ 	tegra_ram_console_debug_reserve(SZ_1M);
+ }
+ 
++#if CONFIG_USB_SUPPORT
++static int __init ktt30_setup_usb2(char *option)
++{
++	if (!strcmp(option, "no"))
++		ktt30_setup_usb2_disabled = 1;
++	return 1;
++}
++__setup("usb2=", ktt30_setup_usb2);
++#endif
++
++#ifdef CONFIG_SATA_AHCI_TEGRA
++static int __init ktt30_setup_sata(char *option)
++{
++	if (!strcmp(option, "no"))
++		ktt30_setup_sata_disable = 1;
++
++	return 1;
++}
++__setup("sata=", ktt30_setup_sata);
++#endif
++
++static int __init ktt30_setup_pcie0(char *option)
++{
++	if (!strcmp(option, "no"))
++		ktt30_pci_platform_data.port_status[0] = 0;
++	return 1;
++}
++__setup("pcie0=", ktt30_setup_pcie0);
++
++static int __init ktt30_setup_pcie1(char *option)
++{
++	if (!strcmp(option, "no"))
++		ktt30_pci_platform_data.port_status[1] = 0;
++	return 1;
++}
++__setup("pcie1=", ktt30_setup_pcie1);
++
++static int __init ktt30_setup_pcie2(char *option)
++{
++	if (!strcmp(option, "no"))
++		ktt30_pci_platform_data.port_status[2] = 0;
++	return 1;
++}
++__setup("pcie2=", ktt30_setup_pcie2);
++
++
+ static const char *ktt30_dt_board_compat[] = {
+ 	"kontron,ktt30",
+ 	NULL
+diff --git a/arch/arm/mach-tegra/board.h b/arch/arm/mach-tegra/board.h
+index 6aaba21..ac29978 100644
+--- a/arch/arm/mach-tegra/board.h
++++ b/arch/arm/mach-tegra/board.h
+@@ -151,6 +151,11 @@ enum audio_codec_type {
+ 	audio_codec_wm8903,
+ };
+ 
++enum touch_screen_type {
++	ts_none,
++	atmel_mxt_ts,
++};
++
+ enum image_type {
+ 	system_image = 0,
+ 	rck_image,
+@@ -177,6 +182,7 @@ int tegra_get_modem_id(void);
+ int tegra_get_commchip_id(void);
+ enum power_supply_type get_power_supply_type(void);
+ enum audio_codec_type get_audio_codec_type(void);
++enum touch_screen_type get_touch_screen_type(void);
+ int get_maximum_cpu_current_supported(void);
+ enum image_type get_tegra_image_type(void);
+ 
+diff --git a/arch/arm/mach-tegra/common.c b/arch/arm/mach-tegra/common.c
+index 0d1407b..4736434f 100644
+--- a/arch/arm/mach-tegra/common.c
++++ b/arch/arm/mach-tegra/common.c
+@@ -149,6 +149,7 @@ static int commchip_id;
+ static int sku_override;
+ static int debug_uart_port_id;
+ static enum audio_codec_type audio_codec_name;
++static enum touch_screen_type touch_screen_name;
+ static enum image_type board_image_type = system_image;
+ static int max_cpu_current;
+ 
+@@ -788,6 +789,23 @@ int tegra_get_commchip_id(void)
+ 
+ __setup("commchip_id=", tegra_commchip_id);
+ 
++static int __init tegra_touch_screen_type(char *info)
++{
++	char *p = info;
++	if (!strncmp(p, "atmel_mxt_ts", 12))
++		touch_screen_name = atmel_mxt_ts;
++	else
++		touch_screen_name = ts_none;
++
++	return 1;
++}
++
++enum touch_screen_type get_touch_screen_type(void)
++{
++	return touch_screen_name;
++}
++__setup("touch=", tegra_touch_screen_type);
++
+ /*
+  * Tegra has a protected aperture that prevents access by most non-CPU
+  * memory masters to addresses above the aperture value.  Enabling it
+-- 
+1.7.4.4
+

@@ -1,0 +1,326 @@
+From 1266dbb7b543614e443a4684fb6b5a9184ee7a55 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sun, 26 May 2013 00:46:20 +0400
+Subject: [PATCH 124/127] mmc: sdhci-tegra: Add fixed regulator support
+
+Currently, the driver assumes that the vdd_io_reg regulator
+supports regulator_set_voltage() callback. It also blindly
+assumes that if it supports 3.3V, it also supports 1.8V.
+This may not be true if the regulator is fixed.
+This reworks regulator handling, adding voltage limit test,
+which helps to identify supported voltage levels,
+and call regulator_set_voltage only if needed.
+We also restore SDHCI_HOST_CONTROL2 register
+in case regulator voltage switch fails.
+
+While at it, fix the unbalanced regulator_disable call
+when the driver is removed, and release regulators in
+the sdhci_tegra_probe callback in case of an error.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/mmc/host/sdhci-tegra.c |  215 +++++++++++++++++++++++++++------------
+ 1 files changed, 149 insertions(+), 66 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 316d828..e911fda 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -61,6 +61,9 @@
+ #define SDHOST_LOW_VOLT_MIN	1800000
+ #define SDHOST_LOW_VOLT_MAX	1800000
+ 
++#define TEGRA_SDHCI_VDDIO_330	(1 << MMC_SIGNAL_VOLTAGE_330)
++#define TEGRA_SDHCI_VDDIO_180	(1 << MMC_SIGNAL_VOLTAGE_180)
++
+ #define TEGRA_SDHOST_MIN_FREQ	50000000
+ #define TEGRA2_SDHOST_STD_FREQ	50000000
+ #define TEGRA3_SDHOST_STD_FREQ	104000000
+@@ -108,10 +111,10 @@ struct tegra_sdhci_host {
+ 	struct tegra_sdhci_hw_ops *hw_ops;
+ 	/* Host controller instance */
+ 	unsigned int instance;
+-	/* vddio_min */
+-	unsigned int vddio_min_uv;
+-	/* vddio_max */
+-	unsigned int vddio_max_uv;
++	/* supported vddio */
++	unsigned int vddio_mask;
++	/* active vddio */
++	unsigned int vddio_active;
+ 	/* max clk supported by the platform */
+ 	unsigned int max_clk_limit;
+ 	/* max ddr clk supported by the platform */
+@@ -551,29 +554,62 @@ static void tegra_sdhci_set_clock(struct sdhci_host *sdhci, unsigned int clock)
+ 	}
+ }
+ 
++static const char *tegra_sdhci_vddio_str(unsigned int vddio)
++{
++	switch (vddio) {
++	case TEGRA_SDHCI_VDDIO_330:
++		return "3.3V";
++	case TEGRA_SDHCI_VDDIO_180:
++		return "1.8V";
++	default:
++		return "unknown";
++	}
++}
++
++static int tegra_sdhci_vddio_set(struct regulator *reg, unsigned int vddio)
++{
++	unsigned int min_uv, max_uv;
++	int retval;
++
++	switch (vddio) {
++	case TEGRA_SDHCI_VDDIO_330:
++		min_uv = SDHOST_HIGH_VOLT_MIN;
++		max_uv = SDHOST_HIGH_VOLT_MAX;
++		break;
++	case TEGRA_SDHCI_VDDIO_180:
++		min_uv = SDHOST_LOW_VOLT_MIN;
++		max_uv = SDHOST_LOW_VOLT_MAX;
++		break;
++	default:
++		return 0;
++	}
++
++	/* Only one voltage is supported */
++	retval = regulator_count_voltages(reg);
++	if (retval < 2)
++		return 0;
++
++	return regulator_set_voltage(reg, min_uv, max_uv);
++}
++
+ static int tegra_sdhci_signal_voltage_switch(struct sdhci_host *sdhci,
+ 	unsigned int signal_voltage)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(sdhci);
+ 	struct tegra_sdhci_host *tegra_host = pltfm_host->priv;
+-	unsigned int min_uV = SDHOST_HIGH_VOLT_MIN;
+-	unsigned int max_uV = SDHOST_HIGH_VOLT_MAX;
++	unsigned int vddio = 1 << signal_voltage;
+ 	unsigned int rc = 0;
+ 	u16 clk, ctrl;
+ 	unsigned int val;
+ 
+ 	ctrl = sdhci_readw(sdhci, SDHCI_HOST_CONTROL2);
+-	if (signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
++	if (signal_voltage == MMC_SIGNAL_VOLTAGE_180)
+ 		ctrl |= SDHCI_CTRL_VDD_180;
+-		min_uV = SDHOST_LOW_VOLT_MIN;
+-		max_uV = SDHOST_LOW_VOLT_MAX;
+-	} else if (signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
+-		if (ctrl & SDHCI_CTRL_VDD_180)
+-			ctrl &= ~SDHCI_CTRL_VDD_180;
+-	}
++	else if (signal_voltage == MMC_SIGNAL_VOLTAGE_330)
++		ctrl &= ~SDHCI_CTRL_VDD_180;
+ 
+ 	/* Check if the slot can support the required voltage */
+-	if (min_uV > tegra_host->vddio_max_uv)
++	if (!(tegra_host->vddio_mask & vddio))
+ 		return 0;
+ 
+ 	/* Switch OFF the card clock to prevent glitches on the clock line */
+@@ -586,17 +622,23 @@ static int tegra_sdhci_signal_voltage_switch(struct sdhci_host *sdhci,
+ 
+ 	/* Switch the I/O rail voltage */
+ 	if (tegra_host->vdd_io_reg) {
+-		rc = regulator_set_voltage(tegra_host->vdd_io_reg,
+-			min_uV, max_uV);
++		rc = tegra_sdhci_vddio_set(tegra_host->vdd_io_reg, vddio);
+ 		if (rc) {
+-			dev_err(mmc_dev(sdhci->mmc), "switching to 1.8V"
+-			"failed . Switching back to 3.3V\n");
+-			regulator_set_voltage(tegra_host->vdd_io_reg,
+-				SDHOST_HIGH_VOLT_MIN,
+-				SDHOST_HIGH_VOLT_MAX);
++			dev_err(mmc_dev(sdhci->mmc), "switching to %s"
++			"failed . Switching back to %s\n",
++			tegra_sdhci_vddio_str(vddio),
++			tegra_sdhci_vddio_str(tegra_host->vddio_active));
++
++			/* Restore the VDD */
++			ctrl ^= SDHCI_CTRL_VDD_180;
++			sdhci_writew(sdhci, ctrl, SDHCI_HOST_CONTROL2);
++
++			tegra_sdhci_vddio_set(tegra_host->vdd_io_reg,
++						tegra_host->vddio_active);
+ 			goto out;
+ 		}
+ 	}
++	tegra_host->vddio_active = vddio;
+ 
+ 	/* Wait for 10 msec for the voltage to be switched */
+ 	mdelay(10);
+@@ -956,6 +998,84 @@ static struct sdhci_pltfm_data sdhci_tegra_pdata = {
+ 	.ops  = &tegra_sdhci_ops,
+ };
+ 
++static struct regulator __devinit *tegra_sdhci_regulator(struct device *dev,
++							const char *name)
++{
++	struct regulator *reg = regulator_get(dev, name);
++
++	if (IS_ERR_OR_NULL(reg)) {
++		dev_info(dev, "%s regulator not found: %ld."
++			" Assuming %s is not required.\n",
++			name, PTR_ERR(reg), name);
++		return NULL;
++	}
++
++	return reg;
++}
++
++static int __devinit tegra_sdhci_vddio_init(struct sdhci_host *host,
++					struct tegra_sdhci_host *tegra_host,
++					struct tegra_sdhci_platform_data *plat)
++{
++	struct device *dev = mmc_dev(host->mmc);
++	int retval;
++
++	tegra_host->vdd_slot_reg = tegra_sdhci_regulator(dev, "vddio_sd_slot");
++	tegra_host->vdd_io_reg = tegra_sdhci_regulator(dev, "vddio_sdmmc");
++	if (!tegra_host->vdd_io_reg)
++		return 0;
++
++	if (!regulator_is_supported_voltage(tegra_host->vdd_io_reg,
++			SDHOST_HIGH_VOLT_MIN, SDHOST_HIGH_VOLT_MAX))
++		plat->mmc_data.ocr_mask |= SDHOST_1V8_OCR_MASK;
++
++	if (regulator_is_supported_voltage(tegra_host->vdd_io_reg,
++			SDHOST_LOW_VOLT_MIN, SDHOST_LOW_VOLT_MAX)) {
++		tegra_host->vddio_mask |= TEGRA_SDHCI_VDDIO_180;
++		tegra_host->vddio_active = TEGRA_SDHCI_VDDIO_180;
++	}
++
++	if (!(plat->mmc_data.ocr_mask & SDHOST_1V8_OCR_MASK)) {
++		tegra_host->vddio_mask |= TEGRA_SDHCI_VDDIO_330;
++		tegra_host->vddio_active = TEGRA_SDHCI_VDDIO_330;
++	}
++
++	if (!tegra_host->vddio_active) {
++		dev_err(dev, "%s: no MMC signal voltage supported",
++			"vddio_sdmmc");
++		return -EINVAL;
++	}
++
++	/* Set default voltage */
++	retval = tegra_sdhci_vddio_set(tegra_host->vdd_io_reg,
++					tegra_host->vddio_active);
++	if (retval) {
++		dev_err(dev, "%s regulator_set_voltage failed: %d",
++			"vddio_sdmmc", retval);
++		tegra_host->vddio_active = 0;
++	}
++
++	return retval;
++}
++
++static inline void tegra_sdhci_vddio_del(struct tegra_sdhci_host *tegra_host)
++{
++	if (tegra_host->vdd_slot_reg) {
++		if (tegra_host->is_rail_enabled)
++			regulator_disable(tegra_host->vdd_slot_reg);
++		regulator_put(tegra_host->vdd_slot_reg);
++		tegra_host->vdd_slot_reg = NULL;
++	}
++	if (tegra_host->vdd_io_reg) {
++		if (tegra_host->is_rail_enabled)
++			regulator_disable(tegra_host->vdd_io_reg);
++		regulator_put(tegra_host->vdd_io_reg);
++		tegra_host->vdd_io_reg = NULL;
++	}
++
++	tegra_host->is_rail_enabled = 0;
++}
++
+ static int __devinit sdhci_tegra_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host;
+@@ -1051,40 +1171,9 @@ static int __devinit sdhci_tegra_probe(struct platform_device *pdev)
+ 		tegra_host->card_present = 1;
+ 
+ 	if (!plat->mmc_data.built_in) {
+-		if (plat->mmc_data.ocr_mask & SDHOST_1V8_OCR_MASK) {
+-			tegra_host->vddio_min_uv = SDHOST_LOW_VOLT_MIN;
+-			tegra_host->vddio_max_uv = SDHOST_LOW_VOLT_MAX;
+-		} else {
+-			/*
+-			 * Set the minV and maxV to default
+-			 * voltage range of 2.7V - 3.6V
+-			 */
+-			tegra_host->vddio_min_uv = SDHOST_HIGH_VOLT_MIN;
+-			tegra_host->vddio_max_uv = SDHOST_HIGH_VOLT_MAX;
+-		}
+-		tegra_host->vdd_io_reg = regulator_get(mmc_dev(host->mmc), "vddio_sdmmc");
+-		if (IS_ERR_OR_NULL(tegra_host->vdd_io_reg)) {
+-			dev_info(mmc_dev(host->mmc), "%s regulator not found: %ld."
+-				"Assuming vddio_sdmmc is not required.\n",
+-					"vddio_sdmmc", PTR_ERR(tegra_host->vdd_io_reg));
+-			tegra_host->vdd_io_reg = NULL;
+-		} else {
+-			rc = regulator_set_voltage(tegra_host->vdd_io_reg,
+-				tegra_host->vddio_min_uv,
+-				tegra_host->vddio_max_uv);
+-			if (rc) {
+-				dev_err(mmc_dev(host->mmc), "%s regulator_set_voltage failed: %d",
+-					"vddio_sdmmc", rc);
+-			}
+-		}
+-
+-		tegra_host->vdd_slot_reg = regulator_get(mmc_dev(host->mmc), "vddio_sd_slot");
+-		if (IS_ERR_OR_NULL(tegra_host->vdd_slot_reg)) {
+-			dev_info(mmc_dev(host->mmc), "%s regulator not found: %ld."
+-				" Assuming vddio_sd_slot is not required.\n",
+-					"vddio_sd_slot", PTR_ERR(tegra_host->vdd_slot_reg));
+-			tegra_host->vdd_slot_reg = NULL;
+-		}
++		rc = tegra_sdhci_vddio_init(host, tegra_host, plat);
++		if (rc)
++			goto err_vddio;
+ 	}
+ 
+ 	if (tegra_host->card_present) {
+@@ -1099,7 +1188,7 @@ static int __devinit sdhci_tegra_probe(struct platform_device *pdev)
+ 	if (IS_ERR(clk)) {
+ 		dev_err(mmc_dev(host->mmc), "clk err\n");
+ 		rc = PTR_ERR(clk);
+-		goto err_clk_get;
++		goto err_vddio;
+ 	}
+ 	rc = clk_enable(clk);
+ 	if (rc != 0)
+@@ -1165,7 +1254,9 @@ err_add_host:
+ 	clk_disable(pltfm_host->clk);
+ err_clk_put:
+ 	clk_put(pltfm_host->clk);
+-err_clk_get:
++err_vddio:
++	tegra_sdhci_vddio_del(tegra_host);
++
+ 	if (gpio_is_valid(plat->wp_gpio))
+ 		gpio_free(plat->wp_gpio);
+ err_wp_req:
+@@ -1197,15 +1288,7 @@ static int __devexit sdhci_tegra_remove(struct platform_device *pdev)
+ 
+ 	plat = pdev->dev.platform_data;
+ 
+-	if (tegra_host->vdd_slot_reg) {
+-		regulator_disable(tegra_host->vdd_slot_reg);
+-		regulator_put(tegra_host->vdd_slot_reg);
+-	}
+-
+-	if (tegra_host->vdd_io_reg) {
+-		regulator_disable(tegra_host->vdd_io_reg);
+-		regulator_put(tegra_host->vdd_io_reg);
+-	}
++	tegra_sdhci_vddio_del(tegra_host);
+ 
+ 	if (gpio_is_valid(plat->wp_gpio))
+ 		gpio_free(plat->wp_gpio);
+-- 
+1.7.4.4
+

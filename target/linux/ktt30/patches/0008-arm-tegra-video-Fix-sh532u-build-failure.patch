@@ -1,0 +1,30 @@
+From 427e0b6fdb48d7c044ee75d010d56a824c1c2b86 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Tue, 25 Sep 2012 14:24:38 +0400
+Subject: [PATCH 008/127] arm: tegra: video: Fix sh532u build failure
+
+This fixes the following compilation error:
+drivers/media/video/tegra/sh532u.c:390:17:
+error: array subscript is above array bounds
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/media/video/tegra/sh532u.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/media/video/tegra/sh532u.c b/drivers/media/video/tegra/sh532u.c
+index e41dd1f..eec01a5 100644
+--- a/drivers/media/video/tegra/sh532u.c
++++ b/drivers/media/video/tegra/sh532u.c
+@@ -386,7 +386,7 @@ static void sh532u_gpio_exit(struct sh532u_info *info)
+ {
+ 	unsigned i;
+ 
+-	for (i = 0; i <= ARRAY_SIZE(sh532u_gpios); i++) {
++	for (i = 0; i < ARRAY_SIZE(sh532u_gpios); i++) {
+ 		if (info->gpio[i].flag && info->gpio[i].own) {
+ 			gpio_free(info->gpio[i].gpio);
+ 			info->gpio[i].own = false;
+-- 
+1.7.4.4
+

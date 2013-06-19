@@ -1,0 +1,30 @@
+From c8476312b499828a1a70559eba79daac69993e8d Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 8 May 2013 02:55:21 +0400
+Subject: [PATCH 084/127] hwmon: ina219: Mask flag bits from the voltage input
+
+Bits D0-D2 are not significant. D2 is always zero.
+D1 is used for conversion completion flag and D0 is
+the overflow flag. Drop them from the bus voltage input.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/hwmon/ina219.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/hwmon/ina219.c b/drivers/hwmon/ina219.c
+index 26f23a6..1224a26 100644
+--- a/drivers/hwmon/ina219.c
++++ b/drivers/hwmon/ina219.c
+@@ -138,7 +138,7 @@ static s32 show_voltage(struct device *dev,
+ 	dev_dbg(dev, "Ina219 voltage reg Value: 0x%x\n", voltage_mV);
+ 	if (voltage_mV < 0)
+ 		goto error;
+-	voltage_mV = voltage_mV >> 1;
++	voltage_mV = (voltage_mV >> 1) & ~0x3;
+ 	dev_dbg(dev, "Ina219 voltage in mv: %d\n", voltage_mV);
+ 
+ 	/* set ina219 to power down mode */
+-- 
+1.7.4.4
+

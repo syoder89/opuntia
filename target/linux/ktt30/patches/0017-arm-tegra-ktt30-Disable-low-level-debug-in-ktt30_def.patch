@@ -1,0 +1,37 @@
+From 15f5b27fa072631a477864023d59b34f5fb7366c Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 5 Dec 2012 18:15:27 +0400
+Subject: [PATCH 017/127] arm: tegra: ktt30: Disable low-level debug in
+ ktt30_defconfig
+
+Low-level debugging is not needed on the production system.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    3 ---
+ 1 files changed, 0 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index 742548d..c59bc19 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -28,7 +28,6 @@ CONFIG_GPIO_PCA953X=y
+ CONFIG_ARCH_TEGRA_3x_SOC=y
+ CONFIG_TEGRA_PCI=y
+ CONFIG_MACH_KTT30=y
+-CONFIG_TEGRA_DEBUG_UARTA=y
+ CONFIG_TEGRA_PWM=y
+ CONFIG_TEGRA_EMC_SCALING_ENABLE=y
+ CONFIG_TEGRA_CLOCK_DEBUG_WRITE=y
+@@ -393,8 +392,6 @@ CONFIG_DEBUG_INFO=y
+ CONFIG_DEBUG_VM=y
+ CONFIG_DEBUG_SG=y
+ CONFIG_FUNCTION_TRACER=y
+-CONFIG_DEBUG_LL=y
+-CONFIG_EARLY_PRINTK=y
+ CONFIG_CRYPTO_TEST=m
+ CONFIG_CRYPTO_SHA256=y
+ CONFIG_CRYPTO_TWOFISH=y
+-- 
+1.7.4.4
+

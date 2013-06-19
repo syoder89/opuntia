@@ -1,0 +1,49 @@
+From 903738e6d9a7c1965aef539a505431e8f507e402 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 22 May 2013 20:35:54 +0400
+Subject: [PATCH 094/127] arm: tegra: ktt30: Fix eMMC block device enumeration
+
+SDHCI4 device is registered last, so eMMC is enumerated after
+removable MMC devices. This causes issues with mounting root
+on the eMMC as its block device number depends on the removable
+MMC card presence. Thus, if no removable cards are present,
+eMMC becomes mmcblk0, if a card is attached, eMMC becomes mmcblk1.
+Register eMMC first, so that it is always enumerated as mmcblk0.
+This matches enumeration scheme used in U-Boot.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-sdhci.c |    9 ++++++---
+ 1 files changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-sdhci.c b/arch/arm/mach-tegra/board-ktt30-sdhci.c
+index 3580efd..4d4d585 100644
+--- a/arch/arm/mach-tegra/board-ktt30-sdhci.c
++++ b/arch/arm/mach-tegra/board-ktt30-sdhci.c
+@@ -72,17 +72,20 @@ static struct tegra_sdhci_platform_data tegra_sdhci_platform_data4 = {
+ 
+ int __init ktt30_sdhci_init(void)
+ {
++	tegra_sdhci_device4.dev.platform_data = &tegra_sdhci_platform_data4;
+ 	tegra_sdhci_device1.dev.platform_data = &tegra_sdhci_platform_data1;
+ 	tegra_sdhci_device3.dev.platform_data = &tegra_sdhci_platform_data3;
+-	tegra_sdhci_device4.dev.platform_data = &tegra_sdhci_platform_data4;
+ 
++	/* MMC0: built-in eMMC */
++	platform_device_register(&tegra_sdhci_device4);
++	/* MMC1: slot J20 */
+ 	platform_device_register(&tegra_sdhci_device1);
++	/* MMC2: slot J19 */
+ 	platform_device_register(&tegra_sdhci_device3);
+-	platform_device_register(&tegra_sdhci_device4);
+ 
++	device_init_wakeup(&tegra_sdhci_device4.dev, 1);
+ 	device_init_wakeup(&tegra_sdhci_device1.dev, 1);
+ 	device_init_wakeup(&tegra_sdhci_device3.dev, 0);
+-	device_init_wakeup(&tegra_sdhci_device4.dev, 1);
+ 
+ 	return 0;
+ }
+-- 
+1.7.4.4
+

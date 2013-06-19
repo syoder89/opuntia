@@ -1,0 +1,43 @@
+From ac8236555d2ef4c55e66408b988afed48d1f095b Mon Sep 17 00:00:00 2001
+From: Mariusz Ptak <mariusz.ptak@kontron.pl>
+Date: Tue, 27 Nov 2012 12:46:42 +0100
+Subject: [PATCH 015/127] arm: tegra: ktt30: enable HDA audio support for HDMI
+ audio output
+
+Signed-off-by: Mariusz Ptak <mariusz.ptak@kontron.pl>
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |   16 ++++++++++++++--
+ 1 files changed, 14 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index f37c4a3..aaad988 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -304,9 +304,21 @@ CONFIG_BACKLIGHT_TEGRA_PWM=y
+ CONFIG_LOGO=y
+ CONFIG_SOUND=y
+ CONFIG_SND=y
+-CONFIG_SND_DYNAMIC_MINORS=y
+ # CONFIG_SND_DRIVERS is not set
+-# CONFIG_SND_PCI is not set
++CONFIG_SND_HDA_INTEL=m
++CONFIG_SND_HDA_PATCH_LOADER=y
++CONFIG_SND_HDA_PLATFORM_DRIVER=y
++CONFIG_SND_HDA_PLATFORM_NVIDIA_TEGRA=y
++# CONFIG_SND_HDA_CODEC_REALTEK is not set
++# CONFIG_SND_HDA_CODEC_ANALOG is not set
++# CONFIG_SND_HDA_CODEC_SIGMATEL is not set
++# CONFIG_SND_HDA_CODEC_VIA is not set
++# CONFIG_SND_HDA_CODEC_CIRRUS is not set
++# CONFIG_SND_HDA_CODEC_CONEXANT is not set
++# CONFIG_SND_HDA_CODEC_CA0110 is not set
++# CONFIG_SND_HDA_CODEC_CA0132 is not set
++# CONFIG_SND_HDA_CODEC_CMEDIA is not set
++# CONFIG_SND_HDA_CODEC_SI3054 is not set
+ # CONFIG_SND_ARM is not set
+ # CONFIG_SND_SPI is not set
+ # CONFIG_SND_USB is not set
+-- 
+1.7.4.4
+

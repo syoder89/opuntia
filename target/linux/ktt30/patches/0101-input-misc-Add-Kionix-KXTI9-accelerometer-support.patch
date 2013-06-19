@@ -1,0 +1,39 @@
+From 96219e8e4e788b1932df230e1939e1fdc8d89e3d Mon Sep 17 00:00:00 2001
+From: Maxim Yu. Osipov <mosipov@dev.rtsoft.ru>
+Date: Tue, 21 May 2013 13:34:49 +0400
+Subject: [PATCH 101/127] input: misc: Add Kionix KXTI9 accelerometer support
+
+This adds KXTI9 chip id. KXTI9 is compatible with KXTF9.
+
+Signed-off-by: Maxim Osipov <mosipov@dev.rtsoft.ru>
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/input/misc/kxtf9.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/input/misc/kxtf9.c b/drivers/input/misc/kxtf9.c
+index d678253..de35fa9 100644
+--- a/drivers/input/misc/kxtf9.c
++++ b/drivers/input/misc/kxtf9.c
+@@ -40,6 +40,7 @@
+ #define KXTF9_XOUT_HPF_L	0x0
+ #define KXTF9_CHIP_ID_REG	0x0F
+ #define KXTF9_CHIP_ID		0x01
++#define KXTI9_CHIP_ID		0x04
+ 
+ #define KXTF9_INT_REL		0x1A
+ #define KXTF9_CTRL_REG1		0x1B
+@@ -281,8 +282,8 @@ static int __devinit kxtf9_probe(struct i2c_client *client,
+ 		goto err_free_mem;
+ 	}
+ 
+-	if (ret != KXTF9_CHIP_ID) {
+-		dev_err(&client->dev, "unsupported chip id\n");
++	if (ret != KXTF9_CHIP_ID && ret != KXTI9_CHIP_ID) {
++		dev_err(&client->dev, "unsupported chip id: %d\n", ret);
+ 		error = -ENXIO;
+ 		goto err_free_mem;
+ 	}
+-- 
+1.7.4.4
+

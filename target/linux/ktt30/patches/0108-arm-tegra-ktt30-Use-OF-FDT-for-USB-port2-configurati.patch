@@ -1,0 +1,96 @@
+From cb7e2246c5d271bfa2d392c39dcd2b7ca420422e Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 2 May 2013 01:08:27 +0400
+Subject: [PATCH 108/127] arm: tegra: ktt30: Use OF FDT for USB port2
+ configuration
+
+Use OF device node "gpios" property instead of command line
+parameters to configure USB port2 output to be routed either
+to J27 (GPIO is high) or J24 (GPIO is low) connector.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30.c |   46 +++++++++++++++++++++++++-----------
+ 1 files changed, 32 insertions(+), 14 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index 44f787a..c135976 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -44,6 +44,7 @@
+ #include <linux/mtd/partitions.h>
+ #include <linux/spi/flash.h>
+ #include <linux/of.h>
++#include <linux/of_gpio.h>
+ 
+ #include <sound/wm8903.h>
+ #include <media/tegra_dtv.h>
+@@ -838,7 +839,36 @@ static struct platform_device __initdata *ktt30_usb_devices[] = {
+ 	&tegra_ehci2_device,
+ };
+ 
+-static int ktt30_setup_usb2_disabled;
++static void __init ktt30_usb2_fixup(void)
++{
++	int gpio = TEGRA_GPIO_PL5;
++	u32 flags = GPIOF_OUT_INIT_HIGH;
++#ifdef CONFIG_OF
++	struct device_node *node;
++	int retval;
++	u32 val;
++
++	node = of_find_node_by_path("usb2");
++	if (!node)
++		node = of_find_node_by_path("/usb@0x7d004000");
++
++	if (!node)
++		goto out;
++
++	retval = of_get_named_gpio_flags(node, "gpios", 0, &val);
++	if (!gpio_is_valid(retval) || !(val & 0x1))
++		goto put;
++
++	gpio = retval;
++	if (!(val & 0x2))
++		flags = GPIOF_OUT_INIT_LOW;
++put:
++	of_node_put(node);
++out:
++#endif
++	gpio_request_one(gpio, flags, "usb2-3g");
++	msleep(20);
++}
+ 
+ static void __init ktt30_usb_init(void)
+ {
+@@ -847,9 +877,7 @@ static void __init ktt30_usb_init(void)
+ 	tegra_ehci2_device.dev.platform_data = &tegra_ehci2_utmi_pdata;
+ 	tegra_ehci3_device.dev.platform_data = &tegra_ehci3_utmi_pdata;
+ 
+-	gpio_request(TEGRA_GPIO_PL5, "usb2-port");
+-	gpio_direction_output(TEGRA_GPIO_PL5, !ktt30_setup_usb2_disabled);
+-	msleep(20);
++	ktt30_usb2_fixup();
+ 
+ 	platform_add_devices(ktt30_usb_devices, ARRAY_SIZE(ktt30_usb_devices));
+ }
+@@ -936,16 +964,6 @@ static void __init tegra_ktt30_reserve(void)
+ 	tegra_ram_console_debug_reserve(SZ_1M);
+ }
+ 
+-#if defined(CONFIG_USB_SUPPORT)
+-static int __init ktt30_setup_usb2(char *option)
+-{
+-	if (!strcmp(option, "no"))
+-		ktt30_setup_usb2_disabled = 1;
+-	return 1;
+-}
+-__setup("usb2=", ktt30_setup_usb2);
+-#endif
+-
+ static int __init ktt30_setup_pcie0(char *option)
+ {
+ 	if (!strcmp(option, "no"))
+-- 
+1.7.4.4
+

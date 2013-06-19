@@ -1,0 +1,47 @@
+From 257d35add50b0e2bf8205f8db2104cf91c2d6b2d Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 27 Feb 2013 19:52:07 +0400
+Subject: [PATCH 032/127] arm: tegra: ktt30: Rename modem power regulator
+
+This regulator actually controls all minicard slots,
+not just the modem one.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-power.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-power.c b/arch/arm/mach-tegra/board-ktt30-power.c
+index 997a0f1..19d1d06 100644
+--- a/arch/arm/mach-tegra/board-ktt30-power.c
++++ b/arch/arm/mach-tegra/board-ktt30-power.c
+@@ -425,7 +425,7 @@ static struct regulator_consumer_supply fixed_reg_en_vdd_bl_supply[] = {
+ };
+ 
+ /* EN_3V3_MODEM from AP GPIO VI_VSYNCH D06*/
+-static struct regulator_consumer_supply fixed_reg_en_3v3_modem_supply[] = {
++static struct regulator_consumer_supply fixed_reg_en_3v3_mini_supply[] = {
+ 	REGULATOR_SUPPLY("vdd_3v3_mini_card", NULL),
+ 	REGULATOR_SUPPLY("vdd_mini_card", NULL),
+ };
+@@ -531,7 +531,7 @@ static struct regulator_consumer_supply fixed_reg_en_vddio_vid_oc_supply[] = {
+ FIXED_REG(1, en_5v0,		en_5v0,		NULL,				0,      0,      TPS6591X_GPIO_2,	true,	0, 5000);
+ FIXED_REG(2, en_ddr,		en_ddr,		NULL,				1,      0,      TPS6591X_GPIO_7,	true,	1, 1500);
+ FIXED_REG(3, en_3v3_sys,	en_3v3_sys,	NULL,				0,      0,      TPS6591X_GPIO_6,	true,	1, 3300);
+-FIXED_REG(5, en_3v3_modem,	en_3v3_modem,	NULL,				1,      0,      TEGRA_GPIO_PD6,		true,	1, 3300);
++FIXED_REG(5, en_3v3_mini,	en_3v3_mini,	NULL,				1,      0,      TEGRA_GPIO_PD6,		true,	1, 3300);
+ FIXED_REG(9, en_3v3_fuse,	en_3v3_fuse,	FIXED_SUPPLY(en_3v3_sys),	0,      0,      TEGRA_GPIO_PL6,		true,	0, 3300);
+ FIXED_REG(10, en_3v3_emmc,	en_3v3_emmc,	FIXED_SUPPLY(en_3v3_sys),	1,      0,      TEGRA_GPIO_PD1,		true,	1, 3300);
+ FIXED_REG(11, en_vdd_sdmmc1,	en_vdd_sdmmc1,	FIXED_SUPPLY(en_3v3_sys),	0,      0,      TEGRA_GPIO_PD7,		true,	1, 3300);
+@@ -561,7 +561,7 @@ FIXED_REG_OD(17, en_vddio_vid_oc,	en_vddio_vid_oc,	FIXED_SUPPLY(dis_5v_switch),
+ 	ADD_FIXED_REG(en_5v0),			\
+ 	ADD_FIXED_REG(en_ddr),			\
+ 	ADD_FIXED_REG(en_3v3_sys),		\
+-	ADD_FIXED_REG(en_3v3_modem),		\
++	ADD_FIXED_REG(en_3v3_mini),		\
+ 	ADD_FIXED_REG(en_3v3_fuse),		\
+ 	ADD_FIXED_REG(en_3v3_emmc),		\
+ 	ADD_FIXED_REG(en_vdd_sdmmc1),		\
+-- 
+1.7.4.4
+

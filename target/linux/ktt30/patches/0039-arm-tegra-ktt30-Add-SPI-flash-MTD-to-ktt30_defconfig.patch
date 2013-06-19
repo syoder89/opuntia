@@ -1,0 +1,30 @@
+From f26efc767f9a621fac533d6302ceb6efc2583556 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sat, 9 Mar 2013 03:33:07 +0400
+Subject: [PATCH 039/127] arm: tegra: ktt30: Add SPI flash MTD to
+ ktt30_defconfig
+
+This enables SPI flash MTD driver built-in.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index 6674b82..5805321 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -180,6 +180,9 @@ CONFIG_CAIF=y
+ CONFIG_NFC=y
+ CONFIG_PN544_NFC=y
+ # CONFIG_FIRMWARE_IN_KERNEL is not set
++CONFIG_MTD=y
++CONFIG_MTD_CHAR=y
++CONFIG_MTD_M25P80=y
+ CONFIG_BLK_DEV_LOOP=y
+ CONFIG_MISC_DEVICES=y
+ CONFIG_AD525X_DPOT=y
+-- 
+1.7.4.4
+

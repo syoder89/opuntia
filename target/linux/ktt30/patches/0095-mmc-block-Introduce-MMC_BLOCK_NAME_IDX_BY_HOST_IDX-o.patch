@@ -1,0 +1,62 @@
+From ec3b8f608be6ef4f4845046f9191c07cb28e63bd Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 22 May 2013 21:22:40 +0400
+Subject: [PATCH 095/127] mmc: block: Introduce MMC_BLOCK_NAME_IDX_BY_HOST_IDX
+ option
+
+This adds CONFIG_MMC_BLOCK_NAME_IDX_BY_HOST_IDX option,
+which allows to set MMC block device number, based on
+the MMC host index.
+For example, if enabled, a card in slot mmc1 is enumerated
+as mmcblk1, a card in slot mmc2 is mmcblk2, and so on.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/mmc/card/Kconfig |   10 ++++++++++
+ drivers/mmc/card/block.c |    8 ++++++++
+ 2 files changed, 18 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/mmc/card/Kconfig b/drivers/mmc/card/Kconfig
+index 3875c21..fb26dc8 100644
+--- a/drivers/mmc/card/Kconfig
++++ b/drivers/mmc/card/Kconfig
+@@ -59,6 +59,16 @@ config MMC_BLOCK_DEFERRED_RESUME
+ 	  is requested. This will reduce overall resume latency and
+ 	  save power when theres an SD card inserted but not being used.
+ 
++config MMC_BLOCK_NAME_IDX_BY_HOST_IDX
++	bool "Set MMC block name index based on the host index"
++	depends on MMC_BLOCK
++	default n
++	help
++	  Say Y here to enable MMC block device numbering based on the
++	  host controller index. If enabled, the driver will attempt
++	  to enumerate a card plugged into slot mmc1 as mmcblk1 device,
++	  a card in slot mmc2 as mmcblk2 and so on.
++
+ config SDIO_UART
+ 	tristate "SDIO UART/GPS class support"
+ 	help
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index bd5427d..74626c1 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -1268,7 +1268,15 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	 * index anymore so we keep track of a name index.
+ 	 */
+ 	if (!subname) {
++#ifdef CONFIG_MMC_BLOCK_NAME_IDX_BY_HOST_IDX
++		md->name_idx = find_next_zero_bit(name_use, max_devices,
++							card->host->index);
++		if (md->name_idx >= max_devices)
++			md->name_idx = find_first_zero_bit(name_use,
++							max_devices);
++#else
+ 		md->name_idx = find_first_zero_bit(name_use, max_devices);
++#endif
+ 		__set_bit(md->name_idx, name_use);
+ 	}
+ 	else
+-- 
+1.7.4.4
+

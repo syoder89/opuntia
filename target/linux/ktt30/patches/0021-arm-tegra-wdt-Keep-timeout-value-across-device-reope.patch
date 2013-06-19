@@ -1,0 +1,46 @@
+From 5bd62c7233cc1cb45777fb394ac6f14e6fde474a Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sun, 13 Jan 2013 01:22:54 +0400
+Subject: [PATCH 021/127] arm: tegra: wdt: Keep timeout value across device
+ reopens
+
+Do not reset watchdog timeout value to the heartbeat module
+parameter every time the device is opened. Keep the previous
+value, set with WDIOC_SETTIMEOUT, instead.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/watchdog/tegra_wdt.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/watchdog/tegra_wdt.c b/drivers/watchdog/tegra_wdt.c
+index 1bcd726..789d960 100644
+--- a/drivers/watchdog/tegra_wdt.c
++++ b/drivers/watchdog/tegra_wdt.c
+@@ -229,7 +229,6 @@ static int tegra_wdt_open(struct inode *inode, struct file *file)
+ 		return -EBUSY;
+ 
+ 	wdt->status |= WDT_ENABLED;
+-	wdt->timeout = heartbeat;
+ 	tegra_wdt_enable(wdt);
+ 	file->private_data = wdt;
+ 	return nonseekable_open(inode, file);
+@@ -449,6 +448,7 @@ static int tegra_wdt_probe(struct platform_device *pdev)
+ 	wdt->res_wdt = res_wdt;
+ 	wdt->res_int_base = res_int_base;
+ 	wdt->status = WDT_DISABLED;
++	wdt->timeout = heartbeat;
+ 
+ 	ret = register_reboot_notifier(&wdt->notifier);
+ 	if (ret) {
+@@ -471,7 +471,6 @@ static int tegra_wdt_probe(struct platform_device *pdev)
+ 	if (!(pdev->id)) {
+ 		u32 val = 0;
+ 		wdt->status = WDT_ENABLED | WDT_ENABLED_AT_PROBE;
+-		wdt->timeout = heartbeat;
+ 		tegra_wdt_enable(wdt);
+ 		val = readl(wdt->wdt_source + WDT_CFG);
+ 		val |= WDT_CFG_INT_EN;
+-- 
+1.7.4.4
+

@@ -1,0 +1,103 @@
+From 7f206b11817ce8727b86f63037f859607cee9e61 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 13 Dec 2012 17:14:38 +0400
+Subject: [PATCH 018/127] arm: tegra: hdmi: Calculate N/CTS/AVAL values on the
+ fly
+
+This adds HDMI audio support for more HDMI modes.
+If the N/CTS/AVAL values for the specified pix_clock
+are not available in tegra_hdmi_audio_config tables,
+they are calculated on the fly.
+
+A bit simplified algorithm, proposed by NVidia, is used.
+The maximum N limit is not applied, however, the sound
+seems to work fine with no noticeable distortions.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/video/tegra/dc/hdmi.c |   48 +++++++++++++++++++++++++++++++++++++---
+ 1 files changed, 44 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/video/tegra/dc/hdmi.c b/drivers/video/tegra/dc/hdmi.c
+index 55d9163..3c883c4 100644
+--- a/drivers/video/tegra/dc/hdmi.c
++++ b/drivers/video/tegra/dc/hdmi.c
+@@ -33,6 +33,7 @@
+ #include <linux/debugfs.h>
+ #include <linux/seq_file.h>
+ #include <linux/device.h>
++#include <linux/gcd.h>
+ 
+ #include <mach/clk.h>
+ #include <mach/dc.h>
+@@ -926,6 +927,38 @@ const struct tegra_hdmi_audio_config tegra_hdmi_audio_192k[] = {
+ 	{0,		0,	0},
+ };
+ 
++static int tegra_hdmi_calc_audio_config(struct tegra_dc *dc,
++					struct tegra_hdmi_audio_config *cfg,
++					unsigned audio_freq)
++{
++	unsigned a128 = audio_freq << 7;
++	unsigned aval = 24000000;
++	unsigned ideal_n = a128 / 1000;
++	unsigned n, c, cts;
++	unsigned d = gcd(aval, a128);
++
++	d = gcd(dc->mode.pclk, d);
++	aval /= d;
++	cts = dc->mode.pclk / d;
++	n = a128 / d;
++	c = ideal_n / n;
++
++	if (c > 1) {
++		n *= c;
++		aval *= c;
++		cts *= c;
++	}
++
++	cfg->pix_clock = dc->mode.pclk;
++	cfg->n = n;
++	cfg->cts = cts;
++	cfg->aval = aval;
++	dev_dbg(&dc->ndev->dev, "%u:%u N %u CTS %u AVAL %u\n",
++				cfg->pix_clock, audio_freq,
++				cfg->n, cfg->cts, cfg->aval);
++	return 0;
++}
++
+ static const struct tegra_hdmi_audio_config
+ *tegra_hdmi_get_audio_config(unsigned audio_freq, unsigned pix_clock)
+ {
+@@ -1864,6 +1897,7 @@ static int tegra_dc_hdmi_setup_audio(struct tegra_dc *dc, unsigned audio_freq,
+ {
+ 	struct tegra_dc_hdmi_data *hdmi = tegra_dc_get_outdata(dc);
+ 	const struct tegra_hdmi_audio_config *config;
++	struct tegra_hdmi_audio_config cfg;
+ 	unsigned long audio_n;
+ #if !defined(CONFIG_ARCH_TEGRA_2x_SOC)
+ 	unsigned long reg_addr = 0;
+@@ -1894,10 +1928,16 @@ static int tegra_dc_hdmi_setup_audio(struct tegra_dc *dc, unsigned audio_freq,
+ #endif
+ 	config = tegra_hdmi_get_audio_config(audio_freq, dc->mode.pclk);
+ 	if (!config) {
+-		dev_err(&dc->ndev->dev,
+-			"hdmi: can't set audio to %d at %d pix_clock",
+-			audio_freq, dc->mode.pclk);
+-		return -EINVAL;
++		int retval;
++
++		retval = tegra_hdmi_calc_audio_config(dc, &cfg, audio_freq);
++		if (retval) {
++			dev_err(&dc->ndev->dev,
++				"hdmi: can't set audio to %d at %d pix_clock",
++				audio_freq, dc->mode.pclk);
++			return -EINVAL;
++		}
++		config = &cfg;
+ 	}
+ 
+ 	tegra_hdmi_writel(hdmi, 0, HDMI_NV_PDISP_HDMI_ACR_CTRL);
+-- 
+1.7.4.4
+

@@ -1,0 +1,131 @@
+From bdafce52d2a882fdcf8b53078ab12b4c23a0e513 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 8 May 2013 02:51:37 +0400
+Subject: [PATCH 083/127] hwmon: ina219: Drop DEBUG_INA219 macro
+
+Drop DEBUG_INA219 macro and use dev_dbg instead.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/hwmon/ina219.c |   34 +++++++++++++---------------------
+ 1 files changed, 13 insertions(+), 21 deletions(-)
+
+diff --git a/drivers/hwmon/ina219.c b/drivers/hwmon/ina219.c
+index 52ff287..26f23a6 100644
+--- a/drivers/hwmon/ina219.c
++++ b/drivers/hwmon/ina219.c
+@@ -81,14 +81,6 @@ struct ina219_data {
+ 	struct mutex mutex;
+ };
+ 
+-/* Set non-zero to enable debug prints */
+-#define INA219_DEBUG_PRINTS 0
+-
+-#if INA219_DEBUG_PRINTS
+-#define DEBUG_INA219(x) printk x
+-#else
+-#define DEBUG_INA219(x)
+-#endif
+ 
+ static inline s16 reorder_bytes(s16 a)
+ {
+@@ -143,18 +135,18 @@ static s32 show_voltage(struct device *dev,
+ 	voltage_mV =
+ 		reorder_bytes(i2c_smbus_read_word_data(client,
+ 			INA219_VOLTAGE));
+-	DEBUG_INA219(("Ina219 voltage reg Value: 0x%x\n", voltage_mV));
++	dev_dbg(dev, "Ina219 voltage reg Value: 0x%x\n", voltage_mV);
+ 	if (voltage_mV < 0)
+ 		goto error;
+ 	voltage_mV = voltage_mV >> 1;
+-	DEBUG_INA219(("Ina219 voltage in mv: %d\n", voltage_mV));
++	dev_dbg(dev, "Ina219 voltage in mv: %d\n", voltage_mV);
+ 
+ 	/* set ina219 to power down mode */
+ 	retval = power_down_INA219(client);
+ 	if (retval < 0)
+ 		goto error;
+ 
+-	DEBUG_INA219(("%s volt = %d\n", __func__, voltage_mV));
++	dev_dbg(dev, "%s volt = %d\n", __func__, voltage_mV);
+ 	return sprintf(buf, "%d mV\n", voltage_mV);
+ error:
+ 	dev_err(dev, "%s: failed\n", __func__);
+@@ -204,22 +196,22 @@ static s32 show_power(struct device *dev,
+ 		voltage_mV =
+ 			reorder_bytes(i2c_smbus_read_word_data(client,
+ 				INA219_VOLTAGE));
+-		DEBUG_INA219(("Ina219 voltage reg Value: 0x%x\n", voltage_mV));
++		dev_dbg(dev, "Ina219 voltage reg Value: 0x%x\n", voltage_mV);
+ 		overflow = voltage_mV & 1;
+ 		if (overflow) {
+ 			dev_err(dev, "overflow error\n");
+ 			return 0;
+ 		}
+ 		conversion = (voltage_mV >> 1) & 1;
+-		DEBUG_INA219(("\n ina219 CNVR value:%d", conversion));
++		dev_dbg(dev, "\n ina219 CNVR value:%d", conversion);
+ 	} while (!conversion);
+ 
+ 	/* getting power readings in milli watts*/
+ 	power_mW = reorder_bytes(i2c_smbus_read_word_data(client,
+ 		INA219_POWER));
+-	DEBUG_INA219(("Ina219 power Reg: 0x%x\n", power_mW));
++	dev_dbg(dev, "Ina219 power Reg: 0x%x\n", power_mW);
+ 	power_mW *= data->pInfo->power_lsb;
+-	DEBUG_INA219(("Ina219 power Val: %d\n", power_mW));
++	dev_dbg(dev, "Ina219 power Val: %d\n", power_mW);
+ 	if (power_mW < 0)
+ 		goto error;
+ 
+@@ -228,7 +220,7 @@ static s32 show_power(struct device *dev,
+ 	if (retval < 0)
+ 		goto error;
+ 
+-	DEBUG_INA219(("%s pow = %d\n", __func__, power_mW));
++	dev_dbg(dev, "%s pow = %d\n", __func__, power_mW);
+ 	return sprintf(buf, "%d mW\n", power_mW);
+ error:
+ 	dev_err(dev, "%s: failed\n", __func__);
+@@ -277,25 +269,25 @@ static s32 show_current(struct device *dev,
+ 		voltage_mV =
+ 			reorder_bytes(i2c_smbus_read_word_data(client,
+ 				INA219_VOLTAGE));
+-		DEBUG_INA219(("Ina219 voltage reg Value: 0x%x\n", voltage_mV));
++		dev_dbg(dev, "Ina219 voltage reg Value: 0x%x\n", voltage_mV);
+ 		overflow = voltage_mV & 1;
+ 		if (overflow) {
+ 			dev_err(dev, "overflow error\n");
+ 			return 0;
+ 		}
+ 		conversion = (voltage_mV >> 1) & 1;
+-		DEBUG_INA219(("\n ina219 CNVR value:%d", conversion));
++		dev_dbg(dev, "\n ina219 CNVR value:%d", conversion);
+ 	} while (!conversion);
+ 
+ 	/* getting current readings in milli amps*/
+ 	current_mA = reorder_bytes(i2c_smbus_read_word_data(client,
+ 		INA219_CURRENT));
+-	DEBUG_INA219(("Ina219 current Reg: 0x%x\n", current_mA));
++	dev_dbg(dev, "Ina219 current Reg: 0x%x\n", current_mA);
+ 	if (current_mA < 0)
+ 		goto error;
+ 	current_mA =
+ 		(current_mA * data->pInfo->power_lsb) / data->pInfo->divisor;
+-	DEBUG_INA219(("Ina219 current Value: %d\n", current_mA));
++	dev_dbg(dev, "Ina219 current Value: %d\n", current_mA);
+ 
+ 	/* set ina219 to power down mode */
+ 	retval = power_down_INA219(client);
+@@ -303,7 +295,7 @@ static s32 show_current(struct device *dev,
+ 		goto error;
+ 
+ 
+-	DEBUG_INA219(("%s current = %d\n", __func__, current_mA));
++	dev_dbg(dev, "%s current = %d\n", __func__, current_mA);
+ 	return sprintf(buf, "%d mA\n", current_mA);
+ error:
+ 	dev_err(dev, "%s: failed\n", __func__);
+-- 
+1.7.4.4
+

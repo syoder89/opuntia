@@ -1,0 +1,38 @@
+From 72cd886b1e4771f77f59fccd6c451f531d8ddaa2 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Tue, 12 Mar 2013 12:58:30 +0400
+Subject: [PATCH 041/127] arm: tegra: ktt30: Add iwlagn support to
+ ktt30_defconfig
+
+This enables Intel Wireless WiFi Next Gen AGN Wireless-N/Advanced-N/Ultimate-N
+(iwlagn) driver module in ktt30_defconfig.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index de0b583..3c721aa 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -175,6 +175,8 @@ CONFIG_BT_HCIUART=y
+ CONFIG_BT_HCIUART_H4=y
+ CONFIG_BT_HCIUART_LL=y
+ CONFIG_BT_BLUESLEEP=y
++CONFIG_CFG80211=m
++CONFIG_MAC80211=m
+ CONFIG_RFKILL=y
+ CONFIG_CAIF=y
+ CONFIG_NFC=y
+@@ -223,6 +225,7 @@ CONFIG_IGB=y
+ CONFIG_IGBVF=y
+ CONFIG_R8169=y
+ # CONFIG_NETDEV_10000 is not set
++CONFIG_IWLAGN=m
+ CONFIG_USB_CATC=y
+ CONFIG_USB_KAWETH=y
+ CONFIG_USB_PEGASUS=y
+-- 
+1.7.4.4
+

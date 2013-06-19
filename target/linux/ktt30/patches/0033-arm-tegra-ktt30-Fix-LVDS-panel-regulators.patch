@@ -1,0 +1,115 @@
+From 0992754450a28c4c89b7248327e9676b3cc79080 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 27 Feb 2013 20:06:53 +0400
+Subject: [PATCH 033/127] arm: tegra: ktt30: Fix LVDS panel regulators
+
+GPIO H2 is controlled by the panel code and used to enable
+or disable the backlight. GPIO K4 is described in the KTT30
+GPIO usage guide as L_VDDEN_N, active low signal.
+This signal enables the LCD panel.
+Adjust power regulators accordingly and drop GPIO H2
+regulator to prevent the following error:
+"pwm-backlight: probe of pwm-backlight failed with error -16"
+This error occurs due to GPIO H2 being acquired twice:
+by the power regulators and ktt30_backlight_init().
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-panel.c |   18 ------------------
+ arch/arm/mach-tegra/board-ktt30-power.c |   14 ++------------
+ 2 files changed, 2 insertions(+), 30 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-panel.c b/arch/arm/mach-tegra/board-ktt30-panel.c
+index c9c0aea..206565b 100644
+--- a/arch/arm/mach-tegra/board-ktt30-panel.c
++++ b/arch/arm/mach-tegra/board-ktt30-panel.c
+@@ -57,7 +57,6 @@ static struct regulator *ktt30_hdmi_pll = NULL;
+ static struct regulator *ktt30_hdmi_vddio = NULL;
+ 
+ static struct regulator *ktt30_lvds_reg = NULL;
+-static struct regulator *ktt30_lvds_vdd_bl = NULL;
+ static struct regulator *ktt30_lvds_vdd_panel = NULL;
+ #endif
+ 
+@@ -182,17 +181,6 @@ static int ktt30_panel_enable(void)
+ 		}
+ 	}
+ 
+-	if (ktt30_lvds_vdd_bl == NULL) {
+-		ktt30_lvds_vdd_bl = regulator_get(NULL, "vdd_backlight");
+-		if (WARN_ON(IS_ERR(ktt30_lvds_vdd_bl))) {
+-			pr_err("%s: couldn't get regulator vdd_backlight: %ld\n",
+-				__func__, PTR_ERR(ktt30_lvds_vdd_bl));
+-			ktt30_lvds_vdd_bl = NULL;
+-		} else {
+-			regulator_enable(ktt30_lvds_vdd_bl);
+-		}
+-	}
+-
+ 	if (ktt30_lvds_vdd_panel == NULL) {
+ 		ktt30_lvds_vdd_panel = regulator_get(NULL, "vdd_lcd_panel");
+ 		if (WARN_ON(IS_ERR(ktt30_lvds_vdd_panel))) {
+@@ -217,12 +205,6 @@ static int ktt30_panel_disable(void)
+ 		ktt30_lvds_reg = NULL;
+ 	}
+ 
+-	if (ktt30_lvds_vdd_bl) {
+-		regulator_disable(ktt30_lvds_vdd_bl);
+-		regulator_put(ktt30_lvds_vdd_bl);
+-		ktt30_lvds_vdd_bl = NULL;
+-	}
+-
+ 	if (ktt30_lvds_vdd_panel) {
+ 		regulator_disable(ktt30_lvds_vdd_panel);
+ 		regulator_put(ktt30_lvds_vdd_panel);
+diff --git a/arch/arm/mach-tegra/board-ktt30-power.c b/arch/arm/mach-tegra/board-ktt30-power.c
+index 19d1d06..633ef36 100644
+--- a/arch/arm/mach-tegra/board-ktt30-power.c
++++ b/arch/arm/mach-tegra/board-ktt30-power.c
+@@ -418,24 +418,16 @@ static struct regulator_consumer_supply fixed_reg_dis_5v_switch_supply[] = {
+ 	REGULATOR_SUPPLY("master_5v_switch", NULL),
+ };
+ 
+-/* EN_VDD_BL */
+-static struct regulator_consumer_supply fixed_reg_en_vdd_bl_supply[] = {
+-	REGULATOR_SUPPLY("vdd_backlight", NULL),
+-	REGULATOR_SUPPLY("vdd_backlight1", NULL),
+-};
+-
+ /* EN_3V3_MODEM from AP GPIO VI_VSYNCH D06*/
+ static struct regulator_consumer_supply fixed_reg_en_3v3_mini_supply[] = {
+ 	REGULATOR_SUPPLY("vdd_3v3_mini_card", NULL),
+ 	REGULATOR_SUPPLY("vdd_mini_card", NULL),
+ };
+ 
+-/* EN_VDD_PNL1 from AP GPIO VI_D6 L04*/
+-#ifndef CONFIG_TEGRA_KTT30_DSI
++/* L_VDDEN_N from AP GPIO GMI-CS3_N K04*/
+ static struct regulator_consumer_supply fixed_reg_en_vdd_pnl1_supply[] = {
+ 	REGULATOR_SUPPLY("vdd_lcd_panel", NULL),
+ };
+-#endif
+ 
+ /* EN_VDD_SDMMC1 from AP GPIO VI_HSYNC D07*/
+ static struct regulator_consumer_supply fixed_reg_en_vdd_sdmmc1_supply[] = {
+@@ -540,8 +532,7 @@ FIXED_REG(13, en_1v8_cam,	en_1v8_cam,	tps6591x_rails(VIO),		0,      0,      TEGR
+ 
+ FIXED_REG(14, dis_5v_switch,	dis_5v_switch,	FIXED_SUPPLY(en_5v0),	0,      0,      TEGRA_GPIO_PX2,		false,	0, 5000);
+ 
+-FIXED_REG(4, en_vdd_bl,		en_vdd_bl,	NULL,				0,      0,      TEGRA_GPIO_PH2,	true,	1, 5000);
+-FIXED_REG(6, en_vdd_pnl1,	en_vdd_pnl1,	FIXED_SUPPLY(en_3v3_sys),	0,      0,      TEGRA_GPIO_PK4,	true,	1, 3300);
++FIXED_REG(6, en_vdd_pnl1,	en_vdd_pnl1,	FIXED_SUPPLY(en_3v3_sys),	0,      0,      TEGRA_GPIO_PK4,	false,	1, 3300);
+ 
+ /****************** Open collector Load switches *******/
+ FIXED_REG_OD(15, en_usb1_vbus_oc,	en_usb1_vbus_oc,	FIXED_SUPPLY(dis_5v_switch),	0,      0,      TEGRA_GPIO_PI4,		true,	0, 5000, true);
+@@ -554,7 +545,6 @@ FIXED_REG_OD(17, en_vddio_vid_oc,	en_vddio_vid_oc,	FIXED_SUPPLY(dis_5v_switch),
+ #define ADD_FIXED_REG(_name)	(&fixed_reg_##_name##_dev)
+ 
+ #define KTT30_DISPLAY_FIXED_REG			\
+-	ADD_FIXED_REG(en_vdd_bl),		\
+ 	ADD_FIXED_REG(en_vdd_pnl1),
+ 
+ #define KTT30_FIXED_REG				\
+-- 
+1.7.4.4
+

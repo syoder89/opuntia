@@ -1,0 +1,28 @@
+From ee750996e95f0bfa8c50b2262d5391e10effff04 Mon Sep 17 00:00:00 2001
+From: Dmitry Artamonov <dartamonov@dev.rtsoft.ru>
+Date: Mon, 10 Sep 2012 14:22:59 +0400
+Subject: [PATCH 007/127] mmc: fix typo in sdhci-tegra (s/eroor/error/)
+
+Signed-off-by: Dmitry Artamonov <dartamonov@dev.rtsoft.ru>
+---
+ drivers/mmc/host/sdhci-tegra.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 8ff35e4..f80adea 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -1018,8 +1018,8 @@ static int __devinit sdhci_tegra_probe(struct platform_device *pdev)
+ 		rc = enable_irq_wake(gpio_to_irq(plat->cd_gpio));
+ 		if (rc < 0)
+ 			dev_err(mmc_dev(host->mmc),
+-				"SD card wake-up event registration"
+-					"failed with eroor: %d\n", rc);
++				"SD card wake-up event registration "
++					"failed with error: %d\n", rc);
+ 
+ 	} else if (plat->mmc_data.register_status_notify) {
+ 		plat->mmc_data.register_status_notify(sdhci_status_notify_cb, host);
+-- 
+1.7.4.4
+

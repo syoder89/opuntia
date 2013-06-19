@@ -1,0 +1,108 @@
+From 1e3189de116a8a97f7bd38db3d9e84ea140411f4 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Mon, 27 May 2013 13:59:20 +0400
+Subject: [PATCH 122/127] mmc: Fix eMMC boot partition access PM issue
+
+If a boot partition is accessed last before suspend, it has to be
+accessed first after resume. Otherwise, a general purpose partition
+access, beyond the boot partition size, fails (out of range error):
+    mmcblk0: r/w command failed, status = 0x80000900
+
+This backports MMC suspend/resume changes from k.o. commit e6c08586.
+With these changes we no longer need to keep the card power during
+suspend. This helps to avoid the above issue.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/mmc/core/mmc.c   |    9 +--------
+ drivers/mmc/host/sdhci.c |    9 ---------
+ include/linux/mmc/card.h |    4 ----
+ 3 files changed, 1 insertions(+), 21 deletions(-)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 0e8001f..6f0ac48 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -984,8 +984,6 @@ static int mmc_suspend(struct mmc_host *host)
+ 	mmc_claim_host(host);
+ 	if (mmc_card_can_sleep(host)) {
+ 		err = mmc_card_sleep(host);
+-		if (!err)
+-			mmc_card_set_sleep(host->card);
+ 	} else if (!mmc_host_is_spi(host))
+ 		mmc_deselect_cards(host);
+ 	host->card->state &= ~(MMC_STATE_HIGHSPEED | MMC_STATE_HIGHSPEED_200);
+@@ -1008,11 +1006,7 @@ static int mmc_resume(struct mmc_host *host)
+ 	BUG_ON(!host->card);
+ 
+ 	mmc_claim_host(host);
+-	if (mmc_card_is_sleep(host->card)) {
+-		err = mmc_card_awake(host);
+-		mmc_card_clr_sleep(host->card);
+-	} else
+-		err = mmc_init_card(host, host->ocr, host->card);
++	err = mmc_init_card(host, host->ocr, host->card);
+ 	mmc_release_host(host);
+ 
+ 	return err;
+@@ -1023,7 +1017,6 @@ static int mmc_power_restore(struct mmc_host *host)
+ 	int ret;
+ 
+ 	host->card->state &= ~(MMC_STATE_HIGHSPEED | MMC_STATE_HIGHSPEED_200);
+-	mmc_card_clr_sleep(host->card);
+ 	mmc_claim_host(host);
+ 	ret = mmc_init_card(host, host->ocr, host->card);
+ 	mmc_release_host(host);
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 3a440dc..4a0a134 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2336,15 +2336,6 @@ int sdhci_suspend_host(struct sdhci_host *host, pm_message_t state)
+ 	}
+ 
+ 	if (mmc->card) {
+-		/*
+-		 * If eMMC cards are put in sleep state, Vccq can be disabled
+-		 * but Vcc would still be powered on. In resume, we only restore
+-		 * the controller context. So, set MMC_PM_KEEP_POWER flag.
+-		 */
+-		if (mmc_card_can_sleep(mmc) &&
+-			!(mmc->caps & MMC_CAP2_NO_SLEEP_CMD))
+-			mmc->pm_flags = MMC_PM_KEEP_POWER;
+-
+ 		ret = mmc_suspend_host(host->mmc);
+ 		if (ret) {
+ 			if (has_tuning_timer) {
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 4d50754..a557c65 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -191,7 +191,6 @@ struct mmc_card {
+ #define MMC_CARD_SDXC		(1<<8)		/* card is SDXC */
+ #define MMC_CARD_REMOVED	(1<<9)		/* card has been removed */
+ #define MMC_STATE_HIGHSPEED_200	(1<<10)		/* card is in HS200 mode */
+-#define MMC_STATE_SLEEP		(1<<11)		/* card is in sleep state */
+ 
+ 	unsigned int		quirks; 	/* card quirks */
+ #define MMC_QUIRK_LENIENT_FN0	(1<<0)		/* allow SDIO FN0 writes outside of the VS CCCR range */
+@@ -337,7 +336,6 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+ #define mmc_card_doing_bkops(c) ((c)->state & MMC_STATE_DOING_BKOPS)
+ #define mmc_card_need_bkops(c) ((c)->state & MMC_STATE_NEED_BKOPS)
+ #define mmc_card_removed(c)	((c) && ((c)->state & MMC_CARD_REMOVED))
+-#define mmc_card_is_sleep(c)	((c)->state & MMC_STATE_SLEEP)
+ 
+ #define mmc_card_set_present(c)	((c)->state |= MMC_STATE_PRESENT)
+ #define mmc_card_set_readonly(c) ((c)->state |= MMC_STATE_READONLY)
+@@ -347,9 +345,7 @@ static inline void __maybe_unused remove_quirk(struct mmc_card *card, int data)
+ #define mmc_sd_card_set_uhs(c) ((c)->state |= MMC_STATE_ULTRAHIGHSPEED)
+ #define mmc_card_set_ext_capacity(c) ((c)->state |= MMC_CARD_SDXC)
+ #define mmc_card_set_removed(c) ((c)->state |= MMC_CARD_REMOVED)
+-#define mmc_card_set_sleep(c)	((c)->state |= MMC_STATE_SLEEP)
+ 
+-#define mmc_card_clr_sleep(c)	((c)->state &= ~MMC_STATE_SLEEP)
+ /*
+  * Quirk add/remove for MMC products.
+  */
+-- 
+1.7.4.4
+

@@ -1,0 +1,32 @@
+From a520b670c5014befea8cdcfe0a66f8f981f52ef3 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Fri, 16 Nov 2012 17:40:23 +0400
+Subject: [PATCH 014/127] arm: tegra: ktt30: Support 1920X1080 32bpp,double
+ buffered on HDMI
+
+This is backported from Cardhu. Using 32bpp double buffer
+should fix issues with HDMI modes higher than 1366x768.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index 4df6ffd..dbe3103 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -806,8 +806,8 @@ static void __init tegra_ktt30_init(void)
+ static void __init tegra_ktt30_reserve(void)
+ {
+ #if defined(CONFIG_NVMAP_CONVERT_CARVEOUT_TO_IOVMM)
+-	/* support 1920X1200 with 24bpp */
+-	tegra_reserve(0, SZ_8M + SZ_1M, SZ_8M + SZ_1M);
++	/* Support 1920X1080 32bpp, double buffered on HDMI */
++	tegra_reserve(0, SZ_8M + SZ_1M, SZ_16M);
+ #else
+ 	tegra_reserve(SZ_128M, SZ_8M, SZ_8M);
+ #endif
+-- 
+1.7.4.4
+

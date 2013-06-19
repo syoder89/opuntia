@@ -1,0 +1,54 @@
+From 8e07c44ceca29c15e924849f173a79a4cf6cef19 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sat, 25 May 2013 16:57:49 +0400
+Subject: [PATCH 125/127] arm: tegra: ktt30: Fix SDHCI power regulators
+
+According to the schematic, SDMMC4 is powered by V_1V8,
+SDMMC1 uses V_3V3_LDO5 and SDMMC3 uses V_3V3.
+Fix power regulators and SDHCI platform data accordingly.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-power.c |    4 ++--
+ arch/arm/mach-tegra/board-ktt30-sdhci.c |    3 ---
+ 2 files changed, 2 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-power.c b/arch/arm/mach-tegra/board-ktt30-power.c
+index 4517988..4b90084 100644
+--- a/arch/arm/mach-tegra/board-ktt30-power.c
++++ b/arch/arm/mach-tegra/board-ktt30-power.c
+@@ -92,8 +92,6 @@ static struct regulator_consumer_supply tps6591x_vio_supply_0[] = {
+ 	REGULATOR_SUPPLY("ldo8", NULL),
+ 	REGULATOR_SUPPLY("vcore_audio", NULL),
+ 	REGULATOR_SUPPLY("avcore_audio", NULL),
+-	REGULATOR_SUPPLY("vddio_sdmmc", "sdhci-tegra.2"),
+-	REGULATOR_SUPPLY("pwrdet_sdmmc3", NULL),
+ 	REGULATOR_SUPPLY("vcore1_lpddr2", NULL),
+ 	REGULATOR_SUPPLY("vcom_1v8", NULL),
+ 	REGULATOR_SUPPLY("pmuio_1v8", NULL),
+@@ -428,6 +426,8 @@ static struct regulator_consumer_supply fixed_reg_en_3v3_sys_supply[] = {
+ 	REGULATOR_SUPPLY("vdd_3v3_als", NULL),
+ 	REGULATOR_SUPPLY("debug_cons", NULL),
+ 	REGULATOR_SUPPLY("vdd", "4-004c"),
++	REGULATOR_SUPPLY("vddio_sdmmc", "sdhci-tegra.2"),
++	REGULATOR_SUPPLY("pwrdet_sdmmc3", NULL),
+ };
+ 
+ /* DIS_5V_SWITCH from AP SPI2_SCK X02 */
+diff --git a/arch/arm/mach-tegra/board-ktt30-sdhci.c b/arch/arm/mach-tegra/board-ktt30-sdhci.c
+index 4d4d585..166c3d6 100644
+--- a/arch/arm/mach-tegra/board-ktt30-sdhci.c
++++ b/arch/arm/mach-tegra/board-ktt30-sdhci.c
+@@ -54,9 +54,6 @@ static struct tegra_sdhci_platform_data tegra_sdhci_platform_data3 = {
+ 	.cd_gpio = KTT30_SD2_CD,
+ 	.wp_gpio = KTT30_SD2_WP,
+ 	.power_gpio = -1,
+-	.mmc_data = {
+-		.ocr_mask = MMC_OCR_1V8_MASK,
+-	}
+ };
+ 
+ static struct tegra_sdhci_platform_data tegra_sdhci_platform_data4 = {
+-- 
+1.7.4.4
+

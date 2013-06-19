@@ -1,0 +1,31 @@
+From c8c167fbd34a54f44aa52117de820b031f97e915 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 5 Dec 2012 18:13:59 +0400
+Subject: [PATCH 016/127] arm: tegra: ktt30: Enable SMP in ktt30_defconfig
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index aaad988..742548d 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -37,11 +37,12 @@ CONFIG_TEGRA_DYNAMIC_PWRDET=y
+ CONFIG_TEGRA_USB_MODEM_POWER=y
+ CONFIG_TEGRA_PLLM_RESTRICTED=y
+ CONFIG_TEGRA_PREINIT_CLOCKS=y
+-CONFIG_SWP_EMULATE=y
+ CONFIG_ARM_ERRATA_743622=y
+ CONFIG_ARM_ERRATA_752520=y
+ CONFIG_NO_HZ=y
+ CONFIG_HIGH_RES_TIMERS=y
++CONFIG_SMP=y
++# CONFIG_SMP_ON_UP is not set
+ CONFIG_PREEMPT=y
+ CONFIG_AEABI=y
+ # CONFIG_OABI_COMPAT is not set
+-- 
+1.7.4.4
+

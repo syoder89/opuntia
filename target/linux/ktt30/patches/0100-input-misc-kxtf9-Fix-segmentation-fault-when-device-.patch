@@ -1,0 +1,30 @@
+From c32dac78bb4d16a23eff2d47a2d29926bd5335df Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 23 May 2013 00:22:29 +0400
+Subject: [PATCH 100/127] input: misc: kxtf9: Fix segmentation fault when
+ device is removed
+
+This adds sensor to the I2C client data since it is used
+to free IRQ when the device is removed.
+This should fix kernel crash when removing the device.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/input/misc/kxtf9.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/input/misc/kxtf9.c b/drivers/input/misc/kxtf9.c
+index 63ab5b8..d678253 100644
+--- a/drivers/input/misc/kxtf9.c
++++ b/drivers/input/misc/kxtf9.c
+@@ -343,6 +343,7 @@ static int __devinit kxtf9_probe(struct i2c_client *client,
+ 		goto err_free_mem;
+ 	}
+ 
++	i2c_set_clientdata(client, sensor);
+ 	return 0;
+ 
+ err_free_irq:
+-- 
+1.7.4.4
+

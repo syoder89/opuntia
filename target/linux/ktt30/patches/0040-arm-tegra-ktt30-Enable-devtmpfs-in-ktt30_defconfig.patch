@@ -1,0 +1,29 @@
+From a5e1cc6472e10ef97c0edef8662303c826c28a18 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Tue, 12 Mar 2013 01:50:48 +0400
+Subject: [PATCH 040/127] arm: tegra: ktt30: Enable devtmpfs in
+ ktt30_defconfig
+
+Auto-mount devtmpfs once the system is started.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index 5805321..de0b583 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -179,6 +179,8 @@ CONFIG_RFKILL=y
+ CONFIG_CAIF=y
+ CONFIG_NFC=y
+ CONFIG_PN544_NFC=y
++CONFIG_DEVTMPFS=y
++CONFIG_DEVTMPFS_MOUNT=y
+ # CONFIG_FIRMWARE_IN_KERNEL is not set
+ CONFIG_MTD=y
+ CONFIG_MTD_CHAR=y
+-- 
+1.7.4.4
+

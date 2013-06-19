@@ -1,0 +1,47 @@
+From aec863dacf41383607679a97025c2c76e908ec9c Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Mon, 14 Jan 2013 17:43:03 +0400
+Subject: [PATCH 022/127] arm: tegra: wdt: Fix ENABLE_ON_PROBE watchdog
+ trigger.
+
+NVidia ENABLE_ON_PROBE watchdog feature emulates kernel
+space watchdog daemon, that enables the WDT right away and
+pings it in the watchdog interrupt handler.
+
+When the watchdog is enabled at probe and then opened by a
+watchdog daemon, the interrupt handler is disabled, which
+effectively stops pinging the watchdog in the kernel space.
+When the watchdog is later closed by the user-space daemon,
+it is not disabled, since ENABLE_ON_PROBE is still set.
+Neither it is kept alive by the interrupt handler,
+which causes unexpected watchdog reset later.
+
+This patch restarts the watchdog when a user-space daemon
+opens it and drops the ENABLE_ON_PROBE flag. This helps
+to stop the timer when the user-space daemon closes it
+and avoid unexpected reset.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/watchdog/tegra_wdt.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/watchdog/tegra_wdt.c b/drivers/watchdog/tegra_wdt.c
+index 789d960..dd6acef 100644
+--- a/drivers/watchdog/tegra_wdt.c
++++ b/drivers/watchdog/tegra_wdt.c
+@@ -228,7 +228,10 @@ static int tegra_wdt_open(struct inode *inode, struct file *file)
+ 	if (test_and_set_bit(1, &wdt->users))
+ 		return -EBUSY;
+ 
+-	wdt->status |= WDT_ENABLED;
++	if (wdt->status & WDT_ENABLED)
++		tegra_wdt_disable(wdt);
++
++	wdt->status = WDT_ENABLED;
+ 	tegra_wdt_enable(wdt);
+ 	file->private_data = wdt;
+ 	return nonseekable_open(inode, file);
+-- 
+1.7.4.4
+

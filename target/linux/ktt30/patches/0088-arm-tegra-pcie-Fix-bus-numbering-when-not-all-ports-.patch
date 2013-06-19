@@ -1,0 +1,35 @@
+From a4dc5b447025628a7e75c4c7de3ca1eb519c232a Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Tue, 14 May 2013 18:48:13 +0400
+Subject: [PATCH 088/127] arm: tegra: pcie: Fix bus numbering when not all
+ ports enabled
+
+This initializes root bus number regardless whether a port is
+enabled or not. This should help us to have correct bus numbers
+even when a port is disabled.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/pcie.c |    5 ++---
+ 1 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/pcie.c b/arch/arm/mach-tegra/pcie.c
+index 94198c0..328163b 100644
+--- a/arch/arm/mach-tegra/pcie.c
++++ b/arch/arm/mach-tegra/pcie.c
+@@ -1357,10 +1357,9 @@ static int tegra_pcie_init(void)
+ 	for (port = 0; port < MAX_PCIE_SUPPORTED_PORTS; port++) {
+ 		ctrl_offset += (port * 8);
+ 		rp_offset = (rp_offset + RP_OFFSET) * port;
+-		if (tegra_pcie.plat_data->port_status[port]) {
+-			tegra_pcie.port[port].root_bus_nr = -1;
++		tegra_pcie.port[port].root_bus_nr = -1;
++		if (tegra_pcie.plat_data->port_status[port])
+ 			tegra_pcie_add_port(port, rp_offset, ctrl_offset);
+-		}
+ 	}
+ 
+ 	if (tegra_pcie.plat_data->use_dock_detect &&
+-- 
+1.7.4.4
+

@@ -1,0 +1,38 @@
+From 5c1890884fda1d305f532c5223d0d40b77e7b15e Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sun, 31 Mar 2013 14:08:51 +0400
+Subject: [PATCH 049/127] arm: tegra: ktt30: Fix compilation errors when USB
+ is disabled
+
+Use #if defined(CONFIG_USB_SUPPORT) instead of #if CONFIG_USB_SUPPORT.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index dfe15dc..b417e10 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -628,7 +628,7 @@ static int __init ktt30_touch_init(void)
+ 	return 0;
+ }
+ 
+-#if CONFIG_USB_SUPPORT
++#if defined(CONFIG_USB_SUPPORT)
+ static struct tegra_usb_platform_data tegra_udc_pdata = {
+ 	.port_otg = true,
+ 	.has_hostpc = true,
+@@ -852,7 +852,7 @@ static void __init tegra_ktt30_reserve(void)
+ 	tegra_ram_console_debug_reserve(SZ_1M);
+ }
+ 
+-#if CONFIG_USB_SUPPORT
++#if defined(CONFIG_USB_SUPPORT)
+ static int __init ktt30_setup_usb2(char *option)
+ {
+ 	if (!strcmp(option, "no"))
+-- 
+1.7.4.4
+

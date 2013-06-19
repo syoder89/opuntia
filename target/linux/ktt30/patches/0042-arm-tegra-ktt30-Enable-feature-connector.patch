@@ -1,0 +1,30 @@
+From 24015d2e9a8226ce251183ce3aa2289dc5242d70 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Mon, 18 Mar 2013 14:38:30 +0400
+Subject: [PATCH 042/127] arm: tegra: ktt30: Enable feature connector
+
+The feature connector output is controlled by GPIO_PQ0 (KB_COL0) pin.
+Pull it up by default to enable feature connector output.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-pinmux.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-pinmux.c b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+index e67b4b4..71471e2 100644
+--- a/arch/arm/mach-tegra/board-ktt30-pinmux.c
++++ b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+@@ -293,6 +293,9 @@ static __initdata struct tegra_pingroup_config ktt30_pinmux_common[] = {
+ 	DEFAULT_PINMUX(KB_ROW8,         KBC,             NORMAL,    NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(KB_ROW9,         KBC,             NORMAL,    NORMAL,     OUTPUT),
+ 
++	/* Feature connector */
++	DEFAULT_PINMUX(KB_COL0,         KBC,             PULL_UP,   NORMAL,     INPUT),
++
+ 	DEFAULT_PINMUX(DAP1_FS,         I2S0,            NORMAL,    NORMAL,     INPUT),
+ 	DEFAULT_PINMUX(DAP1_DIN,        I2S0,            NORMAL,    NORMAL,     INPUT),
+ 	DEFAULT_PINMUX(DAP1_DOUT,       I2S0,            NORMAL,    NORMAL,     INPUT),
+-- 
+1.7.4.4
+

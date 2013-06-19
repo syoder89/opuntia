@@ -1,0 +1,89 @@
+From 89626373c9683bc2cfc32f6fef1d71803527c9b8 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 2 May 2013 01:29:11 +0400
+Subject: [PATCH 109/127] arm: tegra: ktt30: Use OF FDT for PCIe configuration
+
+Use OF device node status instead of command line
+parameters to configure PCIe ports.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30.c |   53 +++++++++++++++++++-----------------
+ 1 files changed, 28 insertions(+), 25 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index c135976..1ed3f8c 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -893,8 +893,36 @@ static struct tegra_pci_platform_data ktt30_pci_platform_data = {
+ 	.gpio		= -1,
+ };
+ 
++#ifdef CONFIG_OF
++static void __init ktt30_of_pci_fixup(void)
++{
++	struct device_node *node = NULL;
++
++	while (true) {
++		int retval;
++		u32 port;
++
++		node = of_find_compatible_node(node,
++						NULL, "nvidia,tegra30-pcie");
++		if (!node)
++			break;
++
++		retval = of_property_read_u32(node, "port", &port);
++		if (retval || (port >= MAX_PCIE_SUPPORTED_PORTS))
++			continue;
++
++		retval = of_device_is_available(node);
++		ktt30_pci_platform_data.port_status[port] = retval;
++	}
++}
++#else
++static void __init ktt30_of_pci_fixup(void) { }
++#endif
++
+ static void __init ktt30_pci_init(void)
+ {
++	ktt30_of_pci_fixup();
++
+ 	if (ktt30_pci_platform_data.port_status[0] ||
+ 			ktt30_pci_platform_data.port_status[1] ||
+ 			ktt30_pci_platform_data.port_status[2]) {
+@@ -964,31 +992,6 @@ static void __init tegra_ktt30_reserve(void)
+ 	tegra_ram_console_debug_reserve(SZ_1M);
+ }
+ 
+-static int __init ktt30_setup_pcie0(char *option)
+-{
+-	if (!strcmp(option, "no"))
+-		ktt30_pci_platform_data.port_status[0] = 0;
+-	return 1;
+-}
+-__setup("pcie0=", ktt30_setup_pcie0);
+-
+-static int __init ktt30_setup_pcie1(char *option)
+-{
+-	if (!strcmp(option, "no"))
+-		ktt30_pci_platform_data.port_status[1] = 0;
+-	return 1;
+-}
+-__setup("pcie1=", ktt30_setup_pcie1);
+-
+-static int __init ktt30_setup_pcie2(char *option)
+-{
+-	if (!strcmp(option, "no"))
+-		ktt30_pci_platform_data.port_status[2] = 0;
+-	return 1;
+-}
+-__setup("pcie2=", ktt30_setup_pcie2);
+-
+-
+ static const char *ktt30_dt_board_compat[] = {
+ 	"kontron,ktt30",
+ 	NULL
+-- 
+1.7.4.4
+

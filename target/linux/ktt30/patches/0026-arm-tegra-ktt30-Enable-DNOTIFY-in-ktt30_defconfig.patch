@@ -1,0 +1,28 @@
+From d2b120ff5f31c88f79bb91de40974f2c5b9ea510 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Fri, 18 Jan 2013 17:26:09 +0400
+Subject: [PATCH 026/127] arm: tegra: ktt30: Enable DNOTIFY in ktt30_defconfig
+
+Some Ubuntu applications, for example, rpc.idmapd,
+still rely on DNOTIFY support.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index 06ce7d7..541aa26 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -360,7 +360,6 @@ CONFIG_IIO=y
+ CONFIG_EXT4_FS=y
+ CONFIG_EXT4_FS_POSIX_ACL=y
+ CONFIG_EXT4_FS_SECURITY=y
+-# CONFIG_DNOTIFY is not set
+ CONFIG_FUSE_FS=y
+ CONFIG_ISO9660_FS=m
+ CONFIG_JOLIET=y
+-- 
+1.7.4.4
+

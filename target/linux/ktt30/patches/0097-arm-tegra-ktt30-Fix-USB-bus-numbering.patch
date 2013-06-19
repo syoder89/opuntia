@@ -1,0 +1,32 @@
+From 9b53ea2b9d97bab78feecd7d10d676ea858cc0de Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 22 May 2013 20:31:42 +0400
+Subject: [PATCH 097/127] arm: tegra: ktt30: Fix USB bus numbering
+
+USB bus numbering in Linux should match U-Boot enumeration scheme.
+Register EHCI3 first, so that it becomes usb1 and EHCI2 becomes usb2.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index 8891e61..9042f84 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -790,8 +790,10 @@ static struct tegra_usb_otg_data tegra_otg_pdata = {
+ static struct platform_device __initdata *ktt30_usb_devices[] = {
+ 	&tegra_otg_device,
+ 	&tegra_udc_device,
+-	&tegra_ehci2_device,
++	/* USB1: J23 */
+ 	&tegra_ehci3_device,
++	/* USB2: J24/J27 */
++	&tegra_ehci2_device,
+ };
+ 
+ static int ktt30_setup_usb2_disabled;
+-- 
+1.7.4.4
+

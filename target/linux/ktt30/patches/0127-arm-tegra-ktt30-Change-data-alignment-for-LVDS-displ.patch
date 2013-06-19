@@ -1,0 +1,34 @@
+From f06a14bc784796045762cbe77ca188b1700fe086 Mon Sep 17 00:00:00 2001
+From: Viktor Krasnov <vkrasnov@dev.rtsoft.ru>
+Date: Tue, 4 Jun 2013 14:02:26 +0400
+Subject: [PATCH 127/127] arm: tegra: ktt30: Change data alignment for LVDS
+ display
+
+The graphics register at offset 42Fh contains a wrong definition:
+DISP_DATA_ALIGNMENT is set to LSB order but should be MSB order. For example:
+LSB order defines LD(7:0) as blue data 7:0. The schematic shows LD(5:0) as blue
+data 7:2 and LD(19:18) as blue data 1:0.
+
+Reported and fixed by Michael Huettmann.
+
+Signed-off-by: Viktor Krasnov <vkrasnov@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-panel.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-panel.c b/arch/arm/mach-tegra/board-ktt30-panel.c
+index f0c52d5..a9e56c3 100644
+--- a/arch/arm/mach-tegra/board-ktt30-panel.c
++++ b/arch/arm/mach-tegra/board-ktt30-panel.c
+@@ -518,7 +518,7 @@ static struct tegra_dc_platform_data ktt30_disp2_pdata = {
+ 
+ 
+ static struct tegra_dc_out ktt30_disp1_out = {
+-	.align		= TEGRA_DC_ALIGN_LSB,
++	.align		= TEGRA_DC_ALIGN_MSB,
+ 	.order		= TEGRA_DC_ORDER_RED_BLUE,
+ 	.sd_settings	= &ktt30_sd_settings,
+ 	.parent_clk	= "pll_d_out0",
+-- 
+1.7.4.4
+

@@ -1,0 +1,72 @@
+From 9401a50df3177df95609e1bf23cb36cbcced8f76 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Fri, 8 Feb 2013 04:31:43 +0400
+Subject: [PATCH 030/127] arm: tegra: sdhci: Rework card detect wake-up
+
+KTT30 has CD IRQ routed to GPIO_PI2, which cannot be used as a wake source.
+
+This adds device_may_wakeup() checks before enabling wake event for card
+detect interrupts. From now on CD wake-up can be controlled via sysfs,
+and is disabled by default. The following function should be called after
+Tegra SDHCI platform device has been registered in order to enable wake-up:
+
+device_init_wakeup(&tegra_sdhci_device.dev, 1);
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/mmc/host/sdhci-tegra.c |   18 ++++++++++--------
+ 1 files changed, 10 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index f80adea..c4ccbf0 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -859,6 +859,11 @@ static int tegra_sdhci_suspend(struct sdhci_host *sdhci, pm_message_t state)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(sdhci);
+ 	struct tegra_sdhci_host *tegra_host = pltfm_host->priv;
++	struct platform_device *pdev = to_platform_device(mmc_dev(sdhci->mmc));
++	struct tegra_sdhci_platform_data *plat = pdev->dev.platform_data;
++
++	if (gpio_is_valid(plat->cd_gpio) && device_may_wakeup(&pdev->dev))
++		enable_irq_wake(gpio_to_irq(plat->cd_gpio));
+ 
+ 	tegra_sdhci_set_clock(sdhci, 0);
+ 
+@@ -886,6 +891,11 @@ static int tegra_sdhci_resume(struct sdhci_host *sdhci)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(sdhci);
+ 	struct tegra_sdhci_host *tegra_host = pltfm_host->priv;
++	struct platform_device *pdev = to_platform_device(mmc_dev(sdhci->mmc));
++	struct tegra_sdhci_platform_data *plat = pdev->dev.platform_data;
++
++	if (gpio_is_valid(plat->cd_gpio) && device_may_wakeup(&pdev->dev))
++		disable_irq_wake(gpio_to_irq(plat->cd_gpio));
+ 
+ 	/* Enable the power rails if any */
+ 	if (tegra_host->card_present) {
+@@ -1015,12 +1025,6 @@ static int __devinit sdhci_tegra_probe(struct platform_device *pdev)
+ 			dev_err(mmc_dev(host->mmc), "request irq error\n");
+ 			goto err_cd_irq_req;
+ 		}
+-		rc = enable_irq_wake(gpio_to_irq(plat->cd_gpio));
+-		if (rc < 0)
+-			dev_err(mmc_dev(host->mmc),
+-				"SD card wake-up event registration "
+-					"failed with error: %d\n", rc);
+-
+ 	} else if (plat->mmc_data.register_status_notify) {
+ 		plat->mmc_data.register_status_notify(sdhci_status_notify_cb, host);
+ 	}
+@@ -1193,8 +1197,6 @@ static int __devexit sdhci_tegra_remove(struct platform_device *pdev)
+ 
+ 	plat = pdev->dev.platform_data;
+ 
+-	disable_irq_wake(gpio_to_irq(plat->cd_gpio));
+-
+ 	if (tegra_host->vdd_slot_reg) {
+ 		regulator_disable(tegra_host->vdd_slot_reg);
+ 		regulator_put(tegra_host->vdd_slot_reg);
+-- 
+1.7.4.4
+

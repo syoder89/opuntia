@@ -1,0 +1,126 @@
+From 1c249cec920c41554304a499a253b57512743e39 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 2 May 2013 03:11:47 +0400
+Subject: [PATCH 111/127] arm: tegra: ktt30: Use OF FDT for the thermal sensor
+ configuration
+
+Use OF device node properties instead of command line
+parameters to configure ADT7461 extended range, alarm
+and external temperature limits.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-sensors.c |   78 ++++++++++++++++-------------
+ 1 files changed, 44 insertions(+), 34 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-sensors.c b/arch/arm/mach-tegra/board-ktt30-sensors.c
+index 5ce52c8..dd87b81 100644
+--- a/arch/arm/mach-tegra/board-ktt30-sensors.c
++++ b/arch/arm/mach-tegra/board-ktt30-sensors.c
+@@ -35,7 +35,8 @@
+ #include <linux/mpu.h>
+ #include <linux/adt7461.h>
+ #include <linux/pwm-fan.h>
+-#include <linux/gpio.h>
++#include <linux/of.h>
++#include <linux/of_gpio.h>
+ #include <mach/fb.h>
+ #include <generated/mach-types.h>
+ 
+@@ -156,51 +157,60 @@ static struct platform_device ktt30_fan_device = {
+ };
+ #endif
+ 
+-int __init ktt30_sensors_init(void)
++#ifdef CONFIG_OF
++static void __init ktt30_of_fixup_sensors(void)
+ {
+-	i2c_register_board_info(4, &adt7461_board_info, 1);
+-	mpuirq_init();
++	struct device_node *node;
++	const char *data;
++	int retval;
++	u32 val;
+ 
+-	/* Ensure the PWM3 output is not in GPIO state */
+-	if (!gpio_request(TEGRA_GPIO_PH3, "fan"))
+-		gpio_free(TEGRA_GPIO_PH3);
++	node = of_find_compatible_node(NULL, NULL, "adi,adt7461");
++	if (!node)
++		return;
+ 
+-#if defined(CONFIG_SENSORS_PWM_FAN) || defined(CONFIG_SENSORS_PWM_FAN_MODULE)
+-	platform_device_register(&tegra_pwfm3_device);
+-	platform_device_register(&ktt30_fan_device);
+-#endif
+-	return 0;
+-}
+-
+-static int __init ktt30_setup_tempalert(char *options)
+-{
+-	if (!strcmp(options, "no")) {
++	retval = of_get_named_gpio_flags(node, "alarm-gpio", 0, &val);
++	if (!gpio_is_valid(retval) || (val & 0x1)) {
++		adt7461_board_info.irq = 0;
+ 		ktt30_adt7461_pdata.irq_gpio = -1;
+ 		ktt30_adt7461_pdata.alarm_fn = NULL;
+-		adt7461_board_info.irq = 0;
++	} else {
++		ktt30_adt7461_pdata.irq_gpio = retval;
++		adt7461_board_info.irq = gpio_to_irq(retval);
+ 	}
+-	return 1;
+-}
+-__setup("tempalert=", ktt30_setup_tempalert);
+ 
+-static int __init ktt30_setup_temphigh(char *options)
+-{
+-	int temp;
++	retval = of_property_read_u32(node, "remote-high", &val);
++	if (!retval && (val < 128))
++		ktt30_adt7461_pdata.throttling_ext_limit = val;
+ 
+-	get_option(&options, &temp);
++	retval = of_property_read_u32(node, "remote-crit", &val);
++	if (!retval && (val < 128))
++		ktt30_adt7461_pdata.shutdown_ext_limit = val;
+ 
+-	if ((temp > 0) && (temp < ktt30_adt7461_pdata.shutdown_ext_limit))
+-		ktt30_adt7461_pdata.throttling_ext_limit = temp;
++	data = of_get_property(node, "ext-range", &retval);
++	if (data && (retval == 8) && !strcmp(data, "enabled"))
++		ktt30_adt7461_pdata.ext_range = true;
+ 
+-	return 1;
++	of_node_put(node);
+ }
+-__setup("temphigh=", ktt30_setup_temphigh);
++#else
++static void __init ktt30_of_fixup_sensors(void) { }
++#endif
+ 
+-static int __init ktt30_setup_tempext(char *options)
++int __init ktt30_sensors_init(void)
+ {
+-	if (!strcmp(options, "yes"))
+-		ktt30_adt7461_pdata.ext_range = true;
++	ktt30_of_fixup_sensors();
+ 
+-	return 1;
++	i2c_register_board_info(4, &adt7461_board_info, 1);
++	mpuirq_init();
++
++	/* Ensure the PWM3 output is not in GPIO state */
++	if (!gpio_request(TEGRA_GPIO_PH3, "fan"))
++		gpio_free(TEGRA_GPIO_PH3);
++
++#if defined(CONFIG_SENSORS_PWM_FAN) || defined(CONFIG_SENSORS_PWM_FAN_MODULE)
++	platform_device_register(&tegra_pwfm3_device);
++	platform_device_register(&ktt30_fan_device);
++#endif
++	return 0;
+ }
+-__setup("tempext=", ktt30_setup_tempext);
+-- 
+1.7.4.4
+

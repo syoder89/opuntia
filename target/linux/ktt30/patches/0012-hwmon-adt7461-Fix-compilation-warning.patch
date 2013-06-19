@@ -1,0 +1,32 @@
+From e862e37d4450329c108cb91ef45e9ca2c7b1ffe3 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 31 Oct 2012 04:02:47 +0400
+Subject: [PATCH 012/127] hwmon: adt7461: Fix compilation warning
+
+The gpio_request() function returns an integer status,
+while the IS_ERR() macro expects a pointer.
+Remove IS_ERR() and test the returned status directly
+to avoid compile-time warning.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/hwmon/adt7461.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/hwmon/adt7461.c b/drivers/hwmon/adt7461.c
+index b88099f..d0d6c3a 100644
+--- a/drivers/hwmon/adt7461.c
++++ b/drivers/hwmon/adt7461.c
+@@ -578,7 +578,8 @@ static int adt7461_init_client(struct i2c_client *client)
+ 		data->flags |= ADT7461_FLAG_THERM2;
+ 
+ 		if (gpio_is_valid(pdata->irq_gpio)) {
+-			if (!IS_ERR(gpio_request(pdata->irq_gpio, "adt7461"))) {
++			err = gpio_request(pdata->irq_gpio, "adt7461");
++			if (!err) {
+ 				gpio_direction_input(pdata->irq_gpio);
+ 				data->irq_gpio = pdata->irq_gpio;
+ 			}
+-- 
+1.7.4.4
+

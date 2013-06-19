@@ -1,0 +1,59 @@
+From a4c687160f4ff33e10f9b017e1fb4ce48ccadf2c Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 17 Apr 2013 14:07:39 +0400
+Subject: [PATCH 060/127] arm: tegra: ktt30: Drop tegra-gpio-enable calls
+
+GPIO pin is now enabled when requested.
+Drop the unneeded tegra-gpio-enable calls.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30.c |   11 -----------
+ 1 files changed, 0 insertions(+), 11 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index 1f90ce5..199ab05 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -608,9 +608,6 @@ static int __init ktt30_touch_init(void)
+ 	if (get_touch_screen_type() != atmel_mxt_ts)
+ 		return -ENODEV;
+ 
+-	tegra_gpio_enable(TEGRA_GPIO_PH4);
+-	tegra_gpio_enable(TEGRA_GPIO_PH6);
+-
+ 	gpio_request(TEGRA_GPIO_PH4, "atmel-irq");
+ 	gpio_direction_input(TEGRA_GPIO_PH4);
+ 
+@@ -746,7 +743,6 @@ static void ktt30_usb_init(void)
+ 	tegra_ehci2_device.dev.platform_data = &tegra_ehci2_utmi_pdata;
+ 	tegra_ehci3_device.dev.platform_data = &tegra_ehci3_utmi_pdata;
+ 
+-	tegra_gpio_enable(TEGRA_GPIO_PL5);
+ 	gpio_request(TEGRA_GPIO_PL5, "usb2-port");
+ 	gpio_direction_output(TEGRA_GPIO_PL5, !ktt30_setup_usb2_disabled);
+ 	msleep(20);
+@@ -757,12 +753,6 @@ static void ktt30_usb_init(void)
+ static void ktt30_usb_init(void) { }
+ #endif
+ 
+-static void ktt30_gps_init(void)
+-{
+-	tegra_gpio_enable(TEGRA_GPIO_PU2);
+-	tegra_gpio_enable(TEGRA_GPIO_PU3);
+-}
+-
+ static struct tegra_pci_platform_data ktt30_pci_platform_data = {
+ 	.port_status[0]	= 1,
+ 	.port_status[1]	= 1,
+@@ -815,7 +805,6 @@ static void __init tegra_ktt30_init(void)
+ 	ktt30_regulator_init();
+ 	ktt30_suspend_init();
+ 	ktt30_touch_init();
+-	ktt30_gps_init();
+ 	ktt30_panel_init();
+ 	ktt30_pmon_init();
+ 	ktt30_sensors_init();
+-- 
+1.7.4.4
+

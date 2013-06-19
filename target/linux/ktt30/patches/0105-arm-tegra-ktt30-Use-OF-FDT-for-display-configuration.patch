@@ -1,0 +1,393 @@
+From 3a2532f3a055e59aa9abfb1c229079e46035dbb2 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sat, 13 Apr 2013 05:11:28 +0400
+Subject: [PATCH 105/127] arm: tegra: ktt30: Use OF FDT for display
+ configuration
+
+This adjusts display parameters based on the device tree.
+The command-line parameter parsing is dropped.
+
+The device tree is searched for a "nvidia,tegra2-lcd"
+compatible node. The LCD "display" property is checked,
+and the kernel display panel modes and FB data
+are updated accordingly.
+Output GPIO settings are updated, based
+on the "gpios" property of the LCD node.
+
+Also "status" property of the LCD and HDMI nodes is checked
+and DC platform data flags are updated accordingly.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-panel.c |  304 ++++++++++++++++++++++++-------
+ 1 files changed, 239 insertions(+), 65 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-panel.c b/arch/arm/mach-tegra/board-ktt30-panel.c
+index f615592..f0c52d5 100644
+--- a/arch/arm/mach-tegra/board-ktt30-panel.c
++++ b/arch/arm/mach-tegra/board-ktt30-panel.c
+@@ -21,13 +21,14 @@
+ #include <linux/delay.h>
+ #include <linux/ion.h>
+ #include <linux/tegra_ion.h>
+-#include <linux/gpio.h>
+ #include <linux/regulator/consumer.h>
+ #include <linux/resource.h>
+ #include <asm/mach-types.h>
+ #include <linux/platform_device.h>
+ #include <linux/earlysuspend.h>
+ #include <linux/pwm_backlight.h>
++#include <linux/of_address.h>
++#include <linux/of_gpio.h>
+ #include <asm/atomic.h>
+ #include <linux/nvhost.h>
+ #include <linux/nvmap.h>
+@@ -111,9 +112,6 @@ enum ktt30_disp_type {
+ 	ktt30_disp_type_none,
+ };
+ 
+-static enum ktt30_disp_type ktt30_setup_disp1;
+-static enum ktt30_disp_type ktt30_setup_disp2;
+-
+ static atomic_t sd_brightness = ATOMIC_INIT(255);
+ 
+ static tegra_dc_bl_output ktt30_bl_output_measured = {
+@@ -681,21 +679,245 @@ static void ktt30_panel_late_resume(struct early_suspend *h)
+ }
+ #endif
+ 
++#if defined(CONFIG_TEGRA_DC) && defined(CONFIG_OF)
++static void __init ktt30_of_fixup_gpio(struct device_node *node)
++{
++	int i, j;
++	u32 gpios;
++
++	if (!node)
++		return;
++
++	gpios = of_gpio_count(node);
++	for (i = 0; i < gpios; i++) {
++		int gpio;
++		u32 flags;
++
++		gpio = of_get_named_gpio_flags(node, "gpios", i, &flags);
++		if (!gpio_is_valid(gpio) || !(flags & 0x1))
++			continue;
++
++		for (j = 0; j < KTT30_PANEL_GPIO_SZ; j++) {
++			if (gpio != ktt30_pnl_gpio[j].gpio)
++				continue;
++
++			if (ktt30_pnl_gpio[j].flags == GPIOF_DIR_IN)
++				break;
++
++			/* Initial state of the first three GPIOs
++			 * is inactive. Invert the FDT flags.
++			 */
++			if (j < KTT30_LVDS_3V3)
++				flags ^= 0x2;
++
++			ktt30_pnl_gpio[j].flags = (flags & 0x2) ?
++				GPIOF_OUT_INIT_HIGH : GPIOF_OUT_INIT_LOW;
++			break;
++		}
++	}
++}
++
++static void __init ktt30_of_fixup_brightness(const struct device_node *node,
++					struct platform_device *bl_device)
++{
++	struct platform_pwm_backlight_data *bl_data;
++	u32 brightness;
++	int retval;
++
++	if (!node || !bl_device)
++		return;
++
++	bl_data = bl_device->dev.platform_data;
++	if (!bl_data)
++		return;
++
++	retval = of_property_read_u32(node,
++				"default-brightness-level", &brightness);
++	if (retval || (brightness > bl_data->max_brightness))
++		return;
++
++	bl_data->dft_brightness = brightness;
++}
++
++static int __init ktt30_of_get_disp_prop(const struct device_node *node,
++					const char *prop, u32 *val, int sz)
++{
++	int retval = of_property_read_u32_array(node, prop, val, sz);
++	if (retval)
++		pr_err("OF: failed to read display %s (%i)\n", prop, retval);
++
++	return retval;
++}
++
++static int __init ktt30_of_fixup_disp(const struct device_node *node,
++					const struct nvhost_device *disp)
++{
++	struct tegra_dc_platform_data *pdata;
++	struct tegra_dc_out *out;
++	struct tegra_dc_mode *mode;
++	struct tegra_fb_data *fb;
++	u32 width, height, bpp, pclk;
++	u32 htm[4];
++	u32 vtm[4];
++	int retval;
++
++	if (!node || !disp)
++		return -EINVAL;
++
++	pdata = disp->dev.platform_data;
++	if (!pdata)
++		return -ENODEV;
++
++	if (!of_device_is_available(node)) {
++		pdata->flags &= ~TEGRA_DC_FLAG_ENABLED;
++		pr_info("OF: %s.%i disabled\n", disp->name, disp->id);
++	}
++
++	out = pdata->default_out;
++
++	/* No output set, nothing to update */
++	if (!out || !out->n_modes)
++		return 0;
++
++	mode = out->modes;
++	if (!mode)
++		return -EINVAL;
++
++	retval = ktt30_of_get_disp_prop(node, "width", &width, 1);
++	if (retval)
++		return retval;
++
++	retval = ktt30_of_get_disp_prop(node, "height", &height, 1);
++	if (retval)
++		return retval;
++
++	retval = ktt30_of_get_disp_prop(node, "bits_per_pixel", &bpp, 1);
++	if (retval)
++		return retval;
++
++	retval = ktt30_of_get_disp_prop(node, "pixel_clock", &pclk, 1);
++	if (retval)
++		return retval;
++
++	retval = ktt30_of_get_disp_prop(node, "horiz_timing", htm, 4);
++	if (retval)
++		return retval;
++
++	retval = ktt30_of_get_disp_prop(node, "vert_timing", vtm, 4);
++	if (retval)
++		return retval;
++
++	if (out->sd_settings)
++		ktt30_of_fixup_brightness(node, out->sd_settings->bl_device);
++
++	/* Set panel mode */
++	mode->pclk = pclk,
++	mode->h_active = width;
++	mode->v_active = height;
++	mode->h_ref_to_sync = htm[0];
++	mode->h_sync_width = htm[1];
++	mode->h_back_porch = htm[2];
++	mode->h_front_porch = htm[3];
++	mode->v_ref_to_sync = vtm[0];
++	mode->v_sync_width = vtm[1];
++	mode->v_back_porch = vtm[2];
++	mode->v_front_porch = vtm[3];
++
++	fb = pdata->fb;
++	if (fb) {
++		/* Set framebuffer */
++		fb->xres = width;
++		fb->yres = height;
++		fb->bits_per_pixel = bpp;
++	}
++
++	pr_info("OF: %s.%i mode updated\n", disp->name, disp->id);
++	return 0;
++}
++
++static bool __init ktt30_disp_regs_match(struct nvhost_device *disp,
++					const struct resource *regs)
++{
++	struct resource *res;
++
++	if (!disp || !regs)
++		return false;
++
++	res = nvhost_get_resource_byname(disp, IORESOURCE_MEM, "regs");
++	if (!res)
++		return false;
++
++	return (res->start == regs->start) && (res->end == regs->end);
++}
++
++static void __init ktt30_fixup_lcd(void)
++{
++	struct device_node *lcd;
++	struct device_node *disp;
++	struct resource res;
++	int retval;
++
++	lcd = of_find_compatible_node(NULL, NULL, "nvidia,tegra2-lcd");
++	if (!lcd)
++		return;
++
++	/* Fix up GPIO output active levels */
++	ktt30_of_fixup_gpio(lcd);
++
++	disp = of_parse_phandle(lcd, "display", 0);
++	if (!disp)
++		goto out_lcd;
++
++	retval = of_device_is_compatible(disp, "nvidia,tegra250-display");
++	if (!retval)
++		goto out_disp;
++
++	retval = of_address_to_resource(disp, 0, &res);
++	if (retval)
++		goto out_disp;
++
++	/* Fix up display modes and framebuffer data */
++	if (!ktt30_disp_regs_match(&ktt30_disp1_device, &res))
++		goto out_disp;
++
++	ktt30_of_fixup_disp(lcd, &ktt30_disp1_device);
++
++out_disp:
++	of_node_put(disp);
++out_lcd:
++	of_node_put(lcd);
++}
++
++static void __init ktt30_fixup_hdmi(void)
++{
++	struct device_node *hdmi;
++
++	hdmi = of_find_compatible_node(NULL, NULL, "nvidia,tegra30-hdmi");
++	if (!hdmi)
++		return;
++
++	ktt30_of_fixup_disp(hdmi, &ktt30_disp2_device);
++
++	of_node_put(hdmi);
++}
++
++static void __init ktt30_fixup_displays(void)
++{
++	ktt30_fixup_lcd();
++	ktt30_fixup_hdmi();
++}
++#else /* !CONFIG_OF */
++static void __init ktt30_fixup_displays(void)
++{
++}
++#endif /* CONFIG_OF */
+ 
+ int __init ktt30_panel_init(void)
+ {
+ 	int err;
+ 	struct resource __maybe_unused *res;
+-	int lcd_enabled;
+-	int hdmi_enabled;
+-
+-	lcd_enabled = (ktt30_setup_disp1 == ktt30_disp_type_auto) ||
+-		(ktt30_setup_disp1 == ktt30_disp_type_lcd) ||
+-		(ktt30_setup_disp2 == ktt30_disp_type_lcd);
+ 
+-	hdmi_enabled = (ktt30_setup_disp2 == ktt30_disp_type_auto) ||
+-		(ktt30_setup_disp2 == ktt30_disp_type_hdmi) ||
+-		(ktt30_setup_disp1 == ktt30_disp_type_hdmi);
++	ktt30_fixup_displays();
+ 
+ #if defined(CONFIG_TEGRA_NVMAP)
+ 	ktt30_carveouts[1].base = tegra_carveout_start;
+@@ -736,7 +958,8 @@ int __init ktt30_panel_init(void)
+ 	platform_device_register(&tegra_ion_device);
+ #endif
+ 
+-	if (lcd_enabled) {
++	/* LCD enabled */
++	if (ktt30_disp1_pdata.flags & TEGRA_DC_FLAG_ENABLED) {
+ 		/* Free PWM GPIO pin to ensure it is
+ 		 * in functional (PWM) mode of operation.
+ 		 */
+@@ -747,7 +970,6 @@ int __init ktt30_panel_init(void)
+ #ifdef CONFIG_TEGRA_DC
+ 		ktt30_disp1_out.enable = ktt30_panel_disable;
+ 		ktt30_disp1_out.sd_settings = NULL;
+-		ktt30_disp1_pdata.flags &= ~TEGRA_DC_FLAG_ENABLED;
+ #endif
+ 	}
+ 
+@@ -768,7 +990,8 @@ int __init ktt30_panel_init(void)
+ 	if (!err)
+ 		err = nvhost_device_register(&ktt30_disp1_device);
+ 
+-	if (!hdmi_enabled)
++	/* HDMI disabled */
++	if (!(ktt30_disp2_pdata.flags & TEGRA_DC_FLAG_ENABLED))
+ 		goto out;
+ 
+ 	res = nvhost_get_resource_byname(&ktt30_disp2_device,
+@@ -798,52 +1021,3 @@ out:
+ #endif
+ 	return err;
+ }
+-
+-static int __init ktt30_setup_bl(char *options)
+-{
+-	if (!strcmp(options, "low"))
+-		ktt30_pnl_gpio[KTT30_LCD1_BL_EN].flags = GPIOF_OUT_INIT_HIGH;
+-	return 1;
+-}
+-__setup("bl_enb=", ktt30_setup_bl);
+-
+-static int __init ktt30_setup_bl_level(char *options)
+-{
+-	int bl_level;
+-
+-	get_option(&options, &bl_level);
+-
+-	if (bl_level < 0)
+-		bl_level = 0;
+-	else if (bl_level > ktt30_backlight_data.max_brightness)
+-		bl_level = ktt30_backlight_data.max_brightness;
+-
+-	ktt30_backlight_data.dft_brightness = bl_level;
+-	return 1;
+-}
+-__setup("bl_level=", ktt30_setup_bl_level);
+-
+-static enum ktt30_disp_type __init ktt30_get_disp_type(char *options)
+-{
+-	if (!strcmp(options, "lcd"))
+-		return ktt30_disp_type_lcd;
+-	if (!strcmp(options, "hdmi"))
+-		return ktt30_disp_type_hdmi;
+-	if (!strcmp(options, "none"))
+-		return ktt30_disp_type_none;
+-	return ktt30_disp_type_auto;
+-}
+-
+-static int __init ktt30_setup_bootdisp1(char *options)
+-{
+-	ktt30_setup_disp1 =  ktt30_get_disp_type(options);
+-	return 1;
+-}
+-__setup("bootdisp1=", ktt30_setup_bootdisp1);
+-
+-static int __init ktt30_setup_bootdisp2(char *options)
+-{
+-	ktt30_setup_disp2 =  ktt30_get_disp_type(options);
+-	return 1;
+-}
+-__setup("bootdisp2=", ktt30_setup_bootdisp2);
+-- 
+1.7.4.4
+

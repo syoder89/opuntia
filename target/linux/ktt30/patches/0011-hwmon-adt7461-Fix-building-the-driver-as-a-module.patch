@@ -1,0 +1,28 @@
+From 74d744a8fee5caa429cbc0e955fd64d19c80e0fd Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 31 Oct 2012 03:59:24 +0400
+Subject: [PATCH 011/127] hwmon: adt7461: Fix building the driver as a module
+
+Struct i2c_device_id should be terminated by a NULL entry,
+otherwise the driver cannot be built as a module.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/hwmon/adt7461.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/hwmon/adt7461.c b/drivers/hwmon/adt7461.c
+index 10ea2eb..b88099f 100644
+--- a/drivers/hwmon/adt7461.c
++++ b/drivers/hwmon/adt7461.c
+@@ -786,6 +786,7 @@ static int adt7461_resume(struct i2c_client *client)
+  */
+ static const struct i2c_device_id adt7461_id[] = {
+ 	{ DRIVER_NAME, 0 },
++	{ }
+ };
+ 
+ MODULE_DEVICE_TABLE(i2c, adt7461_id);
+-- 
+1.7.4.4
+

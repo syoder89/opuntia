@@ -1,0 +1,58 @@
+From eb9cdcb644a1dcd7b266c700a5b1424f7d808aed Mon Sep 17 00:00:00 2001
+From: Dmitry Artamonov <dartamonov@dev.rtsoft.ru>
+Date: Mon, 10 Sep 2012 14:20:22 +0400
+Subject: [PATCH 006/127] tegra: improve GPIO debug output
+
+Add name of port
+
+Signed-off-by: Dmitry Artamonov <dartamonov@dev.rtsoft.ru>
+---
+ drivers/gpio/gpio-tegra.c |   23 ++++++++++++++++++++---
+ 1 files changed, 20 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/gpio/gpio-tegra.c b/drivers/gpio/gpio-tegra.c
+index c1a80fb..f1c3aa9 100644
+--- a/drivers/gpio/gpio-tegra.c
++++ b/drivers/gpio/gpio-tegra.c
+@@ -567,18 +567,35 @@ void __init tegra_gpio_config(struct tegra_gpio_table *table, int num)
+ #include <linux/debugfs.h>
+ #include <linux/seq_file.h>
+ 
++#define A_Z_LEN ('Z' - 'A' + 1)
++
++static void port_2_name(int port, char name[3])
++{
++	if (port < A_Z_LEN) {
++		name[0] = 'A' + port;
++		name[1] = 0;
++	} else if (port < 2 * (A_Z_LEN)) {
++		name[0] = name[1] = 'A' + port - A_Z_LEN;
++		name[2] = 0;
++	} else
++		name[0] = 0;
++}
++
+ static int dbg_gpio_show(struct seq_file *s, void *unused)
+ {
+ 	int i;
+ 	int j;
++	char p_name[3];
+ 
+-	seq_printf(s, "Bank:Port CNF OE OUT IN INT_STA INT_ENB INT_LVL\n");
++	seq_printf(s,
++		"Bank:Port (Port name) CNF OE OUT IN INT_STA INT_ENB INT_LVL\n");
+ 	for (i = 0; i < ARRAY_SIZE(tegra_gpio_banks); i++) {
+ 		for (j = 0; j < 4; j++) {
+ 			int gpio = tegra_gpio_compose(i, j, 0);
++			port_2_name(i * 4 + j, p_name);
+ 			seq_printf(s,
+-				"%d:%d %02x %02x %02x %02x %02x %02x %06x\n",
+-				i, j,
++				"%d:%d (%s) %02x %02x %02x %02x %02x %02x %06x\n",
++				i, j, p_name,
+ 				__raw_readl(GPIO_CNF(gpio)),
+ 				__raw_readl(GPIO_OE(gpio)),
+ 				__raw_readl(GPIO_OUT(gpio)),
+-- 
+1.7.4.4
+

@@ -1,0 +1,43 @@
+From 4797751259838a164e788a8d582cdaea7e648344 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Fri, 8 Feb 2013 04:33:01 +0400
+Subject: [PATCH 031/127] arm: tegra: ktt30: Init SDHCI card detect wake-up
+
+SDHCI.2 has CD IRQ routed to GPIO PI2, which cannot be used
+as a wake-up source. Disable CD wake-up for SDHCI.2 and enable
+for other SDHCI controllers.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-sdhci.c |    9 ++++++---
+ 1 files changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-sdhci.c b/arch/arm/mach-tegra/board-ktt30-sdhci.c
+index c42f9cb..f3837f7 100644
+--- a/arch/arm/mach-tegra/board-ktt30-sdhci.c
++++ b/arch/arm/mach-tegra/board-ktt30-sdhci.c
+@@ -85,9 +85,8 @@ static struct tegra_sdhci_platform_data tegra_sdhci_platform_data0 = {
+ };
+ 
+ /*
+- * SDMMC3_CD_N routed to the pin GMI_DQS.  The corresponding GPIO channel does
+- * not support wake-up.  So the driver complains "SD card wake-up event
+- * registration"
++ * SDMMC3_CD_N is routed to the GMI_DQS pin.
++ * The corresponding GPIO channel does not support wake-up.
+  */
+ static struct tegra_sdhci_platform_data tegra_sdhci_platform_data2 = {
+ 	.cd_gpio = KTT30_SD2_CD,
+@@ -146,5 +145,9 @@ int __init ktt30_sdhci_init(void)
+ 	platform_device_register(&tegra_sdhci_device2);
+ 	platform_device_register(&tegra_sdhci_device3);
+ 
++	device_init_wakeup(&tegra_sdhci_device0.dev, 1);
++	device_init_wakeup(&tegra_sdhci_device2.dev, 0);
++	device_init_wakeup(&tegra_sdhci_device3.dev, 1);
++
+ 	return 0;
+ }
+-- 
+1.7.4.4
+

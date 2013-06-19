@@ -1,0 +1,72 @@
+From cc316bf46dae743e4b05a00ff490195e605c2db4 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 2 May 2013 03:22:01 +0400
+Subject: [PATCH 077/127] arm: tegra: ktt30: Make initialization functions
+ __init
+
+This makes initialization callback functions __init.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30.c |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index 7d63899..0a38dfe 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -263,7 +263,7 @@ static struct i2c_board_info __initdata ktt30_codec_wm8903_info = {
+ 	.platform_data = &ktt30_wm8903_pdata,
+ };
+ 
+-static void ktt30_i2c_init(void)
++static void __init ktt30_i2c_init(void)
+ {
+ 	tegra_i2c_device1.dev.platform_data = &ktt30_i2c1_platform_data;
+ 	tegra_i2c_device2.dev.platform_data = &ktt30_i2c2_platform_data;
+@@ -772,7 +772,7 @@ static struct platform_device __initdata *ktt30_usb_devices[] = {
+ 
+ static int ktt30_setup_usb2_disabled;
+ 
+-static void ktt30_usb_init(void)
++static void __init ktt30_usb_init(void)
+ {
+ 	tegra_otg_device.dev.platform_data = &tegra_otg_pdata;
+ 	tegra_udc_device.dev.platform_data = &tegra_udc_pdata;
+@@ -786,7 +786,7 @@ static void ktt30_usb_init(void)
+ 	platform_add_devices(ktt30_usb_devices, ARRAY_SIZE(ktt30_usb_devices));
+ }
+ #else
+-static void ktt30_usb_init(void) { }
++static void __init ktt30_usb_init(void) { }
+ #endif
+ 
+ static struct tegra_pci_platform_data ktt30_pci_platform_data = {
+@@ -797,7 +797,7 @@ static struct tegra_pci_platform_data ktt30_pci_platform_data = {
+ 	.gpio		= -1,
+ };
+ 
+-static void ktt30_pci_init(void)
++static void __init ktt30_pci_init(void)
+ {
+ 	if (ktt30_pci_platform_data.port_status[0] ||
+ 			ktt30_pci_platform_data.port_status[1] ||
+@@ -811,13 +811,13 @@ static void ktt30_pci_init(void)
+ #ifdef CONFIG_SATA_AHCI_TEGRA
+ static int ktt30_setup_sata_disable;
+ 
+-static void ktt30_sata_init(void)
++static void __init ktt30_sata_init(void)
+ {
+ 	if (!ktt30_setup_sata_disable)
+ 		platform_device_register(&tegra_sata_device);
+ }
+ #else
+-static void ktt30_sata_init(void) { }
++static void __init ktt30_sata_init(void) { }
+ #endif
+ 
+ static void __init tegra_ktt30_init(void)
+-- 
+1.7.4.4
+

@@ -1,0 +1,37 @@
+From c26bb61a7a33457875e5acd98dcd162ee219d72d Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 17 Apr 2013 13:02:31 +0400
+Subject: [PATCH 058/127] arm: tegra: ktt30: Enable MTD block and JFFS2
+ modules in defconfig
+
+This enables MTD block device and JFFS2 filesystem driver modules.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index c625cbd..aaf20de 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -187,6 +187,8 @@ CONFIG_DEVTMPFS_MOUNT=y
+ # CONFIG_FIRMWARE_IN_KERNEL is not set
+ CONFIG_MTD=y
+ CONFIG_MTD_CHAR=y
++CONFIG_MTD_BLOCK=m
++CONFIG_MTD_BLOCK_RO=m
+ CONFIG_MTD_M25P80=y
+ CONFIG_BLK_DEV_LOOP=y
+ CONFIG_MISC_DEVICES=y
+@@ -380,6 +382,7 @@ CONFIG_VFAT_FS=y
+ CONFIG_NTFS_FS=m
+ CONFIG_NTFS_RW=y
+ CONFIG_TMPFS=y
++CONFIG_JFFS2_FS=m
+ CONFIG_NFS_FS=y
+ CONFIG_NFS_V3=y
+ CONFIG_NFS_V3_ACL=y
+-- 
+1.7.4.4
+
