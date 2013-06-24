@@ -1,0 +1,45 @@
+From ed25a4f538c2ddf6173202ca272b94690121824c Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Mon, 25 Mar 2013 15:25:42 +0400
+Subject: [PATCH 051/127] arm: tegra: pci: Check whether dock detect GPIO is
+ valid
+
+Add GPIO validity check before accessing dock-detect GPIO pin.
+This should prevent kernel crash when PCIe is resumed.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/pcie.c |   10 +++++++---
+ 1 files changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/pcie.c b/arch/arm/mach-tegra/pcie.c
+index 6c31a3c..073497b 100644
+--- a/arch/arm/mach-tegra/pcie.c
++++ b/arch/arm/mach-tegra/pcie.c
+@@ -1316,7 +1316,8 @@ static int tegra_pcie_init(void)
+ 			tegra_pcie_add_port(port, rp_offset, ctrl_offset);
+ 	}
+ 
+-	if (tegra_pcie.plat_data->use_dock_detect) {
++	if (tegra_pcie.plat_data->use_dock_detect &&
++		gpio_is_valid(tegra_pcie.plat_data->gpio)) {
+ 		unsigned int irq;
+ 
+ 		pr_info("acquiring dock_detect = %d\n",
+@@ -1412,8 +1413,11 @@ static int tegra_pcie_resume(struct device *dev)
+ 	int ctrl_offset = AFI_PEX0_CTRL;
+ 
+ 	/* return w/o resume if cardhu dock is not connected */
+-	if (gpio_get_value(tegra_pcie.plat_data->gpio))
+-		goto exit;
++	if (gpio_is_valid(tegra_pcie.plat_data->gpio)) {
++		ret = gpio_get_value(tegra_pcie.plat_data->gpio);
++		if (ret)
++			goto exit;
++	}
+ 
+ 	ret = tegra_pcie_power_on();
+ 	if (ret) {
+-- 
+1.7.4.4
+

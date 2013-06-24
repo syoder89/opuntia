@@ -1,0 +1,47 @@
+From e3131db639c7ea7a96f060cde8f7119735be87d3 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sat, 6 Apr 2013 03:40:54 +0400
+Subject: [PATCH 052/127] arm: tegra: pcie: Fix AXI response decoding error at
+ PM resume
+
+The tegra_pcie_add_port() callback is used for initializing PCIe ports
+when PCIe is first started and when it is resumed after PM suspend.
+
+When the PCIe subsystem is first initialized, root_bus_nr has to be
+set to -1 prior to adding a port. Otherwise, the bus numbering may
+become incorrect as the PCIe subsystem may treat uninitialized ports
+with root_bus_nr other than -1 as initialized.
+
+When PCIe is resumed, we should keep the old root_bus_nr values,
+instead of resetting it to -1 since port bus numbers are not
+re-configured this time.
+
+We also need to remove all PCI devices when suspending in order
+to have all busses re-scanned when resumed.
+
+While at it, fix root_bus_nr type to make it treat -1 correctly.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/pcie.c |   13 ++++++-------
+ 1 files changed, 6 insertions(+), 7 deletions(-)
+
+--- a/arch/arm/mach-tegra/pcie.c
++++ b/arch/arm/mach-tegra/pcie.c
+@@ -211,7 +211,7 @@ static void __iomem *reg_pmc_base = IO_A
+ 
+ struct tegra_pcie_port {
+ 	int			index;
+-	u8			root_bus_nr;
++	int			root_bus_nr;
+ 	void __iomem		*base;
+ 
+ 	bool			link_up;
+@@ -868,7 +868,6 @@ static void __init tegra_pcie_add_port(i
+ 
+ 	tegra_pcie.num_ports++;
+ 	pp->index = index;
+-	pp->root_bus_nr = -1;
+ 	memset(pp->res, 0, sizeof(pp->res));
+ }
+ 

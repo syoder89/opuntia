@@ -1,0 +1,437 @@
+From 6362e57fcb63b2f8a7982a66e9421b5ff0ce8758 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 17 Apr 2013 22:06:08 +0400
+Subject: [PATCH 063/127] hwmon: Add PWM fan driver
+
+This adds preliminary PWM fan platform driver support.
+The fan speed is controlled by a PWM device.
+The tachometer output can be routed to a GPIO.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/hwmon/Kconfig   |   11 ++
+ drivers/hwmon/Makefile  |    1 +
+ drivers/hwmon/pwm-fan.c |  363 +++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/pwm-fan.h |   19 +++
+ 4 files changed, 394 insertions(+), 0 deletions(-)
+ create mode 100644 drivers/hwmon/pwm-fan.c
+ create mode 100644 include/linux/pwm-fan.h
+
+--- a/drivers/hwmon/Kconfig
++++ b/drivers/hwmon/Kconfig
+@@ -463,6 +463,17 @@ config SENSORS_HIH6130
+ 	  This driver can also be built as a module.  If so, the module
+ 	  will be called hih6130.
+ 
++config SENSORS_PWM_FAN
++	tristate "PWM fan"
++	depends on HAVE_PWM
++	help
++	  If you say yes here you get support for fans connected to PWM.
++	  Fan speed is controlled by PWM duty cycle. The driver allows
++	  to measure actual speed if a tacho output is connected to a GPIO.
++
++	  This driver can also be built as a module.  If so, the module
++	  will be called pwm-fan.
++
+ config SENSORS_CORETEMP
+ 	tristate "Intel Core/Core2/Atom temperature sensor"
+ 	depends on X86
+--- a/drivers/hwmon/Makefile
++++ b/drivers/hwmon/Makefile
+@@ -60,6 +60,7 @@ obj-$(CONFIG_SENSORS_G760A)	+= g760a.o
+ obj-$(CONFIG_SENSORS_GL518SM)	+= gl518sm.o
+ obj-$(CONFIG_SENSORS_GL520SM)	+= gl520sm.o
+ obj-$(CONFIG_SENSORS_GPIO_FAN)	+= gpio-fan.o
++obj-$(CONFIG_SENSORS_PWM_FAN)	+= pwm-fan.o
+ obj-$(CONFIG_SENSORS_HIH6130)	+= hih6130.o
+ obj-$(CONFIG_SENSORS_ULTRA45)	+= ultra45_env.o
+ obj-$(CONFIG_SENSORS_I5K_AMB)	+= i5k_amb.o
+--- /dev/null
++++ b/drivers/hwmon/pwm-fan.c
+@@ -0,0 +1,363 @@
++/*
++ * pwm-fan.c - Hwmon driver for fans connected to PWM.
++ *
++ * Copyright (C) 2013
++ *
++ * Author: Valentine Barshak <vbarshak@dev.rtsoft.ru>
++ * Based on the GPIO fan driver by:
++ * Simon Guinot <sguinot@lacie.com>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/slab.h>
++#include <linux/interrupt.h>
++#include <linux/irq.h>
++#include <linux/platform_device.h>
++#include <linux/err.h>
++#include <linux/mutex.h>
++#include <linux/hwmon.h>
++#include <linux/gpio.h>
++#include <linux/pwm.h>
++#include <linux/workqueue.h>
++#include <linux/pwm-fan.h>
++
++#define PWM_FAN			"pwm-fan"
++
++/* Measure speed after 5 revolutions or every 2 seconds */
++#define PWM_FAN_TACHO_TICKS	10
++#define PWM_FAN_TACHO_PERIOD	(2*HZ)
++
++/* PWM period and duty cycle, nS */
++#define PWM_FAN_PWM_PERIOD	40000 /* 25kHz */
++#define PWM_FAN_DUTY_NS(d)	(((d) * PWM_FAN_PWM_PERIOD) / 255)
++
++
++struct pwm_fan_data {
++	struct mutex		lock;
++	struct pwm_device	*pwm;
++	int			pwm_duty;
++	int			tacho_irq;
++	int			tacho_cnt;
++	int			rpm;
++	struct timespec		start;
++	struct timespec		stop;
++	struct delayed_work	tacho_work;
++	struct device		*hwmon_dev;
++};
++
++
++static ssize_t show_pwm(struct device *dev,
++			struct device_attribute *attr, char *buf)
++{
++	struct pwm_fan_data *fan_data = dev_get_drvdata(dev);
++
++	return sprintf(buf, "%d\n", fan_data->pwm_duty);
++}
++
++static ssize_t set_pwm(struct device *dev, struct device_attribute *attr,
++		       const char *buf, size_t count)
++{
++	struct pwm_fan_data *fan_data = dev_get_drvdata(dev);
++	unsigned long val;
++	int retval, duty_ns;
++
++	if (strict_strtoul(buf, 10, &val) || val > 255)
++		return -EINVAL;
++
++	duty_ns = PWM_FAN_DUTY_NS(val);
++
++	mutex_lock(&fan_data->lock);
++
++	retval = pwm_config(fan_data->pwm, duty_ns, PWM_FAN_PWM_PERIOD);
++	if (retval)
++		goto out_unlock;
++
++	if (!duty_ns)
++		pwm_disable(fan_data->pwm);
++	else if (!fan_data->pwm_duty)
++		pwm_enable(fan_data->pwm);
++
++	fan_data->pwm_duty = val;
++	retval = count;
++
++out_unlock:
++	mutex_unlock(&fan_data->lock);
++	return retval;
++}
++
++static ssize_t show_rpm(struct device *dev,
++			struct device_attribute *attr, char *buf)
++{
++	struct pwm_fan_data *fan_data = dev_get_drvdata(dev);
++
++	return sprintf(buf, "%d\n", fan_data->rpm);
++}
++
++static DEVICE_ATTR(pwm1, S_IRUGO | S_IWUSR, show_pwm, set_pwm);
++static DEVICE_ATTR(fan1_input, S_IRUGO, show_rpm, NULL);
++
++static struct attribute *pwm_fan_ctrl_attributes[] = {
++	&dev_attr_pwm1.attr,
++	&dev_attr_fan1_input.attr,
++	NULL,
++};
++
++static const struct attribute_group pwm_fan_ctrl_group = {
++	.attrs = pwm_fan_ctrl_attributes,
++};
++
++static ssize_t show_name(struct device *dev,
++			 struct device_attribute *attr, char *buf)
++{
++	return sprintf(buf, "%s\n", dev_name(dev));
++}
++
++static DEVICE_ATTR(name, S_IRUGO, show_name, NULL);
++
++
++static void pwm_fan_tacho_work(struct work_struct *work)
++{
++	struct pwm_fan_data *fan_data;
++	int val;
++
++	fan_data = container_of(work, struct pwm_fan_data, tacho_work.work);
++
++	disable_irq(fan_data->tacho_irq);
++
++	/* Get a number of tacho ticks */
++	val = fan_data->tacho_cnt;
++	fan_data->tacho_cnt = 0;
++
++	/* The interrupt has also been
++	 * disabled in the IRQ handler */
++	if (val > PWM_FAN_TACHO_TICKS)
++		enable_irq(fan_data->tacho_irq);
++
++	/* Do not account for the first (start) tick */
++	if (--val > 0) {
++		struct timespec dts = timespec_sub(fan_data->stop,
++							fan_data->start);
++		long us = dts.tv_sec * USEC_PER_SEC + dts.tv_nsec / 1000;
++
++		/* Calculate RPM after at least one
++		 * complete revolution (2 tacho ticks) */
++		val *= 30 * USEC_PER_SEC;
++		if (us > 0)
++			val /= us;
++	} else {
++		val = 0;
++	}
++
++	/* Update speed */
++	fan_data->rpm = val;
++
++	/* Finally enable the interrupt */
++	enable_irq(fan_data->tacho_irq);
++
++	schedule_delayed_work(&fan_data->tacho_work, PWM_FAN_TACHO_PERIOD);
++}
++
++static irqreturn_t fan_tacho_irq_handler(int irq, void *dev_id)
++{
++	struct pwm_fan_data *fan_data = dev_id;
++
++	if (!fan_data->tacho_cnt)
++		getnstimeofday(&fan_data->start);
++	else
++		getnstimeofday(&fan_data->stop);
++
++	fan_data->tacho_cnt++;
++	if (fan_data->tacho_cnt > PWM_FAN_TACHO_TICKS)
++		disable_irq_nosync(irq);
++
++	return IRQ_HANDLED;
++}
++
++
++static int __devinit pwm_fan_probe(struct platform_device *pdev)
++{
++	int retval;
++	struct pwm_fan_data *fan_data;
++	struct pwm_fan_platform_data *pdata = pdev->dev.platform_data;
++
++	if (!pdata)
++		return -EINVAL;
++
++	fan_data = kzalloc(sizeof(struct pwm_fan_data), GFP_KERNEL);
++	if (!fan_data)
++		return -ENOMEM;
++
++	platform_set_drvdata(pdev, fan_data);
++	mutex_init(&fan_data->lock);
++
++	fan_data->pwm = pwm_request(pdata->pwm_id, dev_name(&pdev->dev));
++	if (IS_ERR(fan_data->pwm)) {
++		retval = PTR_ERR(fan_data->pwm);
++		dev_err(&pdev->dev, "pwm_request failed (%i)\n", retval);
++		goto err_free_data;
++	}
++
++	retval = device_create_file(&pdev->dev, &dev_attr_name);
++	if (retval) {
++		dev_err(&pdev->dev, "device_create_file failed (%i)\n", retval);
++		goto err_free_pwm;
++	}
++
++	retval = sysfs_create_group(&pdev->dev.kobj, &pwm_fan_ctrl_group);
++	if (retval) {
++		dev_err(&pdev->dev, "sysfs_create_group failed (%i)\n", retval);
++		goto err_remove_name;
++	}
++
++	/* Make this driver part of hwmon class. */
++	fan_data->hwmon_dev = hwmon_device_register(&pdev->dev);
++	if (IS_ERR(fan_data->hwmon_dev)) {
++		retval = PTR_ERR(fan_data->hwmon_dev);
++		dev_err(&pdev->dev, "hwmon_device_register failed (%i)\n",
++									retval);
++		goto err_remove_group;
++	}
++
++	/* Configure tacho GPIO if available. */
++	if (!gpio_is_valid(pdata->tacho_gpio)) {
++		dev_info(&pdev->dev,
++			"tachometer output unavailable\n");
++		goto out;
++	}
++
++	retval = gpio_request_one(pdata->tacho_gpio,
++					GPIOF_DIR_IN, dev_name(&pdev->dev));
++	if (retval) {
++		dev_err(&pdev->dev, "gpio %i request failed (%i)\n",
++			pdata->tacho_gpio, retval);
++		goto err_unregister;
++	}
++
++	fan_data->tacho_irq = gpio_to_irq(pdata->tacho_gpio);
++	retval = request_irq(fan_data->tacho_irq, fan_tacho_irq_handler,
++			IRQF_TRIGGER_FALLING, dev_name(&pdev->dev), fan_data);
++	if (retval) {
++		dev_err(&pdev->dev, "gpio %i request_irq failed (%i)\n",
++			pdata->tacho_gpio, retval);
++		goto err_gpio_free;
++	}
++
++	INIT_DELAYED_WORK(&fan_data->tacho_work, pwm_fan_tacho_work);
++	schedule_delayed_work(&fan_data->tacho_work, PWM_FAN_TACHO_PERIOD);
++out:
++	dev_info(&pdev->dev, "initialized\n");
++
++	return 0;
++
++err_gpio_free:
++	gpio_free(pdata->tacho_gpio);
++err_unregister:
++	hwmon_device_unregister(fan_data->hwmon_dev);
++err_remove_group:
++	sysfs_remove_group(&pdev->dev.kobj, &pwm_fan_ctrl_group);
++err_remove_name:
++	device_remove_file(&pdev->dev, &dev_attr_name);
++err_free_pwm:
++	pwm_free(fan_data->pwm);
++err_free_data:
++	platform_set_drvdata(pdev, NULL);
++	kfree(fan_data);
++
++	return retval;
++}
++
++static int __devexit pwm_fan_remove(struct platform_device *pdev)
++{
++	struct pwm_fan_data *fan_data = platform_get_drvdata(pdev);
++	struct pwm_fan_platform_data *pdata = pdev->dev.platform_data;
++
++	hwmon_device_unregister(fan_data->hwmon_dev);
++	sysfs_remove_group(&pdev->dev.kobj, &pwm_fan_ctrl_group);
++	device_remove_file(&pdev->dev, &dev_attr_name);
++
++	if (gpio_is_valid(pdata->tacho_gpio)) {
++		cancel_delayed_work_sync(&fan_data->tacho_work);
++		free_irq(fan_data->tacho_irq, fan_data);
++		gpio_free(pdata->tacho_gpio);
++	}
++
++	if (fan_data->pwm) {
++		pwm_disable(fan_data->pwm);
++		pwm_free(fan_data->pwm);
++	}
++
++	kfree(fan_data);
++
++	return 0;
++}
++
++#ifdef CONFIG_PM
++static int pwm_fan_suspend(struct platform_device *pdev, pm_message_t state)
++{
++	struct pwm_fan_data *fan_data = platform_get_drvdata(pdev);
++
++	pwm_disable(fan_data->pwm);
++
++	return 0;
++}
++
++static int pwm_fan_resume(struct platform_device *pdev)
++{
++	struct pwm_fan_data *fan_data = platform_get_drvdata(pdev);
++
++	if (!fan_data->pwm_duty)
++		return 0;
++
++	pwm_config(fan_data->pwm, PWM_FAN_DUTY_NS(fan_data->pwm_duty),
++			PWM_FAN_PWM_PERIOD);
++	pwm_enable(fan_data->pwm);
++
++	return 0;
++}
++#else
++#define pwm_fan_suspend NULL
++#define pwm_fan_resume NULL
++#endif
++
++static struct platform_driver pwm_fan_driver = {
++	.probe		= pwm_fan_probe,
++	.remove		= __devexit_p(pwm_fan_remove),
++	.suspend	= pwm_fan_suspend,
++	.resume		= pwm_fan_resume,
++	.driver	= {
++		.name	= PWM_FAN,
++	},
++};
++
++static int __init pwm_fan_init(void)
++{
++	return platform_driver_register(&pwm_fan_driver);
++}
++
++static void __exit pwm_fan_exit(void)
++{
++	platform_driver_unregister(&pwm_fan_driver);
++}
++
++module_init(pwm_fan_init);
++module_exit(pwm_fan_exit);
++
++MODULE_AUTHOR("Valentine Barshak <vbarshak@dev.rtsoft.ru>");
++MODULE_DESCRIPTION("PWM fan driver");
++MODULE_LICENSE("GPL");
++MODULE_ALIAS("platform:"PWM_FAN);
+--- /dev/null
++++ b/include/linux/pwm-fan.h
+@@ -0,0 +1,19 @@
++/*
++ * include/linux/gpio-fan.h
++ *
++ * Platform data structure for GPIO fan driver
++ *
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2.  This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
++
++#ifndef __LINUX_GPIO_FAN_H
++#define __LINUX_GPIO_FAN_H
++
++struct pwm_fan_platform_data {
++	int tacho_gpio;
++	int pwm_id;
++};
++
++#endif /* __LINUX_GPIO_FAN_H */

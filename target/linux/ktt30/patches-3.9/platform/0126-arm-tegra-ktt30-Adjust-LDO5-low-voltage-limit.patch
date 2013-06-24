@@ -1,0 +1,30 @@
+From d723432febb179afd39f5f469ca8deb5626bf5f7 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 30 May 2013 13:23:02 +0400
+Subject: [PATCH 126/127] arm: tegra: ktt30: Adjust LDO5 low voltage limit
+
+LDO5 should provide 1.8V as well since it is needed
+for the SDMMC UHS-I support.
+Make LDO5 voltage limits match the Cardhu version.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-power.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-power.c b/arch/arm/mach-tegra/board-ktt30-power.c
+index 4b90084..d003c18 100644
+--- a/arch/arm/mach-tegra/board-ktt30-power.c
++++ b/arch/arm/mach-tegra/board-ktt30-power.c
+@@ -182,7 +182,7 @@ TPS_PDATA_INIT(ldo2, 0,         1050, 1050, tps6591x_rails(VDD_2), 0, 0, 1, -1,
+ 
+ TPS_PDATA_INIT(ldo3, 0,         1000, 3300, 0, 0, 0, 0, -1, 0, 0, 0, 0);
+ TPS_PDATA_INIT(ldo4, 0,         1000, 1200, 0, 1, 0, 0, -1, 0, 0, 0, 0);
+-TPS_PDATA_INIT(ldo5, 0,         3300, 3300, 0, 0, 0, 0, -1, 0, 0, 0, 0);
++TPS_PDATA_INIT(ldo5, 0,         1000, 3300, 0, 0, 0, 0, -1, 0, 0, 0, 0);
+ 
+ TPS_PDATA_INIT(ldo6, 0,         1200, 1200, tps6591x_rails(VIO), 0, 0, 1, -1, 0, 0, 0, 0);
+ TPS_PDATA_INIT(ldo7, 0,         1200, 1200, tps6591x_rails(VIO), 1, 1, 1, -1, 0, 0, EXT_CTRL_SLEEP_OFF, LDO_LOW_POWER_ON_SUSPEND);
+-- 
+1.7.4.4
+

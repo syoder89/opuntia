@@ -1,0 +1,29 @@
+From 15433dd8ad3763a34d0fe0ff5e73cbc1f0a97ffa Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Fri, 25 Jan 2013 22:01:53 +0400
+Subject: [PATCH 029/127] arm: tegra: pcie: Fix port root bus number
+
+Set port root bus number to -1 when adding a new port.
+This should fix the following issue:
+  PCIE: AXI response decoding error, signature: ff0100e5
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/pcie.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/pcie.c b/arch/arm/mach-tegra/pcie.c
+index 04d3a5d..6233e50 100644
+--- a/arch/arm/mach-tegra/pcie.c
++++ b/arch/arm/mach-tegra/pcie.c
+@@ -1262,6 +1262,7 @@ static void tegra_pcie_add_port(int index, u32 offset, u32 reset_reg)
+ 
+ 	tegra_pcie.num_ports++;
+ 	pp->index = index;
++	pp->root_bus_nr = -1;
+ 	memset(pp->res, 0, sizeof(pp->res));
+ }
+ 
+-- 
+1.7.4.4
+

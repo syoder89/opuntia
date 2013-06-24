@@ -1,0 +1,30 @@
+From 93b36e308c03e01ca957c60fe46a957d0e70bf9d Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 22 May 2013 17:22:51 +0400
+Subject: [PATCH 090/127] usb: gadget: tegra_udc: Enable softconnect by
+ default
+
+This enables softconnect by default.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/usb/gadget/tegra_udc.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/usb/gadget/tegra_udc.c b/drivers/usb/gadget/tegra_udc.c
+index 9af22eb..27a43d0 100644
+--- a/drivers/usb/gadget/tegra_udc.c
++++ b/drivers/usb/gadget/tegra_udc.c
+@@ -323,6 +323,9 @@ static void dr_controller_run(struct tegra_udc *udc)
+ 	/* Clear stopped bit */
+ 	udc->stopped = 0;
+ 
++	/* Set softconnect */
++	udc->softconnect = 1;
++
+ 	/* If OTG transceiver is available, then it handles the VBUS detection*/
+ 	if (!udc->transceiver) {
+ 		/* Enable cable detection interrupt, without setting the
+-- 
+1.7.4.4
+

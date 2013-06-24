@@ -1,0 +1,28 @@
+From 36543d09fb6d8d58799ba85a417329103bac783c Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 22 May 2013 21:26:45 +0400
+Subject: [PATCH 096/127] arm: tegra: ktt30: Enable
+ MMC_BLOCK_NAME_IDX_BY_HOST_IDX in ktt30_defconfig
+
+This enabled MMC block device enumeration based on the MMC host index.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index 060ff28..b37bf19 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -367,6 +367,7 @@ CONFIG_USB_CDC_COMPOSITE=m
+ CONFIG_USB_TEGRA_OTG=y
+ CONFIG_MMC=y
+ CONFIG_MMC_UNSAFE_RESUME=y
++CONFIG_MMC_BLOCK_NAME_IDX_BY_HOST_IDX=y
+ CONFIG_MMC_SDHCI=y
+ CONFIG_MMC_SDHCI_PLTFM=y
+ CONFIG_MMC_SDHCI_TEGRA=y
+-- 
+1.7.4.4
+

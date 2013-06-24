@@ -1,0 +1,64 @@
+From d1a3d70f1c431ccd23caa3174d13392be501f12f Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Fri, 22 Feb 2013 15:14:59 +0400
+Subject: [PATCH 037/127] arm: tegra: ktt30: Implement fixed Ethernet power
+ regulator
+
+This adds GPIO_PL2, which is used to control power for
+the built-in PCIe Ethernet device, to fixed power
+regulators.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-pinmux.c |    2 +-
+ arch/arm/mach-tegra/board-ktt30-power.c  |    7 +++++++
+ 2 files changed, 8 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-pinmux.c b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+index 4c6cd1a..e67b4b4 100644
+--- a/arch/arm/mach-tegra/board-ktt30-pinmux.c
++++ b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+@@ -235,7 +235,7 @@ static __initdata struct tegra_pingroup_config ktt30_pinmux_common[] = {
+ 	DEFAULT_PINMUX(VI_D2,           RSVD1,           NORMAL,    NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(VI_D3,           RSVD1,           NORMAL,    NORMAL,     INPUT),
+ 	/* ETH_EN (Intel 82574L chip) */
+-	DEFAULT_PINMUX(VI_D4,           RSVD1,           PULL_UP,   NORMAL,     OUTPUT),
++	DEFAULT_PINMUX(VI_D4,           RSVD1,           PULL_DOWN, NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(VI_D5,           RSVD1,           NORMAL,    NORMAL,     INPUT),
+ 	DEFAULT_PINMUX(VI_D7,           RSVD1,           PULL_UP,   NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(VI_D10,          RSVD1,           NORMAL,    NORMAL,     INPUT),
+diff --git a/arch/arm/mach-tegra/board-ktt30-power.c b/arch/arm/mach-tegra/board-ktt30-power.c
+index 633ef36..6115b68 100644
+--- a/arch/arm/mach-tegra/board-ktt30-power.c
++++ b/arch/arm/mach-tegra/board-ktt30-power.c
+@@ -429,6 +429,11 @@ static struct regulator_consumer_supply fixed_reg_en_vdd_pnl1_supply[] = {
+ 	REGULATOR_SUPPLY("vdd_lcd_panel", NULL),
+ };
+ 
++/* EN_VDD_ETH from  GPIO VI_D4 PL2*/
++static struct regulator_consumer_supply fixed_reg_en_vdd_eth_supply[] = {
++	REGULATOR_SUPPLY("vdd_eth", NULL),
++};
++
+ /* EN_VDD_SDMMC1 from AP GPIO VI_HSYNC D07*/
+ static struct regulator_consumer_supply fixed_reg_en_vdd_sdmmc1_supply[] = {
+ 	REGULATOR_SUPPLY("vddio_sd_slot", "sdhci-tegra.0"),
+@@ -524,6 +529,7 @@ FIXED_REG(1, en_5v0,		en_5v0,		NULL,				0,      0,      TPS6591X_GPIO_2,	true,	0
+ FIXED_REG(2, en_ddr,		en_ddr,		NULL,				1,      0,      TPS6591X_GPIO_7,	true,	1, 1500);
+ FIXED_REG(3, en_3v3_sys,	en_3v3_sys,	NULL,				0,      0,      TPS6591X_GPIO_6,	true,	1, 3300);
+ FIXED_REG(5, en_3v3_mini,	en_3v3_mini,	NULL,				1,      0,      TEGRA_GPIO_PD6,		true,	1, 3300);
++FIXED_REG(7, en_vdd_eth,	en_vdd_eth,	NULL,				1,      1,      TEGRA_GPIO_PL2,		true,	1, 3300);
+ FIXED_REG(9, en_3v3_fuse,	en_3v3_fuse,	FIXED_SUPPLY(en_3v3_sys),	0,      0,      TEGRA_GPIO_PL6,		true,	0, 3300);
+ FIXED_REG(10, en_3v3_emmc,	en_3v3_emmc,	FIXED_SUPPLY(en_3v3_sys),	1,      0,      TEGRA_GPIO_PD1,		true,	1, 3300);
+ FIXED_REG(11, en_vdd_sdmmc1,	en_vdd_sdmmc1,	FIXED_SUPPLY(en_3v3_sys),	0,      0,      TEGRA_GPIO_PD7,		true,	1, 3300);
+@@ -553,6 +559,7 @@ FIXED_REG_OD(17, en_vddio_vid_oc,	en_vddio_vid_oc,	FIXED_SUPPLY(dis_5v_switch),
+ 	ADD_FIXED_REG(en_3v3_sys),		\
+ 	ADD_FIXED_REG(en_3v3_mini),		\
+ 	ADD_FIXED_REG(en_3v3_fuse),		\
++	ADD_FIXED_REG(en_vdd_eth),		\
+ 	ADD_FIXED_REG(en_3v3_emmc),		\
+ 	ADD_FIXED_REG(en_vdd_sdmmc1),		\
+ 	ADD_FIXED_REG(en_3v3_pex_hvdd),		\
+-- 
+1.7.4.4
+

@@ -1,0 +1,79 @@
+From 8db74fe6e63c4d0a5aeb1abe40c542ad7b9758fe Mon Sep 17 00:00:00 2001
+From: Maxim Yu. Osipov <mosipov@dev.rtsoft.ru>
+Date: Wed, 8 May 2013 13:09:11 +0400
+Subject: [PATCH 080/127] arm: tegra: ktt30: Added support of case open.
+
+This adds support of case open with the help of gpio_keys
+infrastructure. Change of the signal level on pin 0 of
+Feature Connector J36 on the running board generates event
+via /dev/input/<event> interface, which could be processed
+by application layer accordingly.
+
+Signed-off-by: Maxim Osipov <mosipov@dev.rtsoft.ru>
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30.c |   28 ++++++++++++++++++++--------
+ 1 files changed, 20 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index 6580251..8891e61 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -72,6 +72,17 @@
+ #include "pm.h"
+ #include "wdt-recovery.h"
+ 
++#define GPIO_SW_KEY(_id, _gpio, _iswake)	\
++	{					\
++		.code = _id,			\
++		.gpio = _gpio,			\
++		.active_low = 1,		\
++		.desc = #_id,			\
++		.type = EV_SW,			\
++		.wakeup = _iswake,		\
++		.debounce_interval = 1,		\
++	}
++
+ #define GPIO_IKEY(_id, _irq, _iswake, _deb)	\
+ 	{					\
+ 		.code = _id,			\
+@@ -543,27 +554,28 @@ static struct platform_device ktt30_audio_wm8903_device = {
+ 	},
+ };
+ 
+-static struct gpio_keys_button ktt30_int_keys[] = {
++static struct gpio_keys_button ktt30_keys[] = {
+ 	[0] = GPIO_IKEY(KEY_POWER,
+-		 TPS6591X_IRQ_BASE + TPS6591X_INT_PWRON, 1, 100)
++		 TPS6591X_IRQ_BASE + TPS6591X_INT_PWRON, 1, 100),
++	[1] = GPIO_SW_KEY(SW_LID, TPS6591X_GPIO_5, 0),
+ };
+ 
+-static struct gpio_keys_platform_data ktt30_int_keys_pdata = {
+-	.buttons	= ktt30_int_keys,
+-	.nbuttons       = ARRAY_SIZE(ktt30_int_keys),
++static struct gpio_keys_platform_data ktt30_keys_pdata = {
++	.buttons	= ktt30_keys,
++	.nbuttons       = ARRAY_SIZE(ktt30_keys),
+ };
+ 
+-static struct platform_device ktt30_int_keys_device = {
++static struct platform_device ktt30_keys_device = {
+ 	.name   = "gpio-keys",
+ 	.id     = 0,
+ 	.dev    = {
+-		.platform_data  = &ktt30_int_keys_pdata,
++		.platform_data  = &ktt30_keys_pdata,
+ 	},
+ };
+ 
+ int __init ktt30_keys_init(void)
+ {
+-	platform_device_register(&ktt30_int_keys_device);
++	platform_device_register(&ktt30_keys_device);
+ 	return 0;
+ }
+ 
+-- 
+1.7.4.4
+

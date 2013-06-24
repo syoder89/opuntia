@@ -1,0 +1,49 @@
+From bc9c39d66c6fb922f844626dae0443e3f88feda7 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Mon, 15 Apr 2013 20:04:53 +0400
+Subject: [PATCH 066/127] arm: tegra: ktt30: Disable LVDS power by default
+
+Let the panel code handle LCD power initialization and
+have it disabled by default.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-pinmux.c |   12 ++++++++----
+ arch/arm/mach-tegra/board-ktt30-power.c  |    2 +-
+ 2 files changed, 9 insertions(+), 5 deletions(-)
+
+--- a/arch/arm/mach-tegra/board-ktt30-pinmux.c
++++ b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+@@ -254,13 +254,18 @@ static __initdata struct tegra_pingroup_
+ 	DEFAULT_PINMUX(GMI_WAIT,        RSVD1,           NORMAL,    NORMAL,     INPUT),
+ 	DEFAULT_PINMUX(GMI_CS0_N,       RSVD1,           NORMAL,    NORMAL,     INPUT),
+ 	DEFAULT_PINMUX(GMI_CS1_N,       RSVD1,           NORMAL,    NORMAL,     OUTPUT),
+-	DEFAULT_PINMUX(GMI_CS3_N,       RSVD1,           PULL_DOWN, NORMAL,     OUTPUT),
++	/* LVDS_SHTDN_N */
++	DEFAULT_PINMUX(GMI_CS2_N,       RSVD1,           PULL_DOWN, NORMAL,     OUTPUT),
++	/* L_VDDEN_N */
++	DEFAULT_PINMUX(GMI_CS3_N,       RSVD1,           PULL_UP,   NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(GMI_CS4_N,       RSVD1,           NORMAL,    NORMAL,     INPUT),
+ 	DEFAULT_PINMUX(GMI_CS6_N,       NAND_ALT,        NORMAL,    NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(GMI_CS7_N,       NAND_ALT,        NORMAL,    NORMAL,     OUTPUT),
+ 
+-	DEFAULT_PINMUX(GMI_AD8,         PWM0,            NORMAL,    NORMAL,     OUTPUT),
+-	DEFAULT_PINMUX(GMI_AD10,        RSVD2,           NORMAL,    NORMAL,     OUTPUT),
++	/* LCD1_BL_PWM */
++	DEFAULT_PINMUX(GMI_AD8,         PWM0,            PULL_DOWN, NORMAL,     OUTPUT),
++	/* LCD1_BL_EN */
++	DEFAULT_PINMUX(GMI_AD10,        RSVD2,           PULL_DOWN, NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(GMI_AD11,        PWM3,            NORMAL,    NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(GMI_AD13,        RSVD1,           NORMAL,    NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(GMI_AD15,        RSVD1,           NORMAL,    NORMAL,     OUTPUT),
+--- a/arch/arm/mach-tegra/board-ktt30-power.c
++++ b/arch/arm/mach-tegra/board-ktt30-power.c
+@@ -547,7 +547,7 @@ FIXED_REG(13, en_1v8_cam,	en_1v8_cam,	tp
+ FIXED_REG(14, dis_5v_switch,	dis_5v_switch,	FIXED_SUPPLY(en_5v0),	0,      0,      TEGRA_GPIO_PX2,		false,	0, 5000);
+ 
+ FIXED_REG(4, en_vdd_bl,		en_vdd_bl,	NULL,				0,      0,      TEGRA_GPIO_PH2,	true,	1, 5000);
+-FIXED_REG(6, en_vdd_pnl1,	en_vdd_pnl1,	FIXED_SUPPLY(en_3v3_sys),	0,      0,      TEGRA_GPIO_PK4,	true,	1, 3300);
++FIXED_REG(6, en_vdd_pnl1,	en_vdd_pnl1,	FIXED_SUPPLY(en_3v3_sys),	0,      0,      TEGRA_GPIO_PK4,	false,	0, 3300);
+ 
+ /****************** Open collector Load switches *******/
+ FIXED_REG_OD(15, en_usb1_vbus_oc,	en_usb1_vbus_oc,	FIXED_SUPPLY(dis_5v_switch),	0,      0,      TEGRA_GPIO_PI4,		true,	0, 5000, true);

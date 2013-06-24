@@ -1,0 +1,53 @@
+From abc5143ac8aace0ce752c0c1542da818536f27e2 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 9 May 2013 01:16:47 +0400
+Subject: [PATCH 086/127] hwmon: ina219: Use x8 samples and x2 gain
+
+This enables x8 samples for Vshunt measurements as well as for Vbus.
+It also sets x2 PGA gain by default. This is needed for KTT30,
+since maximum Vshunt is 80mV. It shouldn't affect other boards.
+While at it, amend the configuration register comments.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/hwmon/ina219.c |   24 ++++++++++++------------
+ 1 files changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/hwmon/ina219.c b/drivers/hwmon/ina219.c
+index cd48fa2..64e1ad2 100644
+--- a/drivers/hwmon/ina219.c
++++ b/drivers/hwmon/ina219.c
+@@ -53,18 +53,18 @@
+ #define INA219_CAL	5
+ 
+ /*
+-	INA219 Sensor defines
+-	Config info for ina219s
+-	D15   D14  D13  D12 D11 D10 D9 D8 D7 D6 D5 D4 D3 D2 D1 D0
+-	rst  BRNG  PG1 PG0  BADC4 .-.BADC1 SADC4 - SADC1 MODE3 - MODE1
+-	reset D15
+-	bus_range=0 (d13)
+-	pga_gain=0  (D12:D11)
+-	bus_adc_setting=0x3     (d10:D7) 12-bit w/o oversampling (532uS)
+-	shunt_adc_setting=0xb    (D6:D3) 8x oversampling (4.26ms)
+-	mode=0x7                 (D2:D0) continuous shunt & bus
+-*/
+-#define INA219_CONFIG_DATA 0x1df
++ * INA219 Sensor defines
++ * Config info for ina219
++ * D15  D14 D13  D12 D11 D10 D9  D8 D7 D6  D5 D4  D3 D2   D1    D0
++ * RST   -  BRNG PG1 PG0 BADC4 - BADC1 SADC4 - SADC1 MODE3 - MODE1
++ *
++ * bus_range	= 0x0	(D13)		(16V)
++ * pga_gain	= 0x1	(D12:D11)	x2 gain (80mV)
++ * bus_adc	= 0xb	(D10:D7)	x8 oversampling (4.26ms)
++ * shunt_adc	= 0xb	(D6:D3)		x8 oversampling (4.26ms)
++ * mode		= 0x7	(D2:D0)		continuous shunt & bus
++ */
++#define INA219_CONFIG_DATA 0xddf
+ #define INA219_RESET 0x8000
+ 
+ /* The worst case should be ~68.10 mS */
+-- 
+1.7.4.4
+

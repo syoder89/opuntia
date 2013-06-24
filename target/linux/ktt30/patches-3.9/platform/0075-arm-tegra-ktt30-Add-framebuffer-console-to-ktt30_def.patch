@@ -1,0 +1,28 @@
+From 722a236d7bd0acb693332fc2e890eea037a2cb15 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 1 May 2013 21:00:37 +0400
+Subject: [PATCH 075/127] arm: tegra: ktt30: Add framebuffer console to
+ ktt30_defconfig
+
+This enables framebuffer console support in the KTT30 default config.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index 420cd3a..5da21b7 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -316,6 +316,7 @@ CONFIG_BACKLIGHT_CLASS_DEVICE=y
+ # CONFIG_BACKLIGHT_GENERIC is not set
+ CONFIG_BACKLIGHT_PWM=y
+ CONFIG_BACKLIGHT_TEGRA_PWM=y
++CONFIG_FRAMEBUFFER_CONSOLE=y
+ CONFIG_LOGO=y
+ CONFIG_SOUND=y
+ CONFIG_SND=y
+-- 
+1.7.4.4
+

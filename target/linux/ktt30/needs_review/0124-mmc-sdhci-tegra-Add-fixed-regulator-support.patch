@@ -1,0 +1,46 @@
+From 1266dbb7b543614e443a4684fb6b5a9184ee7a55 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sun, 26 May 2013 00:46:20 +0400
+Subject: [PATCH 124/127] mmc: sdhci-tegra: Add fixed regulator support
+
+Currently, the driver assumes that the vdd_io_reg regulator
+supports regulator_set_voltage() callback. It also blindly
+assumes that if it supports 3.3V, it also supports 1.8V.
+This may not be true if the regulator is fixed.
+This reworks regulator handling, adding voltage limit test,
+which helps to identify supported voltage levels,
+and call regulator_set_voltage only if needed.
+We also restore SDHCI_HOST_CONTROL2 register
+in case regulator voltage switch fails.
+
+While at it, fix the unbalanced regulator_disable call
+when the driver is removed, and release regulators in
+the sdhci_tegra_probe callback in case of an error.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/mmc/host/sdhci-tegra.c |  215 +++++++++++++++++++++++++++------------
+ 1 files changed, 149 insertions(+), 66 deletions(-)
+
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -333,7 +333,7 @@ static int sdhci_tegra_probe(struct plat
+ 	if (IS_ERR(clk)) {
+ 		dev_err(mmc_dev(host->mmc), "clk err\n");
+ 		rc = PTR_ERR(clk);
+-		goto err_clk_get;
++		goto err_vddio;
+ 	}
+ 	clk_prepare_enable(clk);
+ 	pltfm_host->clk = clk;
+@@ -352,7 +352,9 @@ static int sdhci_tegra_probe(struct plat
+ err_add_host:
+ 	clk_disable_unprepare(pltfm_host->clk);
+ 	clk_put(pltfm_host->clk);
+-err_clk_get:
++err_vddio:
++	tegra_sdhci_vddio_del(tegra_host);
++
+ 	if (gpio_is_valid(plat->wp_gpio))
+ 		gpio_free(plat->wp_gpio);
+ err_wp_req:

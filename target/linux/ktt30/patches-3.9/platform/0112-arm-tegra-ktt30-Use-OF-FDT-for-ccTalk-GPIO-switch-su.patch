@@ -1,0 +1,74 @@
+From 75789980ead80e9a5b8d7e148b6dfcd463b33bb3 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 8 May 2013 23:58:14 +0400
+Subject: [PATCH 112/127] arm: tegra: ktt30: Use OF FDT for ccTalk GPIO switch
+ support
+
+This adds ccTalk GPIO_PBB0 switch support. The GPIO state is obtained
+from the FDT. When GPIO is high, ccTalk is disabled, and UART3 is routed
+to J6 connector. Otherwise, ccTalk (J29) connector is activated.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-pinmux.c |    2 +-
+ arch/arm/mach-tegra/board-ktt30.c        |   26 ++++++++++++++++++++++++++
+ 2 files changed, 27 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-pinmux.c b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+index 6b885db..292f6ca 100644
+--- a/arch/arm/mach-tegra/board-ktt30-pinmux.c
++++ b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+@@ -277,7 +277,7 @@ static __initdata struct tegra_pingroup_config ktt30_pinmux_common[] = {
+ 	DEFAULT_PINMUX(GMI_A18,         SPI4,            NORMAL,    NORMAL,     INPUT),
+ 	DEFAULT_PINMUX(GMI_A19,         SPI4,            NORMAL,    NORMAL,     INPUT),
+ 	DEFAULT_PINMUX(CAM_MCLK,        VI_ALT2,         PULL_UP,   NORMAL,     INPUT),
+-	/* KTT30 CAM_RST_N */
++	/* KTT30 EN_CCTALK_N */
+ 	DEFAULT_PINMUX(GPIO_PBB0,       RSVD1,           PULL_UP,   NORMAL,     INPUT),
+ 	DEFAULT_PINMUX(GPIO_PBB5,       VGP5,            NORMAL,    NORMAL,     INPUT),
+ 	DEFAULT_PINMUX(GPIO_PBB6,       VGP6,            NORMAL,    NORMAL,     INPUT),
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index 5b307a1..f3630ac 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -350,11 +350,37 @@ static void __init uart_debug_init(void)
+ 	return;
+ }
+ 
++#ifdef CONFIG_OF
++static void __init ktt30_uart_fixup(void)
++{
++	struct device_node *node;
++	int gpio;
++	u32 flags;
++
++	node = of_find_node_by_path("/serial@70006200");
++	if (!node)
++		return;
++
++	gpio = of_get_named_gpio_flags(node, "gpios", 0, &flags);
++	if (!gpio_is_valid(gpio) || !(flags & 0x1))
++		goto out;
++
++	flags = (flags & 0x2) ? GPIOF_OUT_INIT_HIGH : GPIOF_OUT_INIT_LOW;
++	gpio_request_one(gpio, flags, "EN_CCTALK_N");
++out:
++	of_node_put(node);
++}
++#else
++static void __init ktt30_uart_fixup(void) { }
++#endif
++
+ static void __init ktt30_uart_init(void)
+ {
+ 	struct clk *c;
+ 	int i;
+ 
++	ktt30_uart_fixup();
++
+ 	for (i = 0; i < ARRAY_SIZE(uart_parent_clk); ++i) {
+ 		c = tegra_get_clock_by_name(uart_parent_clk[i].name);
+ 		if (IS_ERR_OR_NULL(c)) {
+-- 
+1.7.4.4
+

@@ -1,0 +1,95 @@
+From 76b77f2f02e69d1556fcaa9c542ddd475caf6b03 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 17 Apr 2013 22:08:25 +0400
+Subject: [PATCH 064/127] arm: tegra: ktt30: Add PWM fan support.
+
+This adds PWM fan platform device to KTT30 sensors.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-pinmux.c  |    3 ++-
+ arch/arm/mach-tegra/board-ktt30-sensors.c |   28 +++++++++++++++++++++++++++-
+ 2 files changed, 29 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-pinmux.c b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+index ecc8422..5579b71 100644
+--- a/arch/arm/mach-tegra/board-ktt30-pinmux.c
++++ b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+@@ -257,7 +257,8 @@ static __initdata struct tegra_pingroup_config ktt30_pinmux_common[] = {
+ 	DEFAULT_PINMUX(GMI_CS0_N,       RSVD1,           PULL_UP,   NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(GMI_CS1_N,       RSVD1,           NORMAL,    NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(GMI_CS3_N,       RSVD1,           PULL_DOWN, NORMAL,     OUTPUT),
+-	DEFAULT_PINMUX(GMI_CS4_N,       RSVD1,           NORMAL,    NORMAL,     INPUT),
++	/* FAN_TACHO OD */
++	DEFAULT_PINMUX(GMI_CS4_N,       RSVD1,           PULL_UP,   NORMAL,     INPUT),
+ 	DEFAULT_PINMUX(GMI_CS6_N,       NAND_ALT,        NORMAL,    NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(GMI_CS7_N,       NAND_ALT,        NORMAL,    NORMAL,     OUTPUT),
+ 
+diff --git a/arch/arm/mach-tegra/board-ktt30-sensors.c b/arch/arm/mach-tegra/board-ktt30-sensors.c
+index 3b90934..5ce52c8 100644
+--- a/arch/arm/mach-tegra/board-ktt30-sensors.c
++++ b/arch/arm/mach-tegra/board-ktt30-sensors.c
+@@ -34,15 +34,16 @@
+ #include <linux/i2c.h>
+ #include <linux/mpu.h>
+ #include <linux/adt7461.h>
++#include <linux/pwm-fan.h>
+ #include <linux/gpio.h>
+ #include <mach/fb.h>
+ #include <generated/mach-types.h>
+ 
+ #include "board.h"
++#include "devices.h"
+ #include "gpio-names.h"
+ #include "board-ktt30.h"
+ 
+-
+ static void ktt30_adt7461_alarm_fn(bool raised)
+ {
+ 	if (raised)
+@@ -68,6 +69,7 @@ static struct i2c_board_info adt7461_board_info = {
+ 	.irq = TEGRA_GPIO_TO_IRQ(TEGRA_GPIO_PCC2),
+ 	.platform_data = &ktt30_adt7461_pdata,
+ };
++
+ static struct mpu_platform_data mpu_gyro_data = {
+ 	.int_config	= 0x10,
+ 	.level_shifter	= 0,
+@@ -139,10 +141,34 @@ static int mpuirq_init(void)
+ 				ARRAY_SIZE(inv_mpu_i2c2_board_info));
+ }
+ 
++#if defined(CONFIG_SENSORS_PWM_FAN) || defined(CONFIG_SENSORS_PWM_FAN_MODULE)
++static struct pwm_fan_platform_data ktt30_fan_pdata = {
++	.tacho_gpio = TEGRA_GPIO_PK2,
++	.pwm_id = 3,
++};
++
++static struct platform_device ktt30_fan_device = {
++	.name	= "pwm-fan",
++	.id	= 0,
++	.dev	= {
++		.platform_data = &ktt30_fan_pdata,
++	},
++};
++#endif
++
+ int __init ktt30_sensors_init(void)
+ {
+ 	i2c_register_board_info(4, &adt7461_board_info, 1);
+ 	mpuirq_init();
++
++	/* Ensure the PWM3 output is not in GPIO state */
++	if (!gpio_request(TEGRA_GPIO_PH3, "fan"))
++		gpio_free(TEGRA_GPIO_PH3);
++
++#if defined(CONFIG_SENSORS_PWM_FAN) || defined(CONFIG_SENSORS_PWM_FAN_MODULE)
++	platform_device_register(&tegra_pwfm3_device);
++	platform_device_register(&ktt30_fan_device);
++#endif
+ 	return 0;
+ }
+ 
+-- 
+1.7.4.4
+

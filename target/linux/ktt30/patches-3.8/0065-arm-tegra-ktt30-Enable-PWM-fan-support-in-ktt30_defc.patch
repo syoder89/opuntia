@@ -1,0 +1,28 @@
+From 5f6d3b80d9e830e86eb6d19929199d0d91755b94 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 18 Apr 2013 14:37:28 +0400
+Subject: [PATCH 065/127] arm: tegra: ktt30: Enable PWM fan support in
+ ktt30_defconfig
+
+This enabled PWM fan driver module in ktt30_defconfig.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index aaf20de..2a12c4c 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -283,6 +283,7 @@ CONFIG_BATTERY_BQ20Z75=y
+ CONFIG_BATTERY_BQ27x00=y
+ CONFIG_CHARGER_GPIO=y
+ CONFIG_SENSORS_ADT7461=y
++CONFIG_SENSORS_PWM_FAN=m
+ CONFIG_SENSORS_LM90=y
+ CONFIG_SENSORS_TEGRA_TSENSOR=y
+ CONFIG_SENSORS_INA219=y
+-- 
+1.7.4.4
+

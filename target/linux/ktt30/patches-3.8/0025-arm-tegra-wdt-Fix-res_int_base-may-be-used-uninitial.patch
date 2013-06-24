@@ -1,0 +1,34 @@
+From 0724da1ed77bed044890dc9ce2de393b33b07776 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Mon, 14 Jan 2013 19:31:15 +0400
+Subject: [PATCH 025/127] =?UTF-8?q?arm:=20tegra:=20wdt:=20Fix=20"=E2=80=98re?=
+ =?UTF-8?q?s=5Fint=5Fbase=E2=80=99=20may=20be=20used=20uninitialized"=20warn?=
+ =?UTF-8?q?ing?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This should help to prevent a possible invalid memory access when removing
+the watchdog driver module in case CONFIG_TEGRA_FIQ_DEBUGGER is disabled.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/watchdog/tegra_wdt.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/watchdog/tegra_wdt.c b/drivers/watchdog/tegra_wdt.c
+index 560337f..0c0284c 100644
+--- a/drivers/watchdog/tegra_wdt.c
++++ b/drivers/watchdog/tegra_wdt.c
+@@ -354,6 +354,8 @@ static int tegra_wdt_probe(struct platform_device *pdev)
+ 		dev_err(&pdev->dev, "FIQ_DBG: INT base not defined\n");
+ 		return -ENOENT;
+ 	}
++#else
++	res_int_base = NULL;
+ #endif
+ 
+ 	if (pdev->id == -1 && !res_irq) {
+-- 
+1.7.4.4
+

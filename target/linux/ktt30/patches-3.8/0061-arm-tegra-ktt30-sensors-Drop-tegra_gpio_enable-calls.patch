@@ -1,0 +1,47 @@
+From 288e50f0f695bad66e261e6c563de550cdc0d99f Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 17 Apr 2013 13:09:36 +0400
+Subject: [PATCH 061/127] arm: tegra: ktt30-sensors: Drop tegra_gpio_enable
+ calls
+
+GPIO is now enabled when requested. Drop tegra-specific
+gpio-enable calls and use standard GPIO API.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-sensors.c |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-sensors.c b/arch/arm/mach-tegra/board-ktt30-sensors.c
+index b166ef1..f2ea60b 100644
+--- a/arch/arm/mach-tegra/board-ktt30-sensors.c
++++ b/arch/arm/mach-tegra/board-ktt30-sensors.c
+@@ -34,8 +34,8 @@
+ #include <linux/i2c.h>
+ #include <linux/mpu.h>
+ #include <linux/adt7461.h>
++#include <linux/gpio.h>
+ #include <mach/fb.h>
+-#include <mach/gpio.h>
+ #include <generated/mach-types.h>
+ 
+ #include "board.h"
+@@ -105,7 +105,6 @@ static int mpuirq_init(void)
+ 
+ #if MPU_ACCEL_IRQ_GPIO
+ 	/* ACCEL-IRQ assignment */
+-	tegra_gpio_enable(MPU_ACCEL_IRQ_GPIO);
+ 	ret = gpio_request(MPU_ACCEL_IRQ_GPIO, MPU_ACCEL_NAME);
+ 	if (ret < 0) {
+ 		pr_err("%s: gpio_request failed %d\n", __func__, ret);
+@@ -121,7 +120,6 @@ static int mpuirq_init(void)
+ #endif
+ 
+ 	/* MPU-IRQ assignment */
+-	tegra_gpio_enable(MPU_GYRO_IRQ_GPIO);
+ 	ret = gpio_request(MPU_GYRO_IRQ_GPIO, MPU_GYRO_NAME);
+ 	if (ret < 0) {
+ 		pr_err("%s: gpio_request failed %d\n", __func__, ret);
+-- 
+1.7.4.4
+

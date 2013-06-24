@@ -1,0 +1,46 @@
+From d2d2d9a7ef9bdfbd6816f4894618e492aedf08fe Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sat, 25 May 2013 23:55:09 +0400
+Subject: [PATCH 123/127] mmc: sdhci-tegra: Always set is_rail_enabled flag
+
+Currently, the is_rail_enabled flag is not set if a card is built-in.
+For some reason the driver assumes that the regulators are always
+enabled in this case, but it doesn't set is_rail_enabled flag.
+
+This change attempts to enable regulators if they are configured,
+and sets is_rail_enabled flag for built-in cards as well.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/mmc/host/sdhci-tegra.c |   14 +++++++-------
+ 1 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index c4ccbf0..316d828 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -1085,14 +1085,14 @@ static int __devinit sdhci_tegra_probe(struct platform_device *pdev)
+ 					"vddio_sd_slot", PTR_ERR(tegra_host->vdd_slot_reg));
+ 			tegra_host->vdd_slot_reg = NULL;
+ 		}
++	}
+ 
+-		if (tegra_host->card_present) {
+-			if (tegra_host->vdd_slot_reg)
+-				regulator_enable(tegra_host->vdd_slot_reg);
+-			if (tegra_host->vdd_io_reg)
+-				regulator_enable(tegra_host->vdd_io_reg);
+-			tegra_host->is_rail_enabled = 1;
+-		}
++	if (tegra_host->card_present) {
++		if (tegra_host->vdd_slot_reg)
++			regulator_enable(tegra_host->vdd_slot_reg);
++		if (tegra_host->vdd_io_reg)
++			regulator_enable(tegra_host->vdd_io_reg);
++		tegra_host->is_rail_enabled = 1;
+ 	}
+ 
+ 	clk = clk_get(mmc_dev(host->mmc), NULL);
+-- 
+1.7.4.4
+

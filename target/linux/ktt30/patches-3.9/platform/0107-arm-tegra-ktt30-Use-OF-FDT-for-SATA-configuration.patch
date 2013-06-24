@@ -1,0 +1,54 @@
+From a71869621a944feb95b660b90f591659a0ec1029 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 2 May 2013 00:38:26 +0400
+Subject: [PATCH 107/127] arm: tegra: ktt30: Use OF FDT for SATA configuration
+
+Use OF device node status instead of command line options
+for SATA AHCI configuration.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30.c |   18 ++++--------------
+ 1 files changed, 4 insertions(+), 14 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index 051a2b8..44f787a 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -877,11 +877,12 @@ static void __init ktt30_pci_init(void)
+ 
+ 
+ #ifdef CONFIG_SATA_AHCI_TEGRA
+-static int ktt30_setup_sata_disable;
+-
+ static void __init ktt30_sata_init(void)
+ {
+-	if (!ktt30_setup_sata_disable)
++	int retval;
++
++	retval = ktt30_of_device_is_enabled(NULL, "nvidia,tegra30-sata");
++	if (retval)
+ 		platform_device_register(&tegra_sata_device);
+ }
+ #else
+@@ -945,17 +946,6 @@ static int __init ktt30_setup_usb2(char *option)
+ __setup("usb2=", ktt30_setup_usb2);
+ #endif
+ 
+-#ifdef CONFIG_SATA_AHCI_TEGRA
+-static int __init ktt30_setup_sata(char *option)
+-{
+-	if (!strcmp(option, "no"))
+-		ktt30_setup_sata_disable = 1;
+-
+-	return 1;
+-}
+-__setup("sata=", ktt30_setup_sata);
+-#endif
+-
+ static int __init ktt30_setup_pcie0(char *option)
+ {
+ 	if (!strcmp(option, "no"))
+-- 
+1.7.4.4
+

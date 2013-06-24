@@ -1,0 +1,64 @@
+From 7798a33060ffc83912cf9de4456b024eacdac1c2 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 1 May 2013 20:54:09 +0400
+Subject: [PATCH 078/127] arm: tegra: ktt30: Add boot counter partition to the
+ SPI MTD
+
+This updates SPI flash layout, adding the "Bootcount" partition.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30.c |   20 ++++++++++++++++----
+ 1 files changed, 16 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index 0a38dfe..6580251 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -404,27 +404,39 @@ static struct mtd_partition ktt30_spiflash_part[] = {
+ 	[1] = {
+ 		.name		= "User",
+ 		.offset		= MTDPART_OFS_APPEND,
+-		.size		= SZ_4M - SZ_1M - SZ_16K,
++		.size		= SZ_4M - SZ_1M - SZ_16K - SZ_8K,
+ 	},
+ 	[2] = {
+-		.name		= "KT-user-setup",
++		.name		= "Bootcount",
+ 		.offset		= MTDPART_OFS_APPEND,
+ 		.size		= SZ_4K,
+ 		.mask_flags	= MTD_WRITEABLE,
+ 	},
+ 	[3] = {
+-		.name		= "KT-system-setup",
++		.name		= "Reserved",
+ 		.offset		= MTDPART_OFS_APPEND,
+ 		.size		= SZ_4K,
+ 		.mask_flags	= MTD_WRITEABLE,
+ 	},
+ 	[4] = {
+-		.name		= "Reserved",
++		.name		= "KT-user-setup",
+ 		.offset		= MTDPART_OFS_APPEND,
+ 		.size		= SZ_4K,
+ 		.mask_flags	= MTD_WRITEABLE,
+ 	},
+ 	[5] = {
++		.name		= "KT-system-setup",
++		.offset		= MTDPART_OFS_APPEND,
++		.size		= SZ_4K,
++		.mask_flags	= MTD_WRITEABLE,
++	},
++	[6] = {
++		.name		= "Reserved",
++		.offset		= MTDPART_OFS_APPEND,
++		.size		= SZ_4K,
++		.mask_flags	= MTD_WRITEABLE,
++	},
++	[7] = {
+ 		.name		= "U-Boot-Env",
+ 		/* the last 4K according to U-Boot */
+ 		.offset		= SZ_4M - SZ_4K,
+-- 
+1.7.4.4
+

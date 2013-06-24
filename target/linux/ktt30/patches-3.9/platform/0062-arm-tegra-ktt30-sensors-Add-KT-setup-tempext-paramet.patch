@@ -1,0 +1,33 @@
+From 5adaca3ebcff220745c67c17dbd2b64dba247b8a Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Tue, 16 Apr 2013 02:20:57 +0400
+Subject: [PATCH 062/127] arm: tegra: ktt30-sensors: Add KT setup tempext
+ parameter support
+
+This adds "tempext" KT setup command line parameter support
+for thermal sensor ext_range control.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-sensors.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-sensors.c b/arch/arm/mach-tegra/board-ktt30-sensors.c
+index f2ea60b..3b90934 100644
+--- a/arch/arm/mach-tegra/board-ktt30-sensors.c
++++ b/arch/arm/mach-tegra/board-ktt30-sensors.c
+@@ -170,3 +170,11 @@ static int __init ktt30_setup_temphigh(char *options)
+ }
+ __setup("temphigh=", ktt30_setup_temphigh);
+ 
++static int __init ktt30_setup_tempext(char *options)
++{
++	if (!strcmp(options, "yes"))
++		ktt30_adt7461_pdata.ext_range = true;
++
++	return 1;
++}
++__setup("tempext=", ktt30_setup_tempext);
+-- 
+1.7.4.4
+

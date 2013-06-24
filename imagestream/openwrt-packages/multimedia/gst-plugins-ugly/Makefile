@@ -43,7 +43,7 @@ endef
 define Package/gst-plugins-ugly
 $(call Package/gstreamer/Default)
   TITLE+= plugins collection (ugly)
-  DEPENDS+= $(GST_DEPENDS)
+  DEPENDS+= $(GST_DEPENDS) +liba52
 endef
 
 define Package/gts-plugins-ugly/description

@@ -1,0 +1,93 @@
+From d296263b807dd39e94261b42e887438792fd38fa Mon Sep 17 00:00:00 2001
+From: Victor Vengerov <vvengerov@dev.rtsoft.ru>
+Date: Wed, 3 Apr 2013 18:56:47 +0400
+Subject: [PATCH 056/127] arm: tegra: ktt30: configure bl_pwm pin to special
+ function mode
+
+LCD display intensity is controlled by pulse-width modulated signal
+sourced from ktt30_bl_pwm (TEGRA_GPIO_PH0) pin. Internally this pin
+may be routed to Tegra PWM controller, however boot loader default
+for this pin is general-purpose I/O.
+
+To allow this pin to be used in special function (particularly PWM)
+mode, it needs to be released from gpio defaults. To achieve this in
+more or less consistent way pin requested in GPIO mode and freed
+immediately to get it configured in special function mode.
+
+Signed-off-by: Victor Vengerov <vvengerov@dev.rtsoft.ru>
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-panel.c |   20 +++++++-------------
+ 1 files changed, 7 insertions(+), 13 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-panel.c b/arch/arm/mach-tegra/board-ktt30-panel.c
+index aab2e8d..ef49e84 100644
+--- a/arch/arm/mach-tegra/board-ktt30-panel.c
++++ b/arch/arm/mach-tegra/board-ktt30-panel.c
+@@ -118,11 +118,6 @@ static int ktt30_backlight_init(struct device *dev)
+ 	if (WARN_ON(ARRAY_SIZE(ktt30_bl_output_measured) != 256))
+ 		pr_err("bl_output array does not have 256 elements\n");
+ 
+-	ret = gpio_direction_output(ktt30_bl_pwm, 1);
+-	if (ret < 0)
+-		return ret;
+-
+-	mdelay(20);
+ 
+ 	ret = gpio_direction_output(ktt30_bl_enb, !ktt30_setup_bl_enb_low);
+ 	if (ret < 0)
+@@ -135,7 +130,6 @@ static void ktt30_backlight_exit(struct device *dev)
+ {
+ 	gpio_set_value(ktt30_bl_enb, 0);
+ 	mdelay(20);
+-	gpio_set_value(ktt30_bl_pwm, 0);
+ }
+ 
+ static int ktt30_backlight_notify(struct device *unused, int brightness)
+@@ -704,13 +698,17 @@ int __init ktt30_panel_init(void)
+ 	if (err < 0)
+ 		return err;
+ 
++	/* Request and free PWM gpio pin to ensure it is in functional
++	 * (PWM) mode of operation.
++	 */
+ 	err = gpio_request(ktt30_bl_pwm, "bl_pwm");
+ 	if (err < 0)
+ 		goto free_lvds_shutdown;
++	gpio_free(ktt30_bl_pwm);
+ 
+ 	err = gpio_request(ktt30_bl_enb, "bl_enb");
+ 	if (err < 0)
+-		goto free_bl_pwm;
++		goto free_lvds_shutdown;
+ 
+ 	err = gpio_request(ktt30_hdmi_hpd, "hdmi_hpd");
+ 	if (err)
+@@ -739,13 +737,11 @@ int __init ktt30_panel_init(void)
+ 	platform_device_register(&tegra_ion_device);
+ #endif
+ 
+-	if (lcd_enabled) {
++	if (lcd_enabled)
+ 		platform_add_devices(ktt30_bl_devices,
+ 					ARRAY_SIZE(ktt30_bl_devices));
+-	} else {
+-		gpio_direction_output(ktt30_bl_pwm, 0);
++	else
+ 		gpio_direction_output(ktt30_bl_enb, ktt30_setup_bl_enb_low);
+-	}
+ 
+ 
+ #if defined(CONFIG_TEGRA_GRHOST) && defined(CONFIG_TEGRA_DC)
+@@ -799,8 +795,6 @@ out:
+ 
+ free_bl_enb:
+ 	gpio_free(ktt30_bl_enb);
+-free_bl_pwm:
+-	gpio_free(ktt30_bl_pwm);
+ free_lvds_shutdown:
+ 	gpio_free(ktt30_lvds_shutdown);
+ 
+-- 
+1.7.4.4
+

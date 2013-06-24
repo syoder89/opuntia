@@ -1,0 +1,145 @@
+From b25fad3f651a71982b0145219737fa6e8cb97235 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 22 May 2013 22:19:56 +0400
+Subject: [PATCH 093/127] arm: tegra: ktt30: Clean up board-ktt30-sdhci
+
+This removes duplicate resource and platform device
+structure definitions and uses the original, defined
+in arch/arm/mach-tegra/devices.c
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-sdhci.c |   91 +++++--------------------------
+ 1 files changed, 13 insertions(+), 78 deletions(-)
+
+--- a/arch/arm/mach-tegra/board-ktt30-sdhci.c
++++ b/arch/arm/mach-tegra/board-ktt30-sdhci.c
+@@ -32,6 +32,7 @@
+ #include "gpio-names.h"
+ #include "board.h"
+ #include "board-ktt30.h"
++#include "devices.h"
+ 
+ #define KTT30_SD0_CD TEGRA_GPIO_PI5
+ #define KTT30_SD0_WP TEGRA_GPIO_PT3
+@@ -39,46 +40,7 @@
+ #define KTT30_SD2_CD TEGRA_GPIO_PI2
+ #define KTT30_SD2_WP TEGRA_GPIO_PT2
+ 
+-static struct resource sdhci_resource0[] = {
+-	[0] = {
+-		.start  = INT_SDMMC1,
+-		.end    = INT_SDMMC1,
+-		.flags  = IORESOURCE_IRQ,
+-	},
+-	[1] = {
+-		.start	= TEGRA_SDMMC1_BASE,
+-		.end	= TEGRA_SDMMC1_BASE + TEGRA_SDMMC1_SIZE-1,
+-		.flags	= IORESOURCE_MEM,
+-	},
+-};
+-
+-static struct resource sdhci_resource2[] = {
+-	[0] = {
+-		.start  = INT_SDMMC3,
+-		.end    = INT_SDMMC3,
+-		.flags  = IORESOURCE_IRQ,
+-	},
+-	[1] = {
+-		.start	= TEGRA_SDMMC3_BASE,
+-		.end	= TEGRA_SDMMC3_BASE + TEGRA_SDMMC3_SIZE-1,
+-		.flags	= IORESOURCE_MEM,
+-	},
+-};
+-
+-static struct resource sdhci_resource3[] = {
+-	[0] = {
+-		.start  = INT_SDMMC4,
+-		.end    = INT_SDMMC4,
+-		.flags  = IORESOURCE_IRQ,
+-	},
+-	[1] = {
+-		.start	= TEGRA_SDMMC4_BASE,
+-		.end	= TEGRA_SDMMC4_BASE + TEGRA_SDMMC4_SIZE-1,
+-		.flags	= IORESOURCE_MEM,
+-	},
+-};
+-
+-static struct tegra_sdhci_platform_data tegra_sdhci_platform_data0 = {
++static struct tegra_sdhci_platform_data tegra_sdhci_platform_data1 = {
+ 	.cd_gpio = KTT30_SD0_CD,
+ 	.wp_gpio = KTT30_SD0_WP,
+ 	.power_gpio = -1,
+@@ -89,17 +51,16 @@ static struct tegra_sdhci_platform_data
+  * not support wake-up.  So the driver complains "SD card wake-up event
+  * registration"
+  */
+-static struct tegra_sdhci_platform_data tegra_sdhci_platform_data2 = {
++static struct tegra_sdhci_platform_data tegra_sdhci_platform_data3 = {
+ 	.cd_gpio = KTT30_SD2_CD,
+ 	.wp_gpio = KTT30_SD2_WP,
+ 	.power_gpio = -1,
+ 	.mmc_data = {
+-		.built_in = 0,
+ 		.ocr_mask = MMC_OCR_1V8_MASK,
+ 	}
+ };
+ 
+-static struct tegra_sdhci_platform_data tegra_sdhci_platform_data3 = {
++static struct tegra_sdhci_platform_data tegra_sdhci_platform_data4 = {
+ 	.cd_gpio = -1,
+ 	.wp_gpio = -1,
+ 	.power_gpio = -1,
+@@ -110,41 +71,19 @@ static struct tegra_sdhci_platform_data
+ 	}
+ };
+ 
+-static struct platform_device tegra_sdhci_device0 = {
+-	.name		= "sdhci-tegra",
+-	.id		= 0,
+-	.resource	= sdhci_resource0,
+-	.num_resources	= ARRAY_SIZE(sdhci_resource0),
+-	.dev = {
+-		.platform_data = &tegra_sdhci_platform_data0,
+-	},
+-};
+-
+-static struct platform_device tegra_sdhci_device2 = {
+-	.name		= "sdhci-tegra",
+-	.id		= 2,
+-	.resource	= sdhci_resource2,
+-	.num_resources	= ARRAY_SIZE(sdhci_resource2),
+-	.dev = {
+-		.platform_data = &tegra_sdhci_platform_data2,
+-	},
+-};
+-
+-static struct platform_device tegra_sdhci_device3 = {
+-	.name		= "sdhci-tegra",
+-	.id		= 3,
+-	.resource	= sdhci_resource3,
+-	.num_resources	= ARRAY_SIZE(sdhci_resource3),
+-	.dev = {
+-		.platform_data = &tegra_sdhci_platform_data3,
+-	},
+-};
+-
+ int __init ktt30_sdhci_init(void)
+ {
+-	platform_device_register(&tegra_sdhci_device0);
+-	platform_device_register(&tegra_sdhci_device2);
+-	platform_device_register(&tegra_sdhci_device3);
++	tegra_sdhci_device1.dev.platform_data = &tegra_sdhci_platform_data1;
++	tegra_sdhci_device3.dev.platform_data = &tegra_sdhci_platform_data3;
++	tegra_sdhci_device4.dev.platform_data = &tegra_sdhci_platform_data4;
++
++	platform_device_register(&tegra_sdhci_device1);
++ 	platform_device_register(&tegra_sdhci_device3);
++	platform_device_register(&tegra_sdhci_device4);
++
++	device_init_wakeup(&tegra_sdhci_device1.dev, 1);
++	device_init_wakeup(&tegra_sdhci_device3.dev, 0);
++	device_init_wakeup(&tegra_sdhci_device4.dev, 1);
+ 
+ 	return 0;
+ }

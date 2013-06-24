@@ -1,0 +1,32 @@
+From 4ea86f82c6256499e7b43e3e4858e6abce5fd629 Mon Sep 17 00:00:00 2001
+From: Victor Vengerov <vvengerov@dev.rtsoft.ru>
+Date: Thu, 18 Apr 2013 13:30:16 +0400
+Subject: [PATCH 098/127] arm: tegra: usb: USB interrupt racing
+
+"USB PHY clock valid interrupt" is disabled in interrupt handler. When some
+USB devices are connected, the port is dead and didn't respond until some
+bus activity initiated by host.  PHY clock valid interrupt source now reset,
+but kept enabled.
+
+Signed-off-by: Victor Vengerov <vvengerov@dev.rtsoft.ru>
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/tegra3_usb_phy.c |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/tegra3_usb_phy.c b/arch/arm/mach-tegra/tegra3_usb_phy.c
+index 66637f2..d34f444 100644
+--- a/arch/arm/mach-tegra/tegra3_usb_phy.c
++++ b/arch/arm/mach-tegra/tegra3_usb_phy.c
+@@ -1243,8 +1243,6 @@ static int utmi_phy_irq(struct tegra_usb_phy *phy)
+ 	if (phy->pdata->u_data.host.hot_plug) {
+ 		val = readl(base + USB_SUSP_CTRL);
+ 		if ((val  & USB_PHY_CLK_VALID_INT_STS)) {
+-			val &= ~USB_PHY_CLK_VALID_INT_ENB |
+-					USB_PHY_CLK_VALID_INT_STS;
+ 			writel(val , (base + USB_SUSP_CTRL));
+ 
+ 			/* In case of remote wakeup PHY clock will not up
+-- 
+1.7.4.4
+

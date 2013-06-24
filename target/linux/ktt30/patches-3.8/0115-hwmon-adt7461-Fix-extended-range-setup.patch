@@ -1,0 +1,80 @@
+From cb2d6a1ac3d3667dd5143d9429cabbfe86f3f290 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Tue, 28 May 2013 03:20:26 +0400
+Subject: [PATCH 115/127] hwmon: adt7461: Fix extended range setup
+
+Rework ADT7461 configuration to set the configuration register first,
+and add extended measurement scale flag if needed.
+This disables the conversion and also sets the measurement scale before
+setting temperature limits.
+According to the ADT7461 specification, if the temperature measurement
+scale is switched, the temperature limits do not switch automatically.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/hwmon/adt7461.c |   31 ++++++++++++++++---------------
+ 1 files changed, 16 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/hwmon/adt7461.c b/drivers/hwmon/adt7461.c
+index d0d6c3a..b14e897 100644
+--- a/drivers/hwmon/adt7461.c
++++ b/drivers/hwmon/adt7461.c
+@@ -565,7 +565,7 @@ static int adt7461_init_client(struct i2c_client *client)
+ {
+ 	struct adt7461_data *data = i2c_get_clientdata(client);
+ 	struct adt7461_platform_data *pdata = client->dev.platform_data;
+-	u8 config = 0;
++	u8 config = STANDBY_BIT;
+ 	u8 value;
+ 	int err;
+ 
+@@ -586,12 +586,25 @@ static int adt7461_init_client(struct i2c_client *client)
+ 		}
+ 	}
+ 
+-	if (pdata->ext_range)
++	if (pdata->ext_range) {
+ 		data->flags |= ADT7461_FLAG_ADT7461_EXT;
++		config |= EXTENDED_RANGE_BIT;
++	}
++
++	if (data->flags & ADT7461_FLAG_THERM2) {
++		data->alarm_fn = pdata->alarm_fn;
++		config | THERM2_BIT;
++	}
+ 
+ 	adt7461_regulator_enable(client);
+ 
+-	/* Start the conversions. */
++	err = i2c_smbus_write_byte_data(client, ADT7461_REG_W_CONFIG1, config);
++	if (err < 0)
++		goto error;
++
++	data->config = config;
++
++	/* Set the conversions rate */
+ 	err = i2c_smbus_write_byte_data(client, ADT7461_REG_W_CONVRATE,
+ 							pdata->conv_rate);
+ 	if (err < 0)
+@@ -638,18 +651,6 @@ static int adt7461_init_client(struct i2c_client *client)
+ 	if (err < 0)
+ 		goto error;
+ 
+-	if (data->flags & ADT7461_FLAG_THERM2) {
+-		data->alarm_fn = pdata->alarm_fn;
+-		config = (THERM2_BIT | STANDBY_BIT);
+-	} else {
+-		config = (~ALERT_BIT & ~THERM2_BIT & STANDBY_BIT);
+-	}
+-
+-	err = i2c_smbus_write_byte_data(client, ADT7461_REG_W_CONFIG1, config);
+-	if (err < 0)
+-		goto error;
+-
+-	data->config = config;
+ 	return 0;
+ 
+ error:
+-- 
+1.7.4.4
+

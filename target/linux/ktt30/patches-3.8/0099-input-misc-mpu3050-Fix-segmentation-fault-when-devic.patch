@@ -1,0 +1,30 @@
+From ac5802b08c98b70ea9a64b0f91791b22b6db2af4 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 23 May 2013 00:25:18 +0400
+Subject: [PATCH 099/127] input: misc: mpu3050: Fix segmentation fault when
+ device is removed
+
+This adds sensor to the I2C client data since it is used
+to free IRQ when the device is removed.
+This should fix kernel crash when removing the device.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/input/misc/mpu3050.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/input/misc/mpu3050.c b/drivers/input/misc/mpu3050.c
+index 9150cbf..a0e63a3 100644
+--- a/drivers/input/misc/mpu3050.c
++++ b/drivers/input/misc/mpu3050.c
+@@ -305,6 +305,7 @@ static int __devinit mpu3050_probe(struct i2c_client *client,
+ 		goto err_free_irq;
+ 	}
+ 
++	i2c_set_clientdata(client, sensor);
+ 	return 0;
+ 
+ err_free_irq:
+-- 
+1.7.4.4
+

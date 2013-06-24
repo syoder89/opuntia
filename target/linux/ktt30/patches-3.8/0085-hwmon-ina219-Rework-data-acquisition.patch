@@ -1,0 +1,311 @@
+From 5f651f48f5bb2aba790af42bad027bac96b5f95b Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 8 May 2013 03:00:34 +0400
+Subject: [PATCH 085/127] hwmon: ina219: Rework data acquisition
+
+This reworks the driver a bit to make it read the sensor registers
+under the mutex held. The conversion bit is now always checked.
+The original implementation did not check it when reading bus
+voltage input, which caused incorrect voltage measurements.
+While at it, swap bytes only after successful error check.
+Otherwise return error code unchanged.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/hwmon/ina219.c |  220 +++++++++++++++++++----------------------------
+ 1 files changed, 89 insertions(+), 131 deletions(-)
+
+diff --git a/drivers/hwmon/ina219.c b/drivers/hwmon/ina219.c
+index 1224a26..cd48fa2 100644
+--- a/drivers/hwmon/ina219.c
++++ b/drivers/hwmon/ina219.c
+@@ -67,6 +67,9 @@
+ #define INA219_CONFIG_DATA 0x1df
+ #define INA219_RESET 0x8000
+ 
++/* The worst case should be ~68.10 mS */
++#define INA219_TIMEOUT	(HZ / 4)
++
+ struct power_mon_data {
+ 	s32 voltage;
+ 	s32 currentInMillis;
+@@ -106,50 +109,78 @@ static s32 show_rail_name(struct device *dev,
+ 	return sprintf(buf, "%s\n", data->pInfo->rail_name);
+ }
+ 
+-static s32 show_voltage(struct device *dev,
+-			struct device_attribute *attr,
+-			char *buf)
++static s32 read_voltage(struct device *dev)
+ {
+ 	struct i2c_client *client = to_i2c_client(dev);
+ 	struct ina219_data *data = i2c_get_clientdata(client);
++	unsigned long end;
+ 	s32 retval;
+-	s32 voltage_mV;
+ 
+ 	/* fill config data */
+ 	retval = i2c_smbus_write_word_data(client, INA219_CONFIG,
+ 		reorder_bytes(INA219_CONFIG_DATA));
+ 	if (retval < 0) {
+ 		dev_err(dev, "config data write failed sts: 0x%x\n", retval);
+-		goto error;
++		return retval;
+ 	}
+ 
+ 	/* fill calibration data */
+ 	retval = i2c_smbus_write_word_data(client, INA219_CAL,
+ 		reorder_bytes(data->pInfo->calibration_data));
+ 	if (retval < 0) {
+-		dev_err(dev, "calib data write failed sts: 0x%x\n", retval);
+-		goto error;
++		dev_err(dev, "calibration data write failed sts: 0x%x\n",
++			retval);
++		return retval;
+ 	}
+ 
+-	/* getting voltage readings in milli volts*/
+-	voltage_mV =
+-		reorder_bytes(i2c_smbus_read_word_data(client,
+-			INA219_VOLTAGE));
+-	dev_dbg(dev, "Ina219 voltage reg Value: 0x%x\n", voltage_mV);
+-	if (voltage_mV < 0)
+-		goto error;
+-	voltage_mV = (voltage_mV >> 1) & ~0x3;
+-	dev_dbg(dev, "Ina219 voltage in mv: %d\n", voltage_mV);
++	end = jiffies + INA219_TIMEOUT;
+ 
+-	/* set ina219 to power down mode */
+-	retval = power_down_INA219(client);
+-	if (retval < 0)
+-		goto error;
++	/* check if the readings are valid */
++	do {
++		/* read power register to clear conversion bit */
++		retval = i2c_smbus_read_word_data(client, INA219_POWER);
++		if (retval < 0) {
++			dev_err(dev, "CNVR bit clearing failure sts: 0x%x\n",
++				retval);
++			return retval;
++		}
++
++		retval = i2c_smbus_read_word_data(client, INA219_VOLTAGE);
++		if (retval < 0) {
++			dev_err(dev, "Voltage reading failure sts: 0x%x\n",
++				retval);
++			return retval;
++		}
++
++		retval = reorder_bytes(retval);
++		dev_dbg(dev, "Ina219 voltage reg Value: 0x%x\n", retval);
++
++		/* conversion complete */
++		if (retval & 0x2)
++			return retval;
++
++	} while (time_before(jiffies, end));
+ 
+-	dev_dbg(dev, "%s volt = %d\n", __func__, voltage_mV);
+-	return sprintf(buf, "%d mV\n", voltage_mV);
+-error:
+-	dev_err(dev, "%s: failed\n", __func__);
++	dev_err(dev, "conversion timed out\n");
++	return -ETIMEDOUT;
++}
++
++static s32 show_voltage(struct device *dev,
++			struct device_attribute *attr,
++			char *buf)
++{
++	struct i2c_client *client = to_i2c_client(dev);
++	struct ina219_data *data = i2c_get_clientdata(client);
++	s32 retval;
++
++	mutex_lock(&data->mutex);
++	retval = read_voltage(dev);
++	if (retval >= 0) {
++		s32 voltage_mV = (retval >> 1) & ~0x3;
++		retval = sprintf(buf, "%d mV\n", voltage_mV);
++	}
++	power_down_INA219(client);
++	mutex_unlock(&data->mutex);
+ 	return retval;
+ }
+ 
+@@ -162,68 +193,32 @@ static s32 show_power(struct device *dev,
+ 	struct ina219_data *data = i2c_get_clientdata(client);
+ 	s32 retval;
+ 	s32 power_mW;
+-	s32 voltage_mV;
+-	s32 overflow, conversion;
+ 
+-	/* fill config data */
+-	retval = i2c_smbus_write_word_data(client, INA219_CONFIG,
+-		reorder_bytes(INA219_CONFIG_DATA));
+-	if (retval < 0) {
+-		dev_err(dev, "config data write failed sts: 0x%x\n", retval);
+-		goto error;
+-	}
++	mutex_lock(&data->mutex);
++	retval = read_voltage(dev);
++	if (retval < 0)
++		goto out;
+ 
+-	/* fill calib data */
+-	retval = i2c_smbus_write_word_data(client, INA219_CAL,
+-		reorder_bytes(data->pInfo->calibration_data));
+-	if (retval < 0) {
+-		dev_err(dev, "calibration data write failed sts: 0x%x\n",
+-			retval);
+-		goto error;
++	if (retval & 0x1) {
++		dev_err(dev, "overflow error\n");
++		retval = -EOVERFLOW;
++		goto out;
+ 	}
+ 
+-	/* check if the readings are valid */
+-	do {
+-		/* read power register to clear conversion bit */
+-		retval = reorder_bytes(i2c_smbus_read_word_data(client,
+-			INA219_POWER));
+-		if (retval < 0) {
+-			dev_err(dev, "CNVR bit clearing failure sts: 0x%x\n",
+-				retval);
+-			goto error;
+-		}
+-
+-		voltage_mV =
+-			reorder_bytes(i2c_smbus_read_word_data(client,
+-				INA219_VOLTAGE));
+-		dev_dbg(dev, "Ina219 voltage reg Value: 0x%x\n", voltage_mV);
+-		overflow = voltage_mV & 1;
+-		if (overflow) {
+-			dev_err(dev, "overflow error\n");
+-			return 0;
+-		}
+-		conversion = (voltage_mV >> 1) & 1;
+-		dev_dbg(dev, "\n ina219 CNVR value:%d", conversion);
+-	} while (!conversion);
+-
+ 	/* getting power readings in milli watts*/
+-	power_mW = reorder_bytes(i2c_smbus_read_word_data(client,
+-		INA219_POWER));
++	retval = i2c_smbus_read_word_data(client, INA219_POWER);
++	if (retval < 0)
++		goto out;
++
++	power_mW = reorder_bytes(retval);
+ 	dev_dbg(dev, "Ina219 power Reg: 0x%x\n", power_mW);
+ 	power_mW *= data->pInfo->power_lsb;
+ 	dev_dbg(dev, "Ina219 power Val: %d\n", power_mW);
+-	if (power_mW < 0)
+-		goto error;
+-
++	retval = sprintf(buf, "%d mW\n", power_mW);
++out:
+ 	/* set ina219 to power down mode */
+-	retval = power_down_INA219(client);
+-	if (retval < 0)
+-		goto error;
+-
+-	dev_dbg(dev, "%s pow = %d\n", __func__, power_mW);
+-	return sprintf(buf, "%d mW\n", power_mW);
+-error:
+-	dev_err(dev, "%s: failed\n", __func__);
++	power_down_INA219(client);
++	mutex_unlock(&data->mutex);
+ 	return retval;
+ }
+ 
+@@ -235,70 +230,33 @@ static s32 show_current(struct device *dev,
+ 	struct ina219_data *data = i2c_get_clientdata(client);
+ 	s32 retval;
+ 	s32 current_mA;
+-	s32 voltage_mV;
+-	s32 overflow, conversion;
+ 
+-	/* fill config data */
+-	retval = i2c_smbus_write_word_data(client, INA219_CONFIG,
+-		reorder_bytes(INA219_CONFIG_DATA));
+-	if (retval < 0) {
+-		dev_err(dev, "config data write failed sts: 0x%x\n", retval);
+-		goto error;
+-	}
++	mutex_lock(&data->mutex);
++	retval = read_voltage(dev);
++	if (retval < 0)
++		goto out;
+ 
+-	/* fill calib data */
+-	retval = i2c_smbus_write_word_data(client, INA219_CAL,
+-		reorder_bytes(data->pInfo->calibration_data));
+-	if (retval < 0) {
+-		dev_err(dev, "calibration data write failed sts: 0x%x\n",
+-			retval);
+-		goto error;
++	if (retval & 0x1) {
++		dev_err(dev, "overflow error\n");
++		retval = -EOVERFLOW;
++		goto out;
+ 	}
+ 
+-	/* check if the readings are valid */
+-	do {
+-		/* read power register to clear conversion bit */
+-		retval = reorder_bytes(i2c_smbus_read_word_data(client,
+-			INA219_POWER));
+-		if (retval < 0) {
+-			dev_err(dev, "CNVR bit clearing failure sts: 0x%x\n",
+-				retval);
+-			goto error;
+-		}
+-
+-		voltage_mV =
+-			reorder_bytes(i2c_smbus_read_word_data(client,
+-				INA219_VOLTAGE));
+-		dev_dbg(dev, "Ina219 voltage reg Value: 0x%x\n", voltage_mV);
+-		overflow = voltage_mV & 1;
+-		if (overflow) {
+-			dev_err(dev, "overflow error\n");
+-			return 0;
+-		}
+-		conversion = (voltage_mV >> 1) & 1;
+-		dev_dbg(dev, "\n ina219 CNVR value:%d", conversion);
+-	} while (!conversion);
+-
+ 	/* getting current readings in milli amps*/
+-	current_mA = reorder_bytes(i2c_smbus_read_word_data(client,
+-		INA219_CURRENT));
++	retval = i2c_smbus_read_word_data(client, INA219_CURRENT);
++	if (retval < 0)
++		goto out;
++
++	current_mA = reorder_bytes(retval);
+ 	dev_dbg(dev, "Ina219 current Reg: 0x%x\n", current_mA);
+-	if (current_mA < 0)
+-		goto error;
+ 	current_mA =
+ 		(current_mA * data->pInfo->power_lsb) / data->pInfo->divisor;
+ 	dev_dbg(dev, "Ina219 current Value: %d\n", current_mA);
+-
++	retval = sprintf(buf, "%d mA\n", current_mA);
++out:
+ 	/* set ina219 to power down mode */
+-	retval = power_down_INA219(client);
+-	if (retval < 0)
+-		goto error;
+-
+-
+-	dev_dbg(dev, "%s current = %d\n", __func__, current_mA);
+-	return sprintf(buf, "%d mA\n", current_mA);
+-error:
+-	dev_err(dev, "%s: failed\n", __func__);
++	power_down_INA219(client);
++	mutex_unlock(&data->mutex);
+ 	return retval;
+ }
+ 
+-- 
+1.7.4.4
+

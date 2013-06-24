@@ -1,0 +1,44 @@
+From 28f6ae3face5aeb43ef858b97aa5fca74f7be07b Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Mon, 1 Apr 2013 15:08:05 +0400
+Subject: [PATCH 050/127] arm: tegra: ktt30: Set HDMI id 0 if LCD is disabled
+
+The Xorg driver does fails to initialize HDMI output when
+LVDS is disabled on the command line (using KT setup options).
+The DC device descriptors are stored in the tegra_dcs array
+The array index is set via dc id. When LVDS is disabled and
+HDMI is registered with id = 1, the first DC in the tegra_dcs
+array is not initialized.
+This causes kernel oops and Xorg segfault when it tries
+to query the first DC output.
+
+Setting HDMI id 0 helps to avoid the oops/segfault issue.
+However, the HDMI output may still not work with LVDS disabled,
+as the video driver seems to always expect LVDS to have id 0.
+The head types are also hard coded by the tegra DC driver,
+based on the device id -- 0 - LVDS; 1 - HDMI.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-panel.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-panel.c b/arch/arm/mach-tegra/board-ktt30-panel.c
+index c3e5bfc..aab2e8d 100644
+--- a/arch/arm/mach-tegra/board-ktt30-panel.c
++++ b/arch/arm/mach-tegra/board-ktt30-panel.c
+@@ -749,8 +749,10 @@ int __init ktt30_panel_init(void)
+ 
+ 
+ #if defined(CONFIG_TEGRA_GRHOST) && defined(CONFIG_TEGRA_DC)
+-	if (!lcd_enabled)
++	if (!lcd_enabled) {
++		ktt30_disp2_device.id = 0;
+ 		goto disp2;
++	}
+ 
+ 	res = nvhost_get_resource_byname(&ktt30_disp1_device,
+ 					 IORESOURCE_MEM, "fbmem");
+-- 
+1.7.4.4
+

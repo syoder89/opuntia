@@ -1,0 +1,28 @@
+From d2055967b965f52667a53cd2de1cb55518e6b68e Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Fri, 3 May 2013 23:56:29 +0400
+Subject: [PATCH 074/127] arm: tegra: ktt30: Disable MPU Timer IRQ in
+ ktt30_defconfig
+
+The Invensense MPU is not used. Disable MPU Timer IRQ as well.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index 0a65c4c..420cd3a 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -200,7 +200,6 @@ CONFIG_ISL29003=y
+ CONFIG_UID_STAT=y
+ CONFIG_BCM4329_RFKILL=y
+ CONFIG_TEGRA_CRYPTO_DEV=y
+-CONFIG_MPU_SENSORS_TIMERIRQ=y
+ # CONFIG_INV_SENSORS is not set
+ CONFIG_TEGRA_BB_SUPPORT=y
+ CONFIG_TEGRA_BB_POWER=y
+-- 
+1.7.4.4
+

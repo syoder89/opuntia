@@ -1,0 +1,42 @@
+From 3cb741d4746b705b26e10ef11554df99690100b2 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sun, 17 Mar 2013 03:05:00 +0400
+Subject: [PATCH 036/127] arm: tegra: ktt30: Clear framebuffer2 if it's not
+ set by the bootloader
+
+Clear framebuffer2 if and only if framebuffer2 is not specified
+by the bootloader. If the bootloader framebuffer2 is specified,
+then copy the contents to kernel framebuffer2.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-panel.c |   13 ++++++++++---
+ 1 files changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-panel.c b/arch/arm/mach-tegra/board-ktt30-panel.c
+index 11dbf9a..78cca20 100644
+--- a/arch/arm/mach-tegra/board-ktt30-panel.c
++++ b/arch/arm/mach-tegra/board-ktt30-panel.c
+@@ -744,9 +744,16 @@ int __init ktt30_panel_init(void)
+ 	res->start = tegra_fb2_start;
+ 	res->end = tegra_fb2_start + tegra_fb2_size - 1;
+ 
+-	/* Copy the bootloader fb to the fb2. */
+-	tegra_move_framebuffer(tegra_fb2_start, tegra_bootloader_fb_start,
+-				min(tegra_fb2_size, tegra_bootloader_fb_size));
++	/*
++	 * If the bootloader fb2 is valid, copy it to the fb2, or else
++	 * clear fb2 to avoid garbage on dispaly2.
++	 */
++	if (tegra_bootloader_fb2_size)
++		tegra_move_framebuffer(tegra_fb2_start,
++			tegra_bootloader_fb2_start,
++			min(tegra_fb2_size, tegra_bootloader_fb2_size));
++	else
++		tegra_clear_framebuffer(tegra_fb2_start, tegra_fb2_size);
+ 
+ 	if (!err)
+ 		err = nvhost_device_register(&ktt30_disp2_device);
+-- 
+1.7.4.4
+

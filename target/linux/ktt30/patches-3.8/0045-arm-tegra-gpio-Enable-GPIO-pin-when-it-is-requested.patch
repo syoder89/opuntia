@@ -1,0 +1,30 @@
+From 29a792e3b0a9e4f5c3f7a7406d10cb452ae33252 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Mon, 25 Mar 2013 21:13:40 +0400
+Subject: [PATCH 045/127] arm: tegra: gpio: Enable GPIO pin when it is
+ requested
+
+This enables gpio pin when it is requested (exported in sysfs).
+This should fix the GPIO sysfs issue of a pin being disabled
+until a GPIO direction is explicitly set.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/gpio/gpio-tegra.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/drivers/gpio/gpio-tegra.c b/drivers/gpio/gpio-tegra.c
+index f1c3aa9..c9a1428 100644
+--- a/drivers/gpio/gpio-tegra.c
++++ b/drivers/gpio/gpio-tegra.c
+@@ -219,6 +219,7 @@ static int tegra_gpio_to_irq(struct gpio_chip *chip, unsigned offset)
+ 
+ static int tegra_gpio_request(struct gpio_chip *chip, unsigned offset)
+ {
++	tegra_gpio_enable(offset);
+ 	return 0;
+ }
+ 
+-- 
+1.7.4.4
+

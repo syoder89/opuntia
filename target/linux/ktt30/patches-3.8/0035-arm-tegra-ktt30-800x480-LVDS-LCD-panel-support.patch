@@ -1,0 +1,130 @@
+From 75ec5f122fa7e789e606ad9b8e75b91d9004338e Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sat, 2 Mar 2013 23:16:00 +0400
+Subject: [PATCH 035/127] arm: tegra: ktt30: 800x480 LVDS LCD panel support
+
+This adds preliminary 800x480 LVDS panel support.
+Tested with the PM070WL4 800x480 18-bit panel
+(Kontron LDI Module P/N 820975-R11).
+
+Since 18-bit panels are not supported by the h/w,
+some colors are displayed incorrectly.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-panel.c  |   60 ++++++++----------------------
+ arch/arm/mach-tegra/board-ktt30-pinmux.c |    6 ++-
+ 2 files changed, 20 insertions(+), 46 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-panel.c b/arch/arm/mach-tegra/board-ktt30-panel.c
+index 9b20395..11dbf9a 100644
+--- a/arch/arm/mach-tegra/board-ktt30-panel.c
++++ b/arch/arm/mach-tegra/board-ktt30-panel.c
+@@ -367,46 +367,18 @@ static struct resource ktt30_disp2_resources[] = {
+ 
+ static struct tegra_dc_mode ktt30_panel_modes[] = {
+ 	{
+-		/* 1366x768@60Hz */
+-		.pclk = 74180000,
+-		.h_ref_to_sync = 1,
+-		.v_ref_to_sync = 1,
+-		.h_sync_width = 30,
+-		.v_sync_width = 5,
+-		.h_back_porch = 52,
+-		.v_back_porch = 20,
+-		.h_active = 1366,
+-		.v_active = 768,
+-		.h_front_porch = 64,
+-		.v_front_porch = 25,
+-	},
+-	{
+-		/* 1366x768@50Hz */
+-		.pclk = 74180000,
+-		.h_ref_to_sync = 1,
+-		.v_ref_to_sync = 1,
+-		.h_sync_width = 30,
+-		.v_sync_width = 5,
+-		.h_back_porch = 56,
+-		.v_back_porch = 80,
+-		.h_active = 1366,
+-		.v_active = 768,
+-		.h_front_porch = 64,
+-		.v_front_porch = 125,
+-	},
+-	{
+-		/* 1366x768@48 */
+-		.pclk = 74180000,
+-		.h_ref_to_sync = 1,
+-		.v_ref_to_sync = 1,
+-		.h_sync_width = 30,
+-		.v_sync_width = 5,
+-		.h_back_porch = 52,
+-		.v_back_porch = 98,
+-		.h_active = 1366,
+-		.v_active = 768,
+-		.h_front_porch = 64,
+-		.v_front_porch = 152,
++		/* 800x480@60 */
++		.pclk = 27000000,
++		.h_ref_to_sync = 4,
++		.v_ref_to_sync = 2,
++		.h_sync_width = 10,
++		.v_sync_width = 3,
++		.h_back_porch = 20,
++		.v_back_porch = 3,
++		.h_front_porch = 70,
++		.v_front_porch = 3,
++		.h_active = 800,
++		.v_active = 480,
+ 	},
+ };
+ 
+@@ -504,8 +476,8 @@ static struct tegra_dc_sd_settings ktt30_sd_settings = {
+ 
+ static struct tegra_fb_data ktt30_fb_data = {
+ 	.win		= 0,
+-	.xres		= 1366,
+-	.yres		= 768,
++	.xres		= 800,
++	.yres		= 480,
+ 	.bits_per_pixel	= 32,
+ 	.flags		= TEGRA_FB_FLIP_ON_PROBE,
+ };
+@@ -547,13 +519,13 @@ static struct tegra_dc_platform_data ktt30_disp2_pdata = {
+ 
+ 
+ static struct tegra_dc_out ktt30_disp1_out = {
+-	.align		= TEGRA_DC_ALIGN_MSB,
++	.align		= TEGRA_DC_ALIGN_LSB,
+ 	.order		= TEGRA_DC_ORDER_RED_BLUE,
+ 	.sd_settings	= &ktt30_sd_settings,
+ 	.parent_clk	= "pll_d_out0",
+ 	.parent_clk_backup = "pll_d2_out0",
+ 	.type		= TEGRA_DC_OUT_RGB,
+-	.depth		= 18,
++	.depth		= 24,
+ 	.dither		= TEGRA_DC_ORDERED_DITHER,
+ 	.modes		= ktt30_panel_modes,
+ 	.n_modes	= ARRAY_SIZE(ktt30_panel_modes),
+diff --git a/arch/arm/mach-tegra/board-ktt30-pinmux.c b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+index aca0141..4c6cd1a 100644
+--- a/arch/arm/mach-tegra/board-ktt30-pinmux.c
++++ b/arch/arm/mach-tegra/board-ktt30-pinmux.c
+@@ -249,10 +249,12 @@ static __initdata struct tegra_pingroup_config ktt30_pinmux_common[] = {
+ 
+ 	DEFAULT_PINMUX(KB_ROW5,         OWR,             NORMAL,    NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(KB_ROW12,        KBC,             NORMAL,    NORMAL,     OUTPUT),
+-	DEFAULT_PINMUX(KB_ROW15,        KBC,             NORMAL,    NORMAL,     OUTPUT),
++	/* LVDS_SINGLE_PIXEL */
++	DEFAULT_PINMUX(KB_ROW15,        KBC,             PULL_UP,   NORMAL,     OUTPUT),
+ 
+ 	DEFAULT_PINMUX(GMI_WAIT,        RSVD1,           NORMAL,    NORMAL,     INPUT),
+-	DEFAULT_PINMUX(GMI_CS0_N,       RSVD1,           NORMAL,    NORMAL,     INPUT),
++	/* LVDS_3V3 */
++	DEFAULT_PINMUX(GMI_CS0_N,       RSVD1,           PULL_UP,   NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(GMI_CS1_N,       RSVD1,           NORMAL,    NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(GMI_CS3_N,       RSVD1,           PULL_DOWN, NORMAL,     OUTPUT),
+ 	DEFAULT_PINMUX(GMI_CS4_N,       RSVD1,           NORMAL,    NORMAL,     INPUT),
+-- 
+1.7.4.4
+

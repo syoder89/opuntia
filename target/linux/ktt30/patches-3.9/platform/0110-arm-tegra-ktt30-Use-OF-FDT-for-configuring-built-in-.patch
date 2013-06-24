@@ -1,0 +1,31 @@
+From a4947ee3ab2c7f731f883036236ec8add5fdde0e Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 2 May 2013 01:58:05 +0400
+Subject: [PATCH 110/127] arm: tegra: ktt30: Use OF FDT for configuring
+ built-in Ethernet power
+
+Use PCIe port 0 status instead of command line parameters
+to control built-in Intel 82574L Ethernet power.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-power.c |   21 ---------------------
+ arch/arm/mach-tegra/board-ktt30.c       |    6 ++++++
+ 2 files changed, 6 insertions(+), 21 deletions(-)
+
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -932,6 +932,13 @@ static void __init ktt30_of_pci_fixup(vo
+ static void __init ktt30_pci_init(void)
+ {
+ 	ktt30_of_pci_fixup();
++
++	/* Built-in Intel 82574L Ethernet on PCIE#0 port */
++	gpio_request_one(TEGRA_GPIO_PL2,
++			ktt30_pci_platform_data.port_status[0] ?
++			GPIOF_OUT_INIT_HIGH : GPIOF_OUT_INIT_LOW,
++			"en_3v3_eth");
++
+ 	tegra_pci_device.dev.platform_data = &ktt30_pci_platform_data;
+ 	platform_device_register(&tegra_pci_device);
+ }

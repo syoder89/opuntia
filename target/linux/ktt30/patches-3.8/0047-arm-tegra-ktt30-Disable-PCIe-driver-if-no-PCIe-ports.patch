@@ -1,0 +1,36 @@
+From 3fc104c23d08ac62030062c23203a3379a9b0eae Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Mon, 25 Mar 2013 16:04:30 +0400
+Subject: [PATCH 047/127] arm: tegra: ktt30: Disable PCIe driver if no PCIe
+ ports enabled
+
+This skips PCIe device registration in case all PCIe ports
+are disabled on the command line ("pcie[012]=no").
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30.c |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index 17b5c08..dfe15dc 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -783,8 +783,12 @@ static struct tegra_pci_platform_data ktt30_pci_platform_data = {
+ 
+ static void ktt30_pci_init(void)
+ {
+-	tegra_pci_device.dev.platform_data = &ktt30_pci_platform_data;
+-	platform_device_register(&tegra_pci_device);
++	if (ktt30_pci_platform_data.port_status[0] ||
++			ktt30_pci_platform_data.port_status[1] ||
++			ktt30_pci_platform_data.port_status[2]) {
++		tegra_pci_device.dev.platform_data = &ktt30_pci_platform_data;
++		platform_device_register(&tegra_pci_device);
++	}
+ }
+ 
+ 
+-- 
+1.7.4.4
+

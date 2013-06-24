@@ -1,0 +1,53 @@
+From 587ab6d7203fbfe834cc0720eff4857cdcf2cd87 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Mon, 15 Apr 2013 19:10:08 +0400
+Subject: [PATCH 069/127] arm: tegra: ktt30: Rework KT setup bootdisplay
+ settings
+
+The user-space Xorg graphics drivers do not seem to tolerate
+disabled LCD display well. If tegradc.0 device is not registered,
+tegradc.1 (HDMI) output does not work.
+
+Fix this issue by always registering tegradc.0 device.
+
+We don't register backlight devices in case the LCD is disabled.
+We also forbid the dc_out enable callbacks to enable power
+in case the LCD is marked disabled in the KT setup.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-panel.c |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
+
+--- a/arch/arm/mach-tegra/board-ktt30-panel.c
++++ b/arch/arm/mach-tegra/board-ktt30-panel.c
+@@ -768,15 +768,15 @@ int __init ktt30_panel_init(void)
+ 		gpio_free(ktt30_pnl_gpio[KTT30_LCD1_BL_PWM].gpio);
+ 		platform_add_devices(ktt30_bl_devices,
+ 					ARRAY_SIZE(ktt30_bl_devices));
++	} else {
++#ifdef CONFIG_TEGRA_DC
++		ktt30_disp1_out.enable = ktt30_panel_disable;
++		ktt30_disp1_out.sd_settings = NULL;
++		ktt30_disp1_pdata.flags &= ~TEGRA_DC_FLAG_ENABLED;
++#endif
+ 	}
+ 
+-
+ #if defined(CONFIG_TEGRA_GRHOST) && defined(CONFIG_TEGRA_DC)
+-	if (!lcd_enabled) {
+-		ktt30_disp2_device.id = 0;
+-		goto disp2;
+-	}
+-
+ 	res = nvhost_get_resource_byname(&ktt30_disp1_device,
+ 					 IORESOURCE_MEM, "fbmem");
+ 	res->start = tegra_fb_start;
+@@ -789,7 +789,6 @@ int __init ktt30_panel_init(void)
+ 	if (!err)
+ 		err = nvhost_device_register(&ktt30_disp1_device);
+ 
+-disp2:
+ 	if (!hdmi_enabled)
+ 		goto out;
+ 

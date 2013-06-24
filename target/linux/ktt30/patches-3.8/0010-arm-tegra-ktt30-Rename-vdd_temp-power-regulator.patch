@@ -1,0 +1,32 @@
+From 855596a47cea4be29614a4c38b68a633a2f52c1c Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 31 Oct 2012 03:54:13 +0400
+Subject: [PATCH 010/127] arm: tegra: ktt30: Rename vdd_temp power regulator
+
+The "vdd_temp" power regulator name is expected
+to be "vdd_vcore_temp" by the ADT7461 driver.
+Rename it to prevent ADT7461 driver from showing
+the following error message at start-up:
+"Couldn't get regulator vdd_vcore_temp"
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-power.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30-power.c b/arch/arm/mach-tegra/board-ktt30-power.c
+index b44423b..b534de7 100644
+--- a/arch/arm/mach-tegra/board-ktt30-power.c
++++ b/arch/arm/mach-tegra/board-ktt30-power.c
+@@ -392,7 +392,7 @@ static struct regulator_consumer_supply fixed_reg_en_3v3_sys_supply[] = {
+ 	REGULATOR_SUPPLY("vdd_led", NULL),
+ 	REGULATOR_SUPPLY("vddio_cec", NULL),
+ 	REGULATOR_SUPPLY("vdd_cmps", NULL),
+-	REGULATOR_SUPPLY("vdd_temp", NULL),
++	REGULATOR_SUPPLY("vdd_vcore_temp", NULL),
+ 	REGULATOR_SUPPLY("vpp_kfuse", NULL),
+ 	REGULATOR_SUPPLY("vddio_ts", NULL),
+ 	REGULATOR_SUPPLY("vdd_ir_led", NULL),
+-- 
+1.7.4.4
+

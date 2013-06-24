@@ -1,0 +1,46 @@
+From 821c7d71dc6042dc7d4ba68bc6a41480f92b9123 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sun, 17 Mar 2013 02:23:57 +0400
+Subject: [PATCH 003/127] arm: tegra: timer: Fix building with SMP off.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This fixes the following build errors:
+arch/arm/mach-tegra/timer.h:54:19: error:
+function declaration isn’t a prototype [-Werror=strict-prototypes]
+arch/arm/mach-tegra/timer.c:271:5: error:
+redefinition of ‘tegra_get_linear_age’
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/timer.c |    4 ++--
+ arch/arm/mach-tegra/timer.h |    2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/timer.c b/arch/arm/mach-tegra/timer.c
+index 5771bfc..871171f 100644
+--- a/arch/arm/mach-tegra/timer.c
++++ b/arch/arm/mach-tegra/timer.c
+@@ -237,7 +237,6 @@ void tegra_twd_resume(struct tegra_twd_context *context)
+ 	writel(context->twd_load, twd_base + TWD_TIMER_LOAD);
+ 	writel(context->twd_ctrl, twd_base + TWD_TIMER_CONTROL);
+ }
+-#endif
+ 
+ #ifdef CONFIG_RTC_CLASS
+ /**
+@@ -323,11 +322,12 @@ done:
+ }
+ 
+ #else
+-int tegra_get_linear_age()
++int tegra_get_linear_age(void)
+ {
+ 	return -1;
+ }
+ #endif
++#endif
+ 
+ static void __init tegra_init_timer(void)
+ {

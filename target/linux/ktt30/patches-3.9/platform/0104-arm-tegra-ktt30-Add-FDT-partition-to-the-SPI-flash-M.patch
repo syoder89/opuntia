@@ -1,0 +1,80 @@
+From 2ae98085d0c7927079ccbd78d6ca0045f73c0461 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Mon, 6 May 2013 15:27:02 +0400
+Subject: [PATCH 104/127] arm: tegra: ktt30: Add FDT partition to the SPI
+ flash MTD
+
+This updates SPI flash layout, adding the "FDT" partition.
+The system configuration is expected to be stored in the FDT.
+The KT-user/system data partitions are planned to be deprecated.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30.c |   24 ++++++++++++++++++------
+ 1 files changed, 18 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index 9042f84..fe82e97 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -415,39 +415,51 @@ static struct mtd_partition ktt30_spiflash_part[] = {
+ 	[1] = {
+ 		.name		= "User",
+ 		.offset		= MTDPART_OFS_APPEND,
+-		.size		= SZ_4M - SZ_1M - SZ_16K - SZ_8K,
++		.size		= SZ_4M - SZ_1M - SZ_64K,
+ 	},
+ 	[2] = {
++		.name		= "FDT",
++		.offset		= MTDPART_OFS_APPEND,
++		.size		= SZ_16K,
++		.mask_flags	= MTD_WRITEABLE,
++	},
++	[3] = {
++		.name		= "Reserved",
++		.offset		= MTDPART_OFS_APPEND,
++		.size		= SZ_16K + SZ_8K,
++		.mask_flags	= MTD_WRITEABLE,
++	},
++	[4] = {
+ 		.name		= "Bootcount",
+ 		.offset		= MTDPART_OFS_APPEND,
+ 		.size		= SZ_4K,
+ 		.mask_flags	= MTD_WRITEABLE,
+ 	},
+-	[3] = {
++	[5] = {
+ 		.name		= "Reserved",
+ 		.offset		= MTDPART_OFS_APPEND,
+ 		.size		= SZ_4K,
+ 		.mask_flags	= MTD_WRITEABLE,
+ 	},
+-	[4] = {
++	[6] = {
+ 		.name		= "KT-user-setup",
+ 		.offset		= MTDPART_OFS_APPEND,
+ 		.size		= SZ_4K,
+ 		.mask_flags	= MTD_WRITEABLE,
+ 	},
+-	[5] = {
++	[7] = {
+ 		.name		= "KT-system-setup",
+ 		.offset		= MTDPART_OFS_APPEND,
+ 		.size		= SZ_4K,
+ 		.mask_flags	= MTD_WRITEABLE,
+ 	},
+-	[6] = {
++	[8] = {
+ 		.name		= "Reserved",
+ 		.offset		= MTDPART_OFS_APPEND,
+ 		.size		= SZ_4K,
+ 		.mask_flags	= MTD_WRITEABLE,
+ 	},
+-	[7] = {
++	[9] = {
+ 		.name		= "U-Boot-Env",
+ 		/* the last 4K according to U-Boot */
+ 		.offset		= SZ_4M - SZ_4K,
+-- 
+1.7.4.4
+

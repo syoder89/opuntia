@@ -1,0 +1,90 @@
+From 02e47d79fb3798eab562a8c1b9ef30a0ecfb69c5 Mon Sep 17 00:00:00 2001
+From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Date: Mon, 6 Feb 2012 18:46:35 +0100
+Subject: [PATCH 114/127] usb: gadget: clean the ep in autoconf before
+ returning it.
+
+Since commit 72c973dd aka ("usb: gadget: add usb_endpoint_descriptor to
+struct usb_ep) the descriptor is part of the ep. Most gadgets like
+g_zero or masstorage call config_ep_by_speed() to grab an available
+endpoint which may be used for FS/HS/SS bulk/iso/intr and in a second
+they assign the proper descriptor by calling config_ep_by_speed(). This
+is good so far. A few of them like ncm call config_ep_by_speed() only if
+ep->desc not assigned earlier. That means ep->desc is never assigned if
+the endpoint was used by another gadget before it was removed.
+
+Some of those gadgets also assign ep->driver_data to NULL on reset or
+ep_disable part _but_ keep a reference to this endpoint. At ep_enable
+time they assign driver_data to their private data. This probably needs
+a clean up of its own.
+
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Signed-off-by: Felipe Balbi <balbi@ti.com>
+(cherry picked from commit 609ca228073ae06c5513474d2cdf0af7ee5766ec)
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ drivers/usb/gadget/epautoconf.c |   16 ++++++++++------
+ 1 files changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/usb/gadget/epautoconf.c b/drivers/usb/gadget/epautoconf.c
+index 7a7e6b7..056c925 100644
+--- a/drivers/usb/gadget/epautoconf.c
++++ b/drivers/usb/gadget/epautoconf.c
+@@ -288,24 +288,24 @@ struct usb_ep *usb_ep_autoconfig_ss(
+ 		/* ep-e, ep-f are PIO with only 64 byte fifos */
+ 		ep = find_ep (gadget, "ep-e");
+ 		if (ep && ep_matches(gadget, ep, desc, ep_comp))
+-			return ep;
++			goto found_ep;
+ 		ep = find_ep (gadget, "ep-f");
+ 		if (ep && ep_matches(gadget, ep, desc, ep_comp))
+-			return ep;
++			goto found_ep;
+ 
+ 	} else if (gadget_is_goku (gadget)) {
+ 		if (USB_ENDPOINT_XFER_INT == type) {
+ 			/* single buffering is enough */
+ 			ep = find_ep(gadget, "ep3-bulk");
+ 			if (ep && ep_matches(gadget, ep, desc, ep_comp))
+-				return ep;
++				goto found_ep;
+ 		} else if (USB_ENDPOINT_XFER_BULK == type
+ 				&& (USB_DIR_IN & desc->bEndpointAddress)) {
+ 			/* DMA may be available */
+ 			ep = find_ep(gadget, "ep2-bulk");
+ 			if (ep && ep_matches(gadget, ep, desc,
+ 					      ep_comp))
+-				return ep;
++				goto found_ep;
+ 		}
+ 
+ #ifdef CONFIG_BLACKFIN
+@@ -324,18 +324,22 @@ struct usb_ep *usb_ep_autoconfig_ss(
+ 		} else
+ 			ep = NULL;
+ 		if (ep && ep_matches(gadget, ep, desc, ep_comp))
+-			return ep;
++			goto found_ep;
+ #endif
+ 	}
+ 
+ 	/* Second, look at endpoints until an unclaimed one looks usable */
+ 	list_for_each_entry (ep, &gadget->ep_list, ep_list) {
+ 		if (ep_matches(gadget, ep, desc, ep_comp))
+-			return ep;
++			goto found_ep;
+ 	}
+ 
+ 	/* Fail */
+ 	return NULL;
++found_ep:
++	ep->desc = NULL;
++	ep->comp_desc = NULL;
++	return ep;
+ }
+ 
+ /**
+-- 
+1.7.4.4
+

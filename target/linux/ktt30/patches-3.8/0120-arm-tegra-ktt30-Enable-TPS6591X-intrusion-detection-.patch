@@ -1,0 +1,28 @@
+From 1631eb33e924cbec8c6b0767f0a768d5e0724ffd Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Thu, 30 May 2013 00:15:31 +0400
+Subject: [PATCH 120/127] arm: tegra: ktt30: Enable TPS6591X intrusion
+ detection driver
+
+This enables TPS6591X intrusion detection driver built-in.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index cfb60e6..1d4fdcd 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -287,6 +287,7 @@ CONFIG_SENSORS_PWM_FAN=m
+ CONFIG_SENSORS_LM90=y
+ CONFIG_SENSORS_TEGRA_TSENSOR=y
+ CONFIG_SENSORS_INA219=y
++CONFIG_SENSORS_TPS6591X=y
+ CONFIG_THERMAL=y
+ CONFIG_WATCHDOG=y
+ CONFIG_WATCHDOG_NOWAYOUT=y
+-- 
+1.7.4.4
+

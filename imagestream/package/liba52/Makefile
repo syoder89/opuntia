@@ -38,6 +38,10 @@ define Build/InstallDev
 	$(CP) \
 		$(PKG_INSTALL_DIR)/usr/include/a52dec \
 			$(1)/usr/include/
+	$(INSTALL_DIR) $(1)/usr/lib
+	$(CP) \
+		$(PKG_INSTALL_DIR)/usr/lib/liba52.a \
+			$(1)/usr/lib/
 endef
 
 define Package/liba52/install

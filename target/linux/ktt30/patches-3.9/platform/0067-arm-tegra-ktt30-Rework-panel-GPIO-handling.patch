@@ -1,0 +1,260 @@
+From b78a390700c23bfbedc26e4f7dd76335bce492b9 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sat, 13 Apr 2013 02:24:09 +0400
+Subject: [PATCH 067/127] arm: tegra: ktt30: Rework panel GPIO handling
+
+All GPIO settings are collected into a single array.
+The LVDS and backlight control pins are disabled by
+default, while SINGLE_PIXEL and LVDS_3V3 are enabled.
+The ktt30_pnl_gpio_set() function, introduced here,
+allows to control GPIO output, based on the default
+values.
+This should simplify GPIO handling in case we need a
+different polarity for LVDS_SHTDN_N/LCD1_BL_EN signals,
+or different SINGLE_PIXEL/LVDS_3V3 settings.
+All we need to do is change the initial settings
+in the ktt30_pnl_gpio array.
+
+Let panel_enable/disable and backlight_enable/disable
+callbacks handle GPIO switching. Also fix power sequence
+in the panel_enable/disable callbacks.
+Add small delays, using msleep (instead of mdelay)
+to let the power settle down.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-panel.c |  129 ++++++++++++++++++-------------
+ 1 files changed, 74 insertions(+), 55 deletions(-)
+
+--- a/arch/arm/mach-tegra/board-ktt30-panel.c
++++ b/arch/arm/mach-tegra/board-ktt30-panel.c
+@@ -43,13 +43,57 @@
+ #include "gpio-names.h"
+ #include "tegra3_host1x_devices.h"
+ 
+-/* ktt30 default display board pins */
+-#define ktt30_lvds_shutdown		TEGRA_GPIO_PK3
++/* common gpio pins */
++#define KTT30_GPIO_HDMI_HPD		TEGRA_GPIO_PN7
+ 
+-/* common pins( backlight ) for all display boards */
+-#define ktt30_bl_enb			TEGRA_GPIO_PH2
+-#define ktt30_bl_pwm			TEGRA_GPIO_PH0
+-#define ktt30_hdmi_hpd			TEGRA_GPIO_PN7
++#define KTT30_PNL_GPIO(_name, _gpio, _flags)	\
++	{					\
++		.gpio	= _gpio,		\
++		.flags	= _flags,		\
++		.label	= _name,		\
++	}
++
++enum {
++	KTT30_LCD1_BL_PWM = 0,
++	KTT30_LCD1_BL_EN,
++	KTT30_LVDS_SHTDN_N,
++	KTT30_LVDS_3V3,
++	KTT30_LVDS_SNGL_PXL,
++	KTT30_HDMI_HPD,
++	KTT30_PANEL_GPIO_SZ,
++};
++
++/* GPIO pins and their default state flags */
++static struct gpio ktt30_pnl_gpio[KTT30_PANEL_GPIO_SZ] = {
++	/* Disable PWM */
++	[KTT30_LCD1_BL_PWM] = KTT30_PNL_GPIO("lcd1_bl_pwm",
++				TEGRA_GPIO_PH0, GPIOF_OUT_INIT_LOW),
++	/* Disable backlight */
++	[KTT30_LCD1_BL_EN] = KTT30_PNL_GPIO("lcd1_bl_en",
++				TEGRA_GPIO_PH2, GPIOF_OUT_INIT_LOW),
++	/* Disable LVDS */
++	[KTT30_LVDS_SHTDN_N] = KTT30_PNL_GPIO("lvds_shutdown",
++				TEGRA_GPIO_PK3, GPIOF_OUT_INIT_LOW),
++	/* Enable 3.3V */
++	[KTT30_LVDS_3V3] = KTT30_PNL_GPIO("lvds_3V3",
++				TEGRA_GPIO_PJ0, GPIOF_OUT_INIT_HIGH),
++	/* Enable single pixel mode */
++	[KTT30_LVDS_SNGL_PXL] = KTT30_PNL_GPIO("lvds_single_pixel",
++				TEGRA_GPIO_PS7, GPIOF_OUT_INIT_HIGH),
++	/* HDMI hotplug detect input */
++	[KTT30_HDMI_HPD] = KTT30_PNL_GPIO("hdmi_hpd",
++				KTT30_GPIO_HDMI_HPD, GPIOF_DIR_IN),
++};
++
++/* If !val, reset GPIO to its default state.
++ * Otherwise, use the opposite to the default value
++ */
++static inline void ktt30_pnl_gpio_set(int idx, bool val)
++{
++	int dflt_high = ktt30_pnl_gpio[idx].flags & GPIOF_INIT_HIGH;
++
++	gpio_set_value(ktt30_pnl_gpio[idx].gpio, dflt_high ? !val : val);
++}
+ 
+ #ifdef CONFIG_TEGRA_DC
+ static struct regulator *ktt30_hdmi_reg = NULL;
+@@ -71,8 +115,6 @@ enum ktt30_disp_type {
+ static enum ktt30_disp_type ktt30_setup_disp1;
+ static enum ktt30_disp_type ktt30_setup_disp2;
+ 
+-static int ktt30_setup_bl_enb_low;
+-
+ static atomic_t sd_brightness = ATOMIC_INIT(255);
+ 
+ static tegra_dc_bl_output ktt30_bl_output_measured = {
+@@ -114,24 +156,17 @@ static p_tegra_dc_bl_output bl_output =
+ 
+ static int ktt30_backlight_init(struct device *dev)
+ {
+-	int ret = 0;
+-
+ 	if (WARN_ON(ARRAY_SIZE(ktt30_bl_output_measured) != 256))
+ 		pr_err("bl_output array does not have 256 elements\n");
+ 
+-	ret = gpio_direction_output(ktt30_bl_enb, !ktt30_setup_bl_enb_low);
+-	if (ret < 0)
+-		return ret;
+-
++	ktt30_pnl_gpio_set(KTT30_LCD1_BL_EN, true);
+ 	return 0;
+ };
+ 
+ static void ktt30_backlight_exit(struct device *dev)
+ {
+-	/* int ret; */
+-	/*ret = gpio_request(ktt30_bl_enb, "backlight_enb");*/
+-	gpio_set_value(ktt30_bl_enb, 0);
+-	mdelay(20);
++	ktt30_pnl_gpio_set(KTT30_LCD1_BL_EN, false);
++	msleep(20);
+ }
+ 
+ static int ktt30_backlight_notify(struct device *unused, int brightness)
+@@ -139,7 +174,7 @@ static int ktt30_backlight_notify(struct
+ 	int cur_sd_brightness = atomic_read(&sd_brightness);
+ 
+ 	/* Set the backlight GPIO pin mode to 'backlight_enable' */
+-	gpio_set_value(ktt30_bl_enb, !!brightness);
++	ktt30_pnl_gpio_set(KTT30_LCD1_BL_EN, !!brightness);
+ 
+ 	/* SD brightness is a percentage, 8-bit value. */
+ 	brightness = (brightness * cur_sd_brightness) / 255;
+@@ -212,13 +247,17 @@ static int ktt30_panel_enable(void)
+ 		}
+ 	}
+ 
+-	gpio_set_value(ktt30_lvds_shutdown, 1);
++	msleep(20);
++	ktt30_pnl_gpio_set(KTT30_LVDS_SHTDN_N, true);
+ 
+ 	return 0;
+ }
+ 
+ static int ktt30_panel_disable(void)
+ {
++	ktt30_pnl_gpio_set(KTT30_LVDS_SHTDN_N, false);
++	msleep(20);
++
+ 	if (ktt30_lvds_reg) {
+ 		regulator_disable(ktt30_lvds_reg);
+ 		regulator_put(ktt30_lvds_reg);
+@@ -236,8 +275,6 @@ static int ktt30_panel_disable(void)
+ 		regulator_put(ktt30_lvds_vdd_panel);
+ 		ktt30_lvds_vdd_panel = NULL;
+ 	}
+-
+-	gpio_set_value(ktt30_lvds_shutdown, 0);
+ 	return 0;
+ }
+ 
+@@ -531,7 +568,7 @@ static struct tegra_dc_out ktt30_disp2_o
+ 	.parent_clk	= "pll_d2_out0",
+ 
+ 	.dcc_bus	= 3,
+-	.hotplug_gpio	= ktt30_hdmi_hpd,
++	.hotplug_gpio	= KTT30_GPIO_HDMI_HPD,
+ 
+ 	.max_pixclock	= KHZ2PICOS(148500),
+ 
+@@ -741,24 +778,11 @@ int __init ktt30_panel_init(void)
+ 	tegra_ion_data.heaps[0].size = tegra_carveout_size;
+ #endif
+ 
+-	err = gpio_request(ktt30_lvds_shutdown, "lvds_shutdown");
+-	if (err < 0)
+-		return err;
++	/* Set initial GPIO state */
++	err = gpio_request_array(ktt30_pnl_gpio, KTT30_PANEL_GPIO_SZ);
+ 
+-	err = gpio_request(ktt30_bl_pwm, "bl_pwm");
+-	if (err < 0)
+-		goto free_lvds_shutdown;
+-
+-	err = gpio_request(ktt30_bl_enb, "bl_enb");
+-	if (err < 0)
+-		goto free_bl_pwm;
+-
+-	err = gpio_request(ktt30_hdmi_hpd, "hdmi_hpd");
+-	if (err)
+-		goto free_bl_enb;
+-
+-	gpio_direction_output(ktt30_lvds_shutdown, lcd_enabled);
+-	gpio_direction_input(ktt30_hdmi_hpd);
++	/* Let the LVDS voltage settings settle */
++	msleep(20);
+ 
+ #ifdef CONFIG_HAS_EARLYSUSPEND
+ 	ktt30_panel_early_suspender.suspend = ktt30_panel_early_suspend;
+@@ -766,11 +790,12 @@ int __init ktt30_panel_init(void)
+ 	ktt30_panel_early_suspender.level = EARLY_SUSPEND_LEVEL_DISABLE_FB;
+ 	register_early_suspend(&ktt30_panel_early_suspender);
+ #endif
+-
+ #ifdef CONFIG_TEGRA_GRHOST
+ 	err = tegra3_register_host1x_devices();
+-	if (err)
++	if (err) {
++		gpio_free_array(ktt30_pnl_gpio, KTT30_PANEL_GPIO_SZ);
+ 		return err;
++	}
+ #endif
+ 
+ #if defined(CONFIG_TEGRA_NVMAP)
+@@ -781,11 +806,12 @@ int __init ktt30_panel_init(void)
+ #endif
+ 
+ 	if (lcd_enabled) {
++		/* Free PWM GPIO pin to ensure it is
++		 * in functional (PWM) mode of operation.
++		 */
++		gpio_free(ktt30_pnl_gpio[KTT30_LCD1_BL_PWM].gpio);
+ 		platform_add_devices(ktt30_bl_devices,
+ 					ARRAY_SIZE(ktt30_bl_devices));
+-	} else {
+-		gpio_direction_output(ktt30_bl_pwm, 0);
+-		gpio_direction_output(ktt30_bl_enb, ktt30_setup_bl_enb_low);
+ 	}
+ 
+ 
+@@ -837,21 +863,12 @@ out:
+ 		err = nvhost_device_register(&nvavp_device);
+ #endif
+ 	return err;
+-
+-free_bl_enb:
+-	gpio_free(ktt30_bl_enb);
+-free_bl_pwm:
+-	gpio_free(ktt30_bl_pwm);
+-free_lvds_shutdown:
+-	gpio_free(ktt30_lvds_shutdown);
+-
+-	return err;
+ }
+ 
+ static int __init ktt30_setup_bl(char *options)
+ {
+ 	if (!strcmp(options, "low"))
+-		ktt30_setup_bl_enb_low = 1;
++		ktt30_pnl_gpio[KTT30_LCD1_BL_EN].flags = GPIOF_OUT_INIT_HIGH;
+ 	return 1;
+ }
+ __setup("bl_enb=", ktt30_setup_bl);

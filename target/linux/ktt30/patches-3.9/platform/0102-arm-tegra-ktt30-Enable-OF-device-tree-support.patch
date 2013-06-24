@@ -1,0 +1,27 @@
+From 9345d68a3e9aa9a74cdd7418c610664008a4d4f7 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Sat, 13 Apr 2013 05:28:19 +0400
+Subject: [PATCH 102/127] arm: tegra: ktt30: Enable OF device tree support
+
+This enables CONFIG_OF=y in ktt30_defconfig.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/configs/ktt30_defconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/arch/arm/configs/ktt30_defconfig b/arch/arm/configs/ktt30_defconfig
+index b37bf19..e4dc2ac 100644
+--- a/arch/arm/configs/ktt30_defconfig
++++ b/arch/arm/configs/ktt30_defconfig
+@@ -47,6 +47,7 @@ CONFIG_AEABI=y
+ # CONFIG_OABI_COMPAT is not set
+ CONFIG_HIGHMEM=y
+ CONFIG_ARM_FLUSH_CONSOLE_ON_RESTART=y
++CONFIG_USE_OF=y
+ CONFIG_ZBOOT_ROM_TEXT=0x0
+ CONFIG_ZBOOT_ROM_BSS=0x0
+ CONFIG_UIMAGE_LOADADDR=y
+-- 
+1.7.4.4
+

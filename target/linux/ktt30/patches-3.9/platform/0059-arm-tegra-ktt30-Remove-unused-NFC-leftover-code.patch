@@ -1,0 +1,41 @@
+From e47c7edc968cc188f266e28bd49c13d3baff5e28 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Wed, 17 Apr 2013 14:05:53 +0400
+Subject: [PATCH 059/127] arm: tegra: ktt30: Remove unused NFC leftover code
+
+This removes unused NFC thermal sensor pre-initialization.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30.c |    8 --------
+ 1 files changed, 0 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm/mach-tegra/board-ktt30.c b/arch/arm/mach-tegra/board-ktt30.c
+index 7b67ef0..1f90ce5 100644
+--- a/arch/arm/mach-tegra/board-ktt30.c
++++ b/arch/arm/mach-tegra/board-ktt30.c
+@@ -763,13 +763,6 @@ static void ktt30_gps_init(void)
+ 	tegra_gpio_enable(TEGRA_GPIO_PU3);
+ }
+ 
+-static void ktt30_nfc_init(void)
+-{
+-	tegra_gpio_enable(TEGRA_GPIO_PX0);
+-	tegra_gpio_enable(TEGRA_GPIO_PP3);
+-	tegra_gpio_enable(TEGRA_GPIO_PO7);
+-}
+-
+ static struct tegra_pci_platform_data ktt30_pci_platform_data = {
+ 	.port_status[0]	= 1,
+ 	.port_status[1]	= 1,
+@@ -831,7 +824,6 @@ static void __init tegra_ktt30_init(void)
+ 	ktt30_pins_state_init();
+ 	ktt30_emc_init();
+ 	tegra_release_bootloader_fb();
+-	ktt30_nfc_init();
+ 	ktt30_pci_init();
+ #ifdef CONFIG_TEGRA_WDT_RECOVERY
+ 	tegra_wdt_recovery_init();
+-- 
+1.7.4.4
+

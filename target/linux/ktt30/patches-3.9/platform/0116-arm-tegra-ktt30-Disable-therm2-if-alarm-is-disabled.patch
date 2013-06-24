@@ -1,0 +1,29 @@
+From f62c97a14395cb48e1e9e542d935be04d9c497c1 Mon Sep 17 00:00:00 2001
+From: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+Date: Tue, 28 May 2013 02:12:15 +0400
+Subject: [PATCH 116/127] arm: tegra: ktt30: Disable therm2 if alarm is
+ disabled
+
+This sets therm2 flag false if alarm is disabled. In this
+case the driver won't attempt to configure alarm output.
+
+Signed-off-by: Valentine Barshak <vbarshak@dev.rtsoft.ru>
+---
+ arch/arm/mach-tegra/board-ktt30-sensors.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+--- a/arch/arm/mach-tegra/board-ktt30-sensors.c
++++ b/arch/arm/mach-tegra/board-ktt30-sensors.c
+@@ -130,9 +130,10 @@ static void __init ktt30_of_fixup_sensor
+ 
+ 	retval = of_get_named_gpio_flags(node, "alarm-gpio", 0, &val);
+ 	if (!gpio_is_valid(retval) || (val & 0x1)) {
+-		adt7461_board_info.irq = 0;
+- 		ktt30_adt7461_pdata.irq_gpio = -1;
++		ktt30_adt7461_pdata.therm2 = false;
+  		ktt30_adt7461_pdata.alarm_fn = NULL;
++		ktt30_adt7461_pdata.irq_gpio = -1;
++		adt7461_board_info.irq = 0;
+ 	} else {
+ 		ktt30_adt7461_pdata.irq_gpio = retval;
+ 		adt7461_board_info.irq = gpio_to_irq(retval);
