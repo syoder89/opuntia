@@ -468,8 +468,8 @@ define KernelPackage/ppp
 	CONFIG_PPP_ASYNC \
 	CONFIG_SLHC
   FILES:= \
-	$(LINUX_DIR)/drivers/net/ppp/ppp_async.ko \
-	$(LINUX_DIR)/drivers/net/ppp/ppp_generic.ko \
+	$(LINUX_DIR)/drivers/net/ppp_async.ko \
+	$(LINUX_DIR)/drivers/net/ppp_generic.ko \
 	$(LINUX_DIR)/drivers/net/slip/slhc.ko
   AUTOLOAD:=$(call AutoLoad,30,slhc ppp_generic ppp_async)
 endef

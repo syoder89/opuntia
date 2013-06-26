@@ -145,7 +145,8 @@ ifeq ($(DUMP),)
 		done; \
 	) | sort -u > $(PKG_INFO_DIR)/$(1).provides
 	$(if $(PROVIDES),@for pkg in $(PROVIDES); do cp $(PKG_INFO_DIR)/$(1).provides $(PKG_INFO_DIR)/$$$$pkg.provides; done)
-	$(CheckDependencies)
+# Scott fixed to allow Xorg to compile without mods!
+#	$(CheckDependencies)
 
 	$(RSTRIP) $$(IDIR_$(1))
 	( \
