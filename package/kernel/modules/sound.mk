@@ -14,11 +14,11 @@ SOUNDCORE_LOAD ?= \
 	snd-page-alloc \
 	snd-hwdep \
 	snd-seq-device \
-	snd-rawmidi \
 	snd-timer \
 	snd-pcm \
 	snd-mixer-oss \
 	snd-pcm-oss
+#	snd-rawmidi \
 
 SOUNDCORE_FILES ?= \
 	$(LINUX_DIR)/sound/soundcore.ko \
@@ -26,11 +26,11 @@ SOUNDCORE_FILES ?= \
 	$(LINUX_DIR)/sound/core/snd-page-alloc.ko \
 	$(LINUX_DIR)/sound/core/snd-hwdep.ko \
 	$(LINUX_DIR)/sound/core/seq/snd-seq-device.ko \
-	$(LINUX_DIR)/sound/core/snd-rawmidi.ko \
 	$(LINUX_DIR)/sound/core/snd-timer.ko \
 	$(LINUX_DIR)/sound/core/snd-pcm.ko \
 	$(LINUX_DIR)/sound/core/oss/snd-mixer-oss.ko \
 	$(LINUX_DIR)/sound/core/oss/snd-pcm-oss.ko
+#	$(LINUX_DIR)/sound/core/snd-rawmidi.ko \
 
 define KernelPackage/sound-core
   SUBMENU:=$(SOUND_MENU)

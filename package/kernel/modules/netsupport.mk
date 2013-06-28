@@ -378,7 +378,7 @@ define KernelPackage/ipv6
   SUBMENU:=$(NETWORK_SUPPORT_MENU)
   TITLE:=IPv6 support
   KCONFIG:= \
-	CONFIG_IPV6 \
+	CONFIG_IPV6=y \
 	CONFIG_IPV6_PRIVACY=y \
 	CONFIG_IPV6_MULTIPLE_TABLES=y \
 	CONFIG_IPV6_MROUTE=y \
@@ -470,7 +470,7 @@ define KernelPackage/ppp
   FILES:= \
 	$(LINUX_DIR)/drivers/net/ppp_async.ko \
 	$(LINUX_DIR)/drivers/net/ppp_generic.ko \
-	$(LINUX_DIR)/drivers/net/slip/slhc.ko
+	$(LINUX_DIR)/drivers/net/slhc.ko
   AUTOLOAD:=$(call AutoLoad,30,slhc ppp_generic ppp_async)
 endef
 
@@ -486,7 +486,7 @@ define KernelPackage/ppp-synctty
   TITLE:=PPP sync tty support
   DEPENDS:=kmod-ppp
   KCONFIG:=CONFIG_PPP_SYNC_TTY
-  FILES:=$(LINUX_DIR)/drivers/net/ppp/ppp_synctty.ko
+  FILES:=$(LINUX_DIR)/drivers/net/ppp_synctty.ko
   AUTOLOAD:=$(call AutoLoad,40,ppp_synctty)
 endef
 
@@ -502,7 +502,7 @@ define KernelPackage/pppox
   TITLE:=PPPoX helper
   DEPENDS:=kmod-ppp
   KCONFIG:=CONFIG_PPPOE
-  FILES:=$(LINUX_DIR)/drivers/net/ppp/pppox.ko
+  FILES:=$(LINUX_DIR)/drivers/net/pppox.ko
   AUTOLOAD:=$(call AutoLoad,40,pppox)
 endef
 
@@ -518,7 +518,7 @@ define KernelPackage/pppoe
   TITLE:=PPPoE support
   DEPENDS:=kmod-ppp +kmod-pppox
   KCONFIG:=CONFIG_PPPOE
-  FILES:=$(LINUX_DIR)/drivers/net/ppp/pppoe.ko
+  FILES:=$(LINUX_DIR)/drivers/net/pppoe.ko
   AUTOLOAD:=$(call AutoLoad,41,pppoe)
 endef
 
@@ -550,7 +550,7 @@ define KernelPackage/pptp
   TITLE:=PPtP support
   DEPENDS:=kmod-ppp +kmod-gre +kmod-pppox
   KCONFIG:=CONFIG_PPTP
-  FILES:=$(LINUX_DIR)/drivers/net/ppp/pptp.ko
+  FILES:=$(LINUX_DIR)/drivers/net/pptp.ko
   AUTOLOAD:=$(call AutoLoad,41,pptp)
 endef
 
@@ -596,7 +596,7 @@ define KernelPackage/mppe
   KCONFIG:= \
 	CONFIG_PPP_MPPE_MPPC \
 	CONFIG_PPP_MPPE
-  FILES:=$(LINUX_DIR)/drivers/net/ppp/ppp_mppe.ko
+  FILES:=$(LINUX_DIR)/drivers/net/ppp_mppe.ko
   AUTOLOAD:=$(call AutoLoad,31,ppp_mppe)
 endef
 
@@ -853,7 +853,7 @@ define KernelPackage/slip
        CONFIG_SLIP_MODE_SLIP6=y
 
   FILES:= \
-       $(LINUX_DIR)/drivers/net/slip/slip.ko
+       $(LINUX_DIR)/drivers/net/slip.ko
   AUTOLOAD:=$(call AutoLoad,30,slip)
 endef
 

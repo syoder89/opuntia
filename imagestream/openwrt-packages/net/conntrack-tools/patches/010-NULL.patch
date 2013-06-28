@@ -1,0 +1,12 @@
+--- a/src/parse.c	2012-01-04 11:48:15.490258748 -0500
++++ b/src/parse.c	2012-05-07 22:49:51.590626617 -0400
+@@ -16,6 +16,9 @@
+  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  */
+ 
++/* for NULL :P */
++#include <stddef.h>
++
+ #include "network.h"
+ 
+ #include <libnetfilter_conntrack/libnetfilter_conntrack.h>
