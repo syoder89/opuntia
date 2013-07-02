@@ -4,6 +4,7 @@ CMD=$1
 ROUTER="$2"
 DESTDIR="$3"
 RELEASE="$4"
+_TARGET="$5"
 
 # If a git push fails with an odd error 22, http error 404 or whatever, use this:
 # git config http.postBuffer 524288000
@@ -31,7 +32,12 @@ function install_img()
 	fi
 }
 
-OPUNTIA_CFG="config-opuntia-4.7"
+if [ "$_TARGET" = "" ] ; then
+	if [ "$TARGET" = "" ] ; then
+		TARGET="alix2"
+	fi
+fi
+OPUNTIA_CFG="imagestream/configs/$TARGET"
 if [ ! -f .config ] ; then
 	cp -f $OPUNTIA_CFG .config
 elif [ -f .config ] && ! diff .config $OPUNTIA_CFG > /dev/null ; then
