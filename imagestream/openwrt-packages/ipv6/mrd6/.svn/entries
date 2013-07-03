@@ -1,14 +1,14 @@
 10
 
 dir
-36936
-svn://svn.openwrt.org/openwrt/branches/packages_12.09/ipv6/mrd6
+37132
+svn://svn.openwrt.org/openwrt/packages/ipv6/mrd6
 svn://svn.openwrt.org/openwrt
 
 
 
-2012-09-23T09:58:24.597730Z
-33524
+2013-05-14T15:02:57.018915Z
+36635
 nbd
 
 
@@ -32,10 +32,10 @@ file
 
 
 
-2013-06-14T18:05:06.419792Z
-d29efb045f01686f21d05e536d81b1b1
-2012-09-23T09:58:24.597730Z
-33524
+2013-07-02T19:42:01.387568Z
+59a91186cdf9f3ed215ac4126da78228
+2013-05-14T15:02:57.018915Z
+36635
 nbd
 has-props
 
@@ -58,7 +58,7 @@ has-props
 
 
 
-2214
+2216
 
 files
 dir

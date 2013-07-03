@@ -1,6 +1,6 @@
-pppd: tune Linux config defaults for Opuntia
+pppd: tune Linux config defaults for OpenWrt
 
-This patch adjusts a number defaults to properly match the Opuntia environment.
+This patch adjusts a number defaults to properly match the OpenWrt environment.
 It is not intended for upstream.
 
 Signed-off-by: Jo-Philipp Wich <jow@openwrt.org>

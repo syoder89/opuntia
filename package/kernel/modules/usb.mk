@@ -146,6 +146,21 @@ endef
 $(eval $(call KernelPackage,usb-acm))
 
 
+define KernelPackage/usb-wdm
+  TITLE:=Support for Wireless Device Management
+  KCONFIG:=CONFIG_USB_WDM
+  FILES:=$(LINUX_DIR)/drivers/usb/class/cdc-wdm.ko
+  AUTOLOAD:=$(call AutoLoad,60,cdc-wdm)
+$(call AddDepends/usb)
+endef
+
+define KernelPackage/usb-wdm/description
+ Kernel support for USB WDM devices
+endef
+
+$(eval $(call KernelPackage,usb-wdm))
+
+
 define KernelPackage/usb-audio
   TITLE:=Support for USB audio devices
   KCONFIG:= \

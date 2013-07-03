@@ -1,8 +1,8 @@
 10
 
 dir
-36936
-svn://svn.openwrt.org/openwrt/branches/packages_12.09/ipv6/gw6c/files
+37132
+svn://svn.openwrt.org/openwrt/packages/ipv6/gw6c/files
 svn://svn.openwrt.org/openwrt
 
 
@@ -32,7 +32,7 @@ file
 
 
 
-2013-06-14T18:05:06.411792Z
+2013-07-02T19:42:01.355568Z
 08b8f3451529572a86bc6aa4c00f50b7
 2008-11-09T16:14:40.400987Z
 13148
@@ -66,7 +66,7 @@ file
 
 
 
-2013-06-14T18:05:06.411792Z
+2013-07-02T19:42:01.355568Z
 62afda72c8c48675a028bcbe1abc23de
 2011-11-09T23:49:15.463526Z
 28923
@@ -100,7 +100,7 @@ file
 
 
 
-2013-06-14T18:05:06.411792Z
+2013-07-02T19:42:01.355568Z
 0206be9807279988c536b8e4a7f2a2d9
 2008-11-09T16:14:40.400987Z
 13148

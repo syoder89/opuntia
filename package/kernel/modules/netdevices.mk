@@ -663,3 +663,19 @@ define KernelPackage/dm9000/description
 endef
 
 $(eval $(call KernelPackage,dm9000))
+
+define KernelPackage/qmi-wwan
+  SUBMENU:=$(NETWORK_DEVICES_MENU)
+  TITLE:=QMI-based net device support
+  DEPENDS:=@USB_SUPPORT +kmod-usb-net
+  KCONFIG:= \
+        CONFIG_USB_NET_QMI_WWAN=y
+  FILES:=$(LINUX_DIR)/drivers/net/usb/qmi_wwan.ko
+  AUTOLOAD:=$(call AutoLoad,34,qmi-wwan)
+endef
+
+define KernelPackage/qmi-wwan/description
+  Kernel driver for QMI-WWAN devices.
+endef
+
+$(eval $(call KernelPackage,qmi-wwan))

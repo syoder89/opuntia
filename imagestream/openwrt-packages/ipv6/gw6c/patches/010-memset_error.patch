@@ -1,0 +1,89 @@
+--- a/gw6c-config/src/namevalueparser.cc
++++ b/gw6c-config/src/namevalueparser.cc
+@@ -25,6 +25,7 @@
+ #include <fstream>
+ #include <time.h>
+ #include <assert.h>
++#include <cstring>
+ 
+ 
+ #define NV_SEPARATOR          "="                   // Name=value separator
+--- a/gw6c-config/src/gw6cvalidation.cc
++++ b/gw6c-config/src/gw6cvalidation.cc
+@@ -36,6 +36,8 @@
+ #include <netinet/in.h>
+ #define INET_PTON(A, B, C)                inet_pton(A,B,C)
+ #endif
++#include <cstring>
++#include <cstdlib>
+ 
+ 
+ // Definition of valid characters for different strings.
+--- a/gw6c-config/src/gw6cconfig.cc
++++ b/gw6c-config/src/gw6cconfig.cc
+@@ -24,7 +24,8 @@
+ #include <gw6cconfig/gw6cvalidation.h>
+ #include <gw6cconfig/gw6cuistrings.h>
+ #include <assert.h>
+-#include <string>
++#include <cstring>
++#include <cstdlib>
+ 
+ 
+ // Configuration data variable NAMES
+--- a/gw6c-config/src/gw6c_c_wrapper.cc
++++ b/gw6c-config/src/gw6c_c_wrapper.cc
+@@ -22,6 +22,8 @@
+ #include <gw6cconfig/gw6cuistrings.h>
+ using namespace gw6cconfig;
+ #include <assert.h>
++#include <cstring>
++#include <cstdlib>
+ 
+ #ifdef WIN32
+ #define strcasecmp      _stricmp
+--- a/gw6c-config/src/hap6devicemappingconfig.cc
++++ b/gw6c-config/src/hap6devicemappingconfig.cc
+@@ -22,6 +22,7 @@
+ #include <gw6cconfig/hap6devicemappingconfig.h>
+ #include <gw6cconfig/gw6cuistrings.h>
+ #include <assert.h>
++#include <cstring>
+ 
+ 
+ #ifdef WIN32
+--- a/gw6c-config/src/hap6_devmap_c_wrap.cc
++++ b/gw6c-config/src/hap6_devmap_c_wrap.cc
+@@ -22,6 +22,8 @@
+ #include <gw6cconfig/gw6cuistrings.h>
+ using namespace gw6cconfig;
+ #include <assert.h>
++#include <cstring>
++#include <cstdlib>
+ 
+ #ifdef WIN32
+ #define strcasecmp      _stricmp
+--- a/gw6c-messaging/src/messagesender.cc
++++ b/gw6c-messaging/src/messagesender.cc
+@@ -19,6 +19,8 @@
+ // **************************************************************************
+ #include <gw6cmessaging/messagesender.h>
+ #include <assert.h>
++#include <cstring>
++#include <cstdlib>
+ 
+ 
+ #define MAX_QUEUE_ITEMS     512
+--- a/gw6c-messaging/src/clientmsgsender.cc
++++ b/gw6c-messaging/src/clientmsgsender.cc
+@@ -19,7 +19,9 @@
+ // **************************************************************************
+ #include <gw6cmessaging/clientmsgsender.h>
+ #include <assert.h>
+-
++#include <cstring>
++#include <cstdio>
++#include <cstdlib>
+ 
+ namespace gw6cmessaging
+ {

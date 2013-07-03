@@ -9,12 +9,14 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=ipset
-PKG_VERSION:=6.11
-PKG_RELEASE:=2
+PKG_VERSION:=6.16.1
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=http://ipset.netfilter.org
-PKG_MD5SUM:=bfcc92e30a0fcf10ae6e7c4affa03c84
+PKG_MD5SUM:=9fd70c825f052db7dc9d5ba0562b7083
+
+PKG_MAINTAINER:=Jo-Philipp Wich <jow@openwrt.org>
 
 PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
@@ -29,7 +31,7 @@ define Package/ipset
 $(call Package/ipset/Default)
   SECTION:=net
   CATEGORY:=Network
-  DEPENDS+= +iptables-mod-ipset +kmod-ipt-ipset +libmnl
+  DEPENDS+= +kmod-ipt-ipset +libmnl
   TITLE:=IPset administration utility
   URL:=http://ipset.netfilter.org/
 endef
