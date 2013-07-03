@@ -1,0 +1,24 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -72,11 +72,7 @@ AC_CONFIG_FILES([Makefile
+                  libqmi-glib/test/Makefile
+                  cli/Makefile
+                  cli/test/Makefile
+-                 utils/Makefile
+-                 docs/Makefile
+-                 docs/reference/Makefile
+-                 docs/reference/libqmi-glib/Makefile
+-                 docs/reference/libqmi-glib/version.xml])
++                 utils/Makefile])
+ AC_OUTPUT
+ 
+ echo "
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -1,5 +1,5 @@
+ 
+-SUBDIRS = . data build-aux libqmi-glib cli utils docs
++SUBDIRS = . data build-aux libqmi-glib cli utils
+ 
+ ACLOCAL_AMFLAGS = -I m4
+ 
