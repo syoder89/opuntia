@@ -7,20 +7,22 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=ModemManager
+PKG_NAME:=modemmanager
 PKG_VERSION:=0.7.991
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE:=ModemManager-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://cgit.freedesktop.org/ModemManager/ModemManager/snapshot/
+PKG_SOURCE_SUBDIR:=ModemManager-$(PKG_VERSION)
+PKG_BUILD_DIR:=$(BUILD_DIR)/ModemManager-$(PKG_VERSION)
 
 PKG_INSTALL:=1
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/ModemManager
+define Package/modemmanager
   SECTION:=net
   CATEGORY:=Network
-  TITLE:=ModemManager
+  TITLE:=modemmanager
   URL:=http://cgit.freedesktop.org/ModemManager/ModemManager
   DEFAULT:=y
   DEPENDS:= \
@@ -41,7 +43,7 @@ define Package/ModemManager
 	+kmod-usb-serial-wwan
 endef
 
-define Package/ModemManager/description
+define Package/modemmanager/description
   ModemManager is a DBus-activated service which allows controlling mobile
   broadband modems.
 endef
@@ -71,7 +73,7 @@ define Build/InstallDev
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/mm-glib.pc $(1)/usr/lib/pkgconfig
 endef
 
-define Package/ModemManager/install
+define Package/modemmanager/install
 	$(INSTALL_DIR) $(1)/lib/udev/rules.d
 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/lib/udev/rules.d/*.rules $(1)/lib/udev/rules.d
 
@@ -88,4 +90,4 @@ define Package/ModemManager/install
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/ModemManager/libmm-plugin-*.so* $(1)/usr/lib/ModemManager
 endef
 
-$(eval $(call BuildPackage,ModemManager))
+$(eval $(call BuildPackage,modemmanager))
