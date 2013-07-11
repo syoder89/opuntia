@@ -38,7 +38,7 @@ define Package/libnetsnmp
 $(call Package/net-snmp/Default)
   SECTION:=libs
   CATEGORY:=Libraries
-  DEPENDS:=+libelf
+  DEPENDS:=+libelf +libopenssl
   TITLE:=Open source SNMP implementation (libraries)
 endef
 
@@ -170,7 +170,7 @@ CONFIGURE_ARGS += \
 	--with-mib-modules="$(SNMP_MIB_MODULES_INCLUDED)" \
 	--with-out-transports="$(SNMP_TRANSPORTS_EXCLUDED)" \
 	--with-transports="$(SNMP_TRANSPORTS_INCLUDED)" \
-	--without-openssl \
+	--with-openssl \
 	--without-libwrap \
 	--without-rpm \
 	--without-zlib \
