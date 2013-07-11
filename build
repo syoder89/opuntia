@@ -69,7 +69,7 @@ case "$CMD" in
 	install|*)
 		# OpenWRT sucks for building in parallel!
 		# The toolchain must be single-thread built
-		make oldconfig
+		make defconfig
 		NUM_CPUS=$((`cat /proc/cpuinfo | grep bogomips | wc -l` * 2))
 		for section in tools/bison/install tools/install toolchain/install target/linux/compile package/cleanup package/compile package/toolchain/compile world ; do
 			let retries=2
