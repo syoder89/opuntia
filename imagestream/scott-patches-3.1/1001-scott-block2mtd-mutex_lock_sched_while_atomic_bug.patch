@@ -1,0 +1,88 @@
+--- a/drivers/mtd/devices/block2mtd.c
++++ b/drivers/mtd/devices/block2mtd.c
+@@ -84,7 +84,7 @@ static int block2mtd_erase(struct mtd_in
+ 	size_t len = instr->len;
+ 	int err;
+ 
+-	read_lock(&dev->bdev_mutex);
++//	read_lock(&dev->bdev_mutex);
+ 	if (!dev->blkdev) {
+ 		err = -EINVAL;
+ 		goto done;
+@@ -103,7 +103,7 @@ static int block2mtd_erase(struct mtd_in
+ 	mtd_erase_callback(instr);
+ 
+ done:
+-	read_unlock(&dev->bdev_mutex);
++//	read_unlock(&dev->bdev_mutex);
+ 
+ 	return err;
+ }
+@@ -118,7 +118,7 @@ static int block2mtd_read(struct mtd_inf
+ 	int offset = from & (PAGE_SIZE-1);
+ 	int cpylen, err = 0;
+ 
+-	read_lock(&dev->bdev_mutex);
++//	read_lock(&dev->bdev_mutex);
+ 	if (!dev->blkdev || (from > mtd->size)) {
+ 		err = -EINVAL;
+ 		goto done;
+@@ -158,7 +158,7 @@ static int block2mtd_read(struct mtd_inf
+ 	}
+ 
+ done:
+-	read_unlock(&dev->bdev_mutex);
++//	read_unlock(&dev->bdev_mutex);
+ 	return err;
+ }
+ 
+@@ -213,7 +213,7 @@ static int block2mtd_write(struct mtd_in
+ 	struct block2mtd_dev *dev = mtd->priv;
+ 	int err = 0;
+ 
+-	read_lock(&dev->bdev_mutex);
++//	read_lock(&dev->bdev_mutex);
+ 	if (!dev->blkdev) {
+ 		err = -EINVAL;
+ 		goto done;
+@@ -237,7 +237,7 @@ static int block2mtd_write(struct mtd_in
+ 		err = 0;
+ 
+ done:
+-	read_unlock(&dev->bdev_mutex);
++//	read_unlock(&dev->bdev_mutex);
+ 	return err;
+ }
+ 
+@@ -246,10 +246,10 @@ done:
+ static void block2mtd_sync(struct mtd_info *mtd)
+ {
+ 	struct block2mtd_dev *dev = mtd->priv;
+-	read_lock(&dev->bdev_mutex);
+-	if (dev->blkdev)
++//	read_lock(&dev->bdev_mutex);
++//	if (dev->blkdev)
+ 	sync_blockdev(dev->blkdev);
+-	read_unlock(&dev->bdev_mutex);
++//	read_unlock(&dev->bdev_mutex);
+ 
+ 	return;
+ }
+@@ -322,7 +322,7 @@ static int block2mtd_refresh(struct mtd_
+ 	int err = 0;
+ 
+ 	/* no other mtd function can run at this point */
+-	write_lock(&dev->bdev_mutex);
++//	write_lock(&dev->bdev_mutex);
+ 
+ 	/* get the device number for the whole disk */
+ 	devt = MKDEV(MAJOR(dev->blkdev->bd_dev), 0);
+@@ -343,7 +343,7 @@ static int block2mtd_refresh(struct mtd_
+ 
+ 	/* try to open the partition block device again */
+ 	_open_bdev(dev);
+-	write_unlock(&dev->bdev_mutex);
++//	write_unlock(&dev->bdev_mutex);
+ 
+ 	return err;
+ }
