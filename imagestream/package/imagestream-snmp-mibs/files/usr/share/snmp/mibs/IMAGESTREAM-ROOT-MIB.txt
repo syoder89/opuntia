@@ -1,0 +1,15 @@
+IMAGESTREAM-ROOT-MIB DEFINITIONS ::= BEGIN
+-- Router Root MIB Release 1.0.0
+-- Revision 09/03/2010
+-- Copyright 2010 ImageStream Internet Solutions, Inc.
+-- All rights reserved.
+-- SECTION 1: Top Level Definitions
+IMPORTS
+	enterprises
+		FROM	RFC1155-SMI;	
+imagestream	OBJECT IDENTIFIER ::= { enterprises 15425 }
+products	OBJECT IDENTIFIER ::= { imagestream 1 }
+router 		OBJECT IDENTIFIER ::= { products 1 }
+  common		OBJECT IDENTIFIER ::= { router 1 }
+  qos			OBJECT IDENTIFIER ::= { router 2 }
+END
