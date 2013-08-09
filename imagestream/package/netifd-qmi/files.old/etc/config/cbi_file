@@ -1,0 +1,12 @@
+
+config info 'Network'
+	option apn 'yourapn.com'
+	option user 'usernam'
+	option pass 'password'
+	option auth '0'
+
+config dns 'CustomDNS'
+
+config version 'Version'
+	option ver '27/02/2013'
+

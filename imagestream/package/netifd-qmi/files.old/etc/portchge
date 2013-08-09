@@ -1,0 +1,42 @@
+#!/bin/sh
+
+local DIR=$1
+
+log $DIR
+
+source /tmp/port.file
+
+if [ $DIR = "up" ]; then
+	if [ $PORT -lt 5 ]; then
+		PORT=`expr $PORT + 1`
+		echo 'PORT="'"$PORT"'"' > /tmp/port.file
+	fi
+else
+	if [ $PORT -gt 0 ]; then
+		PORT=`expr $PORT - 1`
+		echo 'PORT="'"$PORT"'"' > /tmp/port.file
+	fi
+fi
+
+echo "Changing Port" > /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo "-" >> /tmp/status.file
+echo " " >> /tmp/status.file
+echo " " >> /tmp/status.file
+

@@ -1,0 +1,125 @@
+#!/bin/sh
+
+source /etc/variable.file
+
+log() {
+	logger -t "sierra_set" "$@"
+}
+
+save_var() {
+	SIERRACTIVE=$1
+	echo 'NETCREATE="'"$NETCREATE"'"' > /etc/variable.file
+	echo 'NETSIERRA="'"$NETSIERRA"'"' >> /etc/variable.file
+	echo 'SIERRACTIVE="'"$SIERRACTIVE"'"' >> /etc/variable.file
+	echo 'QMIWWAN="'"$QMIWWAN"'"' >> /etc/variable.file
+	echo 'KEEPALIVE="'"$KEEPALIVE"'"' >> /etc/variable.file
+	echo 'RBDELAY="'"$RBDELAY"'"' >> /etc/variable.file
+}
+
+local DELAY=$(uci get cbi_file.Network.delay)
+if [ -z $DELAY ]; then
+	DELAY=60
+fi
+
+if [ $NETSIERRA = 1 -a $SIERRACTIVE = 0 -a $NETCREATE = 1 ]; then
+	log "Connection is active for Sierra USB to WWAN"
+	save_var 1
+	pkill getsig
+	uci set cbi_file.Version.getsig="0"
+	uci commit cbi_file
+	sleep 35
+	export SETAPN="$(uci get cbi_file.Network.apn)"
+	export SETUSER=$(uci get cbi_file.Network.user)
+	export SETPASS=$(uci get cbi_file.Network.pass)
+	export SETAUTH=$(uci get cbi_file.Network.auth)
+	export PINCODE=$(uci get cbi_file.Network.pincode)
+
+	if [ -e /dev/ttyUSB4 ]; then
+		uci set cbi_file1.Modem.port="/dev/ttyUSB3"
+		uci commit cbi_file1
+		PORT="3"
+		echo 'PORT="'"$PORT"'"' > /tmp/port.file
+		if [ -n "$PINCODE" ]; then
+			gcom -d /dev/ttyUSB3 -s /etc/gcom/setpin.gcom || {
+				return 1
+			}
+		fi
+		comgt -v -d /dev/ttyUSB3 -s /etc/connect-directip.gcom
+	else
+		uci set cbi_file1.Modem.port="/dev/ttyUSB2"
+		uci commit cbi_file1
+		PORT="2"
+		echo 'PORT="'"$PORT"'"' > /tmp/port.file
+		if [ -n "$PINCODE" ]; then
+			gcom -d /dev/ttyUSB2 -s /etc/gcom/setpin.gcom || {
+				return 1
+			}
+		fi
+		comgt -v -d /dev/ttyUSB2 -s /etc/connect-directip.gcom
+	fi
+	KEEPALIVE=1
+	save_var 0
+	/etc/getsig &
+fi
+
+if [ $NETSIERRA = 2 -a $SIERRACTIVE = 0 -a $NETCREATE = 1 ]; then
+	log "Connection is active for QMI"
+	save_var 1
+	pkill getsig
+	uci set cbi_file.Version.getsig="0"
+	uci commit cbi_file
+	sleep $DELAY
+	rm -f /tmp/qmistate.wwan1
+	/etc/qmistart.sh
+	KEEPALIVE=1
+	save_var 0
+	/etc/getsig &
+fi
+
+if [ $NETSIERRA = 3 -a $SIERRACTIVE = 0 -a $NETCREATE = 1 ]; then
+	log "Connection is active for NCM"
+	save_var 1
+	pkill getsig
+	uci set cbi_file.Version.getsig="0"
+	uci commit cbi_file
+	sleep $DELAY
+	export SETAPN="$(uci get cbi_file.Network.apn)"
+	export SETUSER=$(uci get cbi_file.Network.user)
+	export SETPASS=$(uci get cbi_file.Network.pass)
+	export SETAUTH=$(uci get cbi_file.Network.auth)
+	export PINCODE=$(uci get cbi_file.Network.pincode)
+	if [ -n "$PINCODE" ]; then
+		gcom -d /dev/ttyUSB0 -s /etc/gcom/setpin.gcom || {
+			return 1
+		}
+	fi
+	comgt -v -d /dev/ttyUSB0 -s /etc/connect-ncm.gcom
+	KEEPALIVE=1
+	save_var 0
+	/etc/getsig &
+fi
+
+if [ $NETSIERRA = 4 -a $SIERRACTIVE = 0 -a $NETCREATE = 1 ]; then
+	log "Connection is active for NCM"
+	save_var 1
+	pkill getsig
+	uci set cbi_file.Version.getsig="0"
+	uci commit cbi_file
+	sleep $DELAY
+	export SETAPN="$(uci get cbi_file.Network.apn)"
+	export SETUSER=$(uci get cbi_file.Network.user)
+	export SETPASS=$(uci get cbi_file.Network.pass)
+	export SETAUTH=$(uci get cbi_file.Network.auth)
+	export PINCODE=$(uci get cbi_file.Network.pincode)
+	if [ -n "$PINCODE" ]; then
+		gcom -d /dev/ttyUSB1 -s /etc/gcom/setpin.gcom || {
+			return 1
+		}
+	fi
+	comgt -v -d /dev/ttyUSB1 -s /etc/connect-ncm.gcom
+	KEEPALIVE=1
+	save_var 0
+	/etc/getsig &
+fi
+
+

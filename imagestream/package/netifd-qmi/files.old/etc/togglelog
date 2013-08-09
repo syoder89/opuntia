@@ -1,0 +1,20 @@
+#!/bin/sh
+
+if [ -f "/tmp/toggle.file" ]; then
+	source /tmp/toggle.file
+else
+	TOGGLE="0"
+fi
+
+if [ "x$TOGGLE" = "x" ]; then
+	TOGGLE=0
+fi
+if [ $TOGGLE = 0 ]; then
+	TOGGLE=1
+else
+	TOGGLE=0
+fi
+
+echo 'TOGGLE="'"$TOGGLE"'"' > /tmp/toggle.file
+uci set cbi_file.Version.log="$TOGGLE"
+uci commit cbi_file

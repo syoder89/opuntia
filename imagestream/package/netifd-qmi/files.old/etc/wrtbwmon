@@ -1,0 +1,145 @@
+#!/bin/sh
+
+LAN_IFACE=${2} || $(nvram get lan_ifname)
+
+log() {
+	logger -t "wrtbwmon" "$@"
+}
+
+lock()
+{
+	while [ -f /tmp/wrtbwmon.lock ]; do
+		if [ ! -d /proc/$(cat /tmp/wrtbwmon.lock) ]; then
+			log "WARNING : Lockfile detected but process $(cat /tmp/wrtbwmon.lock) does not exist !"
+			rm -f /tmp/wrtbwmon.lock
+		fi
+		sleep 1
+	done
+	echo $$ > /tmp/wrtbwmon.lock
+}
+
+unlock()
+{
+	rm -f /tmp/wrtbwmon.lock
+}
+
+case ${1} in
+
+"setup" )
+
+	#Create the RRDIPT CHAIN (it doesn't matter if it already exists).
+	iptables -N RRDIPT 2> /dev/null
+
+	#Add the RRDIPT CHAIN to the FORWARD chain (if non existing).
+	iptables -L FORWARD --line-numbers -n | grep "RRDIPT" | grep "1" > /dev/null
+	if [ $? -ne 0 ]; then
+		iptables -L FORWARD -n | grep "RRDIPT" > /dev/null
+		if [ $? -eq 0 ]; then
+			log "DEBUG : iptables chain misplaced, recreating it..."
+			iptables -D FORWARD -j RRDIPT
+		fi
+		iptables -I FORWARD -j RRDIPT
+	fi
+
+	#For each host in the ARP table
+	grep ${LAN_IFACE} /proc/net/arp | while read IP TYPE FLAGS MAC MASK IFACE
+	do
+		#Add iptable rules (if non existing).
+		iptables -nL RRDIPT | grep "${IP} " > /dev/null
+		if [ $? -ne 0 ]; then
+			iptables -I RRDIPT -d ${IP} -j RETURN
+			iptables -I RRDIPT -s ${IP} -j RETURN
+		fi
+	done	
+	;;
+	
+"update" )
+	[ -z "${2}" ] && echo "ERROR : Missing argument 2" && exit 1
+	
+	# Uncomment this line if you want to abort if database not found
+	# [ -f "${2}" ] || exit 1
+
+        # Restore this from a backup if needed
+        [ ! -f "${2}" -a -f /etc/config/usage.db ] && cp /etc/config/usage.db ${2}
+
+	lock
+	
+	#Read and reset counters
+	iptables -L RRDIPT -vnxZ -t filter > /tmp/traffic_$$.tmp
+
+	grep -v "0x0" /proc/net/arp | grep -v 'IP address' | grep -v eth0.1 | while read IP TYPE FLAGS MAC MASK IFACE
+	do
+		#Add new data to the graph. Count in Kbs to deal with 16 bits signed values (up to 2G only)
+		#Have to use temporary files because of crappy busybox shell
+		grep ${IP} /tmp/traffic_$$.tmp | while read PKTS BYTES TARGET PROT OPT IFIN IFOUT SRC DST
+		do
+			[ "${DST}" = "${IP}" ] && echo $((${BYTES}/1000)) > /tmp/in_$$.tmp
+			[ "${SRC}" = "${IP}" ] && echo $((${BYTES}/1000)) > /tmp/out_$$.tmp
+		done
+		IN=$(cat /tmp/in_$$.tmp)
+		OUT=$(cat /tmp/out_$$.tmp)
+		rm -f /tmp/in_$$.tmp
+		rm -f /tmp/out_$$.tmp
+		
+		if [ ${IN} -gt 0 -o ${OUT} -gt 0 ];  then
+			echo "DEBUG : New traffic for ${MAC} since last update : ${IN}k:${OUT}k"
+		
+			LINE=$(grep ${MAC} ${2})
+			if [ -z "${LINE}" ]; then
+				echo "DEBUG : ${MAC} is a new host !"
+				PEAKUSAGE_IN=0
+				PEAKUSAGE_OUT=0
+				OFFPEAKUSAGE_IN=0
+				OFFPEAKUSAGE_OUT=0
+			else
+				PEAKUSAGE_IN=$(echo ${LINE} | cut -f2 -s -d, )
+				PEAKUSAGE_OUT=$(echo ${LINE} | cut -f3 -s -d, )
+				OFFPEAKUSAGE_IN=$(echo ${LINE} | cut -f4 -s -d, )
+				OFFPEAKUSAGE_OUT=$(echo ${LINE} | cut -f5 -s -d, )
+			fi
+			
+			if [ "${3}" = "offpeak" ]; then
+				OFFPEAKUSAGE_IN=$((${OFFPEAKUSAGE_IN}+${IN}))
+				OFFPEAKUSAGE_OUT=$((${OFFPEAKUSAGE_OUT}+${OUT}))
+			else
+				PEAKUSAGE_IN=$((${PEAKUSAGE_IN}+${IN}))
+				PEAKUSAGE_OUT=$((${PEAKUSAGE_OUT}+${OUT}))
+			fi
+
+			grep -v "${MAC}" ${2} > /tmp/db_$$.tmp
+			mv /tmp/db_$$.tmp ${2}
+			echo ${MAC},${PEAKUSAGE_IN},${PEAKUSAGE_OUT},${OFFPEAKUSAGE_IN},${OFFPEAKUSAGE_OUT},$(date "+%d-%m-%Y %H:%M"),${IP} >> ${2}
+		fi
+	done
+	
+	#Free some memory
+	rm -f /tmp/*_$$.tmp
+	unlock
+	;;
+"backup" )
+	[ -f ${2} ] && cp ${2} ${3}
+	;;
+"reset" )
+	/etc/totcalc
+	if [ -f ${2} ]; then
+		rm -f ${2}
+	fi
+	if [ -f ${3} ]; then
+		rm -f ${3}
+	fi
+	uci set monitor.bandwidth.down="0 KB"
+	uci set monitor.bandwidth.up="0 KB"
+	uci set monitor.bandwidth.total="0 KB"
+	uci commit monitor
+	;;
+"writeodl" )
+	uci set monitor.bandwidth.oldtot="$2 $3"
+	uci commit monitor
+	;;
+"writedl" )
+	uci set monitor.bandwidth.down="$2 $3"
+	uci set monitor.bandwidth.up="$4 $5"
+	uci set monitor.bandwidth.total="$6 $7"
+	uci commit monitor
+	;;	
+esac

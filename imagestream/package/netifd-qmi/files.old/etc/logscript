@@ -1,0 +1,19 @@
+#!/bin/sh
+
+log() {
+	logger -t "Signal Log " "$@"
+}
+
+STR=$1
+
+LEN=${#STR}
+NEW=$STR
+log "=============="
+while [ $LEN -gt 125 ]; do
+	O1=${NEW:0:125}
+	log "$O1"
+	NEW=${NEW:125}
+	LEN=${#NEW}
+done
+log "$NEW"
+

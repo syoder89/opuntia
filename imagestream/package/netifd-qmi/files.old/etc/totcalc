@@ -1,0 +1,57 @@
+#!/usr/bin/lua
+
+function Split(str, delim, maxNb)
+    -- Eliminate bad cases...
+    if string.find(str, delim) == nil then
+        return { str }
+    end
+    if maxNb == nil or maxNb < 1 then
+        maxNb = 0    -- No limit
+    end
+    local result = {}
+    local pat = "(.-)" .. delim .. "()"
+    local nb = 0
+    local lastPos
+    for part, pos in string.gfind(str, pat) do
+        nb = nb + 1
+        result[nb] = part
+        lastPos = pos
+        if nb == maxNb then break end
+    end
+    -- Handle the last field
+    if nb ~= maxNb then
+        result[nb + 1] = string.sub(str, lastPos)
+    end
+    return result
+end
+
+local upload = 0
+local download = 0
+local file = io.open("/tmp/usage.db", "r")
+if file ~= nil then
+	repeat
+		local line = file:read("*line")
+		if line == nil then
+			break
+		end
+		local t = Split(line, ",", 7)
+		download = download + t[2]
+		upload = upload + t[3]
+	until 1 == 0
+	file:close()
+end
+total = upload + download
+if total < 1000 then
+	tstr = string.format("%d", total)
+	tfm = "KB"
+else
+	if total < 1000000 then
+		tstr = string.format("%g", total/1000)
+		tfm = "MB"
+	else
+		tstr = string.format("%g", total/1000000)
+		tfm = "GB"
+	end
+end
+
+os.execute("/etc/wrtbwmon writeodl " .. tstr .. " " .. tfm)

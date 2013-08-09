@@ -1,0 +1,111 @@
+#!/usr/bin/lua
+
+drv = {}
+idV = arg[1]
+idP = arg[2]
+drv[1] = arg[3]
+drv[2] = arg[4]
+drv[3] = arg[5]
+drv[4] = arg[6]
+drv[5] = arg[7]
+drv[6] = arg[8]
+drv[7] = arg[9]
+
+special = {}
+-- PPP special cases
+-- VID PID port #
+special[1] = "1bbb" ; special[2] = "0017" ; special[3] = 13
+special[4] = "12d1" ; special[5] = nil ; special[6] = 10
+
+retval = 0
+echo = 1
+
+printf = function(s,...)
+	io.write(s:format(...))
+	local ss = s:format(...)
+	if echo == 1 then
+		os.execute("/etc/qmiprint.sh " .. ss)
+	end
+end
+
+function checkserial()
+	local got = 0
+	for j=1,7 do
+		if drv[j] ~= nil then
+			if drv[j] == "option" or drv[j] == "qcaux" or drv[j] == "usb_serial" then
+				got = 1
+				break
+			end
+		end
+	end
+	return got
+end
+
+-- MAIN
+
+for i=1,7 do
+	if drv[i] ~= nil then
+		printf("Driver Name : %d %s\n", i, drv[i])
+	end
+end
+
+for i=1,7 do
+	if drv[i] ~= nil then
+		if drv[i] == "sierra_net" then
+			retval = 1
+			break
+		end
+		if drv[i] == "qmi_wwan" then
+			retval = 2
+			break
+		end
+		if drv[i] == "cdc_ncm" then
+			if i == 2 then
+				retval = 4
+			else
+				retval = 6
+			end
+			break
+		end
+		if drv[i] == "cdc_ether" then
+			if idV == "12d1" then
+				retval = 7
+			else
+				retval = 5
+			end
+			if checkserial() == 1 then
+				retval = 0
+			end
+			break
+		end
+		if drv[i] == "rndis_host" then
+			retval = 8
+			break
+		end
+	end
+end
+
+if retval == 0 then
+	if checkserial() == 1 then
+		retval = 11
+		k = 1
+		vendor = special[k]
+		while vendor ~= nil do
+			if idV == vendor then
+				if special[k+1] == nil then
+					retval = special[k+2]
+					break
+				else
+					if special[k+1] == idP then
+						retval = special[k+2]
+						break
+					end
+				end
+			end
+			k = k + 3
+			vendor = special[k]
+		end
+	end
+end
+
+os.exit(retval)

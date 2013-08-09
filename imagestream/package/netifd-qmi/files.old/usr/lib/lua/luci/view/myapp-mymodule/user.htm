@@ -1,0 +1,74 @@
+<script type="text/javascript" src="<%=resource%>/xhr.js"></script>
+<script type="text/javascript">//<![CDATA[
+XHR.get('<%=luci.dispatcher.build_url("admin", "network", "get_user")%>',
+			null,
+	function(x, rv)
+	{
+		var iw;
+		var ip;
+		var im;
+		var mac;
+		var iu;
+		var upload;
+		var ix;
+		var download;
+		var iy;
+		var total;
+		var tb = document.getElementById('user_info_table');
+		if( rv.length > 0)
+		{
+			iw = rv.ip;
+			ip = iw.split("$$");
+			im = rv.mac;
+			mac = im.split("$$");
+			iu = rv.up;
+			upload = iu.split("$$");
+			ix = rv.down;
+			download = ix.split("$$"); 
+			iy = rv.total;
+			total = iy.split("$$"); 
+		}
+		/* clear all rows */
+		while( tb.rows.length > 1 )
+			tb.deleteRow(1);
+
+		for( var i = 0; i < rv.length; i++ )
+		{
+			var tr = tb.insertRow(-1);
+				tr.className = 'cbi-section-table-row cbi-rowstyle-' + ((i % 2) + 1);
+
+			tr.insertCell(-1).innerHTML = ip[i];
+			tr.insertCell(-1).innerHTML = mac[i];
+			tr.insertCell(-1).innerHTML = upload[i];
+			tr.insertCell(-1).innerHTML = download[i]; 
+			tr.insertCell(-1).innerHTML = total[i];
+		}
+
+		if( tb.rows.length == 1 )
+		{
+			var tr = tb.insertRow(-1);
+				tr.className = 'cbi-section-table-row';
+			var td = tr.insertCell(-1);
+				td.colSpan = 4;
+				td.innerHTML = '<em><br /><%:There are no users.%></em>';
+		}
+	}
+);
+
+//]]></script>
+
+<fieldset class="cbi-section">
+	<legend><%:Individual User Bandwidth%></legend>
+	<table class="cbi-section-table" id="user_info_table">
+		<tr class="cbi-section-table-titles">
+			<th class="cbi-section-table-cell"><%:User IP%></th>
+			<th class="cbi-section-table-cell"><%:MAC-Address%></th>
+			<th class="cbi-section-table-cell"><%:Upload%></th>
+			<th class="cbi-section-table-cell"><%:Download%></th>
+			<th class="cbi-section-table-cell"><%:Total%></th>
+		</tr>
+		<tr class="cbi-section-table-row">
+			<td colspan="5"><em><br /><%:Collecting data...%></em></td>
+		</tr>
+	</table>
+</fieldset>
