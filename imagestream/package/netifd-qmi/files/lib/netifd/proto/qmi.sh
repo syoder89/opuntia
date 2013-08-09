@@ -332,6 +332,7 @@ proto_qmi_setup() {
 	
 	# Reset auto state if forced by technology selection
 	uci_revert_state network $config auto
+	uci set network.$config.apn=$apn
 	
 	local CDCDEV
 	CDCDEV=/dev/$(basename $(ls /sys/class/net/${iface}/device/usbmisc/cdc-wdm* -d)) || {

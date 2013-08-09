@@ -1,0 +1,68 @@
+#!/bin/bash
+
+function status() {
+	CDCDEV="/dev/cdc-wdm0"
+	STATS_TMP="/tmp/qmi_stats.$$"
+
+	uqmi -d ${CDCDEV} --get-serving-system > ${STATS_TMP}
+	carrier=`grep description ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
+	registration=`grep registration ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
+	mcc=`grep mcc ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
+	mnc=`grep mnc ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
+	roaming=`grep roaming ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
+	msisdn=`qmicli -d ${CDCDEV} --dms-get-msisdn | grep MSISDN: | awk '{print $2}' | cut -d "'" -f 2`
+	mode=`qmicli -d ${CDCDEV} --dms-get-operating-mode | grep Mode: | awk '{print $2}' | cut -d "'" -f 2`
+
+	qmicli -d ${CDCDEV} --nas-get-signal-strength > ${STATS_TMP}
+	rssi_net=`grep Network ${STATS_TMP} | head -n 1 | awk '{print toupper($2)}' | cut -d "'" -f 2`
+	rssi_val=`grep Network ${STATS_TMP} | head -n 1 | awk '{print $3}' | cut -d "'" -f 2`
+	rssi_eico=`grep -A 1 ECIO ${STATS_TMP} | tail -n 1 | awk '{print $3}' | cut -d "'" -f 2`
+	rssi_sinr=`grep SINR: ${STATS_TMP} | awk '{print $3}' | cut -d "'" -f 2`
+
+	data_bearer=`qmicli -d ${CDCDEV} --wds-get-current-data-bearer-technology | grep Technology: | cut -d ':' -f 2 | awk '{print toupper($0)}' | cut -d "'" -f 2`
+	power_mode=`qmicli -d ${CDCDEV} --dms-get-operating-mode | grep Mode: | cut -d ':' -f 2 | cut -d "'" -f 2`
+	data_session=`qmicli -d ${CDCDEV} --wds-get-packet-service-status | grep status: | cut -d ':' -f 2 | cut -d "'" -f 2`
+	data_session_connect=`ubus call network.interface.wwan status | grep uptime | cut -d : -f 2 | cut -d , -f 1`
+
+	if [ $((rssi_val)) -ge -90 ] ; then
+		rssi_bars="XXXX"
+	elif [ $((rssi_val)) -ge -97 ] ; then
+		rssi_bars="XXX"
+	elif [ $((rssi_val)) -ge -103 ] ; then
+		rssi_bars="XX"
+	elif [ $((rssi_val)) -ge -107 ] ; then
+		rssi_bars="X"
+	else
+		rssi_bars="0"
+	fi
+
+	if [ "$roaming" = "false" ] ; then
+		network="Home"
+	else
+		network="Roaming"
+	fi
+
+	apn=`uci get network.wwan.apn`
+
+	echo "Carrier: ${carrier} (MCC ${mcc}, MNC ${mnc})"
+	echo "APN: ${apn}"
+	echo "Mobile number: ${msisdn}"
+	echo "State: ${registration^}"
+	echo "Power Mode: ${power_mode^}"
+	echo "Radio Service type: ${rssi_net}"
+	echo "Data Bearer Technology: ${data_bearer}"
+	echo "Data session: ${data_session^}"
+	if [ "$data_session_connect" != "" ] && [ $((data_session_connect)) -gt 0 ] ; then
+		now=`date +"%s"`
+		let connect_date=$((now-data_session_connect))
+		data_session_connect=`date --date="${connect_date}" -D "%s" +"%a %b %e %H:%M:%S %Y"`
+		echo "Connected since ${data_session_connect}"
+	fi
+	echo "Network: ${network}"
+	echo "Signal strength (${rssi_net}): ${rssi_val}dBm, bars: ${rssi_bars}"
+	echo "Signal EC/IO, SINR: ${rssi_eico}dBm, ${rssi_sinr}dB"
+	
+	rm -f ${STATS_TMP}
+}
+
+status
