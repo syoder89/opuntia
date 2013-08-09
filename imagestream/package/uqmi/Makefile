@@ -27,7 +27,7 @@ define Package/uqmi
   DEFAULT:=y
 endef
 
-TARGET_CFLAGS += -ffunction-sections -fdata-sections -DDEBUG -DDEBUG_PACKET
+TARGET_CFLAGS += -ffunction-sections -fdata-sections
 TARGET_LDFLAGS += -Wl,--gc-sections
 
 define Package/uqmi/install
