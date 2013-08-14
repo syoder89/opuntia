@@ -58,7 +58,7 @@ CONFIG_HAS_SUBTARGETS=y
 CONFIG_TARGET_BOARD="x86"
 CONFIG_TARGET_ARCH_PACKAGES="x86"
 CONFIG_DEFAULT_TARGET_OPTIMIZATION="-march=geode -Os -mmmx -m3dnow -fno-align-jumps -fno-align-functions -fno-align-labels -fno-align-loops -pipe -fomit-frame-pointer"
-CONFIG_LINUX_3_8=y
+CONFIG_LINUX_3_10=y
 CONFIG_DEFAULT_6relayd=y
 CONFIG_DEFAULT_base-files=y
 CONFIG_DEFAULT_busybox=y
@@ -1624,6 +1624,7 @@ CONFIG_PACKAGE_kmod-usb-acm=y
 # CONFIG_PACKAGE_kmod-usb-chipidea is not set
 # CONFIG_PACKAGE_kmod-usb-cm109 is not set
 CONFIG_PACKAGE_kmod-usb-core=y
+# CONFIG_PACKAGE_kmod-usb-dwc2 is not set
 CONFIG_PACKAGE_kmod-usb-hid=y
 CONFIG_PACKAGE_kmod-usb-net=y
 # CONFIG_PACKAGE_kmod-usb-net-asix is not set
@@ -1631,14 +1632,14 @@ CONFIG_PACKAGE_kmod-usb-net-cdc-ether=y
 CONFIG_PACKAGE_kmod-usb-net-cdc-mbim=y
 CONFIG_PACKAGE_kmod-usb-net-cdc-ncm=y
 # CONFIG_PACKAGE_kmod-usb-net-dm9601-ether is not set
-CONFIG_PACKAGE_kmod-usb-net-hso=y
+# CONFIG_PACKAGE_kmod-usb-net-hso is not set
 # CONFIG_PACKAGE_kmod-usb-net-ipheth is not set
 # CONFIG_PACKAGE_kmod-usb-net-kaweth is not set
 # CONFIG_PACKAGE_kmod-usb-net-mcs7830 is not set
 # CONFIG_PACKAGE_kmod-usb-net-pegasus is not set
 CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=y
-CONFIG_PACKAGE_kmod-usb-net-rndis=y
-CONFIG_PACKAGE_kmod-usb-net-sierrawireless=y
+# CONFIG_PACKAGE_kmod-usb-net-rndis is not set
+# CONFIG_PACKAGE_kmod-usb-net-sierrawireless is not set
 CONFIG_PACKAGE_kmod-usb-ohci=y
 # CONFIG_PACKAGE_kmod-usb-printer is not set
 CONFIG_PACKAGE_kmod-usb-serial=y
@@ -1653,14 +1654,14 @@ CONFIG_PACKAGE_kmod-usb-serial=y
 # CONFIG_PACKAGE_kmod-usb-serial-mct is not set
 # CONFIG_PACKAGE_kmod-usb-serial-mos7720 is not set
 # CONFIG_PACKAGE_kmod-usb-serial-motorola-phone is not set
-CONFIG_PACKAGE_kmod-usb-serial-option=y
+# CONFIG_PACKAGE_kmod-usb-serial-option is not set
 # CONFIG_PACKAGE_kmod-usb-serial-oti6858 is not set
 # CONFIG_PACKAGE_kmod-usb-serial-pl2303 is not set
-CONFIG_PACKAGE_kmod-usb-serial-qualcomm=y
-CONFIG_PACKAGE_kmod-usb-serial-sierrawireless=y
+# CONFIG_PACKAGE_kmod-usb-serial-qualcomm is not set
+# CONFIG_PACKAGE_kmod-usb-serial-sierrawireless is not set
 # CONFIG_PACKAGE_kmod-usb-serial-ti-usb is not set
 # CONFIG_PACKAGE_kmod-usb-serial-visor is not set
-CONFIG_PACKAGE_kmod-usb-serial-wwan=y
+# CONFIG_PACKAGE_kmod-usb-serial-wwan is not set
 # CONFIG_PACKAGE_kmod-usb-storage is not set
 # CONFIG_PACKAGE_kmod-usb-storage-extras is not set
 # CONFIG_PACKAGE_kmod-usb-test is not set
@@ -2812,8 +2813,8 @@ CONFIG_PACKAGE_luci-app-snmp=y
 #
 # Captive Portals
 #
-CONFIG_PACKAGE_chillispot=m
-CONFIG_PACKAGE_coova-chilli=m
+# CONFIG_PACKAGE_chillispot is not set
+# CONFIG_PACKAGE_coova-chilli is not set
 # CONFIG_PACKAGE_nocatauth is not set
 # CONFIG_PACKAGE_nocatsplash is not set
 # CONFIG_PACKAGE_nodogsplash is not set
@@ -4299,10 +4300,10 @@ CONFIG_PACKAGE_rrdtool1=y
 # CONFIG_PACKAGE_triggerhappy is not set
 # CONFIG_PACKAGE_uboot-envtools is not set
 # CONFIG_PACKAGE_upx is not set
-# CONFIG_PACKAGE_usb-modeswitch is not set
+CONFIG_PACKAGE_usb-modeswitch=y
 # CONFIG_PACKAGE_usbmuxd is not set
-# CONFIG_PACKAGE_usbreset is not set
-# CONFIG_PACKAGE_usbutils is not set
+CONFIG_PACKAGE_usbreset=y
+CONFIG_PACKAGE_usbutils=y
 # CONFIG_PACKAGE_uuidd is not set
 # CONFIG_PACKAGE_uuidgen is not set
 # CONFIG_PACKAGE_v4l-utils is not set
