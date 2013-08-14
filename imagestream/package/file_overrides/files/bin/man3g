@@ -1,7 +1,13 @@
 #!/bin/bash
 
+function usage() {
+	echo "usage: man3g -i {config name} command"
+	echo "Commands: status"
+	echo "Example: man3g -i wwan status"
+	exit 1
+}
+
 function status() {
-	CDCDEV="/dev/cdc-wdm0"
 	STATS_TMP="/tmp/qmi_stats.$$"
 
 	uqmi -d ${CDCDEV} --get-serving-system > ${STATS_TMP}
@@ -65,4 +71,12 @@ function status() {
 	rm -f ${STATS_TMP}
 }
 
+CDCDEV="/dev/cdc-wdm0"
+if [ "$1" = "-i" ] ; then
+	shift
+	CDCDEV=/dev/$(basename $(ls /sys/class/net/${1}/device/usbmisc/cdc-wdm* -d))
+fi
+if [ "$1" = "" ] ; then
+	usage
+fi
 status
