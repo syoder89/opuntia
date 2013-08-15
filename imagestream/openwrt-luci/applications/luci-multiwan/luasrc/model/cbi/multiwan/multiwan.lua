@@ -52,6 +52,7 @@ interval.rmempty = false
 
 icmp_hosts = s:option(Value, "icmp_hosts", translate("Health Monitor ICMP Host(s)"))
 icmp_hosts:value("disable", translate("Disable"))
+icmp_hosts:value("arp_gateway", "WAN Gateway using ARP")
 icmp_hosts:value("dns", "DNS Server(s)")
 icmp_hosts:value("gateway", "WAN Gateway")
 icmp_hosts.default = "dns"

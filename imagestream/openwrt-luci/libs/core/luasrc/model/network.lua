@@ -1023,6 +1023,14 @@ function protocol.adminlink(self)
 	return dsp.build_url("admin", "network", "network", self.sid)
 end
 
+function protocol.extrastatus(self)
+	local p = self:proto()
+	if p == "qmi" then
+		return utl.exec("man3g -i %s status" % self:get("ifname"))
+	end
+	return 0
+end
+
 
 interface = utl.class()
 

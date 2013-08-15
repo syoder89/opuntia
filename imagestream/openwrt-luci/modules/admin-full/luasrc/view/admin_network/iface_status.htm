@@ -67,6 +67,11 @@
 						html += '<br />';
 					}
 
+					if (ifc.extrastatus)
+					{
+						html += String.format('<pre style=" width: 320px;">%s</pre></div><br />', ifc.extrastatus);
+					}
+
 					d.innerHTML = html;
 				}
 				else if (d)
