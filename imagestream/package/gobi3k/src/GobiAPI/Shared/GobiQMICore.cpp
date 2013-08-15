@@ -286,6 +286,7 @@ DESCRIPTION:
 RETURN VALUE:
    std::vector <tDeviceID> - Vector of device ID and device key pairs
 ===========================================================================*/
+#include <iostream>
 std::vector <cGobiQMICore::tDeviceID>
 cGobiQMICore::GetAvailableDevices()
 {
@@ -293,12 +294,13 @@ cGobiQMICore::GetAvailableDevices()
 
 // Total hack for 4.4 Nothing appears in the correct place. - Scott
 //   std::string path = "/sys/bus/usb/devices/";
-   std::string path = "/sys/class/GobiQMI/qcqmi0";
+//   std::string path = "/sys/class/GobiQMI/qcqmi0";
+   std::string path = "/dev/";
 
    std::vector <std::string> files;
    DepthSearch( path,
-                3,
-                "qcqmi",
+                0,
+                "cdc-wdm",
                 files );
 
    int fileNum = files.size();
@@ -310,15 +312,16 @@ cGobiQMICore::GetAvailableDevices()
       int lastSlash = nodePath.find_last_of( "/" );
 
       // This is what we want to return if everything else matches
-      std::string tmpdeviceNode = nodePath.substr( lastSlash + 1 );
+      std::string deviceNode = nodePath.substr( lastSlash + 1 );
 
       // Move down two directories to the interface level
 // Completely change the path - Scott
 //      std::string curPath = nodePath.substr( 0, lastSlash );
 //      curPath = curPath.substr( 0, curPath.find_last_of( "/" ) );
-      std::string deviceNode = "qcqmi0";
-      std::string curPath = nodePath + "/device";
+//      std::string deviceNode = "qcqmi0";
+//      std::string curPath = nodePath + "/device";
 
+#if 0
 #if 0
       // Read bInterfaceNumber
       int handle = open( (curPath + "/bInterfaceNumber").c_str(), 
@@ -385,28 +388,20 @@ cGobiQMICore::GetAvailableDevices()
       close( handle );
       if (ret != 4)
          continue;
+#endif
 
-      struct gobiProbeDevice *dev;
-      for (dev = supportedDevices; dev->vendorID != NULL; dev++)
-      {
-         if (!(strncmp( dev->vendorID, vendorID, 4)) && !strncmp( dev->productID, productID, 4))
-         {
-            bFound = true;
-            // Success!
+     // Get MEID of device node (via ioctl) to use as key
+      std::string deviceStr = "/dev/" + deviceNode;
+      std::string key = cQMIProtocolServer::GetDeviceMEID( deviceStr );
 
-      	    // Get MEID of device node (via ioctl) to use as key
-            std::string deviceStr = "/dev/" + deviceNode;
-            std::string key = cQMIProtocolServer::GetDeviceMEID( deviceStr );
-
-            tDeviceID device;
-            device.first = deviceNode;
-            device.second = key;
-            devices.push_back( device );
-            // Only support one device -- Scott
-            return devices;
-         }
-      }
+     {
+      tDeviceID device;
+      device.first = deviceNode;
+      device.second = key;
+      devices.push_back( device );
+     }
    }
+   return devices;
 }
 
 /*===========================================================================
@@ -432,6 +427,7 @@ bool cGobiQMICore::Connect(
    // Assume failure
    bool bRC = false;
 
+//std::cout << "Device found: "<< deviceNode << std::endl;
    // Clear last error recorded
    ClearLastError();
 
