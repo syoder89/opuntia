@@ -365,7 +365,7 @@ You may obtain a copy of the License at
 	<% for _, dev in ipairs(devices) do local nets = dev:get_wifinets() %>
 	<!-- device <%=dev:name()%> -->
 	<fieldset class="cbi-section">
-		<table class="cbi-section-table" style="margin:10px; empty-cells:hide">
+		<table class="cbi-section-table" style="empty-cells:hide">
 			<!-- physical device -->
 			<tr>
 				<td style="width:34px"><img src="<%=resource%>/icons/wifi_big_disabled.png" style="float:left; margin-right:10px" id="<%=dev:name()%>-iw-upstate" /></td>
@@ -417,7 +417,7 @@ You may obtain a copy of the License at
 	<h2><a id="content" name="content"><%:Associated Stations%></a></h2>
 
 	<fieldset class="cbi-section">
-		<table class="cbi-section-table" style="margin:10px" id="iw-assoclist">
+		<table class="cbi-section-table" id="iw-assoclist">
 			<tr class="cbi-section-table-titles">
 				<th class="cbi-section-table-cell"></th>
 				<th class="cbi-section-table-cell"><%:SSID%></th>
