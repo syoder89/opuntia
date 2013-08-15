@@ -27,9 +27,9 @@ failover() {
 
     add() {
 
-	wan_fail_map=$(echo $wan_fail_map | sed -e "s/${1}\[${failchk}\]//g")
-	wan_fail_map="$wan_fail_map${1}[x]"
-	wan_recovery_map=$(echo $wan_recovery_map | sed -e "s/${1}\[${recvrychk}\]//g")
+	wan_fail_map=$(echo $wan_fail_map | sed -e "s/,${1}\[${failchk}\]//g")
+	wan_fail_map="$wan_fail_map,${1}[x]"
+	wan_recovery_map=$(echo $wan_recovery_map | sed -e "s/,${1}\[${recvrychk}\]//g")
 	update_cache
 
 	if [ "$existing_failover" == "2" ]; then
@@ -46,14 +46,17 @@ failover() {
 
     del() {
 
-	wan_recovery_map=$(echo $wan_recovery_map | sed -e "s/${1}\[${recvrychk}\]//g")
-	wan_fail_map=$(echo $wan_fail_map | sed -e "s/${1}\[${failchk}\]//g")
+	wan_recovery_map=$(echo $wan_recovery_map | sed -e "s/,${1}\[${recvrychk}\]//g")
+	wan_fail_map=$(echo $wan_fail_map | sed -e "s/,${1}\[${failchk}\]//g")
 	update_cache
 
 	if [ "$existing_failover" == "3" ]; then
 	    iptables -D FW${wanid}MARK 2 -t mangle
 	fi
 	mwnote "$1 has recovered and is back online!"
+	mwanrule_refresh_iface=$1
+    	config_load "multiwan"
+    	config_foreach mwanrule_refresh mwanfw $1
     }
 
     case $1 in 
@@ -70,17 +73,17 @@ fail_wan() {
 
     local failchk=$(query_config failchk $1)
     local recvrychk=$(query_config recvrychk $1)
-    wan_recovery_map=$(echo $wan_recovery_map | sed -e "s/${1}\[${recvrychk}\]//g")
+    wan_recovery_map=$(echo $wan_recovery_map | sed -e "s/,${1}\[${recvrychk}\]//g")
 
     if [ -z "$failchk" ]; then
 	failchk=1
-	wan_fail_map="$wan_fail_map${1}[1]"
+	wan_fail_map="$wan_fail_map,${1}[1]"
     fi
 
     if [ "$failchk" != "x" ]; then
 	new_fail_count=$(($failchk + 1))
 	if [ "$new_fail_count" -lt "$health_fail_retries" ]; then
-	    wan_fail_map=$(echo $wan_fail_map | sed -e "s/${1}\[${failchk}\]/$1\[${new_fail_count}\]/g")
+	    wan_fail_map=$(echo $wan_fail_map | sed -e "s/,${1}\[${failchk}\]/,$1\[${new_fail_count}\]/g")
 	else
 	    failover add $1
 	    refresh_dns
@@ -103,13 +106,13 @@ recover_wan() {
     local wanid=$(query_config wanid $1)
 
     if [ ! -z "$failchk" -a "$failchk" != "x" ]; then
-	wan_fail_map=$(echo $wan_fail_map | sed -e "s/${1}\[${failchk}\]//g")
+	wan_fail_map=$(echo $wan_fail_map | sed -e "s/,${1}\[${failchk}\]//g")
 	update_cache
     fi
 
     if [ "$failchk" == "x" ]; then
 	if [ -z "$recvrychk" ]; then
-	    wan_recovery_map="$wan_recovery_map${1}[1]"
+	    wan_recovery_map="$wan_recovery_map,${1}[1]"
 	    update_cache
 	    if [ "$health_recovery_retries" == "1" ]; then
 		recover_wan $1
@@ -117,11 +120,12 @@ recover_wan() {
 	else
 	    new_recovery_count=$(($recvrychk + 1))
 	    if [ "$new_recovery_count" -lt "$health_recovery_retries" ]; then
-		wan_recovery_map=$(echo $wan_recovery_map | sed -e "s/${1}\[${recvrychk}\]/$1\[${new_recovery_count}\]/g")
+		wan_recovery_map=$(echo $wan_recovery_map | sed -e "s/,${1}\[${recvrychk}\]/,$1\[${new_recovery_count}\]/g")
 		update_cache
 	    else
 		failover del $1
 		refresh_dns
+	  	refresh_routes
 		if [ "$weight" != "disable" ]; then
 		    refresh_loadbalancer
 		fi
@@ -138,11 +142,12 @@ acquire_wan_data() {
     local old_gateway
 
     local ifname ipaddr gateway
+    network_flush_cache
     network_get_device  ifname  ${1} || ifname=x
     network_get_ipaddr  ipaddr  ${1} || ipaddr=x
     network_get_gateway gateway ${1} || gateway=x
 
-    check_old_map=$(echo $wan_id_map 2>&1 | grep -o "$1\[")
+    check_old_map=$(echo $wan_id_map 2>&1 | grep -o ",$1\[")
 
     if [ -z $check_old_map ]; then
 	wancount=$(($wancount + 1))
@@ -150,19 +155,19 @@ acquire_wan_data() {
 	    wancount=20
 	    return
 	fi
-	wan_if_map="$wan_if_map${1}[${ifname}]"
-	wan_id_map="$wan_id_map${1}[${wancount}]"
-	wan_gw_map="$wan_gw_map${1}[${gateway}]"
-	wan_ip_map="$wan_ip_map${1}[${ipaddr}]"
+	wan_if_map="$wan_if_map,${1}[${ifname}]"
+	wan_id_map="$wan_id_map,${1}[${wancount}]"
+	wan_gw_map="$wan_gw_map,${1}[${gateway}]"
+	wan_ip_map="$wan_ip_map,${1}[${ipaddr}]"
     else
 	old_ipaddr=$(query_config ipaddr $1)
 	old_gateway=$(query_config gateway $1)
 	old_ifname=$(query_config ifname $1)
 	get_wanid=$(query_config wanid $1)
 
-	wan_if_map=$(echo $wan_if_map | sed -e "s/${1}\[${old_ifname}\]/$1\[${ifname}\]/g")
-	wan_ip_map=$(echo $wan_ip_map | sed -e "s/${1}\[${old_ipaddr}\]/$1\[${ipaddr}\]/g")
-	wan_gw_map=$(echo $wan_gw_map | sed -e "s/${1}\[${old_gateway}\]/$1\[${gateway}\]/g")
+	wan_if_map=$(echo $wan_if_map | sed -e "s/,${1}\[${old_ifname}\]/,$1\[${ifname}\]/g")
+	wan_ip_map=$(echo $wan_ip_map | sed -e "s/,${1}\[${old_ipaddr}\]/,$1\[${ipaddr}\]/g")
+	wan_gw_map=$(echo $wan_gw_map | sed -e "s/,${1}\[${old_gateway}\]/,$1\[${gateway}\]/g")
 
 	if [ "$old_ifname" != "$ifname" ]; then
 	    iptables -D MultiWanPreHandler -t mangle -i $old_$ifname -m state --state NEW -j FW${get_wanid}MARK
@@ -205,13 +210,13 @@ update_cache() {
 
 query_config() {
     case $1 in
-	ifname) echo $wan_if_map | grep -o "$2\[\w*.*\]" | awk -F "[" '{print $2}' | awk -F "]" '{print $1}';; 
-	ipaddr) echo $wan_ip_map | grep -o "$2\[\w*.*\]" | awk -F "[" '{print $2}' | awk -F "]" '{print $1}';;
-	gateway) echo $wan_gw_map | grep -o "$2\[\w*.*\]" | awk -F "[" '{print $2}' | awk -F "]" '{print $1}';;
-	wanid) echo $wan_id_map | grep -o "$2\[\w*.*\]" | awk -F "[" '{print $2}' | awk -F "]" '{print $1}';;
-	failchk) echo $wan_fail_map | grep -o "$2\[\w*.*\]" | awk -F "[" '{print $2}' | awk -F "]" '{print $1}';;
-	recvrychk) echo $wan_recovery_map | grep -o "$2\[\w*.*\]" | awk -F "[" '{print $2}' | awk -F "]" '{print $1}';;
-	monitor) echo $wan_monitor_map | grep -o "$2\[\w*.*\]" | awk -F "[" '{print $2}' | awk -F "]" '{print $1}';;
+	ifname) echo $wan_if_map | grep -o ",$2\[\w*.*\]" | awk -F "[" '{print $2}' | awk -F "]" '{print $1}';; 
+	ipaddr) echo $wan_ip_map | grep -o ",$2\[\w*.*\]" | awk -F "[" '{print $2}' | awk -F "]" '{print $1}';;
+	gateway) echo $wan_gw_map | grep -o ",$2\[\w*.*\]" | awk -F "[" '{print $2}' | awk -F "]" '{print $1}';;
+	wanid) echo $wan_id_map | grep -o ",$2\[\w*.*\]" | awk -F "[" '{print $2}' | awk -F "]" '{print $1}';;
+	failchk) echo $wan_fail_map | grep -o ",$2\[\w*.*\]" | awk -F "[" '{print $2}' | awk -F "]" '{print $1}';;
+	recvrychk) echo $wan_recovery_map | grep -o ",$2\[\w*.*\]" | awk -F "[" '{print $2}' | awk -F "]" '{print $1}';;
+	monitor) echo $wan_monitor_map | grep -o ",$2\[\w*.*\]" | awk -F "[" '{print $2}' | awk -F "]" '{print $1}';;
 	group) echo $wan_id_map | grep -o "\w*\[$2\]" | awk -F "[" '{print $1}';;
     esac
 }
@@ -433,6 +438,62 @@ mwanrule() {
 	return
     fi
     add_rule
+}
+
+mwanrule_refresh() {
+    local src
+    local dst
+    local ports
+    local proto
+    local wanrule
+
+    config_get src $1 src
+    config_get dst $1 dst
+    config_get port_type $1 port_type 'dports'
+    config_get ports $1 ports
+    config_get proto $1 proto
+    config_get wanrule $1 wanrule
+
+    if [ "$wanrule" != "$2" ]; then
+	return
+    fi
+
+    if [ "$dst" == "all" ]; then
+	dst=$NULL
+    fi
+    if [ "$proto" == "all" ]; then
+	proto=$NULL
+    fi
+    if [ "$ports" == "all" ]; then
+	ports=$NULL
+    fi
+    flush_rule() {
+	if [ "$proto" == "icmp" ]; then
+	    port=$NULL
+	fi 
+	if [ "$src" == "all" ]; then
+	    src=$NULL
+	fi
+	conntrack -D ${src:+-s $src} ${dst:+-d $dst} \
+	    ${proto:+-p $proto} \
+	    ${port:+--dport $port}
+    }
+    if  [ -z "$proto" -a ! -z "$ports" ]; then
+	for port in $ports ; do
+		proto=tcp
+		flush_rule
+		proto=udp
+		flush_rule
+	done
+	return
+    fi
+    if  [ -z "$ports" ]; then
+    	flush_rule
+    else
+    	for port in $ports ; do
+    		flush_rule
+    	done
+    fi
 }
 
 refresh_dns() {
@@ -669,6 +730,7 @@ refresh_routes() {
     local ipaddr
 
     echo "## Refreshing Routing Tables ##"
+    mwnote "Refreshing routing tables"
 
     local i=0
     while [ $((i++)) -lt $wancount ]; do 
@@ -735,6 +797,9 @@ flush() {
     echo "## Clearing Rules ##"
     clear_rules $restore_single > /dev/null 2>&1
 
+    # Flush conntrack
+    conntrack -F
+
     rm $jobfile > /dev/null 2>&1
 }
 
@@ -768,6 +833,9 @@ main_init() {
 
     refresh_loadbalancer
 
+    # Flush conntrack
+    conntrack -F
+
     RP_PATH=/proc/sys/net/ipv4/conf
     for IFACE in $(ls $RP_PATH); do
 	echo 0 > $RP_PATH/$IFACE/rp_filter
@@ -798,11 +866,13 @@ monitor_wan() {
     while :; do
 	[ "${health_monitor%.*}" = 'parallel' ] && sleep $health_interval
 
+	network_flush_cache
 	network_get_device  ifname  ${1} || ifname=x
 	network_get_ipaddr  ipaddr  ${1} || ipaddr=x
 	network_get_gateway gateway ${1} || gateway=x
 
 	if [ "$ifname_cur" != "$ifname" -o "$ipaddr_cur" != "$ipaddr" -o "$gateway_cur" != "$gateway" ]; then
+	    mwnote "Interface $ifname_cur changed, reloading information"
 	    add_task "$1" acquire
 	    if [ "${health_monitor%.*}" = 'parallel' ]; then
 		exit
@@ -811,12 +881,17 @@ monitor_wan() {
 	    fi
 	else
 	    [ "$gateway" != "x" ] && ! ip route | grep -o $gateway >&- 2>&- &&
-		add_task route refresh
+	    	mwnote "Gateway $gateway not found, refreshing routes..." && add_task route refresh
 	fi
 
 	if [ "$icmp_hosts" != "disable" -a "$ifname" != "x" -a "$ipaddr" != "x" -a "$gateway" != "x" ]; then
 
-	    if [ "$icmp_hosts" == "gateway" -o -z "$icmp_hosts" ]; then
+	    old_icmp_hosts="$icmp_hosts"
+	    cmd="ping -c $icmp_count -W $timeout -I $ifname"
+	    if [ "$icmp_hosts" == "arp_gateway" ]; then
+		icmp_hosts_acquire=$gateway
+	    	cmd="arping -q -c $icmp_count -w $timeout -I $ifname"
+	    elif [ "$icmp_hosts" == "gateway" -o -z "$icmp_hosts" ]; then
 		icmp_hosts_acquire=$gateway
 	    elif [ "$icmp_hosts" == "dns" ]; then
 		icmp_hosts_acquire=$(uci_get_state multiwan $1 dns 'auto')
@@ -830,24 +905,37 @@ monitor_wan() {
 
 	    ping_test() {
 		echo "$icmp_hosts" | while read icmp_test_host; do
-		    ping -c "$icmp_count" -W $timeout -I $ifname $icmp_test_host 2>&1 | grep -o "round-trip"
+			if [ $((debug)) -gt 9 ] ; then
+				mwnote "Running $cmd $icmp_test_host"
+			fi
+		    $cmd $icmp_test_host > /dev/null 2>&1 && echo "good"
 		done
 	    }
 
 	    check_test=$(ping_test)
 
+	    if [ $((debug)) -gt 9 ] ; then
+		mwnote "$ifname: $check_test"
+	    fi
 	    if [ -z "$check_test" ]; then
 		add_task "$1" fail
+	    	if [ $((debug)) -gt 9 ] ; then
+			mwnote "$ifname is down."
+		fi
 	    else
 		add_task "$1" pass
+	    	if [ $((debug)) -gt 9 ] ; then
+			mwnote "$ifname is ok."
+		fi
 	    fi       	        
+	    icmp_hosts="$old_icmp_hosts"
 
 	elif [ "$icmp_hosts" == "disable" ]; then 
 	    add_task "$1" pass
 	fi
 
 	[ "$health_monitor" = 'serial' ] && {
-	    wan_monitor_map=$(echo $wan_monitor_map | sed -e "s/$1\[\w*\]/$1\[$(date +%s)\]/g")
+	    wan_monitor_map=$(echo $wan_monitor_map | sed -e "s/,$1\[\w*\]/$1\[$(date +%s)\]/g")
 	    update_cache
 	    break
 	}
@@ -902,7 +990,7 @@ schedule_tasks() {
 		    monitored_last=$(query_config monitor $group)
 		    [ -z "$monitored_last" ] && {
 			monitored_last=$current_time
-			wan_monitor_map="${wan_monitor_map}${group}[$monitored_last]"
+			wan_monitor_map="${wan_monitor_map},${group}[$monitored_last]"
 			update_cache
 		    }
 

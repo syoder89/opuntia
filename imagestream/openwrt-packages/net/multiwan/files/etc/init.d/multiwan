@@ -18,3 +18,6 @@ single () {
   /usr/bin/multiwan single &
 }
   
+enable () {
+  /usr/bin/multiwan restart &
+}
