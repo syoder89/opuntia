@@ -333,6 +333,7 @@ proto_qmi_setup() {
 	# Reset auto state if forced by technology selection
 	uci_revert_state network $config auto
 	uci set network.$config.apn=$apn
+	uci commit network.$config.apn
 	
 	local CDCDEV
 	CDCDEV=/dev/$(basename $(ls /sys/class/net/${iface}/device/usbmisc/cdc-wdm* -d)) || {
@@ -365,18 +366,22 @@ proto_qmi_setup() {
 
 	# Set the correct firmware image
 
-	let retries=5
-	while [ $((retries)) -gt 0 ] ; do
-		current_modem=`qmicli -d $CDCDEV --dms-list-stored-images | grep CURRENT -A 1 | grep modem | cut -b 9- | sed -e 's/]*//g'`
-		current_pri=`qmicli -d $CDCDEV --dms-list-stored-images | grep CURRENT -A 1 | grep pri | cut -b 7- | sed -e 's/]*//g'`
-		if [ "$current_modem" != "" ] && [ "$current_pri" != "" ] ; then
-			break
-		fi
-		let retries=retries-1
-		sleep 1
-	done
+        let has_firmware=0
+        let retries=5
+        while [ $((retries)) -gt 0 ] ; do
+                current_modem=`qmicli -d $CDCDEV --dms-list-stored-images | grep CURRENT -A 1 | grep modem | cut -b 9- | sed -e 's/]*//g'`
+                if [ "$?" = "0" ] ; then
+                        current_pri=`qmicli -d $CDCDEV --dms-list-stored-images | grep CURRENT -A 1 | grep pri | cut -b 7- | sed -e 's/]*//g'`
+                        if [ "$?" = "0" ] && [ "$current_modem" != "" ] && [ "$current_pri" != "" ] ; then
+                                has_firmware=1
+                                break
+                        fi
+                fi
+                let retries=retries-1
+                sleep 1
+        done
 
-	if [ $((current_modem)) != $((modem)) ] || [ $((current_pri)) != $((pri)) ] ; then
+        if [ "$has_firmware" = "1" ] && [[ $((current_modem)) != $((modem)) ] || [ $((current_pri)) != $((pri)) ]] ; then
 		proto_qmi_log daemon.info "Changing modem firmware to $modem / $pri. Current firmware is $current_modem / $current_pri."
 		watchdog_pid=`cat /var/run/qmi-watchdog-${config}.pid`
 		qmicli -d $CDCDEV --dms-select-stored-image=modem${modem},pri${pri}
