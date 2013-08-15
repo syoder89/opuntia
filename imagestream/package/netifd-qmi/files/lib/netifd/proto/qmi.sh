@@ -381,17 +381,19 @@ proto_qmi_setup() {
                 sleep 1
         done
 
-        if [ "$has_firmware" = "1" ] && [[ $((current_modem)) != $((modem)) ] || [ $((current_pri)) != $((pri)) ]] ; then
-		proto_qmi_log daemon.info "Changing modem firmware to $modem / $pri. Current firmware is $current_modem / $current_pri."
-		watchdog_pid=`cat /var/run/qmi-watchdog-${config}.pid`
-		qmicli -d $CDCDEV --dms-select-stored-image=modem${modem},pri${pri}
-		qmicli -d $CDCDEV --dms-set-operating-mode=offline
-		qmicli -d $CDCDEV --dms-set-operating-mode=reset
-		sleep 10
-		current_modem=`qmicli -d $CDCDEV --dms-list-stored-images | grep CURRENT -A 1 | grep modem | cut -b 9- | sed -e 's/]*//g'`
-		current_pri=`qmicli -d $CDCDEV --dms-list-stored-images | grep CURRENT -A 1 | grep pri | cut -b 7- | sed -e 's/]*//g'`
+        if [ "$has_firmware" = "1" ] ; then
 		if [ $((current_modem)) != $((modem)) ] || [ $((current_pri)) != $((pri)) ] ; then
-			proto_qmi_log daemon.info "Failed to change modem firmware! Current firmware is $current_modem / $current_pri."
+			proto_qmi_log daemon.info "Changing modem firmware to $modem / $pri. Current firmware is $current_modem / $current_pri."
+			watchdog_pid=`cat /var/run/qmi-watchdog-${config}.pid`
+			qmicli -d $CDCDEV --dms-select-stored-image=modem${modem},pri${pri}
+			qmicli -d $CDCDEV --dms-set-operating-mode=offline
+			qmicli -d $CDCDEV --dms-set-operating-mode=reset
+			sleep 10
+			current_modem=`qmicli -d $CDCDEV --dms-list-stored-images | grep CURRENT -A 1 | grep modem | cut -b 9- | sed -e 's/]*//g'`
+			current_pri=`qmicli -d $CDCDEV --dms-list-stored-images | grep CURRENT -A 1 | grep pri | cut -b 7- | sed -e 's/]*//g'`
+			if [ $((current_modem)) != $((modem)) ] || [ $((current_pri)) != $((pri)) ] ; then
+				proto_qmi_log daemon.info "Failed to change modem firmware! Current firmware is $current_modem / $current_pri."
+			fi
 		fi
 	fi
 
