@@ -13,7 +13,15 @@ __network_set_cache()
 __network_export()
 {
 	local __v="__NETWORK_CV_$2"
-	eval "export -- \"$1=\${$__v:+\${$__v$4}$3}\"; [ -n \"\${$__v+x}\" ]"
+	# Scott put in this check because I was getting some cache variables set but not in
+	# the __NETWORK_CACHE list. - namely the $iface__parsed key for wwan
+	for __ne_tmp in $__NETWORK_CACHE; do
+		if [ "$__ne_tmp" = "$__v" ] ; then
+			eval "export -- \"$1=\${$__v:+\${$__v$4}$3}\"; [ -n \"\${$__v+x}\" ]"
+			return $?
+		fi
+	done
+	return 1
 }
 
 __network_parse_ifstatus()
