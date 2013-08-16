@@ -110,8 +110,8 @@ define Package/base-files/install
 
 	$(VERSION_SED) \
 		$(1)/etc/banner \
-		$(1)/etc/openwrt_version \
-		$(1)/etc/openwrt_release
+		$(1)/etc/opuntia_version \
+		$(1)/etc/opuntia_release
 
 	mkdir -p $(1)/CONTROL
 	mkdir -p $(1)/dev

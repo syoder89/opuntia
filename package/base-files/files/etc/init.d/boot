@@ -9,7 +9,7 @@ system_config() {
 
 	local hostname conloglevel buffersize timezone zonename
 
-	config_get hostname "$cfg" hostname 'OpenWrt'
+	config_get hostname "$cfg" hostname 'Opuntia'
 	echo "$hostname" > /proc/sys/kernel/hostname
 
 	config_get conloglevel "$cfg" conloglevel
