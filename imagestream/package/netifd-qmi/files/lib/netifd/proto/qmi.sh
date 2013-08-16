@@ -163,6 +163,34 @@ proto_qmi_packet_service_status () {
 	fi
 }
 
+proto_qmi_check_led() {
+    config_get dev $1 dev
+    config_get sysfs $1 sysfs
+
+    if [ "$dev" = "$2" ] ; then
+    	led=$sysfs
+    fi
+}
+
+proto_qmi_find_led() {
+	led=""
+	config_load "system"
+	config_foreach proto_qmi_check_led led $1
+	eval [ ! -z $led ]
+}
+
+proto_qmi_led_ok() {
+	proto_qmi_find_led $1 && /etc/init.d/led reload
+}
+
+proto_qmi_led_off() {
+	proto_qmi_find_led $1 && echo 0 > /sys/class/leds/$led/brightness
+}
+
+proto_qmi_led_connecting() {
+	proto_qmi_find_led $1 && echo 255 > /sys/class/leds/$led/brightness && echo timer > /sys/class/leds/$led/trigger
+}
+
 proto_qmi_setup() {
 	local config="$1"
 	local iface="$2"
@@ -171,6 +199,8 @@ proto_qmi_setup() {
 
 	config_load network
 	config_get technology $config technology
+
+	proto_qmi_led_connecting ${iface}
 
 	case "$provider" in
 		verizon)
@@ -433,6 +463,8 @@ proto_qmi_setup() {
 		sleep 5
 	done
 
+	proto_qmi_led_ok ${iface}
+
 	# Show status and start watchdog
 	qmicli -d $CDCDEV --nas-get-serving-system 2>&1 | proto_qmi_log daemon.debug
 	(
@@ -458,6 +490,7 @@ proto_qmi_setup() {
 				let counter=0
 			fi
 			[ "$counter" -gt 5 ] && {
+				proto_qmi_led_off ${iface}
 				proto_qmi_log daemon.err "Error counter to high: $counter, shutting down ${config}, control device ${CDCDEV}"
 				(ifdown $config; sleep 5; sleep 30; ifup $config) </dev/null > /dev/null 2>&1 &
 				exit 1
