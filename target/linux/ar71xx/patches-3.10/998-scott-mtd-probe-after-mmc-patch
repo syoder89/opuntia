@@ -4,8 +4,8 @@
  obj-$(CONFIG_SCSI)		+= scsi/
  obj-$(CONFIG_ATA)		+= ata/
  obj-$(CONFIG_TARGET_CORE)	+= target/
--obj-$(CONFIG_MTD)		+= mtd/
  obj-$(CONFIG_SPI)		+= spi/
+-obj-$(CONFIG_MTD)		+= mtd/
  obj-y				+= hsi/
  obj-y				+= net/
 @@ -152,3 +151,4 @@

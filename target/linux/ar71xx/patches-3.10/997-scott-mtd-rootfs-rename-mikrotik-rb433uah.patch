@@ -1,5 +1,5 @@
---- build_dir/target-mips_r2_uClibc-0.9.33.2/linux-ar71xx_nand/linux-3.10.4/drivers/mtd/nand/rb4xx_nand.c.orig	2013-08-30 15:31:13.527385438 -0500
-+++ build_dir/target-mips_r2_uClibc-0.9.33.2/linux-ar71xx_nand/linux-3.10.4/drivers/mtd/nand/rb4xx_nand.c	2013-08-30 15:32:11.815387671 -0500
+--- a/drivers/mtd/nand/rb4xx_nand.c.orig	2013-08-30 15:31:13.527385438 -0500
++++ b/drivers/mtd/nand/rb4xx_nand.c	2013-08-30 15:32:11.815387671 -0500
 @@ -65,7 +65,7 @@
  		.size	= (4 * 1024 * 1024) - (256 * 1024),
  	},

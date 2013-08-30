@@ -39,6 +39,62 @@ platform_find_kernelpart() {
 	done
 }
 
+platform_do_mt_upgrade_combined() {
+	local partitions=$(platform_find_partitions)
+	local kernelpart=$(platform_find_kernelpart "${partitions#*:}")
+	local erase_size=$((0x${partitions%%:*})); partitions="${partitions#*:}"
+	local kern_length=0x$(dd if="$1" bs=2 skip=1 count=4 2>/dev/null)
+	local kern_blocks=$(($kern_length / $CI_BLKSZ))
+	local root_blocks=$((0x$(dd if="$1" bs=2 skip=5 count=4 2>/dev/null) / $CI_BLKSZ))
+	local mnt_kernel=/tmp/root
+
+	[ -d "$wget2nand_dir" ] && {
+		echo "$wget2nand_dir already exists"
+		umount $mnt_kernel > /dev/null 2>&1
+	}
+
+	if [ -n "$partitions" ] && [ -n "$kernelpart" ] && \
+	   [ ${kern_blocks:-0} -gt 0 ] && \
+	   [ ${root_blocks:-0} -gt ${kern_blocks:-0} ] && \
+	   [ ${erase_size:-0} -gt 0 ];
+	then
+		mtd_kernel="$(find_mtd_part 'kernel')"
+		mtd_rootfs="$(find_mtd_part 'rootfs')"
+		[ -z "$mtd_kernel" -o -z "$mtd_rootfs" ] && {
+			echo "Cannot find NAND Flash partitions"
+			return 1
+		}
+
+		echo "Erasing filesystem..."
+		mtd erase kernel 2>/dev/null >/dev/null
+
+		echo "Mounting $mtd_kernel as kernel partition"
+
+		mount -t yaffs2 "$mtd_kernel" "$mnt_kernel"
+		echo "Copying kernel..."
+
+		dd if="$1" of=$mnt_kernel/kernel bs=$CI_BLKSZ skip=1 count=$kern_blocks || {
+       			echo "Error occured while copying the kernel"
+       			return 1
+		}
+		sync
+		ls $mnt_kernel >/dev/null
+
+		echo "Cleaning up..."
+		# unmount the partitions and remove the directories into which they were mounted
+		umount $mnt_kernel
+
+		echo "Copying root filesystem..."
+		local append=""
+		[ -f "$CONF_TAR" -a "$SAVE_CONFIG" -eq 1 ] && append="-j $CONF_TAR"
+
+		( dd if="$1" bs=$CI_BLKSZ skip=$((1+$kern_blocks)) count=$root_blocks 2>/dev/null ) | \
+			mtd -r $append write - rootfs
+
+		# all done
+	fi
+}
+
 platform_do_upgrade_combined() {
 	local partitions=$(platform_find_partitions)
 	local kernelpart=$(platform_find_kernelpart "${partitions#*:}")
@@ -244,6 +300,7 @@ platform_check_image() {
 	eap7660d | \
 	ja76pf | \
 	ja76pf2 | \
+	rb-433u | \
 	jwap003)
 		[ "$magic" != "4349" ] && {
 			echo "Invalid image. Use *-sysupgrade.bin files on this board"
@@ -302,6 +359,9 @@ platform_do_upgrade() {
 	om2p-hs | \
 	om2p-lc)
 		platform_do_upgrade_openmesh "$ARGV"
+		;;
+	rb-433u)
+		platform_do_mt_upgrade_combined "$ARGV"
 		;;
 	*)
 		default_do_upgrade "$ARGV"
