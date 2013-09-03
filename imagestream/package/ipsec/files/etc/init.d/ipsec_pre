@@ -12,6 +12,7 @@ ConfigTunnel() {
 
   tunnel_name="$1"
   config_get gateway "$1" gateway
+  config_get keyexchange "$1" keyexchange
   config_get exchange_mode "$1" exchange_mode
   config_get local_identifier "$1" local_identifier
   config_get remote_identifier "$1" remote_identifier
@@ -51,9 +52,11 @@ ConfigTunnel() {
   echo >> $IPSEC_FILE
   echo -e "config remote 'remote_${tunnel_name}'" >> $IPSEC_FILE
   echo -e "\toption enabled '1'" >> $IPSEC_FILE
+  echo -e "\toption keyexchange '${keyexchange}'" >> $IPSEC_FILE
   echo -e "\toption gateway '${gateway}'" >> $IPSEC_FILE
   echo -e "\toption exchange_mode '${exchange_mode}'" >> $IPSEC_FILE
   echo -e "\toption authentication_method '${authentication_method}'" >> $IPSEC_FILE
+  echo -e "\toption dpdaction restart" >> $IPSEC_FILE
   if [ "${authentication_method}" = "psk" ] ; then
   	echo -e "\toption pre_shared_key '${pre_shared_key}'" >> $IPSEC_FILE
   else
