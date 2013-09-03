@@ -74,16 +74,16 @@ s:option(Value, "local_identifier", translate("Local Identifier"))
 
 s:option(Value, "remote_identifier", translate("Remote Identifier"))
 
-auth = s:option(ListValue, "authentication_method", translate("Authentication method"))
-auth.widget = "select"
-auth:value("psk", "PSK")
-auth:value("certificate", "Certificate")
+--auth = s:option(ListValue, "authentication_method", translate("Authentication method"))
+--auth.widget = "select"
+--auth:value("psk", "PSK")
+--auth:value("certificate", "Certificate")
 
 psk = s:option(Value, "pre_shared_key", translate("Pre shared key"))
-psk:depends("authentication_method", "psk")
+--psk:depends("authentication_method", "psk")
 
-cert = s:option(TextValue, "certificate", translate("Certificate"))
-cert:depends("authentication_method", "certificate")
+--cert = s:option(TextValue, "certificate", translate("Certificate"))
+--cert:depends("authentication_method", "certificate")
 
 t = s:option(Value, "local_subnet", translate("Local subnet"))
 

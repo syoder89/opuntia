@@ -31,6 +31,9 @@ ConfigTunnel() {
 
   p1_proposal=""
   p2_proposal=""
+  if [ "${authentication_method}" = "" ] ; then
+	authentication_method="psk"
+  fi
 
   if [ "${ike_encryption}" != "" ] ; then
  	p1_proposal="p1_proposal_${tunnel_name}"
