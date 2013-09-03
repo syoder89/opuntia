@@ -25,7 +25,7 @@ function index()
 	page.title  = _("IPSEC")
 	page.index  = true
 
-	page = entry({"admin", "network", "ipsec", "logs"}, call("ipsec_logs"), "IPSEC Logs")
+	page = entry({"admin", "network", "ipsec", "advanced_status"}, call("ipsec_advanced_status"), "IPSEC Advanced Status")
 
 	page = entry({"admin", "network", "ipsec", "tunnel_form"}, cbi("ipsec/tunnel_form", {autoapply=true}), nil)
 	page.leaf = true
@@ -44,13 +44,13 @@ function index()
 
 end
 
-function ipsec_logs()
+function ipsec_advanced_status()
 	local ipm = require "luci.model.ipsec".init()
 	local ip_xfrm_state = ipm:ip_xfrm_state()
 	local ip_xfrm_policy = ipm:ip_xfrm_policy()
-	local iptables = ipm:iptables()
-	luci.template.render("ipsec/logs", 
-		{ip_xfrm_state=ip_xfrm_state, ip_xfrm_policy=ip_xfrm_policy, iptables=iptables})
+	local iproute = ipm:iproute()
+	luci.template.render("ipsec/advanced_status", 
+		{ip_xfrm_state=ip_xfrm_state, ip_xfrm_policy=ip_xfrm_policy, iproute=iproute})
 end
 
 function tunnel_delete(tunnel)

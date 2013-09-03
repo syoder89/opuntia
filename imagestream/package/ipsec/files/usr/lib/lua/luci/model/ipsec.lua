@@ -60,8 +60,8 @@ function ip_xfrm_policy(self)
 	return utl.exec("ip xfrm policy")
 end
 
-function iptables(self)
-	return utl.exec("ls")
+function iproute(self)
+	return utl.exec("ip route list table 220")
 end
 
 function del_tunnel(self, n)

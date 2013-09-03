@@ -1,5 +1,5 @@
 <%#
-LuCI - Lua Configuration IPSEC logs
+LuCI - Lua Configuration IPSEC Advanced State
 Copyright 2013 Juan Flores <juan.flores@gdc-cala.com.mx>
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@ $Id$
 -%>
 <%+header%>
 <h2><a href="<%=luci.dispatcher.build_url("admin", "network", "ipsec")%>"><%:Overview%></a> &raquo; 
-<%:IPSEC Logs%></h2>
+<%:IPSEC Advanced Status%></h2>
 <fieldset class="cbi-section">
 	<legend><%:ip xfrm state%></legend>
 	<textarea readonly="readonly" wrap="off" style="width:98%" rows="<%=ip_xfrm_state:cmatch("\n")+2%>"><%=ip_xfrm_state:pcdata()%></textarea>
@@ -25,8 +25,8 @@ $Id$
 </fieldset>
 
 <fieldset class="cbi-section">
-	<legend><%:iptables%></legend>
-	<textarea readonly="readonly" wrap="off" style="width:98%" rows="<%=iptables:cmatch("\n")+2%>"><%=iptables:pcdata()%></textarea>
+	<legend><%:ip route list table 220%></legend>
+	<textarea readonly="readonly" wrap="off" style="width:98%" rows="<%=iproute:cmatch("\n")+2%>"><%=iproute:pcdata()%></textarea>
 </fieldset>
 
 <%+footer%>
