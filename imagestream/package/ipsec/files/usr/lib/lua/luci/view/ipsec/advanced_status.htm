@@ -1,0 +1,32 @@
+<%#
+LuCI - Lua Configuration IPSEC Advanced State
+Copyright 2013 Juan Flores <juan.flores@gdc-cala.com.mx>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+$Id$
+
+-%>
+<%+header%>
+<h2><a href="<%=luci.dispatcher.build_url("admin", "network", "ipsec")%>"><%:Overview%></a> &raquo; 
+<%:IPSEC Advanced Status%></h2>
+<fieldset class="cbi-section">
+	<legend><%:ip xfrm state%></legend>
+	<textarea readonly="readonly" wrap="off" style="width:98%" rows="<%=ip_xfrm_state:cmatch("\n")+2%>"><%=ip_xfrm_state:pcdata()%></textarea>
+</fieldset>
+
+<fieldset class="cbi-section">
+	<legend><%:ip xfrm policy%></legend>
+	<textarea readonly="readonly" wrap="off" style="width:98%" rows="<%=ip_xfrm_policy:cmatch("\n")+2%>"><%=ip_xfrm_policy:pcdata()%></textarea>
+</fieldset>
+
+<fieldset class="cbi-section">
+	<legend><%:ip route list table 220%></legend>
+	<textarea readonly="readonly" wrap="off" style="width:98%" rows="<%=iproute:cmatch("\n")+2%>"><%=iproute:pcdata()%></textarea>
+</fieldset>
+
+<%+footer%>

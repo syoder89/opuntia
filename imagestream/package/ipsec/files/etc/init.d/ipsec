@@ -47,6 +47,7 @@ ConfigPhase1() {
 }
  
 ConfigTunnel() {
+  local keyexchange 
   local local_subnet
   local local_nat
   local remote_subnet
@@ -55,6 +56,7 @@ ConfigTunnel() {
   local encryption_algorithm
   local authentication_algorithm
  
+  config_get keyexchange              "$1"           keyexchange
   config_get local_subnet             "$1"           local_subnet
   config_get local_nat                "$1"           local_nat ""
   config_get remote_subnet            "$1"           remote_subnet
@@ -68,7 +70,7 @@ ConfigTunnel() {
   p2_proposal="${encryption_algorithm}-${authentication_algorithm}-${pfs_group}"
  
   echo "conn $ConfigName-$1" >> $FileConn
-  echo "  keyexchange=ikev1" >> $FileConn
+  echo "  keyexchange=$keyexchange" >> $FileConn
   echo "  left=$LocalGateway" >> $FileConn
   echo "  right=$RemoteGateway" >> $FileConn
   echo "  leftsubnet=$local_subnet" >> $FileConn
@@ -90,6 +92,9 @@ ConfigTunnel() {
   if [ "$RemoteIdentifier" != "" ]; then
     echo "  rightid=$RemoteIdentifier" >> $FileConn
   fi
+  if [ "$DPDAction" != "" ]; then
+    echo "  dpdaction=$dpdaction" >> $FileConn
+  fi
  
 #  echo "  auth=esp" >> $FileConn
   echo "  esp=$p2_proposal" >> $FileConn
@@ -104,6 +109,7 @@ ConfigRemote() {
   local authentication_method
   local local_identifier
   local remote_identifier
+  local dpdaction
  
   ConfigName=$1
  
@@ -115,6 +121,8 @@ ConfigRemote() {
   config_get authentication_method "$1" authentication_method
   config_get local_identifier      "$1" local_identifier
   config_get remote_identifier     "$1" remote_identifier
+  config_get dpdaction             "$1" dpdaction
+  DPDAction=$dpdaction
  
   AuthenticationMethod=$authentication_method
   LocalIdentifier=$local_identifier

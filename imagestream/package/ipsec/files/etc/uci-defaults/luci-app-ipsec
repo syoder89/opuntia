@@ -3,7 +3,7 @@
 uci -q batch <<-EOF >/dev/null
 	delete ucitrack.@ipsec_pre[-1]
 	set ucitrack.ipsec_pre="ipsec_pre"
-	set ucitrack.ipsec_pre='/etc/init.d/ipsec_pre restart'
+	set ucitrack.ipsec_pre.exec='/etc/init.d/ipsec_pre restart'
 	commit ucitrack
 EOF
 
