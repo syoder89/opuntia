@@ -1,6 +1,6 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=luci-app-openvpn
+PKG_NAME:=luci-app-isis-openvpn
 PKG_VERSION:=1
 PKG_RELEASE:=1
 

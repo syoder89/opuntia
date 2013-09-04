@@ -95,5 +95,6 @@ ports.rmempty = true
 ports:value("", translate("all"))
 
 bytes = s:option(Value, "connbytes", translate("Number of bytes"))
+bytes.size = 6
 
 return m
