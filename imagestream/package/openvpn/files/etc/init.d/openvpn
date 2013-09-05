@@ -59,6 +59,12 @@ start_instance() {
 
 	section_enabled "$s" || return 1
 
+	config_get dev "$s" dev
+	config_get dev_type "$s" dev_type
+	if [ "$dev" = "" ] && [ "$dev_type" != "" ] ; then
+		config_set "$s" dev "$dev_type"
+	fi
+
 	ARGS=""
 
 	# append flags
