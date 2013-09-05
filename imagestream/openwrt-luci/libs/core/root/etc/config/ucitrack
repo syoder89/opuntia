@@ -2,6 +2,7 @@ config network
 	option init network
 	list affects dhcp
 	list affects radvd
+	list affects multiwan
 
 config wireless
 	list affects network
