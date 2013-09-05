@@ -164,4 +164,3 @@ stop() {
 	[ -f $PID_F ] && kill $(cat $PID_F)
 	[ -f $RUN_C ] && rm -f $RUN_C
 }
-

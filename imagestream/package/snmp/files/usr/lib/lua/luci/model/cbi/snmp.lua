@@ -1,7 +1,7 @@
 --[[
 LuCI - Lua Configuration Interface
 
-Copyright 2013 Juan Flores <juan.flores@gdc-cala.com.mx>
+Copyright 2011 Manuel Munz <freifunk at somakoma dot de>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,6 +14,10 @@ require("luci.tools.webadmin")
 
 m = Map("snmpd", translate("SNMP Configuration"),
         translate("This page allows you to configure SNMP"))
+
+function m.on_commit(map)
+	luci.sys.call("(env -i /etc/init.d/snmpd restart) >/dev/null 2>/dev/null")
+end
 
 ag = m:section(TypedSection, "agent", translate("Agent settings"))
 ag.anonymous = true
@@ -79,4 +83,3 @@ type.default="authpriv"
 type:depends("enable", 1)
 
 return m
-
