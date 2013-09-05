@@ -16,7 +16,6 @@ $Id: openvpn-advanced.lua 7774 2011-10-24 18:18:09Z soma $
 require("luci.ip")
 require("luci.model.uci")
 
-
 local knownParams = {
 	--
 	--	Widget			Name							Default(s)														Description	Option(s)
@@ -207,6 +206,7 @@ local knownParams = {
 local cts = { }
 local params = { }
 
+name = arg[1]
 local m = Map("openvpn")
 local p = m:section( SimpleSection )
 
@@ -268,6 +268,11 @@ for _, option in ipairs(params) do
 			o:depends(option[i])
 		end
 	end
+end
+
+function m.on_after_commit(self)
+    luci.sys.call("/etc/init.d/openvpn.luci down %s" % name)
+    luci.sys.call("/etc/init.d/openvpn.luci up %s" % name)
 end
 
 return m

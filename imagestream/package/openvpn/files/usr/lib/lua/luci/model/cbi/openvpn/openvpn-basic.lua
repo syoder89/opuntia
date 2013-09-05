@@ -33,29 +33,32 @@ local mode = s:option(ListValue, "mode", translate( "Server Mode" ) )
   mode:value("p2p", "Point to point")
   mode:value("server", "Server")
   mode:depends("client", "")
+
 local dev_type = s:option( ListValue, "dev_type", translate("Type") )
   dev_type:value( "tun", "TUN" )
   dev_type:value( "tap", "TAP" )
   dev_type.description = translate( "Use TUN for routing based connections and TAP for bridging" )
+
 local proto = s:option( ListValue,"proto", translate("Protocol") )
-  proto:value( "tcp", "TCP" )
   proto:value( "udp", "UDP" )
+  proto:value( "tcp-client", "TCP Client" )
+  proto:value( "tcp-server", "TCP Server" )
+
 local host = s:option( Value, "local", translate("Source IP address") )
   host:depends("client", "")
+
 local port = s:option( Value, "lport", translate("Source port") )
   port.value = "1194"
-  port:depends("client", "")
- 
+  port:depends("client", "") 
+
 local remote = s:option(Value, "remote", translate("Destination IP address") )
   remote:depends("mode", "p2p")
   remote:depends("client", "1")
+
 local rport = s:option( Value, "rport", translate("Destination port") )
   rport.value = "1194"
   rport:depends("mode", "p2p")
   rport:depends("client", "1")
-  
--- local ip = s:option(Value, "ip_address", translate("Remote IP") )
---  ip:depends("mode", "p2p")
 
 local secret_type = s:option( ListValue, "secret_type", translate("Type of Static Key") )
   secret_type:value( "passphrase", "Password Phrase Generator" )
@@ -102,6 +105,11 @@ function m.on_before_save(self)
 			key.map:set(name, key.option, filename)
 		end
 	end
+end
+
+function m.on_after_commit(self)
+    luci.sys.call("/etc/init.d/openvpn.luci down %s" % name)
+    luci.sys.call("/etc/init.d/openvpn.luci up %s" % name)
 end
 
 return m

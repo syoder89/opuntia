@@ -29,21 +29,9 @@ function s.create(self, name)
 
     if name and not name:match("[^a-zA-Z0-9_]") then
 	uci:section( "openvpn", "openvpn", name, { 
-		float 		= "1",
 		client  	= "1",
-		comp_lzo	= "1",
-		dev		= "tun",
-		reneg_sec	= "0",
-		persist_key	= "1",
-		nobind		= "1",
-		remote		= "vpnserver.example.org",
-		port		= "1194",
-		ca		= "ca.crt",
-		cert		= "cert.crt",
-		key		= "key.key",
-		enabled		= "0",
-		dev_type	= "tun",
-		proto		= "udp"
+		enabled		= "1",
+		dev_type	= "tun"
    	} ) 
 	uci:save("openvpn")
         luci.http.redirect( self.extedit:format(name, recipe) )
@@ -86,16 +74,16 @@ function updown.write(self, section, value)
 	end
 end
 
-local port = s:option( DummyValue, "port", translate("Port") )
+local port = s:option( DummyValue, "lport", translate("Port") )
 function port.cfgvalue(self, section)
 	local val = AbstractValue.cfgvalue(self, section)
-	return val or "1194"
+	return val
 end
 
 local proto = s:option( DummyValue, "proto", translate("Protocol") )
 function proto.cfgvalue(self, section)
 	local val = AbstractValue.cfgvalue(self, section)
-	return val or "udp"
+	return val
 end
 
 

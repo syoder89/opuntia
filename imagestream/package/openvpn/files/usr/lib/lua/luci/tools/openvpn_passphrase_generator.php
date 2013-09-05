@@ -9,7 +9,7 @@ if (isset($argv)) {
 $key = "#\n";
 $key .= "# 2048 bit OpenVPN static key \n";
 $key .= "#\n";
-$key .= "-----BEGIN OpenVPN Static key V1 -----\n";
+$key .= "-----BEGIN OpenVPN Static key V1-----\n";
 $line = '';
 $key_size = 2048;
 
