@@ -536,6 +536,12 @@ You may obtain a copy of the License at
 			<%=pcdata(luci.version.luciname)%> (<%=pcdata(luci.version.luciversion)%>)
 		</td></tr>
 		<tr><td width="33%"><%:Kernel Version%></td><td><%=luci.sys.exec("uname -r")%></td></tr>
+		<tr><td width="33%"><%:License%></td><td>
+			Router type:   <%=pcdata(luci.sys.exec("/bin/get_license router_build product_name"))%><br/>
+			Serial number: <%=pcdata(luci.sys.exec("/bin/get_license router_build serial_number"))%><br/>
+			Build date:    <%=pcdata(luci.sys.exec("/bin/get_license router_build build_date"))%><br/>
+			Product id:    <%=pcdata(luci.sys.exec("/bin/get_license router_build product_id"))%>, revision <%=pcdata(luci.sys.exec("/bin/get_license router_build product_rev"))%><br/>
+		</td></tr>
 		<tr><td width="33%"><%:Local Time%></td><td id="localtime">-</td></tr>
 		<tr><td width="33%"><%:Uptime%></td><td id="uptime">-</td></tr>
 		<tr><td width="33%"><%:Load Average%></td><td id="loadavg">-</td></tr>

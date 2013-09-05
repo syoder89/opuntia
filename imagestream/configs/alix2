@@ -2618,6 +2618,7 @@ CONFIG_PACKAGE_luci-lib-web=y
 # CONFIG_PACKAGE_luci-mod-freifunk-community is not set
 # CONFIG_PACKAGE_meshwizard is not set
 CONFIG_PACKAGE_luci-app-ipsec=y
+CONFIG_PACKAGE_luci-app-isis-license=y
 CONFIG_PACKAGE_luci-app-isis-openvpn=y
 CONFIG_PACKAGE_luci-app-snmp=y
 
