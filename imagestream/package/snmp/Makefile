@@ -7,8 +7,8 @@ PKG_RELEASE:=1
 include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)
-  SECTION:=luci
-  CATEGORY:=LuCI
+  SECTION:=net
+  CATEGORY:=ImageStream
   TITLE:=LuCI SNMP
   DEPENDS:=+snmpd
   DEFAULT:=y

@@ -1,6 +1,6 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=luci-app-isis-openvpn
+PKG_NAME:=luci-proto-gre
 PKG_VERSION:=1
 PKG_RELEASE:=1
 
@@ -9,8 +9,8 @@ include $(INCLUDE_DIR)/package.mk
 define Package/$(PKG_NAME)
   SECTION:=net
   CATEGORY:=ImageStream
-  TITLE:=LuCI OpenVPN
-  DEPENDS:=+openvpn
+  TITLE:=LuCI GRE protocol
+  DEPENDS:=+luci
   DEFAULT:=y
 endef
 
