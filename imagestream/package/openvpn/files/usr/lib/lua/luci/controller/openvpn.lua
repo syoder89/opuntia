@@ -16,8 +16,8 @@ $Id: openvpn.lua 9507 2012-11-26 12:53:43Z jow $
 module("luci.controller.openvpn", package.seeall)
 
 function index()
-	entry( {"admin", "services", "openvpn"}, cbi("openvpn/openvpn"), _("OpenVPN") )
-	entry( {"admin", "services", "openvpn", "basic"},    cbi("openvpn/openvpn-basic"),    nil ).leaf = true
-	entry( {"admin", "services", "openvpn", "advanced"}, cbi("openvpn/openvpn-advanced"), nil ).leaf = true
+	entry( {"admin", "network", "openvpn"}, cbi("openvpn/openvpn"), _("OpenVPN") )
+	entry( {"admin", "network", "openvpn", "basic"},    cbi("openvpn/openvpn-basic"),    nil ).leaf = true
+	entry( {"admin", "network", "openvpn", "advanced"}, cbi("openvpn/openvpn-advanced"), nil ).leaf = true
 end
 
