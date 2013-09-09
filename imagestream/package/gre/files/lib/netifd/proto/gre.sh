@@ -44,18 +44,23 @@ proto_gre_setup() {
 	json_add_string remote "$destination"
 	[[ "$key" != "" ]] && json_add_string key "$key"
 	[[ "$sequencing" != "" ]] && json_add_string seq
-	[[ "$keepalive" = "1" ]] && json_add_string keepalive "$keepalive_interval retries $retries"
+	[[ "$keepalive" = "1" ]] && json_add_string keepalive "$keepalive_interval retries $keepalive_retries"
 	proto_close_tunnel
 
 	[[ "$local" != "" ]] && local="local $source"
 	[[ "$key" != "" ]] && key="key $key"
 	[[ "$sequencing" != "" ]] && sequencing="seq"
-	[[ "$keepalive" = "1" ]] && keepalive="keepalive $keepalive_interval retries $retries"
+	[[ "$keepalive" = "1" ]] && keepalive="keepalive $keepalive_interval retries $keepalive_retries"
 	[[ "$ttl" != "" ]] && ttl="ttl $ttl"
 
-	/usr/sbin/ip \
+	cmd="/usr/sbin/ip \
 		tunnel add $iface mode gre remote $destination $local \
-		$key $sequencing $keepalive $ttl
+		$key $sequencing $keepalive $ttl"
+	$cmd 2>&1 | proto_gre_log daemon.debug
+	
+	if [ "$?" != "0" ] ; then
+		proto_gre_log daemon.err "Failed to add ip tunnel. Cmd: $cmd"
+	fi
 
 	proto_send_update "$cfg" 2>&1 | proto_gre_log daemon.debug
 	/usr/sbin/ip link set $iface up
