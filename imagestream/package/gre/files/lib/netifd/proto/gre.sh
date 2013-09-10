@@ -40,14 +40,14 @@ proto_gre_setup() {
 	json_add_string mode gre
 	json_add_int mtu "${mtu:-1280}"
 	json_add_int ttl "${ttl:-64}"
-	[[ "$local" != "" ]] && json_add_string local "$source"
+	[[ "$source" != "" ]] && json_add_string local "$source"
 	json_add_string remote "$destination"
 	[[ "$key" != "" ]] && json_add_string key "$key"
 	[[ "$sequencing" != "" ]] && json_add_string seq
 	[[ "$keepalive" = "1" ]] && json_add_string keepalive "$keepalive_interval retries $keepalive_retries"
 	proto_close_tunnel
 
-	[[ "$local" != "" ]] && local="local $source"
+	[[ "$source" != "" ]] && local="local $source"
 	[[ "$key" != "" ]] && key="key $key"
 	[[ "$sequencing" != "" ]] && sequencing="seq"
 	[[ "$keepalive" = "1" ]] && keepalive="keepalive $keepalive_interval retries $keepalive_retries"
