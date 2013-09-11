@@ -1,0 +1,16 @@
+--- a/drivers/spi/spi-rb4xx.c
++++ b/drivers/spi/spi-rb4xx.c
+@@ -62,7 +62,12 @@ static inline void do_spi_delay(void)
+ 	ndelay(20000);
+ }
+ #else
+-static inline void do_spi_delay(void) { }
++static inline void do_spi_delay(void)
++{
++	// Scott added this to solve a problem with warm boots not properly initting the microSD
++	ndelay(200);
++}
++//static inline void do_spi_delay(void) { }
+ #endif
+ 
+ static inline void do_spi_init(struct spi_device *spi)
