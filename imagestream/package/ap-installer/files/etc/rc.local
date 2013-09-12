@@ -4,7 +4,7 @@
 . /lib/upgrade/platform.sh
 
 IMAGE="opuntia-ar71xx-nand-combined-squashfs.img"
-URL="http://install1/ap-installer"
+URL="http://install1.imagestream.com/ap-installer"
 BSECT="bsect.img"
 RC_POSTINSTALL="rc.postinstall"
 
