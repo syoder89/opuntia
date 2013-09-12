@@ -1158,6 +1158,7 @@ CONFIG_UDEV_EXTRA_v4l_id=y
 #
 CONFIG_PACKAGE_imagestream-overrides=y
 # CONFIG_PACKAGE_imagestream-snmp-mibs is not set
+CONFIG_PACKAGE_imagestream-wifi-ap-installer=y
 # CONFIG_PACKAGE_ktt30-graphics is not set
 # CONFIG_PACKAGE_luci-app-isis-license is not set
 # CONFIG_PACKAGE_luci-app-isis-openvpn is not set
