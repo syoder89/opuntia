@@ -1,0 +1,33 @@
+
+config wifi-device 'radio0'
+	option type 'mac80211'
+	option channel '11'
+	option hwmode '11ng'
+	option htmode 'HT20'
+	list ht_capab 'SHORT-GI-40'
+	list ht_capab 'DSSS_CCK-40'
+	option txpower '28'
+
+config wifi-iface
+	option device 'radio0'
+	option mode 'ap'
+	option ssid 'Opuntia'
+	option encryption 'none'
+
+config wifi-device 'radio1'
+	option type 'mac80211'
+	option hwmode '11na'
+	list ht_capab 'SHORT-GI-40'
+	list ht_capab 'DSSS_CCK-40'
+	option country 'US'
+	option channel '161'
+	option htmode 'HT40-'
+	option txpower '28'
+
+config wifi-iface
+	option device 'radio1'
+	option mesh_id 'ISisMeshBackhaul'
+	option mode 'mesh'
+	option network 'lan'
+	option encryption 'authsae'
+	option key 'changeme'
