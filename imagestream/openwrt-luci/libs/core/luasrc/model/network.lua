@@ -1378,11 +1378,15 @@ function wifinet.mode(self)
 end
 
 function wifinet.ssid(self)
-	return _uci_state:get("wireless", self.sid, "ssid")
+	return _uci_state:get("wireless", self.sid, "ssid") or _uci_state:get("wireless", self.sid, "mesh_id")
 end
 
 function wifinet.bssid(self)
-	return _uci_state:get("wireless", self.sid, "bssid")
+	return _uci_state:get("wireless", self.sid, "bssid") or _uci_state:get("wireless", self.sid, "mesh_id")
+end
+
+function wifinet.mesh_id(self)
+	return _uci_state:get("wireless", self.sid, "mesh_id")
 end
 
 function wifinet.network(self)
@@ -1433,11 +1437,15 @@ function wifinet.active_mode_i18n(self)
 end
 
 function wifinet.active_ssid(self)
-	return _stror(self.iwinfo.ssid, self.iwdata.ssid)
+	return _stror(self.iwinfo.ssid, self.iwdata.ssid) or _stror(self.iwinfo.mesh_id, self.iwdata.mesh_id) 
 end
 
 function wifinet.active_bssid(self)
-	return _stror(self.iwinfo.bssid, self.iwdata.bssid) or "00:00:00:00:00:00"
+	return _stror(self.iwinfo.bssid, self.iwdata.bssid) or _stror(self.iwinfo.mesh_id, self.iwdata.mesh_id) or "00:00:00:00:00:00"
+end
+
+function wifinet.active_mesh_id(self)
+	return _stror(self.iwinfo.mesh_id, self.iwdata.mesh_id)
 end
 
 function wifinet.active_encryption(self)
