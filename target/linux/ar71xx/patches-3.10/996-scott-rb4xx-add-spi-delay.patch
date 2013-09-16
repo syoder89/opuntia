@@ -8,7 +8,7 @@
 +static inline void do_spi_delay(void)
 +{
 +	// Scott added this to solve a problem with warm boots not properly initting the microSD
-+	ndelay(200);
++	ndelay(2000);
 +}
 +//static inline void do_spi_delay(void) { }
  #endif

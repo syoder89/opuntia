@@ -391,7 +391,16 @@ s:tab("encryption", translate("Wireless Security"))
 s:tab("macfilter", translate("MAC-Filter"))
 s:tab("advanced", translate("Advanced Settings"))
 
-s:taboption("general", Value, "ssid", translate("<abbr title=\"Extended Service Set Identifier\">ESSID</abbr>"))
+ssid = s:taboption("general", Value, "ssid", translate("<abbr title=\"Extended Service Set Identifier\">ESSID</abbr>"))
+ssid:depends({mode="ap"})
+ssid:depends({mode="sta"})
+ssid:depends({mode="adhoc"})
+ssid:depends({mode="ahdemo"})
+ssid:depends({mode="ap-wds"})
+ssid:depends({mode="sta-wds"})
+
+meshid = s:taboption("general", Value, "mesh_id", translate("<abbr title=\"Mesh Identifier\">Mesh ID</abbr>"))
+meshid:depends({mode="mesh"})
 
 mode = s:taboption("general", ListValue, "mode", translate("Mode"))
 mode.override_values = true
@@ -444,7 +453,7 @@ end
 
 if hwtype == "mac80211" then
 	if fs.access("/usr/sbin/iw") then
-		mode:value("mesh", "802.11s")
+		mode:value("mesh", "802.11s Mesh")
 	end
 
 	mode:value("ahdemo", translate("Pseudo Ad-Hoc (ahdemo)"))
@@ -719,6 +728,10 @@ end
 encr:value("none", "No Encryption")
 encr:value("wep-open",   translate("WEP Open System"), {mode="ap"}, {mode="sta"}, {mode="ap-wds"}, {mode="sta-wds"}, {mode="adhoc"}, {mode="ahdemo"}, {mode="wds"})
 encr:value("wep-shared", translate("WEP Shared Key"),  {mode="ap"}, {mode="sta"}, {mode="ap-wds"}, {mode="sta-wds"}, {mode="adhoc"}, {mode="ahdemo"}, {mode="wds"})
+
+encr:value("authsae", "SAE Authentication", {mode="mesh"})
+key = s:taboption("encryption", Value, "key", translate("<abbr title=\"Key\">Key</abbr>"))
+key:depends({encryption="authsae"})
 
 if hwtype == "atheros" or hwtype == "mac80211" or hwtype == "prism2" then
 	local supplicant = fs.access("/usr/sbin/wpa_supplicant")
