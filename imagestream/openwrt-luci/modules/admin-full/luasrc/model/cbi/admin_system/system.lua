@@ -159,7 +159,7 @@ if has_ntpd then
 	if m:formvalue("cbid.system._timeserver._enable") then
 		m.uci:section("system", "timeserver", "ntp",
 			{
-                	server = { "0.openwrt.pool.ntp.org", "1.openwrt.pool.ntp.org", "2.openwrt.pool.ntp.org", "3.openwrt.pool.ntp.org" }
+                	server = { "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" }
 			}
 		)
 

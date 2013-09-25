@@ -12,11 +12,11 @@ local pcall, dofile, _G = pcall, dofile, _G
 
 module "luci.version"
 
-if pcall(dofile, "/etc/openwrt_release") and _G.DISTRIB_DESCRIPTION then
+if pcall(dofile, "/etc/opuntia_release") and _G.DISTRIB_DESCRIPTION then
 	distname    = ""
 	distversion = _G.DISTRIB_DESCRIPTION
 else
-	distname    = "${2:-OpenWrt}"
+	distname    = "${2:-Opuntia}"
 	distversion = "${3:-Development Snapshot}"
 end
 

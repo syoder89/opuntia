@@ -45,7 +45,7 @@ endef
 define Package/luci-lib-core/install
 	$(call Package/luci/install/template,$(1),libs/core)
 	$(PKG_BUILD_DIR)/build/mkversion.sh $(1)/usr/lib/lua/luci/version.lua \
-		"OpenWrt Firmware" \
+		"Opuntia Firmware" \
 		"$(OPENWRTVERSION)" \
 		"trunk" \
 		"$(PKG_VERSION)"
