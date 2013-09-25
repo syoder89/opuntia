@@ -1,19 +1,8 @@
-
 config interface 'loopback'
 	option ifname 'lo'
 	option proto 'static'
 	option ipaddr '127.0.0.1'
 	option netmask '255.0.0.0'
-
-config interface 'lan'
-	option type 'bridge'
-	option proto 'static'
-	option netmask '255.255.255.0'
-	option ip6assign '60'
-	option ipaddr '10.10.199.1'
-	option _orig_ifname 'eth1 radio0.network1 wlan1'
-	option _orig_bridge 'true'
-	option ifname 'eth1'
 
 config interface 'wan'
 	option ifname 'eth0'
@@ -33,3 +22,12 @@ config switch_vlan
 	option vlan '1'
 	option ports '1 2 5'
 
+config interface 'Clients'
+	option type 'bridge'
+	option _orig_ifname 'wlan0 wlan1'
+	option _orig_bridge 'true'
+
+config interface 'Management'
+	option _orig_ifname 'wlan1-1'
+	option _orig_bridge 'false'
+	option proto 'dhcp'
