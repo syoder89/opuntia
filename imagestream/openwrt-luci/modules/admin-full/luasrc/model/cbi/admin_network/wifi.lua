@@ -410,6 +410,20 @@ mode:value("adhoc", translate("Ad-Hoc"))
 
 bssid = s:taboption("general", Value, "bssid", translate("<abbr title=\"Basic Service Set Identifier\">BSSID</abbr>"))
 
+gw = s:taboption("general", Flag, "mesh_gate_announcements", translate("Announce Gateway"))
+gw:depends({mode="mesh"})
+
+rootmode = s:taboption("general", ListValue, "mesh_hwmp_rootmode", translate("HWMP Root Mode"))
+rootmode:depends({mode="mesh"})
+rootmode:value("0", translate("Not a root STA"))
+rootmode:value("1", translate("Root STA"))
+rootmode:value("2", translate("Root STA proactive PREQ no PREP"))
+rootmode:value("3", translate("Root STA proactive PREQ with PREP"))
+rootmode:value("4", translate("Root STA proactive RANN"))
+
+rssi_thresh = s:taboption("general", Value, "mesh_rssi_threshold", translate("Peer RSSI Threshold (-dBm)"))
+rssi_thresh:depends({mode="mesh"})
+
 network = s:taboption("general", Value, "network", translate("Network"),
 	translate("Choose the network(s) you want to attach to this wireless interface or " ..
 		"fill out the <em>create</em> field to define a new network."))

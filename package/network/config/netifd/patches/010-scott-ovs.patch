@@ -1,0 +1,114 @@
+--- a/system-linux.c
++++ b/system-linux.c
+@@ -278,6 +278,72 @@ static int system_rtnl_call(struct nl_ms
+ 	return nl_wait_for_ack(sock_rtnl);
+ }
+ 
++//#define USE_OVS 1
++#ifdef USE_OVS
++int system_bridge_addbr(struct device *bridge, struct bridge_config *cfg)
++{
++	char CMD[256];
++	snprintf(CMD, 256, "ovs-vsctl add-br %s", bridge->ifname);
++        return system(CMD);
++}
++
++int system_bridge_delbr(struct device *bridge)
++{
++	char CMD[256];
++        snprintf(CMD, 256, "ovs-vsctl del-br %s", bridge->ifname);
++        return system(CMD);
++}
++
++int system_bridge_addif(struct device *bridge, struct device *dev)
++{
++	char CMD[256];
++        snprintf(CMD, 256, "ovs-vsctl add-port %s %s", bridge->ifname, dev->ifname);
++        return system(CMD);
++}
++
++int system_bridge_delif(struct device *bridge, struct device *dev)
++{
++	char CMD[256];
++        snprintf(CMD, 256, "ovs-vsctl del-port %s %s", bridge->ifname, dev->ifname);
++	return system(CMD);
++}
++
++int system_bridge_delif_name(const char *name, struct device *dev);
++int system_bridge_delif_name(const char *name, struct device *dev)
++{
++	char CMD[256];
++        snprintf(CMD, 256, "ovs-vsctl del-port %s %s", name, dev->ifname);
++	return system(CMD);
++}
++
++static bool system_is_bridge(const char *name, char *buf, int buflen)
++{
++	char CMD[256];
++	snprintf(CMD, 256, "ovs-vsctl iface-to-br %s", name);
++        return ((system(CMD)) == 0);
++}
++
++static char *system_get_bridge(const char *name, char *buf, int buflen)
++{
++	char path[256], *bridge;
++	char CMD[256];
++	FILE *fp;
++
++	snprintf(path, 256, "/tmp/blist-%s.%d", name, getpid());
++	snprintf(CMD, 256, "ovs-vsctl iface-to-br %s > %s", name, path);
++        if ((system(CMD)) != 0)
++		return NULL;
++
++	fp = fopen(path, "r");
++	if (!fp)
++		return NULL;
++
++	bridge = fgets(buf, 256, fp);
++	fclose(fp);
++	unlink(path);
++	return bridge;
++}
++#else
+ int system_bridge_delbr(struct device *bridge)
+ {
+ 	return ioctl(sock_ioctl, SIOCBRDELBR, bridge->ifname);
+@@ -350,6 +416,13 @@ int system_bridge_delif(struct device *b
+ 	return system_bridge_if(bridge->ifname, dev, SIOCBRDELIF, NULL);
+ }
+ 
++int system_bridge_delif_name(const char *name, struct device *dev);
++int system_bridge_delif_name(const char *name, struct device *dev)
++{
++	return system_bridge_if(name, dev, SIOCBRDELIF, NULL);
++}
++#endif
++
+ static int system_if_resolve(struct device *dev)
+ {
+ 	struct ifreq ifr;
+@@ -552,7 +625,7 @@ void system_if_clear_state(struct device
+ 	bridge = system_get_bridge(dev->ifname, buf, sizeof(buf));
+ 	if (bridge) {
+ 		D(SYSTEM, "Remove device '%s' from bridge '%s'\n", dev->ifname, bridge);
+-		system_bridge_if(bridge, dev, SIOCBRDELIF, NULL);
++		system_bridge_delif_name(bridge, dev);
+ 	}
+ 
+ 	system_if_clear_entries(dev, RTM_GETROUTE, AF_INET);
+@@ -568,6 +641,7 @@ sec_to_jiffies(int val)
+ 	return (unsigned long) val * 100;
+ }
+ 
++#ifndef USE_OVS
+ int system_bridge_addbr(struct device *bridge, struct bridge_config *cfg)
+ {
+ 	unsigned long args[4] = {};
+@@ -610,6 +684,7 @@ int system_bridge_addbr(struct device *b
+ 
+ 	return 0;
+ }
++#endif
+ 
+ static int system_vlan(struct device *dev, int id)
+ {
