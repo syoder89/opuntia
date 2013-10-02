@@ -4,6 +4,12 @@
 #
 
 uci batch <<EOF
+delete wireless.@wifi-iface[]
+delete wireless.@wifi-iface[]
+delete wireless.@wifi-iface[]
+delete wireless.@wifi-iface[]
+delete wireless.@wifi-iface[]
+delete wireless.@wifi-iface[]
 set wireless.radio0.type='mac80211'
 set wireless.radio0.channel='11'
 set wireless.radio0.hwmode='11ng'
@@ -13,13 +19,23 @@ set wireless.radio0.country='US'
 set wireless.radio0.txpower='21'
 set wireless.radio0.disabled='0'
 set wireless.radio0.phy='phy0'
+add wireless wifi-iface
 set wireless.@wifi-iface[0]='wifi-iface'
 set wireless.@wifi-iface[0].device='radio0'
 set wireless.@wifi-iface[0].mode='ap'
 set wireless.@wifi-iface[0].ssid='Opuntia'
 set wireless.@wifi-iface[0].encryption='psk2'
 set wireless.@wifi-iface[0].network='Clients'
-set wireless.@wifi-iface[0].key='imagestream8484'
+set wireless.@wifi-iface[0].key='imagestream'
+add wireless wifi-iface
+set wireless.@wifi-iface[1]='wifi-iface'
+set wireless.@wifi-iface[1].device='radio0'
+set wireless.@wifi-iface[1].mode='ap'
+set wireless.@wifi-iface[1].ssid='ISisManagement'
+set wireless.@wifi-iface[1].encryption='psk2'
+set wireless.@wifi-iface[1].network='Management'
+set wireless.@wifi-iface[1].key='imagestream'
+set wireless.@wifi-iface[1].hidden='1'
 set wireless.radio1.type='mac80211'
 set wireless.radio1.ht_capab='SHORT-GI-40 DSSS_CCK-40'
 set wireless.radio1.channel='161'
@@ -29,21 +45,22 @@ set wireless.radio1.htmode='HT40-'
 set wireless.radio1.txpower='21'
 set wireless.radio1.disabled='0'
 set wireless.radio1.phy='phy1'
-set wireless.@wifi-iface[1]='wifi-iface'
-set wireless.@wifi-iface[1].device='radio1'
-set wireless.@wifi-iface[1].mesh_id='ISisMesh'
-set wireless.@wifi-iface[1].mode='mesh'
-set wireless.@wifi-iface[1].network='Clients'
-set wireless.@wifi-iface[1].encryption='authsae'
-set wireless.@wifi-iface[1].key='imagestream8484'
 add wireless wifi-iface
 set wireless.@wifi-iface[2]='wifi-iface'
 set wireless.@wifi-iface[2].device='radio1'
-set wireless.@wifi-iface[2].mesh_id='ISisManagement'
+set wireless.@wifi-iface[2].mesh_id='ISisMesh'
 set wireless.@wifi-iface[2].mode='mesh'
-set wireless.@wifi-iface[2].network='Management'
+set wireless.@wifi-iface[2].network='Clients'
 set wireless.@wifi-iface[2].encryption='authsae'
-set wireless.@wifi-iface[2].key='imagestream8484'
+set wireless.@wifi-iface[2].key='imagestream'
+add wireless wifi-iface
+set wireless.@wifi-iface[3]='wifi-iface'
+set wireless.@wifi-iface[3].device='radio1'
+set wireless.@wifi-iface[3].mesh_id='ISisManagement'
+set wireless.@wifi-iface[3].mode='mesh'
+set wireless.@wifi-iface[3].network='Management'
+set wireless.@wifi-iface[3].encryption='authsae'
+set wireless.@wifi-iface[3].key='imagestream'
 EOF
 
 uci commit wireless
