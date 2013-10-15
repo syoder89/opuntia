@@ -10,7 +10,7 @@ include $(INCLUDE_DIR)/host.mk
 ARCH:=arm
 BOARD:=brcm2708
 BOARDNAME:=Broadcom BCM2708/BCM2835
-FEATURES:=ext4 audio usb usbgadget display gpio
+FEATURES:=ext4 squashfs audio usb usbgadget display gpio
 MAINTAINER:=Florian Fainelli <florian@openwrt.org>
 
 LINUX_VERSION:=3.10.4

@@ -10,7 +10,7 @@ define Package/ktt30-graphics
   SECTION:=multimedia
   CATEGORY:=ImageStream
   TITLE:=ktt30-graphics
-  DEFAULT:=y
+  DEFAULT:=n
 endef
 
 define Build/Configure
