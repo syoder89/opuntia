@@ -5,32 +5,17 @@
 START=15
 
 start() {
-	. /lib/functions.sh
-	. /lib/upgrade/platform.sh
-
-	MNT_PNT="/tmp/nand_root"
-	mkdir $MNT_PNT
-	mtd_nand_root="$(find_mtd_part 'nand_rootfs')"
-	[ -z "$mtd_nand_root" ] && {
-		exit 0
-	}
-
-	mount -r -t yaffs2 $mtd_nand_root $MNT_PNT
-
-	rm -r /var/licenses
+	rm -rf /var/licenses
 	mkdir /var/licenses
 
-	if [ -d /${MNT_PNT}/licenses ] ; then
-        	cd ${MNT_PNT}/licenses
+	if [ -d /etc/licenses ] ; then
+        	cd /etc/licenses
         	for file in *; do
                 	echo "Extracting license file $file..."
                 	/usr/bin/gpg --batch --no-tty --quiet --homedir /lib/security/el_security \
                         	--output /var/licenses/$file \
-                        	--decrypt /${MNT_PNT}/licenses/$file
+                        	--decrypt /etc/licenses/$file
         	done
         	cd
 	fi
-
-	umount $MNT_PNT
-	rmdir $MNT_PNT
 }
