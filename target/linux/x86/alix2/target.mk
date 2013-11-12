@@ -1,5 +1,5 @@
 BOARDNAME:=PCEngines alix2
-FEATURES:=squashfs ext4 pci usb gpio
+FEATURES:=squashfs ext4 pci usb gpio pcie
 DEFAULT_PACKAGES += \
 			kmod-crypto-hw-geode kmod-crypto-ocf kmod-crypto-aes kmod-crypto-cbc \
 			kmod-gpio-cs5535-new kmod-gpio-nsc \
@@ -7,6 +7,7 @@ DEFAULT_PACKAGES += \
 			kmod-cs5536 \
 			kmod-hwmon-core kmod-hwmon-lm90 \
 			kmod-via-rhine \
+			kmod-e1000e \
 			kmod-i2c-core kmod-i2c-gpio \
 			kmod-i2c-algo-bit kmod-i2c-algo-pca kmod-i2c-algo-pcf \
 			kmod-i2c-scx200-acb \

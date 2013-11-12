@@ -41,4 +41,8 @@ define Image/Build
 	$(call Image/Build/RaspberryPi,$(1))
 endef
 
+define Image/Build/squashfs
+	$(call prepare_generic_squashfs,$(KDIR)/root.squashfs)
+endef
+
 $(eval $(call BuildImage))

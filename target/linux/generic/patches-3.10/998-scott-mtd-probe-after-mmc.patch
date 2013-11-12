@@ -1,14 +1,14 @@
---- a/drivers/Makefile	2013-08-11 20:49:02.000000000 -0500
-+++ b/drivers/Makefile	2013-08-30 11:27:52.846826327 -0500
-@@ -62,7 +62,6 @@
+--- a/drivers/Makefile
++++ b/drivers/Makefile
+@@ -62,7 +62,6 @@ obj-$(CONFIG_IDE)		+= ide/
  obj-$(CONFIG_SCSI)		+= scsi/
  obj-$(CONFIG_ATA)		+= ata/
  obj-$(CONFIG_TARGET_CORE)	+= target/
- obj-$(CONFIG_SPI)		+= spi/
 -obj-$(CONFIG_MTD)		+= mtd/
+ obj-$(CONFIG_SPI)		+= spi/
  obj-y				+= hsi/
  obj-y				+= net/
-@@ -152,3 +151,4 @@
+@@ -152,3 +151,4 @@ obj-$(CONFIG_IIO)		+= iio/
  obj-$(CONFIG_VME_BUS)		+= vme/
  obj-$(CONFIG_IPACK_BUS)		+= ipack/
  obj-$(CONFIG_NTB)		+= ntb/
