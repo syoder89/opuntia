@@ -206,6 +206,10 @@ do_upgrade() {
 		platform_copy_config
 	fi
 
+	if type 'platform_copy_licenses' >/dev/null 2>/dev/null; then
+		platform_copy_licenses
+	fi
+
 	v "Upgrade completed"
 	[ -n "$DELAY" ] && sleep "$DELAY"
 	ask_bool 1 "Reboot" && {

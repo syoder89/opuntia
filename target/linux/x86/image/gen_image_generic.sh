@@ -34,6 +34,8 @@ dd if="$ROOTFSIMAGE" of="$OUTPUT" bs=512 seek="$ROOTFSOFFSET" conv=notrunc
 
 [ -n "$NOGRUB" ] && exit 0
 
-genext2fs -d "$KERNELDIR" -b "$BLOCKS" "$OUTPUT.kernel"
+# Scott added inodes (100) to allow copying our licenses. Default is num files + 1
+#genext2fs -d "$KERNELDIR" -b "$BLOCKS" "$OUTPUT.kernel"
+genext2fs -d "$KERNELDIR" -b "$BLOCKS" -N 100 "$OUTPUT.kernel"
 dd if="$OUTPUT.kernel" of="$OUTPUT" bs=512 seek="$KERNELOFFSET" conv=notrunc
 rm -f "$OUTPUT.kernel"

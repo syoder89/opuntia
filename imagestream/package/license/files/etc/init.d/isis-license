@@ -4,7 +4,41 @@
 
 START=15
 
+check_mikrotik() {
+	MNT_PNT="/tmp/nand_root"
+	mkdir $MNT_PNT
+	mtd_nand_root="$(find_mtd_part 'nand_rootfs')"
+	[ -z "$mtd_nand_root" ] && {
+		return 1
+	}
+	mount -r -t yaffs2 $mtd_nand_root $MNT_PNT
+	if [ -d /${MNT_PNT}/licenses ] ; then
+		cp -af ${MNT_PNT}/licenses /etc
+	fi
+	umount $MNT_PNT
+	rmdir $MNT_PNT
+	return 0
+}
+
+check_other() {
+	local rootfs="$(x86_get_rootfs)"
+	local rootfsdev="${rootfs##*:}"
+	
+	MNT_PNT="/tmp/nand_root"
+	mkdir $MNT_PNT
+
+	mount -t ext4 -o rw,noatime "${rootfsdev%[0-9]}1" $MNT_PNT
+	if [ -d /${MNT_PNT}/licenses ] ; then
+		cp -af ${MNT_PNT}/licenses /etc
+	fi
+	umount $MNT_PNT
+	rmdir $MNT_PNT
+}
+
 start() {
+	. /lib/functions.sh
+	. /lib/upgrade/platform.sh
+	check_mikrotik || check_other
 	rm -rf /var/licenses
 	mkdir /var/licenses
 

@@ -34,6 +34,15 @@ platform_copy_config() {
 	umount /mnt
 }
 
+platform_copy_licenses() {
+	local rootfs="$(x86_get_rootfs)"
+	local rootfsdev="${rootfs##*:}"
+	
+	mount -t ext4 -o rw,noatime "${rootfsdev%[0-9]}1" /mnt
+	cp -af "/etc/licenses" /mnt/
+	umount /mnt
+}
+
 platform_do_upgrade() {
 	local rootfs="$(x86_get_rootfs)"
 	local rootfsdev="${rootfs##*:}"
