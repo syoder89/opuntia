@@ -15,6 +15,7 @@ check_mikrotik() {
 	if [ -d /${MNT_PNT}/licenses ] ; then
 		cp -af ${MNT_PNT}/licenses /etc
 	fi
+	cp -af ${MNT_PNT}/product_id.txt /etc
 	umount $MNT_PNT
 	rmdir $MNT_PNT
 	return 0
@@ -27,10 +28,11 @@ check_other() {
 	MNT_PNT="/tmp/nand_root"
 	mkdir $MNT_PNT
 
-	mount -t ext4 -o rw,noatime "${rootfsdev%[0-9]}1" $MNT_PNT
+	mount -t ext4 -o ro,noatime "${rootfsdev%[0-9]}1" $MNT_PNT
 	if [ -d /${MNT_PNT}/licenses ] ; then
 		cp -af ${MNT_PNT}/licenses /etc
 	fi
+	cp -af ${MNT_PNT}/product_id.txt /etc
 	umount $MNT_PNT
 	rmdir $MNT_PNT
 }

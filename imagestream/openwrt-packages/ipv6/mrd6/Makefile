@@ -64,6 +64,7 @@ define Package/mrd6/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_CONF) ./files/mrd6.conf $(1)/etc
 	$(INSTALL_BIN) ./files/mrd6.init $(1)/etc/init.d/mrd6
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./files/mrd6.disable $(1)/etc/uci-defaults/mrd6.disable
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/mrd $(1)/usr/sbin/mrd6

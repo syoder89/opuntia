@@ -40,6 +40,7 @@ platform_copy_licenses() {
 	
 	mount -t ext4 -o rw,noatime "${rootfsdev%[0-9]}1" /mnt
 	cp -af "/etc/licenses" /mnt/
+	cp -af "/etc/product_id.txt" /mnt/
 	umount /mnt
 }
 
