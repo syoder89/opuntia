@@ -1203,6 +1203,7 @@ CONFIG_PACKAGE_gdb=m
 #
 # CONFIG_PACKAGE_gobi3k is not set
 # CONFIG_PACKAGE_imagestream-defcfg-wifi-ap-remote is not set
+CONFIG_PACKAGE_imagestream-envoy-configs=y
 # CONFIG_PACKAGE_imagestream-envoy-installer is not set
 CONFIG_PACKAGE_imagestream-overrides=y
 CONFIG_PACKAGE_imagestream-snmp-mibs=y

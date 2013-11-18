@@ -30,6 +30,17 @@ apply_uci_config() {
 	sh -c '. /lib/functions.sh; include /lib/config; uci_apply_defaults'
 }
 
+restore_config() {
+    [ -f /sysupgrade.tgz ] && {
+        echo "- config restore -"
+        cd /
+        mv sysupgrade.tgz /tmp
+        tar xzf /tmp/sysupgrade.tgz
+        rm -f /tmp/sysupgrade.tgz
+        sync
+    }
+}
+
 start() {
 	[ -f /proc/mounts ] || /sbin/mount_root
 	[ -f /proc/jffs2_bbc ] && echo "S" > /proc/jffs2_bbc
@@ -60,6 +71,7 @@ start() {
 	rm -f /tmp/wireless.tmp
 
 	apply_uci_config
+	restore_config
 	
 	# temporary hack until configd exists
 	/sbin/reload_config

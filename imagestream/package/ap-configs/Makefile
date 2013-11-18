@@ -1,6 +1,6 @@
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=imagestream-envoy-configs
+PKG_NAME:=imagestream-wifi-ap-configs
 PKG_VERSION:=1.0
 PKG_RELEASE:=1
 
@@ -8,14 +8,14 @@ PKG_MAINTAINER:=Scott Yoder <syoder@imagestream.com>
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/imagestream-envoy-configs
+define Package/imagestream-wifi-ap-configs
   SECTION:=sys
   CATEGORY:=ImageStream
-  TITLE:=ImageStream Envoy default configs
+  TITLE:=ImageStream WIFI AP Default Configuration
 endef
 
-define Package/imagestream-envoy-configs/description
-  ImageStream Envoy default configuration
+define Package/imagestream-wifi-ap-configs/description
+  ImageStream WIFI AP Default Configuration
 endef
 
 define Build/Prepare
@@ -27,8 +27,8 @@ endef
 define Build/Compile
 endef
 
-define Package/imagestream-envoy-configs/install
+define Package/imagestream-wifi-ap-configs/install
         $(CP) -a ./files/* $(1)/ 2>/dev/null || true
 endef
 
-$(eval $(call BuildPackage,imagestream-envoy-configs))
+$(eval $(call BuildPackage,imagestream-wifi-ap-configs))
