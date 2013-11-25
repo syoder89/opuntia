@@ -92,6 +92,12 @@ recovery.default = "5"
 recovery.optional = false
 recovery.rmempty = false
 
+restart_ipsec_fail = s:option(Flag, "restart_ipsec_on_fail", translate("Restart IPSec on Failure"))
+restart_ipsec_fail.rmempty = false
+
+restart_ipsec_recovery = s:option(Flag, "restart_ipsec_on_recovery", translate("Restart IPSec on Recovery"))
+restart_ipsec_recovery.rmempty = false
+
 failover_to = s:option(ListValue, "failover_to", translate("Failover Traffic Destination"))
 failover_to:value("disable", translate("None"))
 luci.tools.webadmin.cbi_add_networks(failover_to)
