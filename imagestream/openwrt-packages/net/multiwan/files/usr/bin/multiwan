@@ -137,7 +137,7 @@ recover_wan() {
     		ipsec_recovery=$(uci_get_state multiwan ${1} restart_ipsec_on_recovery)
     		if [ "$ipsec_recovery" = "1" ] ; then
 			mwnote "Restart IPSec due to recovery of $1"
-		    	/etc/init.d/ipsec restart &
+		    	sleep 10 && /etc/init.d/ipsec restart &
     		fi
 	    fi
 	fi
