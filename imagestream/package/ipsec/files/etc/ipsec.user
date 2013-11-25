@@ -6,18 +6,18 @@
 
 case "$PLUTO_VERB:$1" in
 up-client:iptables)
-	  iptables -t nat -I POSTROUTING 1 -o $PLUTO_INTERFACE -p $PLUTO_PEER_PROTOCOL \
+	  iptables -t nat -I POSTROUTING 1 -p $PLUTO_PEER_PROTOCOL \
 	      -s $PLUTO_MY_CLIENT $S_MY_PORT \
 	      -d $PLUTO_PEER_CLIENT $D_PEER_PORT -j ACCEPT
-	  conntrack -F -s $PLUTO_MY_CLIENT -d $PLUTO_PEER_CLIENT
+	  conntrack -F
 	;;
 
 
 down-client:iptables)
-	  iptables -t nat -D POSTROUTING -o $PLUTO_INTERFACE -p $PLUTO_PEER_PROTOCOL \
+	  iptables -t nat -D POSTROUTING -p $PLUTO_PEER_PROTOCOL \
 	      -s $PLUTO_MY_CLIENT $S_MY_PORT \
 	      -d $PLUTO_PEER_CLIENT $D_PEER_PORT \
 	         -j ACCEPT
-	  conntrack -F -s $PLUTO_MY_CLIENT -d $PLUTO_PEER_CLIENT
+	  conntrack -F
 	;;
 esac

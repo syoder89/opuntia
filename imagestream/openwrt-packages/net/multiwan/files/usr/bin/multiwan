@@ -42,11 +42,6 @@ failover() {
 	    fi
 	fi
 	mwnote "$1 has failed and is currently offline."
-        ipsec_fail=$(uci_get_state multiwan ${1} restart_ipsec_on_fail)
-        if [ "$ipsec_fail" = "1" ] ; then
-		mwnote "Restart IPSec due to failure of $1"
-                /etc/init.d/ipsec restart &
-        fi
     }
 
     del() {
@@ -62,11 +57,6 @@ failover() {
 	mwanrule_refresh_iface=$1
     	config_load "multiwan"
     	config_foreach mwanrule_refresh mwanfw $1
-    	ipsec_recovery=$(uci_get_state multiwan ${1} restart_ipsec_on_recovery)
-    	if [ "$ipsec_recovery" = "1" ] ; then
-		mwnote "Restart IPSec due to recovery of $1"
-               	/etc/init.d/ipsec restart &
-    	fi
     }
 
     case $1 in 
@@ -100,6 +90,11 @@ fail_wan() {
 	    if [ "$weight" != "disable" ]; then
 		refresh_loadbalancer
 	    fi
+            ipsec_fail=$(uci_get_state multiwan ${1} restart_ipsec_on_fail)
+            if [ "$ipsec_fail" = "1" ] ; then
+		    mwnote "Restart IPSec due to failure of $1"
+		    /etc/init.d/ipsec restart &
+            fi
 	fi
     fi
     update_cache
@@ -139,6 +134,11 @@ recover_wan() {
 		if [ "$weight" != "disable" ]; then
 		    refresh_loadbalancer
 		fi
+    		ipsec_recovery=$(uci_get_state multiwan ${1} restart_ipsec_on_recovery)
+    		if [ "$ipsec_recovery" = "1" ] ; then
+			mwnote "Restart IPSec due to recovery of $1"
+		    	/etc/init.d/ipsec restart &
+    		fi
 	    fi
 	fi
     fi
