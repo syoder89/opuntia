@@ -75,6 +75,10 @@ fail_wan() {
     local recvrychk=$(query_config recvrychk $1)
     wan_recovery_map=$(echo $wan_recovery_map | sed -e "s/,${1}\[${recvrychk}\]//g")
 
+    if [ "$2" = "lower_down" -a "$failchk" != "x" ] ; then
+        failchk=$health_fail_retries
+    fi
+
     if [ -z "$failchk" ]; then
 	failchk=1
 	wan_fail_map="$wan_fail_map,${1}[1]"
@@ -86,6 +90,7 @@ fail_wan() {
 	    wan_fail_map=$(echo $wan_fail_map | sed -e "s/,${1}\[${failchk}\]/,$1\[${new_fail_count}\]/g")
 	else
 	    failover add $1
+	    refresh_routes
 	    refresh_dns
 	    if [ "$weight" != "disable" ]; then
 		refresh_loadbalancer
@@ -137,7 +142,7 @@ recover_wan() {
     		ipsec_recovery=$(uci_get_state multiwan ${1} restart_ipsec_on_recovery)
     		if [ "$ipsec_recovery" = "1" ] ; then
 			mwnote "Restart IPSec due to recovery of $1"
-		    	sleep 10 && /etc/init.d/ipsec restart &
+		    	/etc/init.d/ipsec restart &
     		fi
 	    fi
 	fi
@@ -738,10 +743,18 @@ refresh_routes() {
     local group
     local ifname
     local ipaddr
+    local default_route_id
 
     echo "## Refreshing Routing Tables ##"
     mwnote "Refreshing routing tables"
 
+    while : ; do
+	ip route del default > /dev/null 2>&1
+	if [ "$?" != "0" ] ; then
+	    break
+	fi
+    done
+    default_route_id=$(query_config wanid $default_route)
     local i=0
     while [ $((i++)) -lt $wancount ]; do 
 	group=$(query_config group $i)
@@ -757,7 +770,15 @@ refresh_routes() {
 
 	if [ "$gateway" != "x" -a "$ipaddr" != "x" -a "$ifname" != "x" ]; then
 	    ip route add default via $gateway table $(($i + 170)) src $ipaddr proto static
-	    route add default gw $gateway > /dev/null 2>&1
+            local wanid=$(query_config wanid $group)
+    	    local failchk=$(query_config failchk $group)
+    	    if [ "$failchk" != "x" -a "$default_route" != "balancer" -a "$default_route" != "fastbalancer" ]; then 
+		if [ "$default_route_id" = "$wanid" ] ; then
+	            route add default gw $gateway > /dev/null 2>&1
+		else
+	            route add default gw $gateway metric 10 > /dev/null 2>&1
+		fi
+            fi
 	fi
     done
 
@@ -922,26 +943,37 @@ monitor_wan() {
 		done
 	    }
 
-	    check_test=$(ping_test)
-
-	    if [ $((debug)) -gt 9 ] ; then
-		mwnote "$ifname: $check_test"
-	    fi
-	    if [ -z "$check_test" ]; then
-		add_task "$1" fail
-	    	if [ $((debug)) -gt 9 ] ; then
-			mwnote "$ifname is down."
-		fi
+	    ip link show dev $ifname | grep LOWER_UP > /dev/null 2>&1
+	    if [ "$?" != "0" ] ; then
+		add_task "$1" fail lower_down
 	    else
-		add_task "$1" pass
-	    	if [ $((debug)) -gt 9 ] ; then
-			mwnote "$ifname is ok."
-		fi
-	    fi       	        
-	    icmp_hosts="$old_icmp_hosts"
+	        check_test=$(ping_test)
+
+	        if [ $((debug)) -gt 9 ] ; then
+		    mwnote "$ifname: $check_test"
+	        fi
+	        if [ -z "$check_test" ]; then
+		    add_task "$1" fail
+	    	    if [ $((debug)) -gt 9 ] ; then
+			    mwnote "$ifname is down."
+		    fi
+	        else
+		    add_task "$1" pass
+	    	    if [ $((debug)) -gt 9 ] ; then
+			    mwnote "$ifname is ok."
+		    fi
+	        fi       	        
+	        icmp_hosts="$old_icmp_hosts"
+	    fi
 
 	elif [ "$icmp_hosts" == "disable" ]; then 
-	    add_task "$1" pass
+	    ip link show dev $ifname | grep LOWER_UP > /dev/null 2>&1
+	    if [ "$?" != "0" ] ; then
+		mwnote "$ifname lower down."
+		add_task "$1" fail lower_down
+	    else
+	    	add_task "$1" pass
+	    fi
 	fi
 
 	[ "$health_monitor" = 'serial' ] && {
@@ -957,7 +989,8 @@ monitor_wan() {
 add_task() {
     local group=$1
     local task=$2
-    grep -o "$group.$task" $jobfile >&- 2>&- || echo "$group.$task" >> $jobfile
+    local data=$3
+    grep -o "$group.$task.$data" $jobfile >&- 2>&- || echo "$group.$task.$data" >> $jobfile
 }
 
 # For health_monitor "parallel", start a background monitor for each group.
@@ -1061,7 +1094,7 @@ do_tasks() {
 
 		execute_task() {
 		    case $2 in 
-			fail) fail_wan $1;;
+			fail) fail_wan $1 $3;;
 			pass) recover_wan $1;;
 			acquire)
 			    acquire_wan_data $1
@@ -1076,7 +1109,7 @@ do_tasks() {
 		    esac
 		}
 
-		queued_task=$(echo $LINE | awk -F "." '{print $1,$2}')
+		queued_task=$(echo $LINE | awk -F "." '{print $1,$2,$3}')
 		execute_task $queued_task
 	    done < $jobfile.work
 
