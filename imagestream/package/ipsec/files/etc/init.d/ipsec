@@ -1,4 +1,4 @@
-#!/bin/sh /etc/rc.common
+#!/bin/bash /etc/rc.common
 #/etc/init.d/ipsec - version 4
  
 NAME=ipsec
@@ -235,7 +235,171 @@ CheckInstallation() {
   done
 }
  
+FailTunnel() {
+	if [ "${failcnt[$1]}" == "" ] ; then
+		let failcnt[$1]=0
+	fi
+	let failcnt[$1]=failcnt[$1]+1
+	if [ $((failcnt[$1])) -lt 3 ] ; then
+		logger "Failing tunnel $1, reason: $2, count ${failcnt[$1]} / 3"
+		return
+	fi
+	logger "Tunnel $1 failed - restarting, reason: $2"
+	/etc/init.d/ipsec restart &
+# This would be nice but StrongSwan seems to have so many bugs that we can't
+# just restart one tunnel. A good example is click connect on the WWAN interface
+# if a tunnel is running over it - changes the IP address and ipsec loses its
+# mind and must be restarted.
+#	ipsec unroute $1
+#	ipsec down $1
+#  	PrepareEnvironment
+# 
+#  	config_load users
+#  	config_foreach ConfigUser user
+# 
+#  	config_load ipsec
+#  	config_foreach ConfigRemote remote
+#	ipsec update rereadall
+#	ipsec up $1
+#  	let failcnt[$conn]=0
+}
+
+CheckTunnel() {
+  local local_subnet
+  local local_nat
+  local remote_subnet
+  local p2_proposal
+  local pfs_group
+  local encryption_algorithm
+  local authentication_algorithm
+ 
+  conn="$ConfigName-$1"
+
+  ipsec status $conn | grep ESTABLISHED > /dev/null 2>&1
+  if [ "$?" != "0" ] ; then
+  	FailTunnel "$conn" "Connection not established!"
+	return
+  fi
+
+  #Check SPIs according to StrongSwan
+  spis=`ipsec status $conn | grep SPIs: | cut -d ':' -f 3 | cut -d '_' -f 1-2`
+  spi_i=`echo $spis | cut -d '_' -f 1 | awk '{print $1}'`
+  spi_o=`echo $spis | awk '{print $2}'`
+  ends_i=`ip xfrm state show spi 0x$spi_i | head -n 1`
+  if [ "$?" != "0" ] ; then
+  	FailTunnel "$conn" "In SPI $spi_i not found!"
+	return
+  fi
+  ends_o=`ip xfrm state show spi 0x$spi_o | head -n 1`
+  if [ "$?" != "0" ] ; then
+  	FailTunnel "$conn" "Out SPI $spi_o not found!"
+	return
+  fi
+
+  config_get local_subnet             "$1"           local_subnet
+  config_get local_nat                "$1"           local_nat ""
+  config_get remote_subnet            "$1"           remote_subnet
+  [[ "$local_nat" != "" ]] && local_subnet=$local_nat
+
+  # Check that policies exist to route the subnets and that the policy endpoints
+  # match the state endpoints! I've seen this be wrong
+  p_ends_i=`ip xfrm policy show dst $local_subnet src $remote_subnet dir in | grep tmpl | cut -d ' ' -f 2-`
+  if [ "$?" != "0" -o "$p_ends_i" = "" ] ; then
+  	FailTunnel "$conn" "No policy for $remote_subnet to $local_subnet"
+	return
+  fi
+  if [ "$ends_i" != "$p_ends_i" ] ; then
+  	FailTunnel "$conn" "Policy for $remote_subnet to $local_subnet is for another connection $p_ends_i s/b $ends_i"
+	return
+  fi
+
+  p_ends_o=`ip xfrm policy show src $local_subnet dst $remote_subnet dir out | grep tmpl | cut -d ' ' -f 2-`
+  if [ "$?" != "0" -o "$p_ends_o" = "" ] ; then
+  	FailTunnel "$conn" "No policy for $local_subnet to $remote_subnet"
+	return
+  fi
+  if [ "$ends_o" != "$p_ends_o" ] ; then
+  	FailTunnel "$conn" "Policy for $local_subnet to $remote_subnet is for another connection $p_ends_o s/b $ends_o"
+	return
+  fi
+
+  # Check routing via correct interface
+
+  current_ep=`echo $ends_o | awk '{print $2}'`
+
+  # Do a DNS lookup because ip route can't handle FQDN
+  Remote=`nslookup $RemoteGateway | tail -n 1 | awk '{print $3}'`
+  if [ "$Remote" = "" ] ; then
+  	$Remote="$RemoteGateway"
+  fi
+  LocalGateway=`ip route get $Remote | awk -F"src" '/src/{gsub(/ /,"");print $2}'`
+
+  if [ "$current_ep" != "$LocalGateway" ] ; then
+  	FailTunnel "$conn" "Tunnel is routed on wrong interface $current_ep s/b $LocalGateway"
+	return
+  fi
+  # All good
+  let failcnt[$conn]=0
+}
+
+CheckRemote() {
+  local enabled
+  local gateway
+  local local_identifier
+  local remote_identifier
+ 
+  ConfigName=$1
+ 
+  config_get_bool enabled "$1" enabled 0
+  [[ "$enabled" == "0" ]] && return
+ 
+  config_get gateway               "$1" gateway
+  RemoteGateway=$gateway
+  config_list_foreach "$1" tunnel CheckTunnel
+}
+
+start_watchdog() {
+	(
+		declare -A failcnt
+		set -o pipefail
+		let counter=0
+		while sleep 10; do
+  			config_load ipsec
+  			config_foreach CheckRemote remote
+		done
+	) </dev/null > /dev/null 2>&1 &
+	local watchdog_pid=$!
+	echo $watchdog_pid > /var/run/ipsec-watchdog.pid
+	logger "Started ipsec watchdog pid $watchdog_pid"
+}
+
+stop_watchdog() {
+	[ -e /var/run/ipsec-watchdog.pid ] && {
+		kill -9 $(cat /var/run/ipsec-watchdog.pid)
+		rm /var/run/ipsec-watchdog.pid
+	}
+}
+
+do_lock() {
+  [ -e /var/run/ipsec-init.pid ] && {
+  	kill -0 $(cat /var/run/ipsec-init.pid)
+	if [ "$?" = "0" ] ; then
+		logger "IPSec init script already starting..."
+		exit 0
+	else
+		logger "IPSec init script detected stale pidfile..."
+	fi
+  }
+  echo "$$" > /var/run/ipsec-init.pid
+}
+
+do_unlock() {
+  rm /var/run/ipsec-init.pid
+}
+
 start() {
+  do_lock
+  stop_watchdog
   CheckInstallation
   PrepareEnvironment
  
@@ -246,8 +410,15 @@ start() {
   config_foreach ConfigRemote remote
  
   /usr/sbin/ipsec start
+  start_watchdog
+  do_unlock
 }
  
 stop() {
+  do_lock
+  stop_watchdog
   /usr/sbin/ipsec stop
+  # ipsec stop should do this but doesn't always...
+  killall charon
+  do_unlock
 }
