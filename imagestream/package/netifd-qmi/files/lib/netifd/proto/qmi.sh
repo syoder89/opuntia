@@ -382,6 +382,20 @@ proto_qmi_setup() {
 	# Just in case there is still context data
 	proto_qmi_stop_network ${config}
 	
+	# Reset the modem
+	qmicli -d $CDCDEV --dms-set-operating-mode=offline
+	qmicli -d $CDCDEV --dms-set-operating-mode=reset
+	sleep 6
+        let retries=10
+        while [ $((retries)) -gt 0 ] ; do
+		qmicli -d $CDCDEV --dms-set-operating-mode=online > /dev/null 2>&1
+		if [ "$?" = "0" ] ; then
+			break
+		fi
+		sleep 1
+		let retries=retries-1
+	done
+
         if [ "$modem" != "2" ] && [ "$modem" != "3" ] ; then
 		rat=""
 		if [ "$service" = "2g" ] ; then

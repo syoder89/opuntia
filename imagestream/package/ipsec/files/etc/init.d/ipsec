@@ -2,8 +2,8 @@
 #/etc/init.d/ipsec - version 4
  
 NAME=ipsec
-START=60
-STOP=60
+START=90
+STOP=10
  
 . /lib/functions.sh
  

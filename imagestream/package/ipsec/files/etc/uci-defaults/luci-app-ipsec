@@ -9,4 +9,7 @@ uci -q batch <<-EOF >/dev/null
 EOF
 
 rm -f /tmp/luci-indexcache
+# Why is this needed? It should enable by default!
+/etc/init.d/ipsec enable
+/etc/init.d/ipsec start
 exit 0
