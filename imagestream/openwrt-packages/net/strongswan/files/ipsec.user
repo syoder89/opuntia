@@ -4,3 +4,20 @@
 # /usr/lib/ipsec/_updown which by default
 # strongswan executes.
 
+case "$PLUTO_VERB:$1" in
+up-client:iptables)
+	  iptables -t nat -I POSTROUTING 1 -p $PLUTO_PEER_PROTOCOL \
+	      -s $PLUTO_MY_CLIENT $S_MY_PORT \
+	      -d $PLUTO_PEER_CLIENT $D_PEER_PORT -j ACCEPT
+	  conntrack -F
+	;;
+
+
+down-client:iptables)
+	  iptables -t nat -D POSTROUTING -p $PLUTO_PEER_PROTOCOL \
+	      -s $PLUTO_MY_CLIENT $S_MY_PORT \
+	      -d $PLUTO_PEER_CLIENT $D_PEER_PORT \
+	         -j ACCEPT
+	  conntrack -F
+	;;
+esac
