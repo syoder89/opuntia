@@ -399,6 +399,7 @@ do_unlock() {
 
 start() {
   do_lock
+#  lock /var/run/ipsec-init.pid
   stop_watchdog
   CheckInstallation
   PrepareEnvironment
@@ -412,6 +413,7 @@ start() {
   /usr/sbin/ipsec start
   start_watchdog
   do_unlock
+#  lock -u /var/run/ipsec-init.pid
 }
  
 stop() {
