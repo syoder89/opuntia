@@ -25,8 +25,9 @@ CFLAGS:=-O2 -pipe -march=armv7-a -mfpu=vfpv3-d16 -mfloat-abi=hard  \
 	-mfpu=neon -mcpu=cortex-a8 -mtune=cortex-a8
 
 KERNELNAME:="zImage dtbs"
-DEFAULT_PACKAGES += kmod-ath5k kmod-ath9k \
-			kmod-cfg80211 kmod-mac80211
+DEFAULT_PACKAGES += 
+#DEFAULT_PACKAGES += kmod-ath5k kmod-ath9k \
+#			kmod-cfg80211 kmod-mac80211
 
 include $(INCLUDE_DIR)/target.mk
 $(eval $(call BuildTarget))

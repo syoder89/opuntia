@@ -21,7 +21,8 @@ define Image/Build/DTB
 endef
 
 define Image/Prepare
-	cp $(LINUX_DIR)/arch/arm/boot/uImage $(KDIR)/uImage
+#	cp $(LINUX_DIR)/arch/arm/boot/zImage $(KDIR)/zImage
+	cp $(LINUX_DIR)/arch/arm/boot/Image $(KDIR)/Image
 endef
 
 define Image/BuildKernel
