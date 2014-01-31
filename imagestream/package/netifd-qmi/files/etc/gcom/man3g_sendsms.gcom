@@ -1,0 +1,32 @@
+opengt
+ set com 115200n81
+ set comecho off
+ set senddelay 0.02
+
+:start
+ send "AT+CMGF=1^m"
+ waitfor 5 "OK"
+ send "AT+CMGS=\""
+ send $env("SMS_NUMBER")
+ send "\""
+ send "^m"
+ send $env("SMS_MESSAGE")
+ send "^z"
+ waitfor 5 "+CMGS: " "ERROR: "
+ if % = -1 goto timeout
+ if % = 0 goto sent
+ if % = 1 goto error
+
+:sent
+ get .01 "" $s
+ print $s
+ exit 0
+
+:timeout
+ print "-1"
+ exit 2
+
+:error
+ get .01 "" $s
+ print $s
+ exit 1

@@ -9,25 +9,58 @@ function usage() {
 
 function status() {
 	STATS_TMP="/tmp/qmi_stats.$$"
+	CACHEF="/tmp/man3g.cache"
 
-	uqmi -d ${CDCDEV} --get-serving-system > ${STATS_TMP}
-	carrier=`grep description ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
-	registration=`grep registration ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
-	mcc=`grep mcc ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
-	mnc=`grep mnc ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
-	roaming=`grep roaming ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
-	msisdn=`qmicli -d ${CDCDEV} --dms-get-msisdn | grep MSISDN: | awk '{print $2}' | cut -d "'" -f 2`
-	mode=`qmicli -d ${CDCDEV} --dms-get-operating-mode | grep Mode: | awk '{print $2}' | cut -d "'" -f 2`
+	CUR=`cat /proc/uptime | awk '{ print $1 }' | cut -d '.' -f 1`
+	CACHE_EXPIRE=$((CUR))
+	if [ -f ${CACHEF} ] ; then
+		. ${CACHEF}
+	fi
+	if [ $((CUR)) -ge $((CACHE_EXPIRE)) ] ; then
+		uqmi -d ${CDCDEV} --get-serving-system > ${STATS_TMP}
+		carrier=`grep description ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
+		registration=`grep registration ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
+		mcc=`grep mcc ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
+		mnc=`grep mnc ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
+		roaming=`grep roaming ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
+		msisdn=`qmicli -d ${CDCDEV} --dms-get-msisdn | grep MSISDN: | awk '{print $2}' | cut -d "'" -f 2`
+		mode=`qmicli -d ${CDCDEV} --dms-get-operating-mode | grep Mode: | awk '{print $2}' | cut -d "'" -f 2`
+		power_mode=`qmicli -d ${CDCDEV} --dms-get-operating-mode | grep Mode: | cut -d ':' -f 2 | cut -d "'" -f 2`
+		data_session=`qmicli -d ${CDCDEV} --wds-get-packet-service-status | grep status: | cut -d ':' -f 2 | cut -d "'" -f 2`
+		data_bearer=`qmicli -d ${CDCDEV} --wds-get-current-data-bearer-technology 2>/dev/null | grep Technology: | cut -d ':' -f 2 | awk '{print toupper($0)}' | cut -d "'" -f 2`
+		qmicli -d ${CDCDEV} --nas-get-signal-strength > ${STATS_TMP}
+		rssi_net=`grep Network ${STATS_TMP} | head -n 1 | awk '{print toupper($2)}' | cut -d "'" -f 2`
+		rssi_val=`grep Network ${STATS_TMP} | head -n 1 | awk '{print $3}' | cut -d "'" -f 2`
+		rssi_eico=`grep -A 1 ECIO ${STATS_TMP} | tail -n 1 | awk '{print $3}' | cut -d "'" -f 2`
+		rssi_sinr=`grep SINR: ${STATS_TMP} | awk '{print $3}' | cut -d "'" -f 2`
+		csq=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_csq.gcom | head -n 1 | cut -d "," -f 1`
+		csq_pct=$(((csq*100)/31))
+		lac=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_lac.gcom | head -n 1 | cut -d "," -f 3-4`
+		ci=`echo $lac | cut -d "," -f 2 | cut -d '"' -f 2`
+		lac=`echo $lac | cut -d "," -f 1 | cut -d '"' -f 2`
+		cat << EOM > ${CACHEF}
+CACHE_EXPIRE=$((CUR+30))
+carrier="$carrier"
+registration="$registration"
+mcc="$mcc"
+mnc="$mnc"
+roaming="$roaming"
+msisdn="$msisdn"
+mode="$mode"
+power_mode="$power_mode"
+data_session="$data_session"
+csq="$csq"
+csq_pct="$csq_pct"
+lac="$lac"
+ci="$ci"
+data_bearer="$data_bearer"
+rssi_net="$rssi_net"
+rssi_val="$rssi_val"
+rssi_eico="$rssi_eico"
+rssi_sinr="$rssi_sinr"
+EOM
+	fi
 
-	qmicli -d ${CDCDEV} --nas-get-signal-strength > ${STATS_TMP}
-	rssi_net=`grep Network ${STATS_TMP} | head -n 1 | awk '{print toupper($2)}' | cut -d "'" -f 2`
-	rssi_val=`grep Network ${STATS_TMP} | head -n 1 | awk '{print $3}' | cut -d "'" -f 2`
-	rssi_eico=`grep -A 1 ECIO ${STATS_TMP} | tail -n 1 | awk '{print $3}' | cut -d "'" -f 2`
-	rssi_sinr=`grep SINR: ${STATS_TMP} | awk '{print $3}' | cut -d "'" -f 2`
-
-	data_bearer=`qmicli -d ${CDCDEV} --wds-get-current-data-bearer-technology | grep Technology: | cut -d ':' -f 2 | awk '{print toupper($0)}' | cut -d "'" -f 2`
-	power_mode=`qmicli -d ${CDCDEV} --dms-get-operating-mode | grep Mode: | cut -d ':' -f 2 | cut -d "'" -f 2`
-	data_session=`qmicli -d ${CDCDEV} --wds-get-packet-service-status | grep status: | cut -d ':' -f 2 | cut -d "'" -f 2`
 	data_session_connect=`ubus call network.interface.wwan status | grep uptime | cut -d : -f 2 | cut -d , -f 1`
 
 	if [ $((rssi_val)) -ge -90 ] ; then
@@ -44,39 +77,194 @@ function status() {
 
 	if [ "$roaming" = "false" ] ; then
 		network="Home"
+		roaming_val=1
 	else
 		network="Roaming"
+		roaming_val=0
 	fi
 
 	apn=`uci get network.wwan.apn`
 
-	echo "Carrier: ${carrier} (MCC ${mcc}, MNC ${mnc})"
-	echo "APN: ${apn}"
-	echo "Mobile number: ${msisdn}"
-	echo "State: ${registration^}"
-	echo "Power Mode: ${power_mode^}"
-	echo "Radio Service type: ${rssi_net}"
-	echo "Data Bearer Technology: ${data_bearer}"
-	echo "Data session: ${data_session^}"
-	if [ "$data_session_connect" != "" ] && [ $((data_session_connect)) -gt 0 ] ; then
-		now=`date +"%s"`
-		let connect_date=$((now-data_session_connect))
-		data_session_connect=`date --date="${connect_date}" -D "%s" +"%a %b %e %H:%M:%S %Y"`
-		echo "Connected since ${data_session_connect}"
-	fi
-	echo "Network: ${network}"
-	echo "Signal strength (${rssi_net}): ${rssi_val}dBm, bars: ${rssi_bars}"
-	echo "Signal EC/IO, SINR: ${rssi_eico}dBm, ${rssi_sinr}dB"
-	
+	if [ "$machine" = "0" ] ; then
+		echo "Carrier: ${carrier} (MCC ${mcc}, MNC ${mnc})"
+		echo "APN: ${apn}"
+		if [ "$lac" != "" ] ; then
+			echo "Location code: ${lac}, Cell ID: ${ci}"
+		fi
+		echo "Mobile number: ${msisdn}"
+		echo "State: ${registration^}"
+		echo "Power Mode: ${power_mode^}"
+		echo "Radio Service type: ${rssi_net}"
+		echo "Data Bearer Technology: ${data_bearer}"
+		echo "Data session: ${data_session^}"
+		if [ "$data_session_connect" != "" ] && [ $((data_session_connect)) -gt 0 ] ; then
+			now=`date +"%s"`
+			let connect_date=$((now-data_session_connect))
+			data_session_connect=`date --date="${connect_date}" -D "%s" +"%a %b %e %H:%M:%S %Y"`
+			echo "Connected since ${data_session_connect}"
+		fi
+		echo "Network: ${network}"
+		echo "Signal quality: $csq/31 ($csq_pct%)"
+		echo "Signal strength (${rssi_net}): ${rssi_val}dBm, bars: ${rssi_bars}"
+		echo "Signal EC/IO, SINR: ${rssi_eico}dBm, ${rssi_sinr}dB"
+	else
+                echo "${carrier}"
+		echo "${rssi_net}"
+		echo "${mcc}"
+		echo "${mnc}"
+		echo "${rssi_val}"
+		echo "0"
+		echo "0"
+		echo "${apn}"
+		echo "${csq}"
+		echo "${data_bearer}"
+		echo "NA"
+		echo "${registration^}"
+		echo "${data_session^}"
+		echo "$((data_session_connect*100))"
+		echo "${roaming_val}"
+		echo "${msisdn}"
+		echo "${lac}"
+		echo "${ci}"
+	fi	
 	rm -f ${STATS_TMP}
 }
 
-CDCDEV="/dev/cdc-wdm0"
+display_sms() {
+	id=$1
+	echo -n "Message $((id+1)) "
+	uqmi -d $CDCDEV --get-message $id 2>/dev/null
+}
+
+display_sms_all() {
+	
+	for idx in `uqmi -d $CDCDEV --list-messages | sed 's/,//g'` ; do
+		case $idx in
+			''|*[!0-9]*) ;;
+			*)
+				display_sms $idx
+			;;
+		esac
+	done
+}
+
+send_sms() {
+	export SMS_NUMBER="$number"
+	export SMS_MESSAGE="$message"
+	id=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_sendsms.gcom`
+	RET="$?"
+	if [ "$RET" = "0" ] ; then
+		echo "SMS message sent with id $id"
+	elif [ "$RET" = "1" ] ; then
+		echo "Unable to send SMS message, error $id"
+	else
+		echo "Unable to send SMS message, unable to communicate with modem!"
+	fi
+}
+
+LCKFILE="/var/run/man3g.pid"
+
+do_lock() {
+    let cnt=29
+    LAST_PID=0
+    while [ $((cnt)) -ge 0 ] ; do
+  	if [ -e ${LCKFILE} ] ; then
+		PID=$(cat ${LCKFILE})
+        	kill -0 ${PID} > /dev/null 2>&1
+        	if [ "$?" = "0" ] ; then
+			if [ "$machine" = "0" ] && [ $((cnt % 5)) -eq 0 ] ; then
+                		echo "Waiting for another man3g process to finish... (pid ${PID})"
+			fi
+        	else
+			if [ "${LAST_PID}" = "${PID}" ] ; then
+				if [ "$machine" = "0" ] ; then
+                			echo "Stale lock file from pid ${PID}! Process is not running. Removing lock..."
+					break
+				fi
+			fi
+        	fi
+		LAST_PID=${PID}
+		sleep 1
+	else
+		break
+	fi
+	let cnt=cnt-1
+    done
+    trap do_exit SIGINT SIGHUP SIGTERM
+    echo "$$" > ${LCKFILE}
+}
+
+do_unlock() {
+    rm -f ${LCKFILE}
+}
+
+do_exit() {
+    do_unlock
+    exit
+}
+
+DEVICE=wwan0
 if [ "$1" = "-i" ] ; then
 	shift
-	CDCDEV=/dev/$(basename $(ls /sys/class/net/${1}/device/usbmisc/cdc-wdm* -d))
+	DEVICE=$1
+	shift
 fi
+CDCDEV=/dev/$(basename $(ls /sys/class/net/${DEVICE}/device/usbmisc/cdc-wdm* -d))
+MODEMDEV=/dev/$(basename $(ls /sys/class/net/${DEVICE}/device/subsystem/drivers/qcserial/*.2/ttyUSB* -d))
+
 if [ "$1" = "" ] ; then
 	usage
 fi
-status
+machine=0
+msgid=-1
+while [ $# -gt 0 ] ; do
+	if [ "$1" = "--machine" ] ; then
+		machine=1
+	elif [ "$1" = "--msgid" ] ; then
+		shift
+		msgid=$1
+		let msgid=msgid-1
+	elif [ "$1" = "--to" ] || [ "$1" = "--number" ] ; then
+		shift
+		number=$1
+	elif [ "$1" = "--message" ] ; then
+		shift
+		message=$1
+	else
+		cmd=$1
+	fi
+	shift
+done
+
+case $cmd in
+	status)
+		do_lock
+		status
+		do_unlock
+	;;
+	display-sms)
+		do_lock
+		if [ $((msgid)) -ge 0 ] ; then
+			display_sms $msgid
+		else
+			display_sms_all
+		fi
+		do_unlock
+	;;
+	send-sms)
+		if [ "$number" = "" ] ; then
+			echo "Must specify recipient mobile number with --to!"
+			exit 1
+		fi
+		if [ "$message" = "" ] ; then
+			echo "Must specify a message with --message!"
+			exit 1
+		fi
+		do_lock
+		send_sms
+		do_unlock
+	;;
+	*)
+		usage
+	;;
+esac

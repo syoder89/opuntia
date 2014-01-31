@@ -191,6 +191,46 @@ proto_qmi_led_connecting() {
 	proto_qmi_find_led $1 && echo 255 > /sys/class/leds/$led/brightness && echo timer > /sys/class/leds/$led/trigger
 }
 
+LCKFILE="/var/run/man3g.pid"
+
+do_lock() {
+    let cnt=30
+    LAST_PID=0
+    while [ $((cnt)) -gt 0 ] ; do
+        if [ -e ${LCKFILE} ] ; then
+                PID=$(cat ${LCKFILE})
+                kill -0 ${PID} > /dev/null 2>&1
+                if [ "$?" = "0" ] ; then
+                        if [ $((cnt % 5)) -eq 0 ] ; then
+                        	proto_qmi_log daemon.info "Waiting for another man3g process to finish... (pid ${PID})"
+			fi
+                else
+                        if [ "${LAST_PID}" = "${PID}" ] ; then
+                                proto_qmi_log daemon.err "Stale lock file from pid ${PID}! Process is not running. Removing lock..."
+                                break
+                        fi
+                fi
+                LAST_PID=${PID}
+                sleep 1
+        else
+                break
+        fi
+        let cnt=cnt-1
+    done
+    trap do_exit SIGTERM
+    echo "$$" > ${LCKFILE}
+}
+
+do_unlock() {
+    rm -f ${LCKFILE}
+}
+
+do_exit() {
+    proto_qmi_log daemon.err "Exiting while lock held, unlocking..."
+    do_unlock
+    exit
+}
+
 proto_qmi_setup() {
 	local config="$1"
 	local iface="$2"
@@ -382,10 +422,12 @@ proto_qmi_setup() {
 	# Just in case there is still context data
 	proto_qmi_stop_network ${config}
 	
+	do_lock
 	# Reset the modem
+	proto_qmi_log daemon.info "Resetting modem"
 	qmicli -d $CDCDEV --dms-set-operating-mode=offline
 	qmicli -d $CDCDEV --dms-set-operating-mode=reset
-	sleep 6
+	sleep 10
         let retries=10
         while [ $((retries)) -gt 0 ] ; do
 		qmicli -d $CDCDEV --dms-set-operating-mode=online > /dev/null 2>&1
@@ -395,6 +437,7 @@ proto_qmi_setup() {
 		sleep 1
 		let retries=retries-1
 	done
+	proto_qmi_log daemon.info "Modem online"
 
         if [ "$modem" != "2" ] && [ "$modem" != "3" ] ; then
 		rat=""
@@ -449,12 +492,14 @@ proto_qmi_setup() {
 			proto_qmi_log daemon.info "PIN Verification failed, shutting down and block restart."
 			proto_notify_error "$config" PIN_FAILED
 			proto_block_restart "$interface"
+			do_unlock
 			return 1
 		fi
 	}
 	# Print info about system selection for debugging purpose
 	qmicli -d $CDCDEV --nas-get-system-selection-preference 2>&1 | proto_qmi_log daemon.debug
 
+	do_unlock
 	# Wait for registration
 	while ! qmicli -d $CDCDEV --nas-get-serving-system|grep 'Registration state'|grep "'registered'" > /dev/null; do
 		sleep 1;
@@ -544,7 +589,9 @@ proto_qmi_teardown() {
 		kill $(cat /var/run/qmi-watchdog-${interface}.pid)
 		rm /var/run/qmi-watchdog-${interface}.pid
 	}
+	do_lock
 	proto_qmi_stop_network ${interface}
+	do_unlock
 	proto_kill_command "$interface"
 	echo "$interface done"
 }

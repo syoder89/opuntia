@@ -1,0 +1,18 @@
+opengt
+ set com 115200n81
+ set comecho off
+ set senddelay 0.02
+
+:start
+ send "AT+CREG=2^m"
+ waitfor 1 "OK"
+ send "AT+CREG?^m"
+ waitfor 1 "+CREG: "
+ get .01 "" $s
+ print $s
+ send "AT+CREG=0^m"
+ waitfor 1 "OK"
+
+:continue
+ exit 0
+
