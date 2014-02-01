@@ -62,6 +62,9 @@ EOM
 	fi
 
 	data_session_connect=`ubus call network.interface.wwan status | grep uptime | cut -d : -f 2 | cut -d , -f 1`
+	if [ "$data_session_connect" = "" ] || [ $((data_session_connect)) -eq 0 ] ; then
+		data_session="disconnected"
+	fi
 
 	if [ $((rssi_val)) -ge -90 ] ; then
 		rssi_bars="XXXX"
@@ -108,6 +111,42 @@ EOM
 		echo "Signal strength (${rssi_net}): ${rssi_val}dBm, bars: ${rssi_bars}"
 		echo "Signal EC/IO, SINR: ${rssi_eico}dBm, ${rssi_sinr}dB"
 	else
+		case $registration in
+			registered*)
+				registration=1
+			;;
+			*searching*)
+				registration=2
+			;;
+			*)
+				registration=0
+			;;
+		esac
+		case $data_session in
+			connected*)
+				data_session=2
+			;;
+			*)
+				data_session=1
+			;;
+		esac
+		case $data_bearer in
+			*GPRS*)
+				data_bearer=3
+			;;
+			*WCDMA*)
+				data_bearer=4
+			;;
+			*EDGE*)
+				data_bearer=6
+			;;
+			*HSDPA*|*HSUPA*|*HSPA*)
+				data_bearer=9
+			;;
+			*)
+				data_bearer=0
+			;;
+		esac
                 echo "${carrier}"
 		echo "${rssi_net}"
 		echo "${mcc}"
@@ -118,9 +157,9 @@ EOM
 		echo "${apn}"
 		echo "${csq}"
 		echo "${data_bearer}"
-		echo "NA"
-		echo "${registration^}"
-		echo "${data_session^}"
+		echo "0"
+		echo "${registration}"
+		echo "${data_session}"
 		echo "$((data_session_connect*100))"
 		echo "${roaming_val}"
 		echo "${msisdn}"

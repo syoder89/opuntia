@@ -1,4 +1,4 @@
-#!/opt/php/bin/php
+#!/usr/bin/php-cli
 <?php
 $stdout = fopen ("php://stdout","w");
 $CACHE_TIME=25;
@@ -63,7 +63,7 @@ function set_mib($ifnum, $offset, $type, $value, $writable = false,
 	$value = trim($value);
 	$OID = "$BASE_OID.$_3G_TABLE_OID.$offset.$ifnum";
 
-	$mib["$OID"] =& new MIB_ITEM($type, $value, $writable, $write_validate, $write_handler, $write_handler_args);
+	$mib["$OID"] = new MIB_ITEM($type, $value, $writable, $write_validate, $write_handler, $write_handler_args);
 }
 
 function set_sub_mib($ifnum, $offset, $sub_offset, $type, $value, $writable = false,
@@ -76,7 +76,7 @@ function set_sub_mib($ifnum, $offset, $sub_offset, $type, $value, $writable = fa
 	$value = trim($value);
 	$OID = "$BASE_OID.$_3G_TABLE_OID.$offset.$sub_offset.$ifnum";
 
-	$mib["$OID"] =& new MIB_ITEM($type, $value, $writable, $write_validate, $write_handler, $write_handler_args);
+	$mib["$OID"] = new MIB_ITEM($type, $value, $writable, $write_validate, $write_handler, $write_handler_args);
 }
 
 function get_sms_messages()
@@ -101,7 +101,7 @@ function get_sms_messages()
 					break;
 				$message .= "\n". $str;
 			}
-			$sms_messages["$id"] =& new SMS_MESSAGE($id, $status, $smsc, $sender, $date, $message);
+			$sms_messages["$id"] = new SMS_MESSAGE($id, $status, $smsc, $sender, $date, $message);
 			if ((next($tmp)) === false)
 				break;
 		}
@@ -126,7 +126,7 @@ function create_mib()
 	$tmp = explode("\n", shell_exec('man3g status --machine'));
 	if (!empty($tmp)) {
 		$carrier = current($tmp);
-		$ifnum=`ip link show dev usb0 | head -n 1 | cut -d ':' -f 1`;
+		$ifnum=`ip link show dev wwan0 | head -n 1 | cut -d ':' -f 1`;
 		$tech = next($tmp);
 		$mcc = next($tmp);
 		$mnc = next($tmp);

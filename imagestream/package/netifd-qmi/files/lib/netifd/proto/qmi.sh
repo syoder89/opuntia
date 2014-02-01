@@ -423,21 +423,22 @@ proto_qmi_setup() {
 	proto_qmi_stop_network ${config}
 	
 	do_lock
-	# Reset the modem
-	proto_qmi_log daemon.info "Resetting modem"
-	qmicli -d $CDCDEV --dms-set-operating-mode=offline
-	qmicli -d $CDCDEV --dms-set-operating-mode=reset
-	sleep 10
-        let retries=10
-        while [ $((retries)) -gt 0 ] ; do
-		qmicli -d $CDCDEV --dms-set-operating-mode=online > /dev/null 2>&1
-		if [ "$?" = "0" ] ; then
-			break
-		fi
-		sleep 1
-		let retries=retries-1
-	done
-	proto_qmi_log daemon.info "Modem online"
+# Very bad things happen when we do this! We get QMI hangs all over the place!
+#	# Reset the modem
+#	proto_qmi_log daemon.info "Resetting modem"
+#	qmicli -d $CDCDEV --dms-set-operating-mode=offline
+#	qmicli -d $CDCDEV --dms-set-operating-mode=reset
+#	sleep 10
+#        let retries=10
+#        while [ $((retries)) -gt 0 ] ; do
+#		qmicli -d $CDCDEV --dms-set-operating-mode=online > /dev/null 2>&1
+#		if [ "$?" = "0" ] ; then
+#			break
+#		fi
+#		sleep 1
+#		let retries=retries-1
+#	done
+#	proto_qmi_log daemon.info "Modem online"
 
         if [ "$modem" != "2" ] && [ "$modem" != "3" ] ; then
 		rat=""

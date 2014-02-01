@@ -30,18 +30,22 @@ define Build/Compile
 endef
 
 define Package/netifd-qmi/install
-	$(INSTALL_DIR) $(1)/bin
-	$(INSTALL_DIR) $(1)/lib
-	$(INSTALL_DIR) $(1)/lib/netifd
-	$(INSTALL_DIR) $(1)/lib/netifd/proto
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/network
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/admin_network
+        $(CP) -a ./files/* $(1)/ 2>/dev/null || true
 
-	$(INSTALL_BIN) ./files/bin/man3g $(1)/bin/
-	$(INSTALL_BIN) ./files/lib/netifd/dhcp-qmi.script $(1)/lib/netifd/
-	$(INSTALL_BIN) ./files/lib/netifd/proto/qmi.sh $(1)/lib/netifd/proto/
-	$(INSTALL_BIN) ./files/usr/lib/lua/luci/model/network/proto_qmi.lua $(1)/usr/lib/lua/luci/model/network/
-	$(INSTALL_BIN) ./files/usr/lib/lua/luci/model/cbi/admin_network/proto_qmi.lua $(1)/usr/lib/lua/luci/model/cbi/admin_network/
+#	$(INSTALL_DIR) $(1)/etc
+#	$(INSTALL_DIR) $(1)/etc/gcom
+#	$(INSTALL_DIR) $(1)/bin
+#	$(INSTALL_DIR) $(1)/lib
+#	$(INSTALL_DIR) $(1)/lib/netifd
+#	$(INSTALL_DIR) $(1)/lib/netifd/proto
+#	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/network
+#	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/model/cbi/admin_network
+#
+#	$(INSTALL_BIN) ./files/bin/man3g $(1)/bin/
+#	$(INSTALL_BIN) ./files/lib/netifd/dhcp-qmi.script $(1)/lib/netifd/
+#	$(INSTALL_BIN) ./files/lib/netifd/proto/qmi.sh $(1)/lib/netifd/proto/
+#	$(INSTALL_BIN) ./files/usr/lib/lua/luci/model/network/proto_qmi.lua $(1)/usr/lib/lua/luci/model/network/
+#	$(INSTALL_BIN) ./files/usr/lib/lua/luci/model/cbi/admin_network/proto_qmi.lua $(1)/usr/lib/lua/luci/model/cbi/admin_network/
 
 endef
 
