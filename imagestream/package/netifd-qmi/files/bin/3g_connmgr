@@ -8,6 +8,7 @@ function usage() {
 
 function trigger_watchdog() {
 	logger "3g_connmgr: Triggering hardware watchdog forcing a hardware reset in 60 seconds..."
+	killall -9 watchdog
 }
 
 failcnt=0
@@ -25,6 +26,7 @@ function check_status() {
 		fi
 	else
 		failcnt=0
+		logger "3g_connmgr: CSQ ok at $csq"
 	fi
 }
 

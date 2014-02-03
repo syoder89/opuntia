@@ -176,8 +176,37 @@ EOM
 
 display_sms() {
 	id=$1
-	echo -n "Message $((id+1)) "
-	uqmi -d $CDCDEV --get-message $id 2>/dev/null
+	if [ "$machine" = "0" ] ; then
+		echo -n "Message $((id+1)) "
+		uqmi -d $CDCDEV --get-message $id 2>/dev/null
+	else
+		SMS_TMP="/tmp/man3g_sms.$$"
+		uqmi -d $CDCDEV --get-message $id > $SMS_TMP 2>/dev/null
+		# ID, Status, SMSC, Sender, Date, Message
+		echo "$((id+1))"
+		echo "0"
+		while read line
+		do
+			read line
+			echo "$line" | grep '"smsc":' | awk '{print $2}' | cut -d ',' -f 1
+			read line
+			echo "$line" | grep '"sender":' | awk '{print $2}' | cut -d ',' -f 1
+			read line
+			ts=`echo "$line" | grep '"timestamp":' | cut -d ',' -f 1 | awk '{print $2","$3}'`
+			tzo=`date +%z`
+			# Ok this needs explaining. The output should look like: "2010-12-13,18:43:49.0,-06:00"
+			# The ts string looks like: "2010-12-13,18:43:49" so I use a neat bash substring trick to
+			# print all but the last character of ts (substring start at 0 through length -1) and
+			# also split the timezone from -0600 to the format -06:00.
+			echo "${ts:0:(-1)}.0,${tzo:0:3}:${tzo:3}\""
+			read -r line
+			message=`echo -E "$line" | grep '"text":' | cut -d ':' -f 2- | cut -b 2-`
+			echo ${#message}
+			echo -E $message
+			break
+		done < ${SMS_TMP}
+		rm -f ${SMS_TMP}
+	fi
 }
 
 display_sms_all() {

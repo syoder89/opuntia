@@ -42,6 +42,7 @@ proto_qmi_init_config() {
 	proto_config_add_string "service"
 	proto_config_add_string "mcc"
 	proto_config_add_string "mnc"
+	proto_config_add_string "reboot_code"
 }
 
 proto_qmi_log() {
@@ -234,8 +235,8 @@ do_exit() {
 proto_qmi_setup() {
 	local config="$1"
 	local iface="$2"
-	local ipaddr hostname clientid vendorid broadcast reqopts apn username password pincode auto lte_apn_use lte_apn lte_username lte_password provider service mcc mnc
-	json_get_vars ipaddr hostname clientid vendorid broadcast reqopts apn username password pincode auto data lte_apn_use lte_apn lte_username lte_password provider service mcc mnc
+	local ipaddr hostname clientid vendorid broadcast reqopts apn username password pincode auto lte_apn_use lte_apn lte_username lte_password provider service mcc mnc reboot_code
+	json_get_vars ipaddr hostname clientid vendorid broadcast reqopts apn username password pincode auto data lte_apn_use lte_apn lte_username lte_password provider service mcc mnc reboot_code
 
 	config_load network
 	config_get technology $config technology
@@ -525,7 +526,11 @@ proto_qmi_setup() {
 
 	proto_qmi_led_ok ${iface}
 
-	3g_connmgr -i ${iface} &
+	REBOOT_CODE_STR=""
+	if [ "$reboot_code" != "" ] ; then
+		REBOOT_CODE_STR="--reboot-code $reboot_code"
+	fi
+	3g_connmgr -i ${iface} $REBOOT_CODE_STR &
 
 	# Show status and start watchdog
 	qmicli -d $CDCDEV --nas-get-serving-system 2>&1 | proto_qmi_log daemon.debug

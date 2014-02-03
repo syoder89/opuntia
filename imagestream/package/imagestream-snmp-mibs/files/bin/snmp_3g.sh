@@ -142,6 +142,8 @@ function create_mib()
 		$data_duration = next($tmp);
 		$roaming = next($tmp);
 		$mobile_number = next($tmp);
+		$lac = next($tmp);
+		$ci = next($tmp);
 
 		$offset = 1;
 		set_mib($ifnum, $offset++, "integer", $ifnum);
@@ -161,6 +163,8 @@ function create_mib()
 		set_mib($ifnum, $offset++, "timeticks", $data_duration);
 		set_mib($ifnum, $offset++, "integer", $roaming);
 		set_mib($ifnum, $offset++, "string", $mobile_number);
+		set_mib($ifnum, $offset++, "string", $lac);
+		set_mib($ifnum, $offset++, "string", $ci);
 
 		// Leave some room
 		$offset = 40;
