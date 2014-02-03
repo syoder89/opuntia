@@ -9,6 +9,7 @@ function usage() {
 
 function status() {
 	STATS_TMP="/tmp/qmi_stats.$$"
+	STATS_TMP2="/tmp/qmi_stats2.$$"
 	CACHEF="/tmp/man3g.cache"
 
 	CUR=`cat /proc/uptime | awk '{ print $1 }' | cut -d '.' -f 1`
@@ -17,27 +18,32 @@ function status() {
 		. ${CACHEF}
 	fi
 	if [ $((CUR)) -ge $((CACHE_EXPIRE)) ] ; then
+		do_lock
 		uqmi -d ${CDCDEV} --get-serving-system > ${STATS_TMP}
+		msisdn=`qmicli -d ${CDCDEV} --dms-get-msisdn | grep MSISDN: | awk '{print $2}' | cut -d "'" -f 2`
+		t_mode=`qmicli -d ${CDCDEV} --dms-get-operating-mode | grep Mode:`
+		mode=`echo $t_mode | awk '{print $2}' | cut -d "'" -f 2`
+		power_mode=`echo $t_mode | cut -d ':' -f 2 | cut -d "'" -f 2`
+		data_session=`qmicli -d ${CDCDEV} --wds-get-packet-service-status | grep status: | cut -d ':' -f 2 | cut -d "'" -f 2`
+		data_bearer=`qmicli -d ${CDCDEV} --wds-get-current-data-bearer-technology 2>/dev/null | grep Technology: | cut -d ':' -f 2 | awk '{print toupper($0)}' | cut -d "'" -f 2`
+		qmicli -d ${CDCDEV} --nas-get-signal-strength > ${STATS_TMP2}
+		csq=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_csq.gcom | head -n 1 | cut -d "," -f 1`
+		lac=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_lac.gcom | head -n 1 | cut -d "," -f 3-4`
+		do_unlock
 		carrier=`grep description ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
 		registration=`grep registration ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
 		mcc=`grep mcc ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
 		mnc=`grep mnc ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
 		roaming=`grep roaming ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
-		msisdn=`qmicli -d ${CDCDEV} --dms-get-msisdn | grep MSISDN: | awk '{print $2}' | cut -d "'" -f 2`
-		mode=`qmicli -d ${CDCDEV} --dms-get-operating-mode | grep Mode: | awk '{print $2}' | cut -d "'" -f 2`
-		power_mode=`qmicli -d ${CDCDEV} --dms-get-operating-mode | grep Mode: | cut -d ':' -f 2 | cut -d "'" -f 2`
-		data_session=`qmicli -d ${CDCDEV} --wds-get-packet-service-status | grep status: | cut -d ':' -f 2 | cut -d "'" -f 2`
-		data_bearer=`qmicli -d ${CDCDEV} --wds-get-current-data-bearer-technology 2>/dev/null | grep Technology: | cut -d ':' -f 2 | awk '{print toupper($0)}' | cut -d "'" -f 2`
-		qmicli -d ${CDCDEV} --nas-get-signal-strength > ${STATS_TMP}
-		rssi_net=`grep Network ${STATS_TMP} | head -n 1 | awk '{print toupper($2)}' | cut -d "'" -f 2`
-		rssi_val=`grep Network ${STATS_TMP} | head -n 1 | awk '{print $3}' | cut -d "'" -f 2`
-		rssi_eico=`grep -A 1 ECIO ${STATS_TMP} | tail -n 1 | awk '{print $3}' | cut -d "'" -f 2`
-		rssi_sinr=`grep SINR: ${STATS_TMP} | awk '{print $3}' | cut -d "'" -f 2`
-		csq=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_csq.gcom | head -n 1 | cut -d "," -f 1`
+		rssi_net=`grep Network ${STATS_TMP2} | head -n 1 | awk '{print toupper($2)}' | cut -d "'" -f 2`
+		rssi_val=`grep Network ${STATS_TMP2} | head -n 1 | awk '{print $3}' | cut -d "'" -f 2`
+		rssi_eico=`grep -A 1 ECIO ${STATS_TMP2} | tail -n 1 | awk '{print $3}' | cut -d "'" -f 2`
+		rssi_sinr=`grep SINR: ${STATS_TMP2} | awk '{print $3}' | cut -d "'" -f 2`
 		csq_pct=$(((csq*100)/31))
-		lac=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_lac.gcom | head -n 1 | cut -d "," -f 3-4`
 		ci=`echo $lac | cut -d "," -f 2 | cut -d '"' -f 2`
 		lac=`echo $lac | cut -d "," -f 1 | cut -d '"' -f 2`
+		rm -f ${STATS_TMP}
+		rm -f ${STATS_TMP2}
 		cat << EOM > ${CACHEF}
 CACHE_EXPIRE=$((CUR+30))
 carrier="$carrier"
@@ -166,7 +172,6 @@ EOM
 		echo "${lac}"
 		echo "${ci}"
 	fi	
-	rm -f ${STATS_TMP}
 }
 
 display_sms() {
@@ -204,14 +209,14 @@ send_sms() {
 LCKFILE="/var/run/man3g.pid"
 
 do_lock() {
-    let cnt=29
+    let cnt=290
     LAST_PID=0
     while [ $((cnt)) -ge 0 ] ; do
   	if [ -e ${LCKFILE} ] ; then
-		PID=$(cat ${LCKFILE})
+		PID=$(cat ${LCKFILE} 2>/dev/null)
         	kill -0 ${PID} > /dev/null 2>&1
         	if [ "$?" = "0" ] ; then
-			if [ "$machine" = "0" ] && [ $((cnt % 5)) -eq 0 ] ; then
+			if [ "$machine" = "0" ] && [ $((cnt % 50)) -eq 0 ] ; then
                 		echo "Waiting for another man3g process to finish... (pid ${PID})"
 			fi
         	else
@@ -223,7 +228,7 @@ do_lock() {
 			fi
         	fi
 		LAST_PID=${PID}
-		sleep 1
+		usleep 100000
 	else
 		break
 	fi
@@ -277,9 +282,7 @@ done
 
 case $cmd in
 	status)
-		do_lock
 		status
-		do_unlock
 	;;
 	display-sms)
 		do_lock

@@ -1,0 +1,125 @@
+#!/bin/bash
+
+function usage() {
+	echo "usage: 3g_connmgr -i {config name}"
+	echo "Example: 3g_connmgr -i wwan0"
+	exit 1
+}
+
+function trigger_watchdog() {
+	logger "3g_connmgr: Triggering hardware watchdog forcing a hardware reset in 60 seconds..."
+}
+
+failcnt=0
+failmax=4
+function check_status() {
+	do_lock
+	csq=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_csq.gcom | head -n 1 | cut -d "," -f 1`
+	do_unlock
+	if [ "$csq" = "" ] ; then
+		logger "3g_connmgr: Failed to retrieved signal quality ($failcnt/$failmax)!"
+		let failcnt=failcnt+1
+		if [ $((failcnt)) -ge $((failmax)) ] ; then
+			trigger_watchdog
+			sleep 120
+		fi
+	else
+		failcnt=0
+	fi
+}
+
+check_sms() {
+	id=$1
+	uqmi -d $CDCDEV --get-message $id 2>/dev/null | grep $REBOOT_CODE
+}
+
+check_reboot_sms() {
+	
+	do_lock
+	for idx in `uqmi -d $CDCDEV --list-messages | sed 's/,//g'` ; do
+		case $idx in
+			''|*[!0-9]*) ;;
+			*)
+				check_sms $idx
+			;;
+		esac
+	done
+	do_unlock
+}
+
+LCKFILE="/var/run/man3g.pid"
+
+do_lock() {
+    let cnt=290
+    LAST_PID=0
+    while [ $((cnt)) -ge 0 ] ; do
+  	if [ -e ${LCKFILE} ] ; then
+		PID=$(cat ${LCKFILE} 2>/dev/null)
+        	kill -0 ${PID} > /dev/null 2>&1
+        	if [ "$?" = "0" ] ; then
+			if [ "$machine" = "0" ] && [ $((cnt % 50)) -eq 0 ] ; then
+                		logger "3g_connmgr: Waiting for another man3g process to finish... (pid ${PID})"
+			fi
+        	else
+			if [ "${LAST_PID}" = "${PID}" ] ; then
+				if [ "$machine" = "0" ] ; then
+                			logger "3g_connmgr: Stale lock file from pid ${PID}! Process is not running. Removing lock..."
+					break
+				fi
+			fi
+        	fi
+		LAST_PID=${PID}
+		usleep 100000
+	else
+		break
+	fi
+	let cnt=cnt-1
+    done
+    echo "$$" > ${LCKFILE}
+    LOCKED=1
+}
+
+do_unlock() {
+    rm -f ${LCKFILE}
+    LOCKED=0
+}
+
+do_exit() {
+    if [ "$LOCKED" = "1" ] ; then
+    	do_unlock
+    fi
+    rm -f ${PIDFILE}
+    logger "ImageStream 3G Connection Manager for $DEVICE exiting"
+    exit
+}
+
+DEVICE=wwan0
+REBOOT_CODE=""
+LOCKED=0
+if [ "$1" = "-i" ] ; then
+	shift
+	DEVICE=$1
+	shift
+fi
+PIDFILE="/var/run/3g_connmgr_$DEVICE.pid"
+CDCDEV=/dev/$(basename $(ls /sys/class/net/${DEVICE}/device/usbmisc/cdc-wdm* -d))
+MODEMDEV=/dev/$(basename $(ls /sys/class/net/${DEVICE}/device/subsystem/drivers/qcserial/*.2/ttyUSB* -d))
+
+while [ $# -gt 0 ] ; do
+	if [ "$1" = "--reboot-code" ] ; then
+		shift
+		REBOOT_CODE=$1
+	fi
+	shift
+done
+
+echo $$ > ${PIDFILE}
+trap do_exit SIGINT SIGHUP SIGTERM
+logger "ImageStream 3G Connection Manager for $DEVICE starting (pid $$)"
+while : ; do
+	check_status
+	if [ "$REBOOT_CODE" != "" ] ; then
+		check_reboot_sms
+	fi
+	sleep 15
+done

@@ -525,6 +525,7 @@ proto_qmi_setup() {
 
 	proto_qmi_led_ok ${iface}
 
+	3g_connmgr -i ${iface}
 	# Show status and start watchdog
 	qmicli -d $CDCDEV --nas-get-serving-system 2>&1 | proto_qmi_log daemon.debug
 	(
@@ -589,6 +590,10 @@ proto_qmi_teardown() {
 	[ -e /var/run/qmi-watchdog-${interface}.pid ] && {
 		kill $(cat /var/run/qmi-watchdog-${interface}.pid)
 		rm /var/run/qmi-watchdog-${interface}.pid
+	}
+	[ -e /var/run/3g_connmgr_${iface}.pid ] && {
+		kill $(cat /var/run/3g_connmgr_${iface}.pid)
+		rm /var/run/3g_connmgr_${iface}.pid
 	}
 	do_lock
 	proto_qmi_stop_network ${interface}
