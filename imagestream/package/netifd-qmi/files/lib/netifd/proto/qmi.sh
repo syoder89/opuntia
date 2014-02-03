@@ -525,7 +525,8 @@ proto_qmi_setup() {
 
 	proto_qmi_led_ok ${iface}
 
-	3g_connmgr -i ${iface}
+	3g_connmgr -i ${iface} &
+
 	# Show status and start watchdog
 	qmicli -d $CDCDEV --nas-get-serving-system 2>&1 | proto_qmi_log daemon.debug
 	(

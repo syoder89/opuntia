@@ -1,0 +1,13 @@
+#!/bin/sh /etc/rc.common
+#
+#
+
+START=97
+
+start() {
+	/sbin/watchdog /dev/watchdog
+}
+
+stop() {
+	killall watchdog
+}

@@ -31,6 +31,13 @@ function check_status() {
 check_sms() {
 	id=$1
 	uqmi -d $CDCDEV --get-message $id 2>/dev/null | grep $REBOOT_CODE
+	if [ "$?" = "0" ] ; then
+		logger "3g_connmgr: Received reboot code! Rebooting..."
+		sync
+		sync
+		sync
+#		reboot -f
+	fi
 }
 
 check_reboot_sms() {
