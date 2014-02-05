@@ -46,7 +46,7 @@ ramips_board_detect() {
 	*"Argus ATP-52B")
 		name="argus-atp52b"
 		;;
-	*"AsiaRF AWM002-EVB")
+	*"AsiaRF AWM002 EVB")
 		name="awm002-evb"
 		;;
 	*"BR6524N")
@@ -64,8 +64,17 @@ ramips_board_detect() {
 	*"Aztech HW550-3G")
 		name="hw550-3g"
 		;;
+	*"DCS-930")
+		name="dcs-930"
+		;;
 	*"DIR-300 B1")
 		name="dir-300-b1"
+		;;
+	*"DIR-300 B7")
+		name="dir-300-b7"
+		;;
+	*"DIR-320 B1")
+		name="dir-320-b1"
 		;;
 	*"DIR-600 B1")
 		name="dir-600-b1"
@@ -100,6 +109,9 @@ ramips_board_detect() {
 	*"ESR-9753")
 		name="esr-9753"
 		;;
+	*"Edimax BR-6475nD")
+		name="br-6475nd"
+		;;
 	*"F7C027")
 		name="f7c027"
 		;;
@@ -118,11 +130,17 @@ ramips_board_detect() {
 	*"La Fonera 2.0N")
 		name="fonera20n"
 		;;
+	*"Asus RT-N14U")
+		name="rt-n14u"
+		;;
 	*"Asus RT-N13U")
 		name="rt-n13u"
 		;;
 	*"MoFi Network MOFI3500-3GN")
 		name="mofi3500-3gn"
+		;;
+	*"HILINK HLK-RM04")
+		name="hlk-rm04"
 		;;
 	*"HAME MPR-A1")
  		name="mpr-a1"
@@ -199,6 +217,15 @@ ramips_board_detect() {
 	*"W502U")
 		name="w502u"
 		;;
+	*"WMR-300")
+		name="wmr300"
+		;;
+	*"WHR-300HP2")
+		name="whr-300hp2"
+		;;
+	*"WHR-600D")
+		name="whr-600d"
+		;;
 	*"WHR-G300N")
 		name="whr-g300n"
 		;;
@@ -249,6 +276,9 @@ ramips_board_detect() {
 		;;
 	*"HG255D")
 		name="hg255d"
+		;;
+	*"V22SG")
+		name="v22sg"
 		;;
 	*)
 		name="generic"

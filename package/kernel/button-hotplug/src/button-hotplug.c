@@ -85,9 +85,9 @@ static struct bh_map button_map[] = {
 	BH_MAP(BTN_9,		"BTN_9"),
 	BH_MAP(KEY_RESTART,	"reset"),
 	BH_MAP(KEY_POWER,	"power"),
-#ifdef KEY_WPS_BUTTON
+	BH_MAP(KEY_RFKILL,	"rfkill"),
 	BH_MAP(KEY_WPS_BUTTON,	"wps"),
-#endif /* KEY_WPS_BUTTON */
+	BH_MAP(KEY_WIMAX,	"wwan"),
 };
 
 /* -------------------------------------------------------------------------*/

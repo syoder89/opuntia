@@ -1,6 +1,6 @@
 --- a/arch/mips/Kconfig
 +++ b/arch/mips/Kconfig
-@@ -137,6 +137,19 @@ config BCM63XX
+@@ -138,6 +138,19 @@ config BCM63XX
  	help
  	 Support for BCM63XX based boards
  
@@ -20,7 +20,7 @@
  config MIPS_COBALT
  	bool "Cobalt Server"
  	select CEVT_R4K
-@@ -837,6 +850,7 @@ config NLM_XLP_BOARD
+@@ -838,6 +851,7 @@ config NLM_XLP_BOARD
  
  endchoice
  
@@ -2659,7 +2659,7 @@
 +	/* Cold reset does not work on the AR2315/6, use the GPIO reset bits a workaround.
 +	 * give it some time to attempt a gpio based hardware reset
 +	 * (atheros reference design workaround) */
-+	gpio_direction_output(AR2315_RESET_GPIO, 0);
++	gpio_request_one(AR2315_RESET_GPIO, GPIOF_OUT_INIT_LOW, "Reset");
 +	mdelay(100);
 +
 +	/* Some boards (e.g. Senao EOC-2610) don't implement the reset logic

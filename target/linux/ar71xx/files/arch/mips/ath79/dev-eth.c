@@ -20,6 +20,7 @@
 #include <linux/platform_device.h>
 #include <linux/serial_8250.h>
 #include <linux/clk.h>
+#include <linux/sizes.h>
 
 #include <asm/mach-ath79/ath79.h>
 #include <asm/mach-ath79/ar71xx_regs.h>
@@ -39,7 +40,7 @@ static struct resource ath79_mdio0_resources[] = {
 	}
 };
 
-static struct ag71xx_mdio_platform_data ath79_mdio0_data;
+struct ag71xx_mdio_platform_data ath79_mdio0_data;
 
 struct platform_device ath79_mdio0_device = {
 	.name		= "ag71xx-mdio",
@@ -60,7 +61,7 @@ static struct resource ath79_mdio1_resources[] = {
 	}
 };
 
-static struct ag71xx_mdio_platform_data ath79_mdio1_data;
+struct ag71xx_mdio_platform_data ath79_mdio1_data;
 
 struct platform_device ath79_mdio1_device = {
 	.name		= "ag71xx-mdio",
@@ -253,13 +254,8 @@ void __init ath79_register_mdio(unsigned int id, u32 phy_mask)
 		mdio_data->is_ar934x = 1;
 		break;
 
-	case ATH79_SOC_QCA9558:
-		if (id == 1)
-			mdio_data->builtin_switch = 1;
-		mdio_data->is_ar934x = 1;
-		break;
-
 	case ATH79_SOC_QCA9556:
+	case ATH79_SOC_QCA9558:
 		mdio_data->is_ar934x = 1;
 		break;
 
@@ -786,6 +782,9 @@ void __init ath79_register_eth(unsigned int id)
 
 	pdata = pdev->dev.platform_data;
 
+	pdata->max_frame_len = 1540;
+	pdata->desc_pktlen_mask = 0xfff;
+
 	err = ath79_setup_phy_if_mode(id, pdata);
 	if (err) {
 		printk(KERN_ERR
@@ -955,6 +954,9 @@ void __init ath79_register_eth(unsigned int id)
 		pdata->has_gbit = 1;
 		pdata->is_ar724x = 1;
 
+		pdata->max_frame_len = SZ_16K - 1;
+		pdata->desc_pktlen_mask = SZ_16K - 1;
+
 		if (!pdata->fifo_cfg1)
 			pdata->fifo_cfg1 = 0x0010ffff;
 		if (!pdata->fifo_cfg2)
@@ -978,6 +980,17 @@ void __init ath79_register_eth(unsigned int id)
 		pdata->ddr_flush = ath79_ddr_no_flush;
 		pdata->has_gbit = 1;
 		pdata->is_ar724x = 1;
+
+		/*
+		 * Limit the maximum frame length to 4095 bytes.
+		 * Although the documentation says that the hardware
+		 * limit is 16383 bytes but that does not work in
+		 * practice. It seems that the hardware only updates
+		 * the lowest 12 bits of the packet length field
+		 * in the RX descriptor.
+		 */
+		pdata->max_frame_len = SZ_4K - 1;
+		pdata->desc_pktlen_mask = SZ_16K - 1;
 
 		if (!pdata->fifo_cfg1)
 			pdata->fifo_cfg1 = 0x0010ffff;
@@ -1056,35 +1069,42 @@ void __init ath79_set_mac_base(unsigned char *mac)
 	memcpy(ath79_mac_base, mac, ETH_ALEN);
 }
 
-void __init ath79_parse_mac_addr(char *mac_str)
+void __init ath79_parse_ascii_mac(char *mac_str, u8 *mac)
 {
-	u8 tmp[ETH_ALEN];
 	int t;
 
 	t = sscanf(mac_str, "%02hhx:%02hhx:%02hhx:%02hhx:%02hhx:%02hhx",
-			&tmp[0], &tmp[1], &tmp[2], &tmp[3], &tmp[4], &tmp[5]);
+		   &mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
 
 	if (t != ETH_ALEN)
 		t = sscanf(mac_str, "%02hhx.%02hhx.%02hhx.%02hhx.%02hhx.%02hhx",
-			&tmp[0], &tmp[1], &tmp[2], &tmp[3], &tmp[4], &tmp[5]);
+			&mac[0], &mac[1], &mac[2], &mac[3], &mac[4], &mac[5]);
 
-	if (t == ETH_ALEN)
-		ath79_set_mac_base(tmp);
-	else
-		printk(KERN_DEBUG "ar71xx: failed to parse mac address "
-				"\"%s\"\n", mac_str);
+	if (t != ETH_ALEN || !is_valid_ether_addr(mac)) {
+		memset(mac, 0, ETH_ALEN);
+		printk(KERN_DEBUG "ar71xx: invalid mac address \"%s\"\n",
+		       mac_str);
+	}
+}
+
+static void __init ath79_set_mac_base_ascii(char *str)
+{
+	u8 mac[ETH_ALEN];
+
+	ath79_parse_ascii_mac(str, mac);
+	ath79_set_mac_base(mac);
 }
 
 static int __init ath79_ethaddr_setup(char *str)
 {
-	ath79_parse_mac_addr(str);
+	ath79_set_mac_base_ascii(str);
 	return 1;
 }
 __setup("ethaddr=", ath79_ethaddr_setup);
 
 static int __init ath79_kmac_setup(char *str)
 {
-	ath79_parse_mac_addr(str);
+	ath79_set_mac_base_ascii(str);
 	return 1;
 }
 __setup("kmac=", ath79_kmac_setup);

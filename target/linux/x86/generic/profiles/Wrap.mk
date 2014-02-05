@@ -7,7 +7,7 @@
 
 define Profile/Wrap
   NAME:=PCEngines WRAP
-  PACKAGES:=kmod-i2c-scx200 kmod-natsemi kmod-leds-wrap kmod-gpio-scx200 kmod-wdt-scx200 kmod-hwmon-pc87360 kmod-e1000e
+  PACKAGES:=kmod-i2c-scx200 kmod-natsemi kmod-leds-wrap kmod-gpio-scx200 kmod-wdt-scx200 kmod-hwmon-pc87360
 endef
 
 define Profile/Wrap/Description

@@ -29,7 +29,10 @@ platform_check_image() {
 	broadway | \
 	carambola | \
 	d105 | \
+	dcs-930 | \
 	dir-300-b1 | \
+	dir-300-b7 | \
+	dir-320-b1 | \
 	dir-600-b1 | \
 	dir-600-b2 | \
 	dir-615-h1 | \
@@ -45,6 +48,7 @@ platform_check_image() {
 	freestation5 | \
 	hw550-3g | \
 	hg255d | \
+	hlk-rm04 | \
 	ip2202 | \
 	m3 | \
 	m4 | \
@@ -60,6 +64,7 @@ platform_check_image() {
 	rp-n53 | \
 	rt-g32-b1 | \
 	rt-n10-plus | \
+	rt-n14u | \
 	rt-n15 | \
 	rt-n56u | \
 	sl-r7205 | \
@@ -87,8 +92,16 @@ platform_check_image() {
 		}
 		return 0
 		;;
+	dir-610-a1 |\
 	dir-645)
 		[ "$magic" != "5ea3a417" ] && {
+			echo "Invalid image type."
+			return 1
+		}
+		return 0
+		;;
+	br-6475nd)
+		[ "$magic" != "43535953" ] && {
 			echo "Invalid image type."
 			return 1
 		}

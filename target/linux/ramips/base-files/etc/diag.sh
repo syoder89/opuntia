@@ -21,13 +21,13 @@ get_status_led() {
 	br6524n)
 		status_led="edimax:blue:power"
 		;;
-	br6425)
+	br6425 | br-6475nd)
 		status_led="edimax:green:power"
 		;;
 	d105)
 		status_led="d105:red:power"
 		;;
-	dir-300-b1 | dir-600-b1 | dir-600-b2 | dir-610-a1 | dir-615-h1 | dir-615-d | dir-620-a1| dir-620-d1)
+	dcs-930 | dir-300-b1 | dir-600-b1 | dir-600-b2 | dir-610-a1 | dir-615-h1 | dir-615-d | dir-620-a1| dir-620-d1| dir-300-b7| dir-320-b1)
 		status_led="d-link:green:status"
 		;;
 	dir-645)
@@ -50,6 +50,9 @@ get_status_led() {
 		;;
 	rt-n13u)
 		status_led="rt-n13u:power"
+		;;
+	hlk-rm04)
+		status_led="hlk-rm04:red:power"
 		;;
 	all0239-3g|\
 	hw550-3g)
@@ -119,6 +122,11 @@ get_status_led() {
 		;;
 	whr-g300n)
 		status_led="whr-g300n:green:router"
+		;;
+	wmr300 | \
+	whr-300hp2 | \
+	whr-600d)
+		status_led="buffalo:green:status"
 		;;
 	wli-tx4-ag300n)
 		status_led="buffalo:blue:power"

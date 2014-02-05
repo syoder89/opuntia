@@ -13,16 +13,16 @@
  enum {
 --- a/net/ipv4/ip_gre.c
 +++ b/net/ipv4/ip_gre.c
-@@ -335,6 +335,11 @@ static int ipgre_rcv(struct sk_buff *skb
- 				  iph->saddr, iph->daddr, tpi.key);
+@@ -336,6 +336,11 @@ static int ipgre_rcv(struct sk_buff *skb
  
  	if (tunnel) {
+ 		skb_pop_mac_header(skb);
 +		if (tpi.proto == 0) {
 +			tunnel->parms.ka_cur_retries = tunnel->parms.ka_retries;
 +			if (!netif_carrier_ok(tunnel->dev))
 +				netif_carrier_on(tunnel->dev);
 +		}
- 		ip_tunnel_rcv(tunnel, skb, &tpi, log_ecn_error);
+ 		ip_tunnel_rcv(tunnel, skb, &tpi, hdr_len, log_ecn_error);
  		return 0;
  	}
 --- a/net/ipv4/ip_tunnel.c
