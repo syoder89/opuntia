@@ -1,274 +1,0 @@
-10
-
-dir
-36936
-svn://svn.openwrt.org/openwrt/branches/packages_12.09/lang
-svn://svn.openwrt.org/openwrt
-
-
-
-2013-04-30T19:44:35.028892Z
-36503
-juhosg
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3c298f89-4303-0410-b956-a3cf2f4a3e73
-
-luasocket
-dir
-
-perl-html-parser
-dir
-
-perl-uri
-dir
-
-pyrrd
-dir
-
-lsqlite3
-dir
-
-python-eeml
-dir
-
-python-ifconfig
-dir
-
-erlang
-dir
-
-numpy
-dir
-
-gst-python
-dir
-
-distribute
-dir
-
-telepathy-python
-dir
-
-perl-net-telnet
-dir
-
-php-pear-xmlrpc
-dir
-
-python-django
-dir
-
-pyclips
-dir
-
-eggdrop
-dir
-
-mako
-dir
-
-perl-www-curl
-dir
-
-pyserial
-dir
-
-pyevent
-dir
-
-pyopenssl
-dir
-
-perl-dbi
-dir
-
-perl-html-tree
-dir
-
-python-mimms
-dir
-
-perl
-dir
-
-jamvm
-dir
-
-python-sip
-dir
-
-python2-chardet
-dir
-
-xapian-bindings
-dir
-
-luasec
-dir
-
-pymysql
-dir
-
-perl-lockfile-simple
-dir
-
-logilab-astng
-dir
-
-perl-www
-dir
-
-python-flup
-dir
-
-python-json
-dir
-
-pybluez
-dir
-
-python-cjson
-dir
-
-pyxdg
-dir
-
-python-imaging-library
-dir
-
-php-pear-db
-dir
-
-4th
-dir
-
-logilab-common
-dir
-
-python-crypto
-dir
-
-urbi
-dir
-
-luasql
-dir
-
-egenix-mx
-dir
-
-luasoap
-dir
-
-luaposix
-dir
-
-cython
-dir
-
-python-webpy
-dir
-
-sigscheme
-dir
-
-kid
-dir
-
-pysqlite
-dir
-
-pyyaml
-dir
-
-tcl
-dir
-
-luaexpat
-dir
-
-simplejson
-dir
-
-twisted
-dir
-
-luaprofiler
-dir
-
-perl-www-mechanize
-dir
-
-pygobject
-dir
-
-yapsnmp
-dir
-
-perl-html-tagset
-dir
-
-ipython
-dir
-
-pypcap
-dir
-
-pyusb
-dir
-
-sqlite3-ruby
-dir
-
-php4
-dir
-
-python-dbus
-dir
-
-php5
-dir
-
-php-pear
-dir
-
-python-pyosc
-dir
-
-perl-compress-bzip2
-dir
-
-arm
-dir
-
-python
-dir
-
-ruby
-dir
-
-psycopg
-dir
-
-python-curl
-dir
-
-luafilesystem
-dir
-
-jsonpath
-dir
-

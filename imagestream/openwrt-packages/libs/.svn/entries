@@ -1,703 +1,0 @@
-10
-
-dir
-36936
-svn://svn.openwrt.org/openwrt/branches/packages_12.09/libs
-svn://svn.openwrt.org/openwrt
-
-
-
-2013-06-04T12:58:00.695212Z
-36845
-jow
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-3c298f89-4303-0410-b956-a3cf2f4a3e73
-
-rrdtool-1.0.x
-dir
-
-libnfsidmap
-dir
-
-cgilib
-dir
-
-wxbase
-dir
-
-libevent2
-dir
-
-wt
-dir
-
-libdaq
-dir
-
-libcrypto++
-dir
-
-protobuf
-dir
-
-liblo
-dir
-
-libpam
-dir
-
-libfreefare
-dir
-
-libssh2
-dir
-
-libxapian
-dir
-
-libmikmod
-dir
-
-glibmm
-dir
-
-credis
-dir
-
-libupnp
-dir
-
-gnutls
-dir
-
-libftdi
-dir
-
-leptonica
-dir
-
-file
-dir
-
-ftplib
-dir
-
-gettext-full
-dir
-
-speex
-dir
-
-libsamplerate
-dir
-
-libdbi
-dir
-
-pcre
-dir
-
-libdaemon
-dir
-
-xmpp4r
-dir
-
-libffi
-dir
-
-libcroco
-dir
-
-libnfc
-dir
-
-libcli
-dir
-
-libgcrypt
-dir
-
-db47
-dir
-
-libmpeg2
-dir
-
-openldap
-dir
-
-libmpd
-dir
-
-dbus-glib
-dir
-
-spandsp
-dir
-
-rblibtorrent
-dir
-
-libgphoto2
-dir
-
-libsdl
-dir
-
-libusb-1.0
-dir
-
-libzstream
-dir
-
-libpthread-stubs
-dir
-
-libcelt
-dir
-
-keynote
-dir
-
-classpath
-dir
-
-libfreenect
-dir
-
-ucl
-dir
-
-alsa-lib
-dir
-
-phidget21
-dir
-
-elfutils
-dir
-
-libmad
-dir
-
-libgpg-error
-dir
-
-libaio
-dir
-
-libinklevel
-dir
-
-poco
-dir
-
-confuse
-dir
-
-postgresql
-dir
-
-liboping
-dir
-
-clinkc
-dir
-
-libvncserver
-dir
-
-cyrus-sasl
-dir
-
-re
-dir
-
-bluez-libs
-dir
-
-ptlib
-dir
-
-argp-standalone
-dir
-
-libnet-1.0.x
-dir
-
-argtable
-dir
-
-libmicroxml
-dir
-
-expat
-dir
-
-libsml
-dir
-
-libexif
-dir
-
-librpcsecgss
-dir
-
-libdmapsharing
-dir
-
-libnids
-dir
-
-ustl
-dir
-
-libconfig
-dir
-
-giflib
-dir
-
-libmbus
-dir
-
-libdvdread
-dir
-
-ldns
-dir
-
-libol
-dir
-
-intltool
-dir
-
-zaptel-1.4.x
-dir
-
-flac
-dir
-
-fribidi
-dir
-
-libtasn1
-dir
-
-faad2
-dir
-
-pwlib
-dir
-
-libart
-dir
-
-libgssapi
-dir
-
-libmodbus
-dir
-
-libsdl_sound
-dir
-
-freetype
-dir
-
-libosip2
-dir
-
-sqlite2
-dir
-
-sqlite3
-dir
-
-jpeg
-dir
-
-boost
-dir
-
-libimobiledevice
-dir
-
-libamsel
-dir
-
-radlib
-dir
-
-polarssl
-dir
-
-gpgme
-dir
-
-neon
-dir
-
-libogg
-dir
-
-libmicrohttpd
-dir
-
-libdlna
-dir
-
-mysql
-dir
-
-libowfat
-dir
-
-libsynce
-dir
-
-aalib
-dir
-
-libevent
-dir
-
-tcp_wrappers
-dir
-
-sctp
-dir
-
-libtheora
-dir
-
-libsndfile
-dir
-
-clearsilver
-dir
-
-newt
-dir
-
-libsrtp
-dir
-
-libusb
-dir
-
-libnet-1.1.x
-dir
-
-libIDL2
-dir
-
-slang2
-dir
-
-libao
-dir
-
-libnatpmp
-dir
-
-shflags
-dir
-
-tiff
-dir
-
-avahi
-dir
-
-libyaml
-dir
-
-iksemel
-dir
-
-libzip
-dir
-
-fftw3
-dir
-
-libpar2
-dir
-
-tokyocabinet
-dir
-
-libelf
-dir
-
-zaptel
-dir
-
-ezxml
-dir
-
-pthsem
-dir
-
-libidn
-dir
-
-gperf
-dir
-
-libiconv-full
-dir
-
-libnetfilter-queue
-dir
-
-libmpdclient
-dir
-
-libpfm
-dir
-
-libpng
-dir
-
-jansson
-dir
-
-unixodbc
-dir
-
-check
-dir
-
-mxml
-dir
-
-protobuf-c
-dir
-
-vips
-dir
-
-libxslt
-dir
-
-rem
-dir
-
-eventlog
-dir
-
-gsl
-dir
-
-libatomicops
-dir
-
-libptmalloc3
-dir
-
-xmlrpc-c
-dir
-
-gsm
-dir
-
-matrixssl
-dir
-
-sysfsutils
-dir
-
-libshout
-dir
-
-libcap
-dir
-
-axtls
-dir
-
-libv4l
-dir
-
-apr-util
-dir
-
-ossp-js
-dir
-
-serdisplib
-dir
-
-libid3tag
-dir
-
-libsigc++
-dir
-
-libnetfilter-conntrack
-dir
-
-curl
-dir
-
-id3lib
-dir
-
-libtwin
-dir
-
-howl
-dir
-
-libdirectfb
-dir
-
-libcunit
-dir
-
-liboil
-dir
-
-c-ares
-dir
-
-libsdl_mixer
-dir
-
-glib
-dir
-
-libdvbpsi
-dir
-
-libnfnetlink
-dir
-
-libassuan
-dir
-
-apr
-dir
-
-libmms
-dir
-
-ortp
-dir
-
-libtorrent
-dir
-
-libaudiofile
-dir
-
-radiusclient-ng
-dir
-
-gd
-dir
-
-opal
-dir
-
-libvorbis
-dir
-
-st2205tool
-dir
-
-glib2
-dir
-
-libfreecwmp
-dir
-
-nmeap
-dir
-
-libspe2
-dir
-
-orbit2
-dir
-
-openh323
-dir
-
-taglib
-dir
-
-libnetfilter-log
-dir
-
-lzo
-dir
-
-libmcrypt
-dir
-
-libiconv
-dir
-
-fcgi
-dir
-
-gdbm
-dir
-
-libxml2
-dir
-
-nacl
-dir
-
-libmnl
-dir
-
-libsoup
-dir
-
-libvorbisidec
-dir
-
-libdnet
-dir
-
-popt
-dir
-
-libmpcdec
-dir
-
-libplist
-dir
-
-gmp
-dir
-
-opencdk
-dir
-
-gettext
-dir
-
-librsync
-dir
-
