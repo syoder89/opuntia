@@ -5,10 +5,6 @@
 # See /LICENSE for more information.
 #
 
-define Image/Prepare
-	cp $(LINUX_DIR)/arch/arm/boot/uImage $(KDIR)/uImage
-endef
-
 define Image/BuildKernel
 	# Orion Kernel uImages
  # DT2: mach id 1514 (0x5EA)
@@ -17,7 +13,14 @@ define Image/BuildKernel
 	$(STAGING_DIR_HOST)/bin/mkimage -A arm -O linux -T kernel \
 	-C none -a 0x00008000 -e 0x00008000 -n 'Linux-$(LINUX_VERSION)' \
 	-d $(KDIR)/dt2-zImage $(KDIR)/dt2-uImage
-	cp $(KDIR)/dt2-uImage $(BIN_DIR)/opuntia-dt2-uImage
+	cp $(KDIR)/dt2-uImage $(BIN_DIR)/openwrt-dt2-uImage
+ # LaCie 2big Network: mach id 2342 (0x926)
+	echo -en "\x09\x1c\xa0\xe3\x26\x10\x81\xe3" > $(KDIR)/net2big-zImage
+	cat $(LINUX_DIR)/arch/arm/boot/zImage >> $(KDIR)/net2big-zImage
+	$(STAGING_DIR_HOST)/bin/mkimage -A arm -O linux -T kernel \
+	-C none -a 0x00008000 -e 0x00008000 -n 'Linux-$(LINUX_VERSION)' \
+	-d $(KDIR)/net2big-zImage $(KDIR)/net2big-uImage
+	cp $(KDIR)/net2big-uImage $(BIN_DIR)/openwrt-net2big-uImage
 endef
 
 define Image/Build/Freecom
@@ -32,8 +35,8 @@ define Image/Build/Freecom
 	$(CP) $(KDIR)/dt2-uImage $(TARGET_DIR)/boot/uImage
 	$(INSTALL_DIR) $(TARGET_DIR)/var
  # create image
-	$(TAR) cfj $(BIN_DIR)/opuntia-$(2)-$(1).img --numeric-owner --owner=0 --group=0 -C $(TARGET_DIR)/ .
-	$(STAGING_DIR_HOST)/bin/encode_crc $(BIN_DIR)/opuntia-$(2)-$(1).img $(BIN_DIR)/opuntia-$(2)-$(1)-webupgrade.img $(3)
+	$(TAR) cfj $(BIN_DIR)/openwrt-$(2)-$(1).img --numeric-owner --owner=0 --group=0 -C $(TARGET_DIR)/ .
+	$(STAGING_DIR_HOST)/bin/encode_crc $(BIN_DIR)/openwrt-$(2)-$(1).img $(BIN_DIR)/openwrt-$(2)-$(1)-webupgrade.img $(3)
  # remove extra files
 	rm -rf $(TARGET_DIR)/{boot,var}
  # recover unwanted files

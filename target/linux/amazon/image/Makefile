@@ -11,7 +11,7 @@ define Image/BuildKernel
 	$(STAGING_DIR_HOST)/bin/lzma e $(KDIR)/vmlinux $(KDIR)/vmlinux.lzma
 	mkimage -A mips -O linux -T kernel -C lzma -a 0x80002000 -e \
 		0x80002000 \
-		-n 'MIPS Opuntia Linux-$(LINUX_VERSION)' \
+		-n 'MIPS OpenWrt Linux-$(LINUX_VERSION)' \
 		-d $(KDIR)/vmlinux.lzma $(KDIR)/uImage
 
 	cp $(KDIR)/uImage $(BIN_DIR)/$(IMG_PREFIX)-uImage

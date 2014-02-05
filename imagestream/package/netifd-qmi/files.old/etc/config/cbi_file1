@@ -1,0 +1,8 @@
+
+config info 'Modem'
+
+config new 'New'
+	option 'proto' 'ppp'
+	option 'driver1' 'none'
+	option 'driver2' 'none'
+

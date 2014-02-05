@@ -1,0 +1,210 @@
+--- a/include/uapi/linux/if_tunnel.h
++++ b/include/uapi/linux/if_tunnel.h
+@@ -35,6 +35,10 @@ struct ip_tunnel_parm {
+ 	__be32			i_key;
+ 	__be32			o_key;
+ 	struct iphdr		iph;
++        struct timer_list               *timer;
++        int             ka_interval;
++        int             ka_retries;
++        int             ka_cur_retries;
+ };
+ 
+ enum {
+--- a/net/ipv4/ip_gre.c
++++ b/net/ipv4/ip_gre.c
+@@ -336,6 +336,11 @@ static int ipgre_rcv(struct sk_buff *skb
+ 
+ 	if (tunnel) {
+ 		skb_pop_mac_header(skb);
++		if (tpi.proto == 0) {
++			tunnel->parms.ka_cur_retries = tunnel->parms.ka_retries;
++			if (!netif_carrier_ok(tunnel->dev))
++				netif_carrier_on(tunnel->dev);
++		}
+ 		ip_tunnel_rcv(tunnel, skb, &tpi, hdr_len, log_ecn_error);
+ 		return 0;
+ 	}
+--- a/net/ipv4/ip_tunnel.c
++++ b/net/ipv4/ip_tunnel.c
+@@ -61,6 +61,8 @@
+ #include <net/ip6_route.h>
+ #endif
+ 
++static void ipgre_keepalive_timer(unsigned long data);
++
+ static unsigned int ip_tunnel_hash(struct ip_tunnel_net *itn,
+ 				   __be32 key, __be32 remote)
+ {
+@@ -701,6 +703,8 @@ tx_error:
+ }
+ EXPORT_SYMBOL_GPL(ip_tunnel_xmit);
+ 
++void ip_gre_keepalive_setup(struct ip_tunnel *t, struct net_device *dev, int on);
++
+ static void ip_tunnel_update(struct ip_tunnel_net *itn,
+ 			     struct ip_tunnel *t,
+ 			     struct net_device *dev,
+@@ -730,9 +734,138 @@ static void ip_tunnel_update(struct ip_t
+ 		if (set_mtu)
+ 			dev->mtu = mtu;
+ 	}
++	t->parms.ka_interval = p->ka_interval;
++	t->parms.ka_retries = p->ka_retries;
++
++	if (!t->parms.timer && t->parms.ka_interval > 0 && t->parms.ka_retries > 0) {
++		ip_gre_keepalive_setup(t, t->dev, 1);
++	} else if (t->parms.timer && (t->parms.ka_interval <= 0 || t->parms.ka_retries <= 0)) {
++		ip_gre_keepalive_setup(t, t->dev, 0);
++	}
++
+ 	netdev_state_change(dev);
+ }
+ 
++struct ipgre_keepalive {
++	// 3.10 kernel drops packets with less than 8 bytes of GRE payload for
++	// some reason - maybe less than hlen? Scott
++	u32 ts;
++	u8 pad[4];
++};
++
++static void ipgre_keepalive_xmit(struct net_device *dev)
++{
++	struct ip_tunnel *tunnel = netdev_priv(dev);
++	struct iphdr *iph = &tunnel->parms.iph;
++	int hlen = sizeof(struct iphdr) + tunnel->hlen;
++	struct ipgre_keepalive *ipk;
++	// 2 IP headers and 2 GRE headers, tunnel->hlen = IP header + GRE hreader
++	struct sk_buff *skb = dev_alloc_skb((hlen * 2) + sizeof(*ipk));
++	struct iphdr *inner_iph;
++
++	skb_reserve(skb, hlen);
++	skb->dev = dev;
++	skb->pkt_type = PACKET_OUTGOING;
++	skb->ip_summed = CHECKSUM_NONE;
++	skb->protocol = htons(ETH_P_IP);
++
++	skb_reset_network_header(skb);
++	skb_set_transport_header(skb, sizeof(struct iphdr));
++
++	inner_iph = (struct iphdr*) skb_put(skb, hlen + sizeof(*ipk));
++	inner_iph->saddr = iph->daddr;
++	inner_iph->daddr = iph->saddr;
++	inner_iph->protocol = IPPROTO_GRE;
++
++	inner_iph->version	=	4;
++	inner_iph->ihl		=	sizeof(struct iphdr) >> 2;
++	inner_iph->frag_off	=	0;
++	inner_iph->ttl		=	255;
++	inner_iph->tos		=	0;
++	inner_iph->tot_len = htons(skb->len);
++
++	ipk = (struct ipgre_keepalive*)(((u8*)inner_iph) + hlen);
++	ipk->ts = jiffies;
++	memset(ipk->pad, 0, sizeof(ipk->pad));
++
++	((__be16*)(inner_iph+1))[0] = tunnel->parms.o_flags;
++	((__be16*)(inner_iph+1))[1] = 0;
++
++	if (tunnel->parms.o_flags&(GRE_KEY|GRE_CSUM|GRE_SEQ)) {
++		__be32 *ptr = (__be32*)(((u8*)inner_iph) + hlen - 4);
++
++		if (tunnel->parms.o_flags&GRE_SEQ) {
++			++tunnel->o_seqno;
++			*ptr = htonl(tunnel->o_seqno);
++			ptr--;
++		}
++		if (tunnel->parms.o_flags&GRE_KEY) {
++			*ptr = tunnel->parms.o_key;
++			ptr--;
++		}
++		if (tunnel->parms.o_flags&GRE_CSUM) {
++			*ptr = 0;
++			*(__sum16*)ptr = ip_compute_csum((void*)(inner_iph+1), skb->len - sizeof(struct iphdr));
++		}
++	}
++
++	inner_iph->check = 0;
++	inner_iph->check = ip_fast_csum((unsigned char *)inner_iph, inner_iph->ihl);
++
++	dev->netdev_ops->ndo_start_xmit(skb, dev);
++}
++
++static void ipgre_keepalive_schedule(struct ip_tunnel *tunnel)
++{
++	struct ip_tunnel_parm *parms = &tunnel->parms;
++
++	parms->timer->function = ipgre_keepalive_timer;
++	/* First keepalive sent in 1 jiffie */
++	if (parms->timer->data == 0)
++		parms->timer->expires = jiffies + 1;
++	else
++		parms->timer->expires = jiffies + tunnel->parms.ka_interval * HZ;
++	parms->timer->data = (unsigned long) tunnel;
++	add_timer(parms->timer);
++}
++
++static void ipgre_keepalive_timer(unsigned long data)
++{
++	struct ip_tunnel *tunnel = (struct ip_tunnel*) data;
++	
++	if (tunnel->parms.ka_cur_retries > 0 && --tunnel->parms.ka_cur_retries == 0) {
++		netif_carrier_off(tunnel->dev);
++	}
++
++	ipgre_keepalive_xmit(tunnel->dev);
++	ipgre_keepalive_schedule(tunnel);
++}
++
++void ip_gre_keepalive_setup(struct ip_tunnel *t, struct net_device *dev, int on)
++{
++	struct in_device *in_dev = __in_dev_get_rtnl(dev);
++	if (on) {
++		if (!t->parms.timer)
++			t->parms.timer = kmalloc(sizeof(struct timer_list), GFP_ATOMIC);
++		init_timer(t->parms.timer);
++		t->parms.timer->data = 0;
++		netif_carrier_off(dev);
++		if (in_dev)
++			IPV4_DEVCONF(in_dev->cnf, ACCEPT_LOCAL) = 1;
++		t->parms.ka_cur_retries = t->parms.ka_retries;
++		ipgre_keepalive_schedule(t);
++	}
++	else {
++		del_timer(t->parms.timer);
++		kfree(t->parms.timer);
++		t->parms.timer = NULL;
++		if (!netif_carrier_ok(dev))
++			netif_carrier_on(dev);
++		if (in_dev)
++			IPV4_DEVCONF(in_dev->cnf, ACCEPT_LOCAL) = 0;
++	}
++}
++
+ int ip_tunnel_ioctl(struct net_device *dev, struct ip_tunnel_parm *p, int cmd)
+ {
+ 	int err = 0;
+@@ -766,8 +899,10 @@ int ip_tunnel_ioctl(struct net_device *d
+ 
+ 		t = ip_tunnel_find(itn, p, itn->fb_tunnel_dev->type);
+ 
+-		if (!t && (cmd == SIOCADDTUNNEL))
++		if (!t && (cmd == SIOCADDTUNNEL)) {
++			p->timer = NULL;
+ 			t = ip_tunnel_create(net, itn, p);
++		}
+ 
+ 		if (dev != itn->fb_tunnel_dev && cmd == SIOCCHGTUNNEL) {
+ 			if (t != NULL) {
+@@ -813,6 +948,11 @@ int ip_tunnel_ioctl(struct net_device *d
+ 			if (t == netdev_priv(itn->fb_tunnel_dev))
+ 				goto done;
+ 			dev = t->dev;
++			if (t && t->parms.timer) {
++				del_timer(t->parms.timer);
++				kfree(t->parms.timer);
++				t->parms.timer = NULL;
++			}
+ 		}
+ 		unregister_netdevice(dev);
+ 		err = 0;

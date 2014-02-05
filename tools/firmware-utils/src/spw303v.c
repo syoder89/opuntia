@@ -1,5 +1,5 @@
 /*
- * spw303v.c - partially based on Opuntia's imagetag.c and addpattern.c
+ * spw303v.c - partially based on OpenWrt's imagetag.c and addpattern.c
  *
  * Copyright (C) 2011  Jonas Gorski <jonas.gorski@gmail.com>
  *

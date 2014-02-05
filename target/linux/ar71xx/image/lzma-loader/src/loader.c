@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2011 Gabor Juhos <juhosg@openwrt.org>
  *
- * Some parts of this code was based on the Opuntia specific lzma-loader
+ * Some parts of this code was based on the OpenWrt specific lzma-loader
  * for the BCM47xx and ADM5120 based boards:
  *	Copyright (C) 2004 Manuel Novoa III (mjn3@codepoet.org)
  *	Copyright (C) 2005 Mineharu Takahara <mtakahar@yahoo.com>
@@ -178,7 +178,7 @@ static void lzma_init_data(void)
 
 	flash_base = (unsigned char *) KSEG1ADDR(AR71XX_FLASH_START);
 
-	printf("Looking for Opuntia image... ");
+	printf("Looking for OpenWrt image... ");
 
 	for (flash_ofs = CONFIG_FLASH_OFFS;
 	     flash_ofs <= (CONFIG_FLASH_OFFS + CONFIG_FLASH_MAX);
@@ -219,7 +219,7 @@ void loader_main(unsigned long reg_a0, unsigned long reg_a1,
 
 	board_init();
 
-	printf("\n\nOpuntia kernel loader for AR7XXX/AR9XXX\n");
+	printf("\n\nOpenWrt kernel loader for AR7XXX/AR9XXX\n");
 	printf("Copyright (C) 2011 Gabor Juhos <juhosg@openwrt.org>\n");
 
 	lzma_init_data();

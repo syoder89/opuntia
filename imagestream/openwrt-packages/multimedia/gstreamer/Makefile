@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2010 OpenWrt.org
+# Copyright (C) 2008-2012 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -82,13 +82,9 @@ endef
 GST_VERSION:=0.10
 
 CONFIGURE_ARGS += \
-	--disable-debug \
 	--disable-examples \
 	--disable-tests \
 	--disable-valgrind \
-	\
-	--disable-gst-debug \
-	\
 	--without-libiconv-prefix \
 	--without-libintl-prefix \
 	--without-x \

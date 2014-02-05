@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Automated Opuntia package dependency checker
+# Automated OpenWrt package dependency checker
 #
 # Copyright (C) 2009-2010 OpenWrt.org
 #

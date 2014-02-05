@@ -1,0 +1,35 @@
+<%+cbi/valueheader%>
+<script type="text/javascript">//<![CDATA[
+	XHR.poll(5, '<%=luci.dispatcher.build_url("admin", "network", "isis_mesh", "map_status", self.option)%>', null,
+		function(x, tnl)
+		{
+			if (tnl && (tnl = tnl[0]))
+			{
+				var html = '';
+
+				var d = document.getElementById('<%=self.option%>-ifc-description');
+				if (d && tnl.name)
+				{
+					html += tnnl.status + ' <br />';
+
+					d.innerHTML = html;
+				}
+				else if (d)
+				{
+					d.innerHTML = '<em><%:Mesh Access Point not present or not connected yet.%></em>';
+				}
+			}
+		}
+	);
+//]]></script>
+
+<table>
+	<tr class="cbi-section-table">
+		<td></td>
+		<td class="cbi-value-field" style="vertical-align:middle; text-align:left; padding:3px" id="<%=self.option%>-ifc-description">
+			<em><%:Collecting data...%></em>
+		</td>
+	</tr>
+</table>
+
+<%+cbi/valuefooter%>

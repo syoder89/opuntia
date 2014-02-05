@@ -13,7 +13,7 @@ define Image/BuildKernel
 	dd if=$(KDIR)/vmlinux of=$(KDIR)/$(IMG_PREFIX)-vmlinux bs=64k conv=sync
 	mkimage -A mips -O linux -T kernel -a 0x80100000 -C none -e \
 		0x80100000 \
-		-n 'MIPS Opuntia Linux-$(LINUX_VERSION)' \
+		-n 'MIPS OpenWrt Linux-$(LINUX_VERSION)' \
 		-d $(KDIR)/$(IMG_PREFIX)-vmlinux $(BIN_DIR)/$(IMG_PREFIX)-uImage
 endef
 

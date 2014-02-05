@@ -11,7 +11,7 @@ define Profile/RouterBoard
 endef
 
 define Profile/RouterBoard/Description
-	Package set compatible with the RouterBoard RB1xx devices. Contains RouterOS to Opuntia\\\
+	Package set compatible with the RouterBoard RB1xx devices. Contains RouterOS to OpenWrt\\\
 	installation scripts.
 endef
 

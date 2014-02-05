@@ -17,4 +17,3 @@ restart () {
 single () {
   /usr/bin/multiwan single &
 }
-  

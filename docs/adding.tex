@@ -13,7 +13,7 @@ particular bug. Few manufacturers do ship their routers with a Sample Developmen
 that would allow you to create your own and custom firmware and most of the time,
 when they do, you will most likely not be able to complete the firmware creation process.
 
-This is one of the reasons why Opuntia and other firmware exists: providing a 
+This is one of the reasons why OpenWrt and other firmware exists: providing a 
 version independent, and tools independent firmware, that can be run on various 
 platforms, known to be running Linux originally.
 
@@ -41,7 +41,7 @@ PORT   STATE SERVICE
 MAC Address: 00:13:xx:xx:xx:xx (Cisco-Linksys)
 Device type: broadband router
 Running: Linksys embedded
-OS details: Linksys WRT54GS v4 running Opuntia w/Linux kernel 2.4.30
+OS details: Linksys WRT54GS v4 running OpenWrt w/Linux kernel 2.4.30
 Network Distance: 1 hop
 \end{Verbatim}
 
@@ -62,7 +62,7 @@ PORT   STATE SERVICE VERSION
 22/tcp open  ssh     Dropbear sshd 0.48 (protocol 2.0)
 23/tcp open  telnet  Busybox telnetd
 53/tcp open  domain  ISC Bind dnsmasq-2.35
-80/tcp open  http    Opuntia BusyBox httpd
+80/tcp open  http    OpenWrt BusyBox httpd
 MAC Address: 00:13:xx:xx:xx:xx (Cisco-Linksys)
 Service Info: Device: WAP
 \end{verbatim}
@@ -126,10 +126,10 @@ located the flash chip, try to find its characteristics on the Internet. If
 your flash chip is a 2MB or less device, your device is most likely to run a 
 proprietary OS such as WindRiver VxWorks, or a custom manufacturer OS like Zyxel ZynOS.
 
-Opuntia does not currently run on devices which have 2MB or less of flash memory.
+OpenWrt does not currently run on devices which have 2MB or less of flash memory.
 This limitation will probably not be worked around since those devices are most 
 of the time micro-routers, or Wireless Access Points, which are not the main 
-Opuntia target.
+OpenWrt target.
 
 \subsubsection{Pluging a serial port}
 
@@ -479,15 +479,15 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Me, myself and I <memyselfandi@domain.tld");
 \end{verbatim}
 
-\subsection{Adding your target in Opuntia}
+\subsection{Adding your target in OpenWrt}
 
 Once you spotted the key changes that were made to the Linux kernel
-to support your target, you will want to create a target in Opuntia
+to support your target, you will want to create a target in OpenWrt
 for your hardware. This can be useful to benefit from the toolchain
-that Opuntia builds as well as the resulting user-space and kernel
+that OpenWrt builds as well as the resulting user-space and kernel
 configuration options.
 
-Provided that your target is already known to Opuntia, it will be
+Provided that your target is already known to OpenWrt, it will be
 as simple as creating a \texttt{target/linux/board} directory
 where you will be creating the following directories and files.
 
@@ -571,7 +571,7 @@ define Image/Build
         dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/openwrt-$(BOARD)-root.$(1) bs=128k conv=sync
 
         -$(STAGING_DIR_HOST)/bin/mkfwimage \
-                -B XS2 -v XS2.ar2316.Opuntia \
+                -B XS2 -v XS2.ar2316.OpenWrt \
                 -k $(BIN_DIR)/openwrt-$(BOARD)-vmlinux.lzma \
                 -r $(BIN_DIR)/openwrt-$(BOARD)-root.$(1) \
                 -o $(BIN_DIR)/openwrt-$(BOARD)-ubnt2-$(1).bin

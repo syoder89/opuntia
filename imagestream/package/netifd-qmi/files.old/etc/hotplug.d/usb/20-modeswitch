@@ -1,0 +1,689 @@
+#!/bin/sh
+
+local uVid uPid uMa uPr uSe
+local idV idP
+local sVe sMo sRe
+local doswitch 
+local retval
+
+[ -f "/etc/variable.file" ] || sleep 30
+
+local modeswitch="/usr/bin/usb_modeswitch"
+
+log() {
+	logger -t "usb-modeswitch" "$@"
+}
+
+sanitize() {
+	sed -e 's/[[:space:]]\+$//; s/[[:space:]]\+/_/g' "$@"
+}
+
+find_scsi_attrs() {
+	[ -n "$DEVPATH" ] && [ -d /sys$DEVPATH/host* ] && {
+		log "$DEVICENAME is a SCSI device, waiting for it to settle..."
+		local timeout=20
+		while [ $((--timeout)) -ge 0 ]; do
+			[ -d /sys$DEVPATH/host*/target* ] && {
+				local scsi_dir
+				for scsi_dir in /sys$DEVPATH/host*/target*/*; do
+					[ -d "$scsi_dir" ] || break
+					case "$scsi_dir" in
+						*/host*/target*/*:*:*:*)
+							sVe=$(sanitize "$scsi_dir/vendor")
+							sMo=$(sanitize "$scsi_dir/model")
+							sRe=$(sanitize "$scsi_dir/rev")
+
+							log "$DEVICENAME: Vendor=${sVe:-?} Model=${sMo:-?} Revision=${sRe:-?}"
+							return 0
+						;;
+					esac
+				done
+			} || {
+				sleep 1
+			}
+		done
+		log "$DEVICENAME: Failed to get SCSI attributes!"
+	}
+
+	return 1
+}
+
+find_usb_attrs() {
+	local usb_dir="/sys$DEVPATH"
+	[ -f "$usb_dir/idVendor" ] || usb_dir="${usb_dir%/*}"
+
+	uVid=$(cat "$usb_dir/idVendor")
+	uPid=$(cat "$usb_dir/idProduct")
+	uMa=$(sanitize "$usb_dir/manufacturer")
+	uPr=$(sanitize "$usb_dir/product")
+	uSe=$(sanitize "$usb_dir/serial")
+}
+
+match_config_tag() {
+	local conf="$1"
+	local tag="$2"
+
+	case "${conf##*/}" in
+		*:*$tag=*)
+			local cmp; eval "cmp=\$$tag"
+			local pat="${conf#*:$tag=}"; pat="${pat%%:*}"
+			case "$cmp" in
+				*$pat*) return 0 ;;
+				*) return 1 ;;
+			esac
+		;;
+	esac
+
+	return 0
+}
+
+match_config() {
+	local conf="$1"
+	local tag
+
+	for tag in uMa uPr uSe sVe sMo sRe; do
+		match_config_tag "$conf" "$tag" || return 1
+	done
+
+	return 0
+}
+
+sav_vars() {
+	rm -f /etc/variable.file
+	NETCREATE=$1
+	NETSIERRA=$2
+	KEEPALIVE=0
+	SIERRACTIVE=0
+	RBDELAY=1
+	echo 'NETCREATE="'"$NETCREATE"'"' >> /etc/variable.file
+	echo 'NETSIERRA="'"$NETSIERRA"'"' >> /etc/variable.file	
+	echo 'SIERRACTIVE="'"$SIERRACTIVE"'"' >> /etc/variable.file
+	echo 'QMIWWAN="'"$QMIWWAN"'"' >> /etc/variable.file
+	echo 'KEEPALIVE="'"$KEEPALIVE"'"' >> /etc/variable.file
+	echo 'RBDELAY="'"$RBDELAY"'"' >> /etc/variable.file
+}
+
+set_dns() {
+	local DNS1=$(uci get cbi_file.CustomDNS.dns1)
+	local DNS2=$(uci get cbi_file.CustomDNS.dns2)
+	if [ -z $DNS1 ]; then
+		if [ -z $DNS2 ]; then
+			return
+		else
+			uci set network.wan2.peerdns=0  
+			uci set network.wan2.dns=$DNS2
+		fi
+	else
+		uci set network.wan2.peerdns=0
+		if [ -z $DNS2 ]; then
+			uci set network.wan2.dns="$DNS1"
+		else
+			uci set network.wan2.dns="$DNS2 $DNS1"
+		fi
+	fi
+}
+
+create_network() {
+	local tty="$1"
+	local NAPN=$(uci get cbi_file.Network.apn)
+	local NUSER=$(uci get cbi_file.Network.user)
+	local NPASS=$(uci get cbi_file.Network.pass)
+	local NPIN=$(uci get cbi_file.Network.pincode)
+	uci set cbi_file1.Modem.proto="PPP"
+	uci set cbi_file1.Modem.port=$tty
+	uci commit cbi_file1
+
+	uci delete network.wan2        
+       uci set network.wan2=interface  
+       uci set network.wan2._orig_ifname=eth1    
+	uci set network.wan2._orig_bridge=false      
+       uci set network.wan2.proto=3g          
+       uci set network.wan2.service=umts  
+       uci set network.wan2.keepalive=0    
+       uci set network.wan2.device=$tty    
+       uci set network.wan2.apn=$NAPN    
+       uci set network.wan2.username=$NUSER     
+       uci set network.wan2.password=$NPASS
+       uci set network.wan2.pincode=$NPIN
+       uci set network.wan2.pppd_options=noipdefault
+	set_dns
+       uci commit network
+	sav_vars "1" "0"
+}
+
+create_rndis() {
+	uci set cbi_file1.Modem.proto="CDC-RNDIS"
+	uci set cbi_file1.Modem.port=" "
+	uci commit cbi_file1
+
+	uci delete network.wan2        
+	uci set network.wan2=interface
+	uci set network.wan2.proto=dhcp  
+	uci set network.wan2.ifname=usb0  
+	set_dns
+	uci commit network
+	sav_vars "1" "0"
+}
+
+create_ether() {
+	uci set cbi_file1.Modem.proto="CDC-ETHER eth2"
+	uci set cbi_file1.Modem.port=" "
+	uci commit cbi_file1
+
+	uci delete network.wan2        
+	uci set network.wan2=interface
+	uci set network.wan2.proto=dhcp  
+	uci set network.wan2.ifname=eth2  
+	set_dns
+	uci commit network
+	sav_vars "1" "0"
+}
+
+create_ether1() {
+	uci set cbi_file1.Modem.proto="CDC-ETHER eth1"
+	uci set cbi_file1.Modem.port=" "
+	uci commit cbi_file1
+
+	uci delete network.wan2        
+	uci set network.wan2=interface
+	uci set network.wan2.proto=dhcp  
+	uci set network.wan2.ifname=eth1  
+	set_dns
+	uci commit network
+	sav_vars "1" "0"
+}
+
+create_qmi0() {
+	uci set cbi_file1.Modem.proto="QMI-to-WWAN"
+	uci set cbi_file1.Modem.port="/dev/cdc-wdm0"
+	uci commit cbi_file1
+
+	uci delete network.wan2        
+	uci set network.wan2=interface
+	uci set network.wan2.proto=dhcp  
+	uci set network.wan2.ifname=wwan0  
+	uci set network.wan2._orig_bridge=false
+	uci commit network
+	QMIWWAN=0
+	sav_vars "1" "2"
+}
+
+create_ncm() {
+	uci set cbi_file1.Modem.proto="CDC-NCM"
+	uci set cbi_file1.Modem.port="/dev/ttyUSB0"
+	uci commit cbi_file1
+
+	uci delete network.wan2        
+	uci set network.wan2=interface
+	uci set network.wan2.proto=dhcp  
+	uci set network.wan2.ifname=wwan0  
+	uci set network.wan2._orig_bridge=false
+	set_dns
+	uci commit network
+	sav_vars "1" "3"
+}
+
+create_ncm1() {
+	uci set cbi_file1.Modem.proto="CDC-NCM"
+	uci set cbi_file1.Modem.port="/dev/ttyUSB1"
+	uci commit cbi_file1
+
+	uci delete network.wan2        
+	uci set network.wan2=interface
+	uci set network.wan2.proto=dhcp  
+	uci set network.wan2.ifname=wwan0  
+	uci set network.wan2._orig_bridge=false
+	set_dns
+	uci commit network
+	sav_vars "1" "4"
+}
+
+create_sierra() {
+	uci set cbi_file1.Modem.proto="USB-to-WWAN"
+	uci commit cbi_file1
+
+	uci delete network.wan2        
+	uci set network.wan2=interface
+	uci set network.wan2.proto=dhcp  
+	uci set network.wan2.ifname=wwan0  
+	uci set network.wan2._orig_bridge=false
+       uci set network.wan2._orig_ifname=eth1 
+	set_dns
+	uci commit network
+	sav_vars "1" "1"
+}
+
+ppp_modem_check() {
+	VEN=$1
+	PROD=$2
+	CPORT=$3
+	DPORT=$4
+	/etc/modemchk $VEN $PROD
+	source /tmp/parmpass
+	ddata=$TPARM
+	let "ddata &= 0x0f"
+	cdata=$TPARM
+	let "cdata >>= 8"
+	if [ $ddata -ne 0 ]; then
+		if [ $ddata -eq 1 ]; then
+			create_network "/dev/ttyUSB0"
+		fi
+		if [ $ddata -eq 2 ]; then
+			create_network "/dev/ttyUSB1"
+		fi
+		if [ $ddata -eq 3 ]; then
+			create_network "/dev/ttyUSB2"
+		fi
+		if [ $ddata -eq 4 ]; then
+			create_network "/dev/ttyUSB3"
+		fi
+		if [ $ddata -eq 5 ]; then
+			create_network "/dev/ttyUSB4"
+		fi
+		if [ $ddata -eq 6 ]; then
+			create_network "/dev/ttyUSB5"
+		fi
+	else
+		create_network $DPORT
+	fi
+# E1762
+	if [ $VEN = 12d1 -a $PROD = 14ac ]; then
+		CPORT="1"
+	fi
+	if [ $VEN = 12d1 -a $PROD = 140c ]; then
+		CPORT="2"
+	fi
+
+	if [ $cdata -ne 0 ]; then
+		if [ $cdata -eq 1 ]; then
+			CPORT="0"
+		fi
+		if [ $cdata -eq 2 ]; then
+			CPORT="1"
+		fi
+		if [ $cdata -eq 3 ]; then
+			CPORT="2"
+		fi
+		if [ $cdata -eq 4 ]; then
+			CPORT="3"
+		fi
+		if [ $cdata -eq 5 ]; then
+			CPORT="4"
+		fi
+		if [ $cdata -eq 6 ]; then
+			CPORT="5"
+		fi
+	fi
+	rm -f /tmp/port.file
+	PORT="$CPORT"
+	echo 'PORT="'"$PORT"'"' >> /tmp/port.file
+}
+
+port_set()
+{
+	VEN=$1
+	PROD=$2
+	CPORT=$3
+	/etc/modemchk $VEN $PROD
+	source /tmp/parmpass
+	cdata=$TPARM
+	let "cdata >>= 8"
+
+# K4511
+	if [ $VEN = 12d1 -a $PROD = 14cc ]; then
+		CPORT="0"
+	fi
+# K4505
+	if [ $VEN = 12d1 -a $PROD = 1464 ]; then
+		CPORT="0"
+	fi
+# E398u-12
+	if [ $VEN = 12d1 -a $PROD = 151b ]; then
+		CPORT="0"
+	fi
+	if [ $cdata -ne 0 ]; then
+		if [ $cdata -eq 1 ]; then
+			CPORT="0"
+		fi
+		if [ $cdata -eq 2 ]; then
+			CPORT="1"
+		fi
+		if [ $cdata -eq 3 ]; then
+			CPORT="2"
+		fi
+		if [ $cdata -eq 4 ]; then
+			CPORT="3"
+		fi
+		if [ $cdata -eq 5 ]; then
+			CPORT="4"
+		fi
+		if [ $cdata -eq 6 ]; then
+			CPORT="5"
+		fi
+	fi
+	rm -f /tmp/port.file
+	PORT="$CPORT"
+	echo 'PORT="'"$PORT"'"' >> /tmp/port.file
+}
+
+if [ "$ACTION" = add ]; then
+	{
+		find_usb_attrs
+
+		local candidates=0
+		local conf configs
+		for conf in /etc/usb_modeswitch.d/$uVid:$uPid*; do
+			[ -f "$conf" ] || break
+			configs="${configs:+$configs }$conf"
+			$((candidates++))
+		done
+
+		# Found more than one candidate, read SCSI attributes and find the best match
+		[ $candidates -gt 1 ] && {
+			find_scsi_attrs
+			for conf in $configs; do
+				match_config "$conf" && {
+					configs="$conf"
+					candidates=1
+					break
+				}
+			done
+		}
+		
+		source /etc/variable.file
+
+		log "$DEVICENAME: Manufacturer=${uMa:-?} Product=${uPr:-?} Serial=${uSe:-?} $uVid $uPid $RBDELAY $NETCREATE"
+
+		doswitch=0
+
+		if [ -z $RBDELAY ]; then
+			RBDELAY="0"
+		fi
+# Hub
+
+		if [ ! -f /tmp/bootend.file ]; then
+			rm -f /tmp/qmistate.wwan1
+			log "Delay for boot up"
+			sleep 10
+			while [ ! -f /tmp/bootend.file ]; do
+				sleep 1
+			done
+			sav_vars "0" "0"
+		fi
+
+		source /etc/variable.file
+
+		if [ -z $uMa ]; then
+			log "Ignoring Unnamed Hub"
+			exit 0
+		fi
+
+		UPR=${uPr}
+		CT=`echo $UPR | tr '[A-Z]' '[a-z]'`
+		if echo $CT | grep -q "hub" ; then
+			log "Ignoring Named Hub"
+			exit 0
+		fi
+
+		if [ $uVid = 1d6b ]; then
+			log "Ignoring Linux Hub"
+			exit 0
+		fi
+
+		if [ $NETCREATE = 0 ]; then
+			log "*******************************************************"
+			log "*"
+			log "* Start of Modem Detection and Connection Information"
+			log "*"
+			log "* Product=${uPr:-?} $uVid $uPid"
+			log "*"
+			log "*******************************************************"
+			uci set cbi_file1.Modem.uvid=$uVid
+			uci set cbi_file1.Modem.upid=$uPid
+			uci set cbi_file1.Modem.vid=$uVid
+			uci set cbi_file1.Modem.pid=$uPid
+			uci set cbi_file1.Modem.drv6=""
+			uci set cbi_file1.Modem.drv1=""
+			uci set cbi_file1.Modem.drv2=""
+			uci set cbi_file1.Modem.drv3=""
+			uci set cbi_file1.Modem.drv4=""
+			uci set cbi_file1.Modem.drv5=""
+			uci set cbi_file1.Modem.drv7=""
+			uci set cbi_file1.Modem.port=""
+			uci set cbi_file1.Modem.proto=""
+			uci set cbi_file1.New.uvid=$uVid
+			uci set cbi_file1.New.upid=$uPid
+			uci set cbi_file1.New.vid=$uVid
+			uci set cbi_file1.New.pid=$uPid
+			uci commit cbi_file1
+			idV=$uVid
+			idP=$uPid
+		else
+			exit 0
+		fi
+
+		# If a candidate is remaining, start usb-modeswitch
+		[ -n "$configs" -a $candidates -gt 0 ] && {
+			log "$DEVICENAME: Selecting ${configs%% *} for mode switching"
+			# ugly workaround, but working for all hw we got for testing
+			switching_done=0
+			switching_tries=0
+			local usb_dir="/sys$DEVPATH"
+			[ -f "$usb_dir/idVendor" ] || usb_dir="${usb_dir%/*}"
+			while [ $switching_done -lt 1 -a $switching_tries -le 6 ]; do
+				$modeswitch -v $uVid -p $uPid -I -D -n -s 30 -c "${configs%% *}"
+				if [ $(sanitize "$usb_dir/idProduct") = $uPid ]; then
+					log "$DEVICENAME: Switching seemingly failed"
+					sleep 1
+				else
+					switching_done=1
+				fi
+				switching_tries=$(( $switching_tries + 1 ))
+			done
+			log "*******************************************************"
+			log "*"
+			log "* Switched to : $(sanitize "$usb_dir/idVendor"):$(sanitize "$usb_dir/idProduct")"
+			log "*"
+			log "*******************************************************"
+
+			idV="$(sanitize "$usb_dir/idVendor")"
+			idP="$(sanitize "$usb_dir/idProduct")"
+
+			uci set cbi_file1.Modem.vid=$idV
+			uci set cbi_file1.Modem.pid=$idP
+			uci set cbi_file1.New.vid=$idV
+			uci set cbi_file1.New.pid=$idP
+			uci commit cbi_file1
+		}
+		if [ $idV = 2357 -a $idP = 9000 ]; then
+			sleep 10
+		fi
+
+		LOG=/tmp/driver
+		rm -f $LOG
+		cat /sys/kernel/debug/usb/devices | grep "Cls=ff" > $LOG 2>&1
+		cat /sys/kernel/debug/usb/devices | grep "Cls=02" >> $LOG 2>&1
+		cat /sys/kernel/debug/usb/devices | grep "1 Cls=e0" >> $LOG 2>&1
+		BASE="1"
+		EQ="="
+		CM="cbi_file1.Modem.drv"
+		while read CMD; do
+			SUBSTRING="${CMD:62}"
+			UCIX="$CM$BASE$EQ$SUBSTRING"
+			uci set $UCIX
+			BASE=`expr $BASE + 1`
+		done < $LOG
+		uci commit cbi_file1
+		drv1=$(uci get cbi_file1.Modem.drv1)
+		drv2=$(uci get cbi_file1.Modem.drv2)
+		drv3=$(uci get cbi_file1.Modem.drv3)
+		drv4=$(uci get cbi_file1.Modem.drv4)
+		drv5=$(uci get cbi_file1.Modem.drv5)
+		drv6=$(uci get cbi_file1.Modem.drv6)
+		drv7=$(uci get cbi_file1.Modem.drv7)
+		log "*******************************************************"
+		log "*"
+		/etc/protofind $idV $idP $drv1 $drv2 $drv3 $drv4 $drv5 $drv6 $drv7
+		local retval=$?
+
+		log "* ProtoFind returns : $retval"
+		log "*"
+		log "*******************************************************"
+
+		pkill getsig
+		uci set cbi_file.Version.proto="$retval"
+		uci set cbi_file.Version.getsig="0"
+		uci commit cbi_file
+
+		local fval = $retval
+		FORCE=$(uci get cbi_file.Network.ppp)
+		if [ -n $FORCE ]; then
+			if [ $FORCE = 1 ]; then
+				log "Forcing PPP mode"
+				if [ $idV = 12d1 ]; then
+					retval=10
+				else
+					retval=11
+				fi
+				log "Forced Protcol Value : $retval"
+			fi
+		fi
+
+
+		if [ $retval -eq 1 ]; then
+			create_sierra
+			#/etc/init.d/network start
+			ifup wan
+		else
+			if [ $retval -eq 2 ]; then
+				port_set $idV $idP "1"
+				create_qmi0
+				#/etc/init.d/network start
+				ifup wan
+			else
+				if [ $retval -eq 4 ]; then
+					port_set $idV $idP "0"
+					create_ncm
+					#/etc/init.d/network start
+					ifup wan
+				else
+					if [ $retval -eq 5 ]; then
+						create_ether
+						#/etc/init.d/network start
+						ifup wan
+					else
+						if [ $retval -eq 10 ]; then
+							ppp_modem_check $idV $idP "2" "/dev/ttyUSB0"
+							#/etc/init.d/network start
+							ifup wan
+						else
+							if [ $retval -eq 11 ]; then
+								ppp_modem_check $idV $idP "2" "/dev/ttyUSB1"
+								#/etc/init.d/network start
+								ifup wan
+							else
+								if [ $retval -eq 12 ]; then
+									ppp_modem_check $idV $idP "2" "/dev/ttyUSB1"
+									#/etc/init.d/network start
+									ifup wan
+								else
+									if [ $retval -eq 13 ]; then
+										ppp_modem_check $idV $idP "3" "/dev/ttyUSB4"
+										#/etc/init.d/network start
+										ifup wan
+									else
+										if [ $retval -eq 14 ]; then
+											ppp_modem_check $idV $idP "2" "/dev/ttyUSB3"
+											#/etc/init.d/network start
+											ifup wan
+										else
+											if [ $retval -eq 8 ]; then
+												create_rndis
+												#/etc/init.d/network start
+												ifup wan
+											else
+												if [ $retval -eq 6 ]; then
+													port_set $idV $idP "1"
+													create_ncm1
+													#/etc/init.d/network start
+													ifup wan
+												else
+													if [ $retval -eq 7 ]; then
+														create_ether1
+														#/etc/init.d/network start
+														ifup wan
+													else
+														sav_vars "1" "0"
+														uci delete network.wan2
+													fi
+												fi 
+											fi
+										fi
+									fi
+								fi
+							fi
+						fi
+					fi
+				fi
+			fi
+		fi
+	}
+fi
+
+if [ "$ACTION" = remove ]; then
+	find_usb_attrs
+	if [ -z $uVid ]; then
+		uci delete network.wan2        
+		uci set network.wan2=interface
+		uci set network.wan2.proto=dhcp  
+		uci commit network
+		pkill pppd
+
+		sav_vars "0" "0"
+		rm -f /tmp/qmistate.wwan1
+		uci set cbi_file1.Modem.uvid=""
+		uci set cbi_file1.Modem.upid=""
+		uci set cbi_file1.Modem.vid=""
+		uci set cbi_file1.Modem.pid=""
+		uci set cbi_file1.Modem.proto=""
+		uci set cbi_file1.Modem.drv6=""
+		uci set cbi_file1.Modem.drv1=""
+		uci set cbi_file1.Modem.drv2=""
+		uci set cbi_file1.Modem.drv3=""
+		uci set cbi_file1.Modem.drv4=""
+		uci set cbi_file1.Modem.drv5=""
+		uci set cbi_file1.Modem.drv7=""
+		uci set cbi_file1.Modem.port=""
+		uci commit cbi_file1
+		uci set cbi_file.Version.getsig="0"
+		uci commit cbi_file
+		pkill getsig
+		rm -f /tmp/getsig.file
+		rm -f /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "No Modem Present" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo " " >> /tmp/status.file
+		echo " " >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+		echo "-" >> /tmp/status.file
+	fi
+	log "Remove $DEVICENAME $uVid $NETCREATE"
+fi

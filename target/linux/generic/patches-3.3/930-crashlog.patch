@@ -26,7 +26,7 @@
  
 +config CRASHLOG
 +	bool "Crash logging"
-+	depends on (!NO_BOOTMEM || HAVE_MEMBLOCK) && !ARM
++	depends on (!NO_BOOTMEM || HAVE_MEMBLOCK) && !(ARM || SPARC || PPC)
 +
  config BLK_DEV_INITRD
  	bool "Initial RAM filesystem and RAM disk (initramfs/initrd) support"
@@ -166,7 +166,7 @@
 +		return;
 +
 +	va_start(args, fmt);
-+	crashlog_buf->len += vsnprintf(
++	crashlog_buf->len += vscnprintf(
 +		&crashlog_buf->data[crashlog_buf->len],
 +		len, fmt, args);
 +	va_end(args);

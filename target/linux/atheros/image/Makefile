@@ -24,19 +24,19 @@ define Image/Build
 	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/$(IMG_PREFIX)-root.$(1) bs=128k conv=sync
 
 	-$(STAGING_DIR_HOST)/bin/mkfwimage \
-		-B XS2 -v XS2.ar2316.Opuntia.$(REVISION) \
+		-B XS2 -v XS2.ar2316.OpenWrt.$(REVISION) \
 		-k $(BIN_DIR)/$(IMG_PREFIX)-vmlinux.lzma \
 		-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
 		-o $(BIN_DIR)/$(IMG_PREFIX)-ubnt2-$(1).bin
 
 	-$(STAGING_DIR_HOST)/bin/mkfwimage \
-		-B XS5 -v XS5.ar2313.Opuntia.$(REVISION) \
+		-B XS5 -v XS5.ar2313.OpenWrt.$(REVISION) \
 		-k $(BIN_DIR)/$(IMG_PREFIX)-vmlinux.lzma \
 		-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
 		-o $(BIN_DIR)/$(IMG_PREFIX)-ubnt5-$(1).bin
 
 	-$(STAGING_DIR_HOST)/bin/mkfwimage \
-		-B XS2-8 -v XS2.ar2316.Opuntia.$(REVISION) \
+		-B XS2-8 -v XS2.ar2316.OpenWrt.$(REVISION) \
 		-k $(BIN_DIR)/$(IMG_PREFIX)-vmlinux.lzma \
 		-r $(BIN_DIR)/$(IMG_PREFIX)-root.$(1) \
 		-o $(BIN_DIR)/$(IMG_PREFIX)-ubnt2-pico2-$(1).bin

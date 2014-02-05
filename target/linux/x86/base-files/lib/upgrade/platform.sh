@@ -1,5 +1,3 @@
-USE_REFRESH=1
-
 x86_get_rootfs() {
 	local rootfsdev
 	local rootfstype
@@ -27,16 +25,22 @@ platform_check_image() {
 	esac
 }
 
-platform_refresh_partitions() {
-	return 0
-}
-
 platform_copy_config() {
 	local rootfs="$(x86_get_rootfs)"
 	local rootfsdev="${rootfs##*:}"
 	
 	mount -t ext4 -o rw,noatime "${rootfsdev%[0-9]}1" /mnt
 	cp -af "$CONF_TAR" /mnt/
+	umount /mnt
+}
+
+platform_copy_licenses() {
+	local rootfs="$(x86_get_rootfs)"
+	local rootfsdev="${rootfs##*:}"
+	
+	mount -t ext4 -o rw,noatime "${rootfsdev%[0-9]}1" /mnt
+	cp -af "/etc/licenses" /mnt/
+	cp -af "/etc/product_id.txt" /mnt/
 	umount /mnt
 }
 

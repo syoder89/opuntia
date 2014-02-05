@@ -1,0 +1,20 @@
+INCLUDEDIR		= -I/usr/include/ncurses
+
+OBJS			= input.o menurt.o listbox.o winops.o labels.o \
+				msgboxes.o txbox.o
+
+all: libtextbox.a
+
+libtextbox.a: $(OBJS)
+	rm -rf libtextbox.a
+	$(AR) cq libtextbox.a $(OBJS)
+	$(RANLIB) libtextbox.a
+#	gcc -shared -o libtextbox.so $(OBJS)
+
+%.o: %.c *.h
+	$(CC) -O2 -g -Wall -fPIC $(INCLUDEDIR) -c -o $*.o $<
+
+clean:
+	rm -rf *.o *~ libtextbox.a libtextbox.so
+
+

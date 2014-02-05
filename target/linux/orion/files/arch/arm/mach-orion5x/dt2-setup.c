@@ -377,9 +377,9 @@ static int __init parse_tag_dt2_uboot(const struct tag *t)
 __tagtable(ATAG_MV_UBOOT, parse_tag_dt2_uboot);
 
 /*
- * This is Opuntia specific fixup. It includes code from original "tag_fixup_mem32" to
+ * This is OpenWrt specific fixup. It includes code from original "tag_fixup_mem32" to
  * fixup bogus memory tags and also fixes kernel cmdline by adding " init=/etc/preinit"
- * at the end. It is important to flash Opuntia image from original Freecom firmware.
+ * at the end. It is important to flash OpenWrt image from original Freecom firmware.
  *
  * Vanilla kernel should use "tag_fixup_mem32" function.
  */

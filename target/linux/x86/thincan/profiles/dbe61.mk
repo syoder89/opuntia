@@ -10,7 +10,7 @@ define Profile/DBE61
 endef
 
 define Profile/DBE61/Description
-	Compile Opuntia for Artec ThinCan DBE61
+	Compile OpenWrt for Artec ThinCan DBE61
 
 	ThinCan DBE61 is a thin-client featuring:
 	  * AMD Geode LX700

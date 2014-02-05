@@ -307,7 +307,7 @@ print_config() {
 			echo "Available targets:"                               >&2
 			echo $mktargets                                         >&2
 		else
-			echo -e "Could not find a suitable Opuntia target for " >&2
+			echo -e "Could not find a suitable OpenWrt target for " >&2
 			echo -e "CPU architecture '$cpuarch' - you need to "    >&2
 			echo -e "define one first!"                             >&2
 		fi
@@ -355,6 +355,10 @@ print_config() {
 	echo "CONFIG_TOOLCHAIN_ROOT=\"$TOOLCHAIN\"" >> "$config"
 	echo "CONFIG_TOOLCHAIN_PREFIX=\"$prefix\"" >> "$config"
 	echo "CONFIG_TARGET_NAME=\"$target\"" >> "$config"
+
+	if [ "$LIBC_TYPE" != glibc ]; then
+		echo "CONFIG_TOOLCHAIN_LIBC=\"$LIBC_TYPE\"" >> "$config"
+	fi
 
 	local lib
 	for lib in C RT PTHREAD GCC STDCPP SSP GFORTRAN; do

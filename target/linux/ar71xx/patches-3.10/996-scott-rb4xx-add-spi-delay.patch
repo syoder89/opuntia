@@ -1,0 +1,22 @@
+--- a/drivers/spi/spi-rb4xx.c
++++ b/drivers/spi/spi-rb4xx.c
+@@ -74,13 +74,18 @@ static inline void do_spi_init(struct sp
+ 						AR71XX_SPI_IOC_CS0;
+ 
+ 	spi_clk_low = cs;
++	ndelay(20000); // Scott added to allow for proper operation on warm boot
+ }
+ 
+ static inline void do_spi_finish(void __iomem *base)
+ {
+-	do_spi_delay();
++//	do_spi_delay();
++// This delay may be all that's required, but of course it's a no-op if debug is not
++// enabled - Scott
++	ndelay(20000); // Scott added to allow for proper operation on warm boot
+ 	__raw_writel(AR71XX_SPI_IOC_CS0 | AR71XX_SPI_IOC_CS1,
+ 		     base + AR71XX_SPI_REG_IOC);
++	ndelay(20000); // Scott added to allow for proper operation on warm boot
+ }
+ 
+ static inline void do_spi_clk(void __iomem *base, int bit)

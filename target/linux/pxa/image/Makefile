@@ -7,10 +7,6 @@
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/image.mk
 
-define Image/Prepare
-	cp $(LINUX_DIR)/arch/arm/boot/uImage $(KDIR)/uImage
-endef
-
 define Image/BuildKernel
 	cp $(KDIR)/uImage $(BIN_DIR)/$(IMG_PREFIX)-uImage
 endef
@@ -18,7 +14,7 @@ endef
 # Build a fake flash image for usage in Qemu
 define Image/Build/Gumstix
 	dd if=/dev/zero bs=128k count=256 of=$(BIN_DIR)/$(IMG_PREFIX)-$(1)-qemu-flash.img
-	dd if=$(BIN_DIR)/opuntia-pxa-gumstix-u-boot.bin conv=notrunc bs=128k \
+	dd if=$(BIN_DIR)/openwrt-pxa-gumstix-u-boot.bin conv=notrunc bs=128k \
 		of=$(BIN_DIR)/$(IMG_PREFIX)-$(1)-qemu-flash.img
 	dd if=$(KDIR)/root.$(1) conv=notrunc bs=128k seek=2 \
 		of=$(BIN_DIR)/$(IMG_PREFIX)-$(1)-qemu-flash.img

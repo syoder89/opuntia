@@ -8,7 +8,7 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/image.mk
 
 define Image/BuildKernel
-	cp $(LINUX_DIR)/arch/$(ARCH)/boot/$(subst ",,$(KERNELNAME)) $(BIN_DIR)/opuntia-$(BOARD)-vmlinux.elf
+	cp $(LINUX_DIR)/arch/$(ARCH)/boot/$(subst ",,$(KERNELNAME)) $(BIN_DIR)/openwrt-$(BOARD)-vmlinux.elf
 endef
 
 define Image/Build/squashfs
@@ -17,7 +17,7 @@ endef
 
 define Image/Build
 	$(call Image/Build/$(1))
-	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/opuntia-$(BOARD)-root.$(1) bs=128k conv=sync
+	dd if=$(KDIR)/root.$(1) of=$(BIN_DIR)/openwrt-$(BOARD)-root.$(1) bs=128k conv=sync
 endef
 
 $(eval $(call BuildImage))

@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Copyright (C) 2013 ImageStream Internet Solutions, Inc.
+#
+
+# Add a wwan cellular interface
+
+uci batch <<EOF
+set network.wwan=interface
+set network.wwan.proto=qmi
+set network.wwan.ifname=wwan0
+set network.wwan.provider=att
+set network.wwan.service=auto
+set network.wwan.apn=wap.cingular
+set network.wwan.auto=0
+add_list firewall.@zone[1].network=wwan
+EOF
+
+uci commit network
+uci commit firewall
+
+exit 0
+

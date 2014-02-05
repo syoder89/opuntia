@@ -38,7 +38,7 @@ define Package/libnetsnmp
 $(call Package/net-snmp/Default)
   SECTION:=libs
   CATEGORY:=Libraries
-  DEPENDS:=+libelf +libopenssl
+  DEPENDS:=+libelf1
   TITLE:=Open source SNMP implementation (libraries)
 endef
 
@@ -78,7 +78,7 @@ endef
 define Package/snmpd-static
 $(call Package/net-snmp/Default)
   TITLE:=Open source SNMP implementation (daemon)
-  DEPENDS:=+libelf
+  DEPENDS:=+libelf1
 endef
 
 define Package/snmpd-static/description
@@ -122,6 +122,7 @@ SNMP_MIB_MODULES_INCLUDED = \
 	ucd-snmp/loadave \
 	ucd-snmp/memory \
 	ucd-snmp/pass \
+	ucd-snmp/pass_persist \
 	ucd-snmp/proc \
 	ucd-snmp/vmstat \
 	util_funcs \
@@ -155,7 +156,7 @@ CONFIGURE_ARGS += \
 	--enable-mfd-rewrites \
 	--enable-shared \
 	--enable-static \
-	--with-endianness=little \
+	--with-endianness=$(if $(CONFIG_BIG_ENDIAN),big,little) \
 	--with-logfile=/var/log/snmpd.log \
 	--with-persistent-directory=/usr/lib/snmp/ \
 	--with-default-snmp-version=1 \
@@ -164,13 +165,10 @@ CONFIGURE_ARGS += \
 	--enable-applications \
 	--disable-debugging \
 	--disable-manuals \
-	--disable-mibs \
-	--disable-scripts \
-	--with-out-mib-modules="$(SNMP_MIB_MODULES_EXCLUDED)" \
-	--with-mib-modules="$(SNMP_MIB_MODULES_INCLUDED)" \
+	--with-mib-modules="smux disman/event-mib" \
 	--with-out-transports="$(SNMP_TRANSPORTS_EXCLUDED)" \
 	--with-transports="$(SNMP_TRANSPORTS_INCLUDED)" \
-	--with-openssl \
+	--without-openssl \
 	--without-libwrap \
 	--without-rpm \
 	--without-zlib \
@@ -179,6 +177,11 @@ CONFIGURE_ARGS += \
 ifeq ($(CONFIG_IPV6),y)
 SNMP_TRANSPORTS_INCLUDED+= UDPIPv6
 endif
+
+#	--disable-mibs \
+#	--disable-scripts \
+#	--with-out-mib-modules="$(SNMP_MIB_MODULES_EXCLUDED)" \
+#	--with-mib-modules="$(SNMP_MIB_MODULES_INCLUDED)" \
 
 TARGET_LDFLAGS += -L$(TOOLCHAIN_DIR)/usr/lib
 
@@ -225,12 +228,15 @@ define Package/snmpd/install
 	$(INSTALL_DATA) ./files/snmpd.conf $(1)/etc/config/snmpd
 	$(INSTALL_DIR) $(1)/etc/snmp
 	ln -sf /var/run/snmpd.conf $(1)/etc/snmp/
+	$(INSTALL_DATA) ./files/snmp.conf $(1)/etc/snmp/snmp.conf
 	$(INSTALL_DIR) $(1)/etc/default
 	$(INSTALL_DATA) ./files/snmpd.default $(1)/etc/default/snmpd
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/snmpd.init $(1)/etc/init.d/snmpd
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/snmpd $(1)/usr/sbin/snmpd
+	$(INSTALL_DIR) $(1)/usr/share/snmp/mibs
+	$(CP) $(PKG_INSTALL_DIR)/usr/share/snmp/mibs/* $(1)/usr/share/snmp/mibs/
 endef
 
 define Package/snmpd-static/conffiles
@@ -243,12 +249,15 @@ define Package/snmpd-static/install
 	$(INSTALL_DATA) ./files/snmpd.conf $(1)/etc/config/snmpd
 	$(INSTALL_DIR) $(1)/etc/snmp
 	ln -sf /var/run/snmpd.conf $(1)/etc/snmp/
+	$(INSTALL_DATA) ./files/snmp.conf $(1)/etc/snmp/snmp.conf
 	$(INSTALL_DIR) $(1)/etc/default
 	$(INSTALL_DATA) ./files/snmpd.default $(1)/etc/default/snmpd
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/snmpd.init $(1)/etc/init.d/snmpd
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/agent/snmpd-static $(1)/usr/sbin/snmpd
+	$(INSTALL_DIR) $(1)/usr/share/snmp/mibs
+	$(CP) $(PKG_INSTALL_DIR)/usr/share/snmp/mibs/* $(1)/usr/share/snmp/mibs/
 endef
 
 define Package/snmp-utils/install

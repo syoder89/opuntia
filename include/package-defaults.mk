@@ -21,7 +21,7 @@ define Package/Default
   MDEPENDS:=
   PROVIDES:=
   EXTRA_DEPENDS:=
-  MAINTAINER:=Opuntia Developers Team <openwrt-devel@openwrt.org>
+  MAINTAINER:=$(PKG_MAINTAINER)
   SOURCE:=$(patsubst $(TOPDIR)/%,%,$(CURDIR))
   ifneq ($(PKG_VERSION),)
     ifneq ($(PKG_RELEASE),)
@@ -42,7 +42,6 @@ define Package/Default
   else
     PKGARCH:=$(BOARD)
   endif
-  PRIORITY:=optional
   DEFAULT:=
   MENU:=
   SUBMENU:=

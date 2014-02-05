@@ -28,6 +28,13 @@ static int ag71xx_msg_level = -1;
 module_param_named(msg_level, ag71xx_msg_level, int, 0);
 MODULE_PARM_DESC(msg_level, "Message level (-1=defaults,0=none,...,16=all)");
 
+#define ETH_SWITCH_HEADER_LEN	2
+
+static inline unsigned int ag71xx_max_frame_len(unsigned int mtu)
+{
+	return ETH_SWITCH_HEADER_LEN + ETH_HLEN + VLAN_HLEN + mtu + ETH_FCS_LEN;
+}
+
 static void ag71xx_dump_dma_regs(struct ag71xx *ag)
 {
 	DBG("%s: dma_tx_ctrl=%08x, dma_tx_desc=%08x, dma_tx_status=%08x\n",
@@ -145,7 +152,7 @@ static void ag71xx_ring_tx_clean(struct ag71xx *ag)
 		}
 
 		if (ring->buf[i].skb) {
-			bytes_compl += ring->buf[i].skb->len;
+			bytes_compl += ring->buf[i].len;
 			pkts_compl++;
 			dev_kfree_skb_any(ring->buf[i].skb);
 		}
@@ -191,7 +198,7 @@ static void ag71xx_ring_rx_clean(struct ag71xx *ag)
 	for (i = 0; i < ring->size; i++)
 		if (ring->buf[i].rx_buf) {
 			dma_unmap_single(&ag->dev->dev, ring->buf[i].dma_addr,
-					 AG71XX_RX_BUF_SIZE, DMA_FROM_DEVICE);
+					 ag->rx_buf_size, DMA_FROM_DEVICE);
 			kfree(ring->buf[i].rx_buf);
 		}
 }
@@ -217,15 +224,15 @@ static bool ag71xx_fill_rx_buf(struct ag71xx *ag, struct ag71xx_buf *buf,
 {
 	void *data;
 
-	data = kmalloc(AG71XX_RX_BUF_SIZE +
+	data = kmalloc(ag->rx_buf_size +
 		       SKB_DATA_ALIGN(sizeof(struct skb_shared_info)),
 		       GFP_ATOMIC);
 	if (!data)
 		return false;
 
 	buf->rx_buf = data;
-	buf->dma_addr = dma_map_single(&ag->dev->dev, data,
-				       AG71XX_RX_BUF_SIZE, DMA_FROM_DEVICE);
+	buf->dma_addr = dma_map_single(&ag->dev->dev, data, ag->rx_buf_size,
+				       DMA_FROM_DEVICE);
 	buf->desc->data = (u32) buf->dma_addr + offset;
 	return true;
 }
@@ -433,8 +440,8 @@ static void ag71xx_hw_setup(struct ag71xx *ag)
 	ag71xx_sb(ag, AG71XX_REG_MAC_CFG2,
 		  MAC_CFG2_PAD_CRC_EN | MAC_CFG2_LEN_CHECK);
 
-	/* setup max frame length */
-	ag71xx_wr(ag, AG71XX_REG_MAC_MFL, AG71XX_TX_MTU_LEN);
+	/* setup max frame length to zero */
+	ag71xx_wr(ag, AG71XX_REG_MAC_MFL, 0);
 
 	/* setup FIFO configuration registers */
 	ag71xx_wr(ag, AG71XX_REG_FIFO_CFG0, FIFO_CFG0_INIT);
@@ -502,6 +509,10 @@ static void ag71xx_fast_reset(struct ag71xx *ag)
 
 	ag71xx_dma_reset(ag);
 	ag71xx_hw_setup(ag);
+
+	/* setup max frame length */
+	ag71xx_wr(ag, AG71XX_REG_MAC_MFL,
+		  ag71xx_max_frame_len(ag->dev->mtu));
 
 	ag71xx_wr(ag, AG71XX_REG_RX_DESC, rx_ds);
 	ag71xx_wr(ag, AG71XX_REG_TX_DESC, tx_ds);
@@ -607,7 +618,14 @@ void ag71xx_link_adjust(struct ag71xx *ag)
 static int ag71xx_open(struct net_device *dev)
 {
 	struct ag71xx *ag = netdev_priv(dev);
+	unsigned int max_frame_len;
 	int ret;
+
+	max_frame_len = ag71xx_max_frame_len(dev->mtu);
+	ag->rx_buf_size = max_frame_len + NET_SKB_PAD + NET_IP_ALIGN;
+
+	/* setup max frame length */
+	ag71xx_wr(ag, AG71XX_REG_MAC_MFL, max_frame_len);
 
 	ret = ag71xx_rings_init(ag);
 	if (ret)
@@ -684,12 +702,13 @@ static netdev_tx_t ag71xx_hard_start_xmit(struct sk_buff *skb,
 				  DMA_TO_DEVICE);
 
 	netdev_sent_queue(dev, skb->len);
+	ring->buf[i].len = skb->len;
 	ring->buf[i].skb = skb;
 	ring->buf[i].timestamp = jiffies;
 
 	/* setup descriptor fields */
 	desc->data = (u32) dma_addr;
-	desc->ctrl = (skb->len & DESC_PKTLEN_M);
+	desc->ctrl = skb->len & ag->desc_pktlen_mask;
 
 	/* flush descriptor */
 	wmb();
@@ -824,6 +843,7 @@ static int ag71xx_tx_packets(struct ag71xx *ag)
 		unsigned int i = ring->dirty % ring->size;
 		struct ag71xx_desc *desc = ring->buf[i].desc;
 		struct sk_buff *skb = ring->buf[i].skb;
+		int len = ring->buf[i].len;
 
 		if (!ag71xx_desc_empty(desc)) {
 			if (pdata->is_ar7240 &&
@@ -834,8 +854,8 @@ static int ag71xx_tx_packets(struct ag71xx *ag)
 
 		ag71xx_wr(ag, AG71XX_REG_TX_STATUS, TX_STATUS_PS);
 
-		bytes_compl += skb->len;
-		ag->dev->stats.tx_bytes += skb->len;
+		bytes_compl += len;
+		ag->dev->stats.tx_bytes += len;
 		ag->dev->stats.tx_packets++;
 
 		dev_kfree_skb_any(skb);
@@ -846,6 +866,9 @@ static int ag71xx_tx_packets(struct ag71xx *ag)
 	}
 
 	DBG("%s: %d packets sent out\n", ag->dev->name, sent);
+
+	if (!sent)
+		return 0;
 
 	netdev_completed_queue(ag->dev, sent, bytes_compl);
 	if ((ring->curr - ring->dirty) < (ring->size * 3) / 4)
@@ -859,6 +882,7 @@ static int ag71xx_rx_packets(struct ag71xx *ag, int limit)
 	struct net_device *dev = ag->dev;
 	struct ag71xx_ring *ring = &ag->rx_ring;
 	int offset = ag71xx_buffer_offset(ag);
+	unsigned int pktlen_mask = ag->desc_pktlen_mask;
 	int done = 0;
 
 	DBG("%s: rx packets, limit=%d, curr=%u, dirty=%u\n",
@@ -881,17 +905,16 @@ static int ag71xx_rx_packets(struct ag71xx *ag, int limit)
 
 		ag71xx_wr(ag, AG71XX_REG_RX_STATUS, RX_STATUS_PR);
 
-		pktlen = ag71xx_desc_pktlen(desc);
+		pktlen = desc->ctrl & pktlen_mask;
 		pktlen -= ETH_FCS_LEN;
 
 		dma_unmap_single(&dev->dev, ring->buf[i].dma_addr,
-				 AG71XX_RX_BUF_SIZE, DMA_FROM_DEVICE);
+				 ag->rx_buf_size, DMA_FROM_DEVICE);
 
-		dev->last_rx = jiffies;
 		dev->stats.rx_packets++;
 		dev->stats.rx_bytes += pktlen;
 
-		skb = build_skb(ring->buf[i].rx_buf);
+		skb = build_skb(ring->buf[i].rx_buf, 0);
 		if (!skb) {
 			kfree(ring->buf[i].rx_buf);
 			goto next;
@@ -1042,13 +1065,29 @@ static void ag71xx_netpoll(struct net_device *dev)
 }
 #endif
 
+static int ag71xx_change_mtu(struct net_device *dev, int new_mtu)
+{
+	struct ag71xx *ag = netdev_priv(dev);
+	unsigned int max_frame_len;
+
+	max_frame_len = ag71xx_max_frame_len(new_mtu);
+	if (new_mtu < 68 || max_frame_len > ag->max_frame_len)
+		return -EINVAL;
+
+	if (netif_running(dev))
+		return -EBUSY;
+
+	dev->mtu = new_mtu;
+	return 0;
+}
+
 static const struct net_device_ops ag71xx_netdev_ops = {
 	.ndo_open		= ag71xx_open,
 	.ndo_stop		= ag71xx_stop,
 	.ndo_start_xmit		= ag71xx_hard_start_xmit,
 	.ndo_do_ioctl		= ag71xx_do_ioctl,
 	.ndo_tx_timeout		= ag71xx_tx_timeout,
-	.ndo_change_mtu		= eth_change_mtu,
+	.ndo_change_mtu		= ag71xx_change_mtu,
 	.ndo_set_mac_address	= eth_mac_addr,
 	.ndo_validate_addr	= eth_validate_addr,
 #ifdef CONFIG_NET_POLL_CONTROLLER
@@ -1056,7 +1095,28 @@ static const struct net_device_ops ag71xx_netdev_ops = {
 #endif
 };
 
-static int __devinit ag71xx_probe(struct platform_device *pdev)
+static const char *ag71xx_get_phy_if_mode_name(phy_interface_t mode)
+{
+	switch (mode) {
+	case PHY_INTERFACE_MODE_MII:
+		return "MII";
+	case PHY_INTERFACE_MODE_GMII:
+		return "GMII";
+	case PHY_INTERFACE_MODE_RMII:
+		return "RMII";
+	case PHY_INTERFACE_MODE_RGMII:
+		return "RGMII";
+	case PHY_INTERFACE_MODE_SGMII:
+		return "SGMII";
+	default:
+		break;
+	}
+
+	return "unknown";
+}
+
+
+static int ag71xx_probe(struct platform_device *pdev)
 {
 	struct net_device *dev;
 	struct resource *res;
@@ -1071,7 +1131,7 @@ static int __devinit ag71xx_probe(struct platform_device *pdev)
 		goto err_out;
 	}
 
-	if (pdata->mii_bus_dev == NULL) {
+	if (pdata->mii_bus_dev == NULL && pdata->phy_mask) {
 		dev_err(&pdev->dev, "no MII bus device specified\n");
 		err = -EINVAL;
 		goto err_out;
@@ -1083,6 +1143,9 @@ static int __devinit ag71xx_probe(struct platform_device *pdev)
 		err = -ENOMEM;
 		goto err_out;
 	}
+
+	if (!pdata->max_frame_len || !pdata->desc_pktlen_mask)
+		return -EINVAL;
 
 	SET_NETDEV_DEV(dev, &pdev->dev);
 
@@ -1129,6 +1192,9 @@ static int __devinit ag71xx_probe(struct platform_device *pdev)
 	ag->tx_ring.size = AG71XX_TX_RING_SIZE_DEFAULT;
 	ag->rx_ring.size = AG71XX_RX_RING_SIZE_DEFAULT;
 
+	ag->max_frame_len = pdata->max_frame_len;
+	ag->desc_pktlen_mask = pdata->desc_pktlen_mask;
+
 	ag->stop_desc = dma_alloc_coherent(NULL,
 		sizeof(struct ag71xx_desc), &ag->stop_desc_dma, GFP_KERNEL);
 
@@ -1143,15 +1209,6 @@ static int __devinit ag71xx_probe(struct platform_device *pdev)
 
 	netif_napi_add(dev, &ag->napi, ag71xx_poll, AG71XX_NAPI_WEIGHT);
 
-	err = register_netdev(dev);
-	if (err) {
-		dev_err(&pdev->dev, "unable to register net device\n");
-		goto err_free_desc;
-	}
-
-	pr_info("%s: Atheros AG71xx at 0x%08lx, irq %d\n",
-		dev->name, dev->base_addr, dev->irq);
-
 	ag71xx_dump_regs(ag);
 
 	ag71xx_hw_init(ag);
@@ -1160,7 +1217,7 @@ static int __devinit ag71xx_probe(struct platform_device *pdev)
 
 	err = ag71xx_phy_connect(ag);
 	if (err)
-		goto err_unregister_netdev;
+		goto err_free_desc;
 
 	err = ag71xx_debugfs_init(ag);
 	if (err)
@@ -1168,12 +1225,22 @@ static int __devinit ag71xx_probe(struct platform_device *pdev)
 
 	platform_set_drvdata(pdev, dev);
 
+	err = register_netdev(dev);
+	if (err) {
+		dev_err(&pdev->dev, "unable to register net device\n");
+		goto err_debugfs_exit;
+	}
+
+	pr_info("%s: Atheros AG71xx at 0x%08lx, irq %d, mode:%s\n",
+		dev->name, dev->base_addr, dev->irq,
+		ag71xx_get_phy_if_mode_name(pdata->phy_if_mode));
+
 	return 0;
 
+err_debugfs_exit:
+	ag71xx_debugfs_exit(ag);
 err_phy_disconnect:
 	ag71xx_phy_disconnect(ag);
-err_unregister_netdev:
-	unregister_netdev(dev);
 err_free_desc:
 	dma_free_coherent(NULL, sizeof(struct ag71xx_desc), ag->stop_desc,
 			  ag->stop_desc_dma);
@@ -1188,7 +1255,7 @@ err_out:
 	return err;
 }
 
-static int __devexit ag71xx_remove(struct platform_device *pdev)
+static int ag71xx_remove(struct platform_device *pdev)
 {
 	struct net_device *dev = platform_get_drvdata(pdev);
 
@@ -1209,7 +1276,7 @@ static int __devexit ag71xx_remove(struct platform_device *pdev)
 
 static struct platform_driver ag71xx_driver = {
 	.probe		= ag71xx_probe,
-	.remove		= __exit_p(ag71xx_remove),
+	.remove		= ag71xx_remove,
 	.driver = {
 		.name	= AG71XX_DRV_NAME,
 	}

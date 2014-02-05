@@ -7,11 +7,11 @@
 #
 
 include $(TOPDIR)/rules.mk
-include $(INCLUDE_DIR)/kernel.mk
 include $(INCLUDE_DIR)/version.mk
+include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=base-files
-PKG_RELEASE:=117.1
+PKG_RELEASE:=151
 
 PKG_FILE_DEPENDS:=$(PLATFORM_DIR)/ $(GENERIC_PLATFORM_DIR)/base-files/
 PKG_BUILD_DEPENDS:=opkg/host
@@ -28,8 +28,8 @@ endif
 define Package/base-files
   SECTION:=base
   CATEGORY:=Base system
-  DEPENDS:=+netifd +libc
-  TITLE:=Base filesystem for Opuntia
+  DEPENDS:=+netifd +libc +procd
+  TITLE:=Base filesystem for OpenWrt
   URL:=http://openwrt.org/
   VERSION:=$(PKG_RELEASE)-$(REVISION)
 endef
@@ -52,7 +52,7 @@ $(call $(TARGET)/conffiles)
 endef
 
 define Package/base-files/description
- This package contains a base filesystem and system scripts for Opuntia.
+ This package contains a base filesystem and system scripts for OpenWrt.
 endef
 
 ifneq ($(CONFIG_PREINITOPT),)
@@ -110,8 +110,8 @@ define Package/base-files/install
 
 	$(VERSION_SED) \
 		$(1)/etc/banner \
-		$(1)/etc/openwrt_version \
-		$(1)/etc/openwrt_release
+		$(1)/etc/opuntia_version \
+		$(1)/etc/opuntia_release
 
 	mkdir -p $(1)/CONTROL
 	mkdir -p $(1)/dev

@@ -1,0 +1,268 @@
+<%+header%>
+
+<% local uvid = luci.model.uci.cursor():get("cbi_file1", "Modem", "uvid") %>
+<% local upid = luci.model.uci.cursor():get("cbi_file1", "Modem", "upid") %>
+<% local vid = luci.model.uci.cursor():get("cbi_file1", "Modem", "vid") %>
+<% local pid = luci.model.uci.cursor():get("cbi_file1", "Modem", "pid") %>
+<% local proto = luci.model.uci.cursor():get("cbi_file1", "Modem", "proto") %>
+<% local drv1 = luci.model.uci.cursor():get("cbi_file1", "Modem", "drv1") %>
+<% local drv2 = luci.model.uci.cursor():get("cbi_file1", "Modem", "drv2") %>
+<% local drv3 = luci.model.uci.cursor():get("cbi_file1", "Modem", "drv3") %>
+<% local drv4 = luci.model.uci.cursor():get("cbi_file1", "Modem", "drv4") %>
+<% local drv5 = luci.model.uci.cursor():get("cbi_file1", "Modem", "drv5") %>
+<% local drv6 = luci.model.uci.cursor():get("cbi_file1", "Modem", "drv6") %>
+<% local drv7 = luci.model.uci.cursor():get("cbi_file1", "Modem", "drv7") %>
+<% local port = luci.model.uci.cursor():get("cbi_file1", "Modem", "port") %>
+
+<%
+local modemfile = "/etc/config/modem.data"
+local modemdata = {}
+local count
+local cnt = 0
+local tt = {}
+
+os.execute("cat /sys/kernel/debug/usb/devices > /etc/modstat 2>&1")
+local file = io.open("/etc/modstat", "r")
+repeat
+	local line = file:read("*line")
+	if line == nil then
+		break
+	end
+	i = string.find(line, "SerialNumber")
+	if i == nil then
+		tt[cnt] = line
+		cnt = cnt + 1
+	end
+until 1 == 0
+cnt = cnt - 1
+file:close()
+
+
+function process_line(xline, cnt)
+	local data = {}
+	local pline = xline
+	local start = 1
+	for i=1,3 do
+		s, e = string.find(pline, " ")
+		data[i] = string.sub(pline, start, s-1)
+		pline = string.sub(pline, e+1)
+	end
+	data[4] = pline
+	modemdata[cnt] = data
+end
+
+function read_modem()
+	count = 0
+	local file = io.open(modemfile, "r")
+	if file == nil then
+		return
+	end
+	repeat
+		local line = file:read("*line")
+		if line == nil then
+			break
+		end
+		if string.len(line) < 5 then
+			break
+		end
+		count = count + 1
+		process_line(line, count)
+	until 1==0
+	file:close()
+end
+
+function process_family(index)
+	local t = { }
+	if count == 0 then
+		return t
+	end
+	local mdata = modemdata[index]
+	if mdata[1] ~= "nil" and mdata[2] ~= "nil" then
+		t[1] = mdata[1] .. ":" .. mdata[2]
+		if mdata[3] == "tty" then
+			t[2] = "default"
+		end
+		if mdata[3] == "tty0" then
+			t[2] = "ttyUSB0"
+		end
+		if mdata[3] == "tty1" then
+			t[2] = "ttyUSB1"
+		end
+		if mdata[3] == "tty2" then
+			t[2] = "ttyUSB2"
+		end
+		if mdata[3] == "tty3" then
+			t[2] = "ttyUSB3"
+		end
+		if mdata[3] == "tty4" then
+			t[2] = "ttyUSB4"
+		end
+		if mdata[3] == "tty5" then
+			t[2] = "ttyUSB5"
+		end
+
+		if mdata[4] == "tty" then
+			t[3] = "default"
+		end
+		if mdata[4] == "tty0" then
+			t[3] = "ttyUSB0"
+		end
+		if mdata[4] == "tty1" then
+			t[3] = "ttyUSB1"
+		end
+		if mdata[4] == "tty2" then
+			t[3] = "ttyUSB2"
+		end
+		if mdata[4] == "tty3" then
+			t[3] = "ttyUSB3"
+		end
+		if mdata[4] == "tty4" then
+			t[3] = "ttyUSB4"
+		end
+		if mdata[4] == "tty5" then
+			t[3] = "ttyUSB5"
+		end
+
+	end
+	return t
+end
+
+read_modem()
+
+%>
+
+
+<div class="cbi-map" id="cbi-modem">
+<h2><a id="content" name="content">Modem Information</a></h2>
+<div class="cbi-map-descr">Currently Attached Modem</div>
+<fieldset class="cbi-section" id="cbi-uvid">
+	<legend>Vendor ID, Product ID, Protocol and Drivers</legend>
+	<table width="100%"  border="0">
+  	<tr>
+    		<td width="15%"><ul>&nbsp;Unswitched Vendor ID</ul></td>
+    		<td width="10%"><ul>&nbsp;<%=uvid%></ul></td>
+    		<td width="75%">&nbsp;</td>
+  	</tr>
+  	<tr>
+    		<td><ul>&nbsp;Unswitched Product ID</ul></td>
+    		<td><ul>&nbsp;<%=upid%></ul></td>
+    		<td>&nbsp;</td>
+  	</tr>
+  	<tr>
+    		<td>&nbsp;</td>
+    		<td>&nbsp;</td>
+    		<td>&nbsp;</td>
+  	</tr>
+  	<tr>
+    		<td><ul>&nbsp;Switched Vendor ID</ul></td>
+    		<td><ul>&nbsp;<%=vid%></ul></td>
+    		<td>&nbsp;</td>
+  	</tr>
+  	<tr>
+    		<td><ul>&nbsp;Switched Product ID</ul></td>
+    		<td><ul>&nbsp;<%=pid%></ul></td>
+    		<td>&nbsp;</td>
+  	</tr>
+  	<tr>
+    		<td>&nbsp;</td>
+    		<td>&nbsp;</td>
+    		<td>&nbsp;</td>
+  	</tr>
+  	<tr>
+    		<td><ul>&nbsp;Protocol Used</ul></td>
+    		<td><ul>&nbsp;<%=proto%></ul></td>
+    		<td><ul>&nbsp;<%=port%></ul></td>
+  	</tr>
+  	<tr>
+    		<td><ul>&nbsp;Attached Drivers</ul></td>
+    		<td><ul>&nbsp;<%=drv1%></ul></td>
+    		<td>&nbsp;</td>
+  	</tr>
+  	<tr>
+    		<td>&nbsp;</td>
+    		<td><ul>&nbsp;<%=drv2%></ul></td>
+    		<td>&nbsp;</td>
+  	</tr>
+  	<tr>
+    		<td>&nbsp;</td>
+    		<td><ul>&nbsp;<%=drv3%></ul></td>
+    		<td>&nbsp;</td>
+  	</tr>
+  	<tr>
+    		<td>&nbsp;</td>
+    		<td><ul>&nbsp;<%=drv4%></ul></td>
+    		<td>&nbsp;</td>
+  	</tr>
+  	<tr>
+    		<td>&nbsp;</td>
+    		<td><ul>&nbsp;<%=drv5%></ul></td>
+    		<td>&nbsp;</td>
+  	</tr>
+  	<tr>
+    		<td>&nbsp;</td>
+    		<td><ul>&nbsp;<%=drv6%></ul></td>
+    		<td>&nbsp;</td>
+  	</tr>
+  	<tr>
+    		<td>&nbsp;</td>
+    		<td><ul>&nbsp;<%=drv7%></ul></td>
+    		<td>&nbsp;</td>
+  	</tr>
+
+	</table>
+</fieldset>
+
+<fieldset class="cbi-section" id="cbi-family">
+	<legend>Support Added for Modems</legend>
+	<table width="100%"  border="0">
+  	<tr>
+    		<td width="15%"><strong><ul><div align="left">Modem</div></ul></strong></td>
+    		<td width="10%"><strong><ul><div align="left">Data Port</div></ul></strong></td>
+    		<td width="75%"><strong><ul><div align="left">Communication Port</div></ul></strong></td>
+  	</tr>
+  	<tr>
+    		<td>&nbsp;</td>
+    		<td>&nbsp;</td>
+    		<td>&nbsp;</td>
+  	</tr>
+	<% 
+	if count > 0 then
+		for i=1,count do
+			t = process_family(i) %>
+  	<tr>
+    		<td><ul><div align="left"><%=t[1]%></div></ul></td>
+    		<td><ul><div align="left"><%=t[2]%></div></ul></td>
+    		<td><ul><div align="left"><%=t[3]%></div></ul></td>
+  	</tr>
+	<% 
+		end
+	end %>
+	</table>
+</fieldset>
+
+<fieldset class="cbi-section" id="cbi-debug">
+	<legend>Device Debug Information</legend>
+	<table width="550"  border="0">
+  	<tr>
+    		<td width="5%"><strong><ul> </ul></strong></td>
+    		<td width="90%"><strong><ul> </ul></strong></td>
+    		<td width="5%"><strong><ul> </ul></strong></td>
+  	</tr>
+	<% 
+		for i=1,cnt do %>
+  	<tr>
+    		<td><ul> </ul></td>
+    		<td><ul><div align="left"><%=tt[i]%></div></ul></td>
+    		<td><ul> </ul></td>
+  	</tr>
+	<% 
+	end %>
+	</table>
+
+</fieldset>
+
+<br></br>
+
+</div>
+
+<%+footer%>

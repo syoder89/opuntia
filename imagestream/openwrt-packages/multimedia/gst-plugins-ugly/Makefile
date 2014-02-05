@@ -11,12 +11,12 @@ PKG_NAME:=gst-plugins-ugly
 PKG_VERSION:=0.10.19
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=http://gstreamer.freedesktop.org/src/gst-plugins-ugly/
-PKG_MD5SUM:=1d81c593e22a6cdf0f2b4f57eae93df2
+PKG_MD5SUM:=ba26045c8c8c91f0d48d327ccf53ac0c
 
 PKG_BUILD_DEPENDS:= gstreamer gst-plugins-base liboil
-PKG_CONFIG_DEPENDS:= \
+PKG_CONFIG_Dba26045c8c8c91f0d48d327ccf53ac0cEPENDS:= \
 	CONFIG_PACKAGE_gst-mod-asf \
 	CONFIG_PACKAGE_gst-mod-lame \
 	CONFIG_PACKAGE_gst-mod-mad \
@@ -43,7 +43,7 @@ endef
 define Package/gst-plugins-ugly
 $(call Package/gstreamer/Default)
   TITLE+= plugins collection (ugly)
-  DEPENDS+= $(GST_DEPENDS) +liba52
+  DEPENDS+= $(GST_DEPENDS)
 endef
 
 define Package/gts-plugins-ugly/description
@@ -59,10 +59,9 @@ GST_COND_SELECT = $(patsubst %,$(if $(CONFIG_PACKAGE_gst-mod-$(1)),--enable,--di
 GST_VERSION:=0.10
 
 CONFIGURE_ARGS += \
-	--disable-debug \
 	--disable-examples \
 	\
-	$(call GST_COND_SELECT,a52dec) \
+	--disable-a52dec \
 	--disable-amrnb \
 	--disable-amrwb \
 	$(call GST_COND_SELECT,asf) \
@@ -127,9 +126,8 @@ define GstBuildPlugin
 endef
 
 $(eval $(call GstBuildPlugin,asf,ASF demuxer,audio riff rtp rtsp sdp tag,,))
-$(eval $(call GstBuildPlugin,lame,MP3 encoder (using LAME),,,+lame-lib))
+$(eval $(call GstBuildPlugin,lame,MP3 encoder (using LAME),audio,,+lame-lib))
 $(eval $(call GstBuildPlugin,mad,MP3 decoder (using MAD),audio tag,,+libid3tag +libmad))
 $(eval $(call GstBuildPlugin,mpeg2dec,MPEG decoder,video,,+libmpeg2))
-$(eval $(call GstBuildPlugin,a52dec,AC3/ATSC A/52 decoder,audio,,+liba52))
 
 $(eval $(call BuildPackage,gst-plugins-ugly))

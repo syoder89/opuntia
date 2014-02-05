@@ -9,7 +9,7 @@ RAMSIZE		= 0x00800000		# 8MB
 LOADADDR	= 0x80400000		# RAM start + 4M
 KERNEL_ENTRY	= 0x80002000
 
-CROSS_COMPILE = mipsel-opuntia-linux-
+CROSS_COMPILE = mipsel-openwrt-linux-
 
 OBJCOPY:= $(CROSS_COMPILE)objcopy -O binary -R .reginfo -R .note -R .comment -R .mdebug -S
 CFLAGS := -I./include -fno-builtin -Os -G 0 -ffunction-sections -mno-abicalls -fno-pic -mabi=32 -march=mips32 -Wa,-32 -Wa,-march=mips32 -Wa,-mips32 -Wa,--trap -Wall -DRAMSTART=${RAMSTART} -DRAMSIZE=${RAMSIZE} -DKERNEL_ENTRY=${KERNEL_ENTRY}

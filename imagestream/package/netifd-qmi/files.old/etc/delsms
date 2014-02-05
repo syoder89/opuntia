@@ -1,0 +1,7 @@
+#!/bin/sh
+
+SLOT=$1
+
+export ATCMD="AT+CMGD=$SLOT"
+
+echo "$ATCMD" > /tmp/bandcmd.at

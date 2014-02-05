@@ -9,21 +9,17 @@ include $(TOPDIR)/rules.mk
 ARCH:=mips
 BOARD:=ar71xx
 BOARDNAME:=Atheros AR7xxx/AR9xxx
-FEATURES:=squashfs jffs2 targz
-CFLAGS:=-Os -pipe -mips32r2 -mtune=mips32r2 -fno-caller-saves
-SUBTARGETS:=generic nand
+FEATURES:=mips16
+CPU_TYPE=34kc
+SUBTARGETS:=generic nand mikrotik
 
-LINUX_VERSION:=3.3.8
+LINUX_VERSION:=3.10.28
 
 include $(INCLUDE_DIR)/target.mk
 
 DEFAULT_PACKAGES += \
-	kmod-leds-gpio kmod-gpio-button-hotplug kmod-wdt-ath79 swconfig \
+	kmod-leds-gpio kmod-gpio-button-hotplug swconfig \
 	kmod-ledtrig-default-on kmod-ledtrig-timer kmod-ledtrig-netdev \
 	kmod-ath9k wpad-mini uboot-envtools
-
-define Target/Description
-	Build firmware images for Atheros AR7xxx/AR9xxx based boards.
-endef
 
 $(eval $(call BuildTarget))

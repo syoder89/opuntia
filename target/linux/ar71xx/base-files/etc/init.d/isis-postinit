@@ -1,0 +1,27 @@
+#!/bin/sh /etc/rc.common
+#
+#
+
+START=99
+
+start() {
+	. /lib/functions.sh
+	. /lib/upgrade/platform.sh
+
+	RC_POSTINSTALL="rc.postinstall"
+	mnt_nand_root=/tmp/nand_root
+	mkdir $mnt_nand_root
+	mtd_nand_root="$(find_mtd_part 'nand_rootfs')"
+	[ -z "$mtd_nand_root" ] && {
+		exit 0
+	}
+
+	mount -r -t yaffs2 $mtd_nand_root $mnt_nand_root
+	if [ -x ${mnt_nand_root}/${RC_POSTINSTALL} ] ; then
+		logger "Running postinstall script..."
+		${mnt_nand_root}/${RC_POSTINSTALL}
+		logger "Done running postinstall script."
+	fi
+	umount $mnt_nand_root
+	rmdir $mnt_nand_root
+}

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2008-2011 OpenWrt.org
+# Copyright (C) 2008-2012 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -71,7 +71,6 @@ GST_COND_SELECT = $(patsubst %,$(if $(CONFIG_PACKAGE_gst-mod-$(1)),--enable,--di
 GST_VERSION:=0.10
 
 CONFIGURE_ARGS += \
-	--disable-debug \
 	--disable-examples \
 	\
 	$(call GST_COND_SELECT,alsa) \
@@ -175,7 +174,7 @@ define GstBuildLibrary
 endef
 
 $(eval $(call GstBuildLibrary,app,app,,))
-$(eval $(call GstBuildLibrary,audio,audio,interfaces,))
+$(eval $(call GstBuildLibrary,audio,audio,interfaces pbutils,))
 $(eval $(call GstBuildLibrary,cdda,CDDA,tag,))
 $(eval $(call GstBuildLibrary,fft,FFT,,))
 $(eval $(call GstBuildLibrary,interfaces,interfaces,))
@@ -234,7 +233,7 @@ $(eval $(call GstBuildPlugin,ogg,Ogg,riff tag,,+libogg))
 $(eval $(call GstBuildPlugin,playbin,playback,video interfaces pbutils,,))
 $(eval $(call GstBuildPlugin,tcp,TCP,dataprotocol,,))
 $(eval $(call GstBuildPlugin,theora,Theora,video tag,ogg,+libtheora))
-$(eval $(call GstBuildPlugin,typefindfunctions,'typefind' functions,,,))
+$(eval $(call GstBuildPlugin,typefindfunctions,'typefind' functions,pbutils,,))
 $(eval $(call GstBuildPlugin,videotestsrc,video test,,,+liboil))
 $(eval $(call GstBuildPlugin,volume,volume,audio controller,,+liboil))
 $(eval $(call GstBuildPlugin,vorbis,Vorbis,audio tag,ogg,+libvorbis))
