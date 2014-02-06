@@ -604,6 +604,7 @@ proto_qmi_teardown() {
 	do_lock
 	proto_qmi_stop_network ${interface}
 	do_unlock
+	proto_qmi_led_off ${iface}
 	proto_kill_command "$interface"
 	echo "$interface done"
 }
