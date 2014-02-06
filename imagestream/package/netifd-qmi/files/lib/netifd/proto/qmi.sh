@@ -181,7 +181,8 @@ proto_qmi_find_led() {
 }
 
 proto_qmi_led_ok() {
-	proto_qmi_find_led $1 && /etc/init.d/led reload
+	proto_qmi_find_led $1 && echo netdev > /sys/class/leds/$led/trigger && echo $1 > /sys/class/leds/$led/device_name \
+			&& echo "link tx rx" > /sys/class/leds/$led/mode && echo 1 > /sys/class/leds/$led/brightness
 }
 
 proto_qmi_led_off() {
@@ -230,6 +231,29 @@ do_exit() {
     proto_qmi_log daemon.err "Exiting while lock held, unlocking..."
     do_unlock
     exit
+}
+
+trigger_watchdog() {
+        proto_qmi_log "Triggering hardware watchdog forcing a hardware reset in 60 seconds..."
+        killall -9 watchdog
+}
+
+check_modem() {
+	MODEMDEV=$1
+	failcnt=3
+	while [ $((failcnt)) -gt 0 ] ; do
+        	do_lock
+        	csq=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_csq.gcom | head -n 1 | cut -d "," -f 1`
+        	do_unlock
+        	if [ "$csq" = "" ] ; then
+                	proto_qmi_log "Check modem: failed to retrieved signal quality!"
+        	else
+			return
+        	fi
+                let failcnt=failcnt-1
+	done
+	trigger_watchdog
+	sleep 120
 }
 
 proto_qmi_setup() {
@@ -420,6 +444,8 @@ proto_qmi_setup() {
 		proto_qmi_log daemon.debug "Waiting for device creation: ${CDCDEV}"
 		sleep 2
 	done
+	# Check that the modem is not hung
+	check_modem $CDCDEV
 	# Just in case there is still context data
 	proto_qmi_stop_network ${config}
 	

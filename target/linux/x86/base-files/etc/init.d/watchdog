@@ -2,7 +2,7 @@
 #
 #
 
-START=97
+START=15
 
 start() {
 	/sbin/watchdog /dev/watchdog
