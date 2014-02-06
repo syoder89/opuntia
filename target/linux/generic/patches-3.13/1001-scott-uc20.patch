@@ -1,0 +1,23 @@
+--- a/drivers/net/usb/qmi_wwan.c
++++ b/drivers/net/usb/qmi_wwan.c
+@@ -642,6 +642,7 @@ static const struct usb_device_id produc
+ 	{QMI_GOBI_DEVICE(0x12d1, 0x14f1)},	/* Sony Gobi 3000 Composite */
+ 	{QMI_GOBI_DEVICE(0x1410, 0xa021)},	/* Foxconn Gobi 3000 Modem device (Novatel E396) */
+ 	{QMI_GOBI_DEVICE(0x0af0, 0x8120)},      /* Option Gobi 3000 Modem device (Option GTM689W) */
++	{QMI_FIXED_INTF(0x05c6, 0x9003, 4)},    /* Quectel UC20 */
+ 
+ 	{ }					/* END */
+ };
+--- a/drivers/usb/serial/qcserial.c
++++ b/drivers/usb/serial/qcserial.c
+@@ -140,6 +140,10 @@ static const struct usb_device_id id_tab
+ 	{USB_DEVICE_INTERFACE_NUMBER(0x1199, 0x901c, 2)},	/* Sierra Wireless EM7700 NMEA */
+ 	{USB_DEVICE_INTERFACE_NUMBER(0x1199, 0x901c, 3)},	/* Sierra Wireless EM7700 Modem */
+ 
++	{USB_DEVICE_INTERFACE_NUMBER(0x05c6, 0x9003, 0)},	/* Quectel UC20 Device Management */
++	{USB_DEVICE_INTERFACE_NUMBER(0x05c6, 0x9003, 1)},	/* Quectel UC20 NMEA */
++	{USB_DEVICE_INTERFACE_NUMBER(0x05c6, 0x9003, 2)},	/* Quectel UC20 AT interface */
++	{USB_DEVICE_INTERFACE_NUMBER(0x05c6, 0x9003, 3)},	/* Quectel UC20 Modem */
+ 	{ }				/* Terminating entry */
+ };
+ MODULE_DEVICE_TABLE(usb, id_table);

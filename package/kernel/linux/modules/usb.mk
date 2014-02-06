@@ -119,13 +119,15 @@ define KernelPackage/usb-ohci
   KCONFIG:= \
 	CONFIG_USB_OHCI \
 	CONFIG_USB_OHCI_HCD \
+	CONFIG_USB_OHCI_HCD_PCI=y \
 	CONFIG_USB_OHCI_ATH79=y \
 	CONFIG_USB_OHCI_BCM63XX=y \
 	CONFIG_USB_OCTEON_OHCI=y \
 	CONFIG_USB_OHCI_HCD_OMAP3=y \
 	CONFIG_USB_OHCI_HCD_PLATFORM=y
-  FILES:=$(LINUX_DIR)/drivers/usb/host/ohci-hcd.ko
-  AUTOLOAD:=$(call AutoLoad,50,ohci-hcd,1)
+  FILES:=$(LINUX_DIR)/drivers/usb/host/ohci-hcd.ko \
+	 $(LINUX_DIR)/drivers/usb/host/ohci-pci.ko
+  AUTOLOAD:=$(call AutoLoad,50,ohci-hcd ohci-pci,1)
   $(call AddDepends/usb)
 endef
 
