@@ -1,5 +1,0 @@
-
-config template 'quota'
-	option applies_to_type 'only'
-
-

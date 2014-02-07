@@ -1,8 +1,0 @@
-#!/bin/sh
-
-NUMBER=$1
-TEXT=$2
-
-IX="AT+CMGS=\""$NUMBER"\""$TEXT
-echo "$IX" > /tmp/smssend.at
-

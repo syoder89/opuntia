@@ -21,9 +21,9 @@ config led
 	option trigger	'phy0tpt'
 
 config led
-	option default	1
+	option default	0
 	option name	WWAN
 	option sysfs	'alix:3'
-	option trigger	netdev
+	option trigger	none
 	option mode	'link tx rx'
 	option dev	'wwan0'

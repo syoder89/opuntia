@@ -17,7 +17,7 @@
 +		usb_autopm_put_interface(desc->intf);
 +		mutex_unlock(&desc->wlock);
 +		mutex_unlock(&wdm_mutex);
-+		if ((schedule_timeout_interruptible(HZ)) > 0)
++		if ((schedule_timeout_interruptible(HZ/10)) > 0)
 +			return -EBUSY;
 +		goto retry;
 +	}

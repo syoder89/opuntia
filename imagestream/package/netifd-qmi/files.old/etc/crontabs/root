@@ -1,5 +1,0 @@
-*/2 * * * * /etc/root
-*/1 * * * * /etc/wrtbwmon setup br-lan
-*/5 * * * * /etc/wrtbwmon update /tmp/usage.db peak
-7 */1 * * * /etc/wrtbwmon backup /tmp/usage.db /etc/usage.db
-1 1 1 * * /etc/wrtbwmon reset /tmp/usage.db /etc/usage.db

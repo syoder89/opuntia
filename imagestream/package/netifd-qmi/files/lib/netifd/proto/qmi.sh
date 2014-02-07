@@ -169,28 +169,36 @@ proto_qmi_check_led() {
     config_get sysfs $1 sysfs
 
     if [ "$dev" = "$2" ] ; then
-    	led=$sysfs
+        led=$sysfs
+        ledidx=$1
     fi
 }
 
 proto_qmi_find_led() {
-	led=""
-	config_load "system"
-	config_foreach proto_qmi_check_led led $1
-	eval [ ! -z $led ]
+        led=""
+        config_load "system"
+        config_foreach proto_qmi_check_led led $1
+        eval [ ! -z $led ]
+}
+
+proto_qmi_set_led() {
+        for i in $* ; do
+                uci set system.$ledidx.$i
+        done
+        uci commit system.$ledidx
+        /etc/init.d/led start
 }
 
 proto_qmi_led_ok() {
-	proto_qmi_find_led $1 && echo netdev > /sys/class/leds/$led/trigger && echo $1 > /sys/class/leds/$led/device_name \
-			&& echo "link tx rx" > /sys/class/leds/$led/mode && echo 1 > /sys/class/leds/$led/brightness
+        proto_qmi_find_led $1 && proto_qmi_set_led trigger=netdev dev=$1 default=1
 }
 
 proto_qmi_led_off() {
-	proto_qmi_find_led $1 && echo 0 > /sys/class/leds/$led/brightness
+        proto_qmi_find_led $1 && proto_qmi_set_led trigger=none default=0
 }
 
 proto_qmi_led_connecting() {
-	proto_qmi_find_led $1 && echo 255 > /sys/class/leds/$led/brightness && echo timer > /sys/class/leds/$led/trigger
+        proto_qmi_find_led $1 && proto_qmi_set_led trigger=timer default=255
 }
 
 LCKFILE="/var/run/man3g.pid"
@@ -231,29 +239,6 @@ do_exit() {
     proto_qmi_log daemon.err "Exiting while lock held, unlocking..."
     do_unlock
     exit
-}
-
-trigger_watchdog() {
-        proto_qmi_log "Triggering hardware watchdog forcing a hardware reset in 60 seconds..."
-        killall -9 watchdog
-}
-
-check_modem() {
-	MODEMDEV=$1
-	failcnt=3
-	while [ $((failcnt)) -gt 0 ] ; do
-        	do_lock
-        	csq=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_csq.gcom | head -n 1 | cut -d "," -f 1`
-        	do_unlock
-        	if [ "$csq" = "" ] ; then
-                	proto_qmi_log "Check modem: failed to retrieved signal quality!"
-        	else
-			return
-        	fi
-                let failcnt=failcnt-1
-	done
-	trigger_watchdog
-	sleep 120
 }
 
 proto_qmi_setup() {
@@ -444,8 +429,6 @@ proto_qmi_setup() {
 		proto_qmi_log daemon.debug "Waiting for device creation: ${CDCDEV}"
 		sleep 2
 	done
-	# Check that the modem is not hung
-	check_modem $CDCDEV
 	# Just in case there is still context data
 	proto_qmi_stop_network ${config}
 	
