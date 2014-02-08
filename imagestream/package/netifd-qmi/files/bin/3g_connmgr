@@ -16,8 +16,10 @@ failmax=4
 function check_status() {
 	do_lock
 	csq=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_csq.gcom | head -n 1 | cut -d "," -f 1`
+	timeout 10 uqmi -d $CDCDEV --get-version
+	ret=$?
 	do_unlock
-	if [ "$csq" = "" ] ; then
+	if [ "$ret" != "0" ] || [ "$csq" = "" ] ; then
 		logger "3g_connmgr: Failed to retrieved signal quality ($failcnt/$failmax)!"
 		let failcnt=failcnt+1
 		if [ $((failcnt)) -ge $((failmax)) ] ; then
@@ -26,7 +28,6 @@ function check_status() {
 		fi
 	else
 		failcnt=0
-		logger "3g_connmgr: CSQ ok at $csq"
 	fi
 }
 
