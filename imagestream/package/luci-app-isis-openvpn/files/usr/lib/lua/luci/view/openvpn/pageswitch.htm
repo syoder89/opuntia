@@ -21,13 +21,13 @@ translate("Cryptography")
 
 <fieldset class="cbi-section">
 	<legend>
-		<a href="<%=luci.dispatcher.build_url("admin", "services", "openvpn")%>"><%:Overview%></a> &raquo;
+		<a href="<%=luci.dispatcher.build_url("admin", "network", "openvpn")%>"><%:Overview%></a> &raquo;
 		<%=luci.i18n.translatef("Instance \"%s\"", self.instance)%>
 	</legend>
 	<% if self.mode == "basic" then %>
-		<a href="<%=luci.dispatcher.build_url("admin", "services", "openvpn", "advanced", self.instance, "Service")%>"><%:Switch to advanced configuration »%></a>
+		<a href="<%=luci.dispatcher.build_url("admin", "network", "openvpn", "advanced", self.instance, "Service")%>"><%:Switch to advanced configuration »%></a>
 	<% else %>
-		<a href="<%=luci.dispatcher.build_url("admin", "services", "openvpn", "basic", self.instance)%>"><%:« Switch to basic configuration%></a>
+		<a href="<%=luci.dispatcher.build_url("admin", "network", "openvpn", "basic", self.instance)%>"><%:« Switch to basic configuration%></a>
 		<hr style="margin:0.5em 0" />
 		<%:Configuration category%>:
 		<% for i, c in ipairs(self.categories) do %>
@@ -35,7 +35,7 @@ translate("Cryptography")
 				<strong><%=translate(c)%></strong>
 			<% else %>
 				<a href="<%=luci.dispatcher.build_url(
-					"admin", "services", "openvpn", "advanced", self.instance, c
+					"admin", "network", "openvpn", "advanced", self.instance, c
 				)%>"><%=translate(c)%></a>
 			<% end %>
 			<% if next(self.categories, i) then %>|<% end %>
