@@ -150,7 +150,9 @@ proto_qmi_packet_service_status () {
 
 	STATUS_CMD="qmicli -d $DEVICE --wds-get-packet-service-status $USE_PREVIOUS_CID"
 
+	do_lock
 	STATUS_OUT=`$STATUS_CMD`
+	do_unlock
 
 	CONN=`echo "$STATUS_OUT" | grep "Connection status" | sed "s/'//g" | awk 'BEGIN { FS = ": " } ; { print $2 }'`
 	if [ "x$CONN" = "x" ]; then	
@@ -229,10 +231,12 @@ do_lock() {
     done
     trap do_exit SIGTERM
     echo "$$" > ${LCKFILE}
+#logger "qmi: PID $$ took lock..."
 }
 
 do_unlock() {
     rm -f ${LCKFILE}
+#logger "qmi: PID $$ released lock..."
 }
 
 do_exit() {
@@ -429,10 +433,11 @@ proto_qmi_setup() {
 		proto_qmi_log daemon.debug "Waiting for device creation: ${CDCDEV}"
 		sleep 2
 	done
+
+	do_lock
 	# Just in case there is still context data
 	proto_qmi_stop_network ${config}
 	
-	do_lock
 # Very bad things happen when we do this! We get QMI hangs all over the place!
 #	# Reset the modem
 #	proto_qmi_log daemon.info "Resetting modem"
@@ -512,11 +517,19 @@ proto_qmi_setup() {
 
 	do_unlock
 	# Wait for registration
-	while ! qmicli -d $CDCDEV --nas-get-serving-system|grep 'Registration state'|grep "'registered'" > /dev/null; do
+	while : ; do
+		do_lock
+		qmicli -d $CDCDEV --nas-get-serving-system|grep 'Registration state'|grep "'registered'" > /dev/null
+		ret=$?
+		do_unlock
+		if [ "$ret" = "0" ] ; then 
+			break
+		fi
 		sleep 1;
 		proto_qmi_log daemon.info "Waiting for registration"
 	done
 
+	do_lock
 	# Print current network info
 	qmicli -d $CDCDEV --nas-get-serving-system 2>&1 | proto_qmi_log daemon.debug
 
@@ -527,9 +540,17 @@ proto_qmi_setup() {
 		current_apn="$apn_standard"
 	fi
 
+	do_unlock
 	# Try to start network	
 	set -o pipefail
-	while ! proto_qmi_start_network ${config} $CDCDEV "${current_apn}" 2>&1 | proto_qmi_log daemon.info; do
+	while : ; do
+		do_lock
+		proto_qmi_start_network ${config} $CDCDEV "${current_apn}" 2>&1 | proto_qmi_log daemon.info
+		ret=$?
+		do_unlock
+		if [ "$ret" = "0" ] ; then 
+			break
+		fi
 		sleep 5
 	done
 
@@ -541,9 +562,11 @@ proto_qmi_setup() {
 	fi
 	3g_connmgr -i ${iface} $REBOOT_CODE_STR &
 
+	do_lock
 	# Show status and start watchdog
 	qmicli -d $CDCDEV --nas-get-serving-system 2>&1 | proto_qmi_log daemon.debug
 	(
+		do_unlock
 		set -o pipefail
 		let counter=0
 		while sleep 20; do

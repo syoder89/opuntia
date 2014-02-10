@@ -181,7 +181,7 @@ local knownParams = {
 		{ FileUpload,	"cert",							"/etc/easy-rsa/keys/some-client.crt",							translate("Local certificate") },
 		{ FileUpload,	"key",							"/etc/easy-rsa/keys/some-client.key",							translate("Local private key") },
 		{ FileUpload,	"pkcs12",						"/etc/easy-rsa/keys/some-client.pk12",							translate("PKCS#12 file containing keys") },
-		{ ListValue,	"key_method",					{ 1, 2 },														translate("Enable TLS and assume client role") },
+		{ ListValue,	"key_method",					{ 1, 2 },														translate("Enable TLS and assume client role"), { tls_client="1" }, { tls_server="1" } },
 		{ Value,		"tls_cipher",					"DHE-RSA-AES256-SHA:DHE-DSS-AES256-SHA:AES256-SHA:EDH-RSA-DES-CBC3-SHA:EDH-DSS-DES-CBC3-SHA:DES-CBC3-SHA:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA:AES128-SHA:RC4-SHA:RC4-MD5:EDH-RSA-DES-CBC-SHA:EDH-DSS-DES-CBC-SHA:DES-CBC-SHA:EXP-EDH-RSA-DES-CBC-SHA:EXP-EDH-DSS-DES-CBC-SHA:EXP-DES-CBC-SHA:EXP-RC2-CBC-MD5:EXP-RC4-MD5",
 																														translate("TLS cipher") },
 		{ Value,		"tls_timeout",					2,																translate("Retransmit timeout on TLS control channel") },
@@ -196,8 +196,8 @@ local knownParams = {
 		--{ Value,		"askpass",						"[file]",														translate("Get PEM password from controlling tty before we daemonize") },
 		{ Flag,			"auth_nocache",					0,																translate("Don't cache --askpass or --auth-user-pass passwords") },
 		{ Value,		"tls_remote",					"remote_x509_name",												translate("Only accept connections from given X509 name") },
-		{ ListValue,	"ns_cert_type",					{ "client", "server" },											translate("Require explicit designation on certificate") },
-		{ ListValue,	"remote_cert_tls",				{ "client", "server" },											translate("Require explicit key usage on certificate") },
+		{ ListValue,	"ns_cert_type",					{ "client", "server" },											translate("Require explicit designation on certificate"), { tls_client="1" }, { tls_server="1" } },
+		{ ListValue,	"remote_cert_tls",				{ "client", "server" },											translate("Require explicit key usage on certificate"), { tls_client="1" }, { tls_server="1" } },
 		{ Value,		"crl_verify",					"/etc/easy-rsa/keys/crl.pem",									translate("Check peer certificate against a CRL") },
  	} }
 }
@@ -257,9 +257,9 @@ for _, option in ipairs(params) do
 				v = tostring(v)
 				o:value(v)
 			end
-			o.default = tostring(option[3][1])
+			o.placeholder= tostring(option[3][1])
 		else
-			o.default = tostring(option[3])
+			o.placeholder= tostring(option[3])
 		end
 	end
 

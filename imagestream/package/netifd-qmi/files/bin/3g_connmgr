@@ -86,11 +86,13 @@ do_lock() {
 	let cnt=cnt-1
     done
     echo "$$" > ${LCKFILE}
+#    logger "PID $$ took lock..."
     LOCKED=1
 }
 
 do_unlock() {
     rm -f ${LCKFILE}
+#    logger "PID $$ released lock..."
     LOCKED=0
 }
 
@@ -131,5 +133,5 @@ while : ; do
 	if [ "$REBOOT_CODE" != "" ] ; then
 		check_reboot_sms
 	fi
-	sleep 15
+	sleep 60
 done

@@ -21,7 +21,7 @@ local m = Map("openvpn", translate("OpenVPN"))
 local s = m:section( TypedSection, "openvpn", translate("OpenVPN instances"), translate("Below is a list of configured OpenVPN instances and their current state") )
 s.template = "cbi/tblsection"
 s.addremove = true
-s.extedit = luci.dispatcher.build_url( "admin", "services", "openvpn", "basic", "%s" )
+s.extedit = luci.dispatcher.build_url( "admin", "network", "openvpn", "basic", "%s" )
 
 function s.create(self, name)
       

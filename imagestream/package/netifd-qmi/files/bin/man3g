@@ -265,10 +265,12 @@ do_lock() {
     done
     trap do_exit SIGINT SIGHUP SIGTERM
     echo "$$" > ${LCKFILE}
+#    logger "Man3g: PID $$ took lock..."
 }
 
 do_unlock() {
     rm -f ${LCKFILE}
+#    logger "Man3g: PID $$ released lock..."
 }
 
 do_exit() {
