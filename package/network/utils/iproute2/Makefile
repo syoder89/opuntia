@@ -71,12 +71,14 @@ endif
 
 TARGET_CFLAGS += -ffunction-sections -fdata-sections
 
+# Scott removed - we need ipsec xfrm!
+#	IP_CONFIG_TINY=y \
+
 MAKE_FLAGS += \
 	EXTRA_CCOPTS="$(TARGET_CFLAGS) -I../include -I$(STAGING_DIR)/usr/include/libnl-tiny" \
 	KERNEL_INCLUDE="$(LINUX_DIR)/include" \
 	SHARED_LIBS="" \
 	LDFLAGS="-Wl,--gc-sections" \
-	IP_CONFIG_TINY=y \
 	FPIC=""
 
 define Build/Compile
