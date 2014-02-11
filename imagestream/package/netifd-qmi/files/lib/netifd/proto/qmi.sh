@@ -206,11 +206,14 @@ proto_qmi_led_connecting() {
 LCKFILE="/var/run/man3g.pid"
 
 do_lock() {
-    let cnt=30
+    let cnt=60
     LAST_PID=0
     while [ $((cnt)) -gt 0 ] ; do
         if [ -e ${LCKFILE} ] ; then
                 PID=$(cat ${LCKFILE})
+		if [ "$PID" == "$$" ] ; then
+			return
+		fi
                 kill -0 ${PID} > /dev/null 2>&1
                 if [ "$?" = "0" ] ; then
                         if [ $((cnt % 5)) -eq 0 ] ; then
@@ -231,17 +234,23 @@ do_lock() {
     done
     trap do_exit SIGTERM
     echo "$$" > ${LCKFILE}
-#logger "qmi: PID $$ took lock..."
+    # verify that we got it!
+    do_lock
+    LOCKED=1
+logger "qmi: PID $$ took lock..."
 }
 
 do_unlock() {
     rm -f ${LCKFILE}
-#logger "qmi: PID $$ released lock..."
+    LOCKED=0
+logger "qmi: PID $$ released lock..."
 }
 
 do_exit() {
     proto_qmi_log daemon.err "Exiting while lock held, unlocking..."
-    do_unlock
+    if [ "$LOCKED" = "1" ] ; then
+    	do_unlock
+    fi
     exit
 }
 

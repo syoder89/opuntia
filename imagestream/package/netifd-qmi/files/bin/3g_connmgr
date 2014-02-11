@@ -60,11 +60,14 @@ check_reboot_sms() {
 LCKFILE="/var/run/man3g.pid"
 
 do_lock() {
-    let cnt=290
+    let cnt=600
     LAST_PID=0
     while [ $((cnt)) -ge 0 ] ; do
   	if [ -e ${LCKFILE} ] ; then
 		PID=$(cat ${LCKFILE} 2>/dev/null)
+		if [ "$PID" == "$$" ] ; then
+			return
+		fi
         	kill -0 ${PID} > /dev/null 2>&1
         	if [ "$?" = "0" ] ; then
 			if [ "$machine" = "0" ] && [ $((cnt % 50)) -eq 0 ] ; then
@@ -86,13 +89,15 @@ do_lock() {
 	let cnt=cnt-1
     done
     echo "$$" > ${LCKFILE}
-#    logger "PID $$ took lock..."
+    # verify that we got it!
+    do_lock
+    logger "PID $$ took lock..."
     LOCKED=1
 }
 
 do_unlock() {
     rm -f ${LCKFILE}
-#    logger "PID $$ released lock..."
+    logger "PID $$ released lock..."
     LOCKED=0
 }
 

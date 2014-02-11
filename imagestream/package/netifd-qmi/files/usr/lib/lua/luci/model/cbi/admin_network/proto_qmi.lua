@@ -129,6 +129,8 @@ dns:depends("peerdns", "")
 dns.datatype = "ipaddr"
 dns.cast     = "string"
 
+reboot_code = section:taboption("advanced", Value, "reboot_code", translate("SMS code to reboot router"),
+        translate("If a received SMS message contains any part of this code the router will be rebooted"))
 
 metric = section:taboption("advanced", Value, "metric",
         translate("Use gateway metric"))
