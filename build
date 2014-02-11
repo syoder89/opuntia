@@ -84,7 +84,7 @@ case "$CMD" in
 			done
 			if [ $((retries)) -eq 0 ] ; then
 				echo "Trying in single-threaded mode..."
-				make -j 1 $section
+				make -j 1 $section V=s
 				if [ "$?" = "0" ] ; then
 					echo "Success in single-threaded mode!"
 				else
