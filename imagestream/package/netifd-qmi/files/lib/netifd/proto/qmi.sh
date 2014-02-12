@@ -206,7 +206,7 @@ proto_qmi_led_connecting() {
 LCKFILE="/var/run/man3g.pid"
 
 do_lock() {
-    let cnt=60
+    let cnt=600
     LAST_PID=0
     while [ $((cnt)) -gt 0 ] ; do
         if [ -e ${LCKFILE} ] ; then
@@ -216,7 +216,7 @@ do_lock() {
 		fi
                 kill -0 ${PID} > /dev/null 2>&1
                 if [ "$?" = "0" ] ; then
-                        if [ $((cnt % 5)) -eq 0 ] ; then
+                        if [ $((cnt % 50)) -eq 0 ] ; then
                         	proto_qmi_log daemon.info "Waiting for another man3g process to finish... (pid ${PID})"
 			fi
                 else
@@ -226,7 +226,7 @@ do_lock() {
                         fi
                 fi
                 LAST_PID=${PID}
-                sleep 1
+		usleep 100000
         else
                 break
         fi
@@ -237,13 +237,13 @@ do_lock() {
     # verify that we got it!
     do_lock
     LOCKED=1
-logger "qmi: PID $$ took lock..."
+#logger "qmi: PID $$ took lock..."
 }
 
 do_unlock() {
     rm -f ${LCKFILE}
     LOCKED=0
-logger "qmi: PID $$ released lock..."
+#logger "qmi: PID $$ released lock..."
 }
 
 do_exit() {

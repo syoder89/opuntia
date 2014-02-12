@@ -6,6 +6,8 @@ opengt
 :start
  send "AT+CMGF=1^m"
  waitfor 5 "OK"
+ send "AT+CPMS=\"MT\"^m"
+ waitfor 5 "OK"
  send "AT+CMGL=\"ALL\"^m"
  get 1 "" $s
  print $s

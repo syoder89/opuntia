@@ -16,7 +16,7 @@ failmax=4
 function check_status() {
 	do_lock
 	csq=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_csq.gcom | head -n 1 | cut -d "," -f 1`
-	timeout 10 uqmi -d $CDCDEV --get-version
+	timeout 10 uqmi -d $CDCDEV --get-version > /dev/null 2>&1
 	ret=$?
 	do_unlock
 	if [ "$ret" != "0" ] || [ "$csq" = "" ] ; then
@@ -25,13 +25,17 @@ function check_status() {
 		if [ $((failcnt)) -ge $((failmax)) ] ; then
 			trigger_watchdog
 			sleep 120
+			sync
+			sync
+			sync
+			reboot -f
 		fi
 	else
 		failcnt=0
 	fi
 }
 
-check_sms() {
+uqmi_check_sms() {
 	id=$1
 	timeout 10 uqmi -d $CDCDEV --get-message $id 2>/dev/null | grep $REBOOT_CODE
 	if [ "$?" = "0" ] ; then
@@ -43,7 +47,7 @@ check_sms() {
 	fi
 }
 
-check_reboot_sms() {
+uqmi_check_reboot_sms() {
 	
 	do_lock
 	for idx in `timeout 10 uqmi -d $CDCDEV --list-messages | sed 's/,//g'` ; do
@@ -55,6 +59,23 @@ check_reboot_sms() {
 		esac
 	done
 	do_unlock
+}
+
+check_reboot_sms() {
+	man3g display-sms --match "$REBOOT_CODE" > /dev/null 2>&1
+	id="$?"
+	if [ $((id)) -gt 0 ] ; then
+		logger "3g_connmgr: Received reboot code in message $id! Rebooting via watchdog..."
+		message=`man3g display-sms --id $id`
+		logger "3g_connmgr: message: $message"
+		man3g delete-sms --id $id
+		trigger_watchdog
+		sleep 120
+		sync
+		sync
+		sync
+		reboot -f
+	fi
 }
 
 LCKFILE="/var/run/man3g.pid"
@@ -91,13 +112,13 @@ do_lock() {
     echo "$$" > ${LCKFILE}
     # verify that we got it!
     do_lock
-    logger "PID $$ took lock..."
+#    logger "PID $$ took lock..."
     LOCKED=1
 }
 
 do_unlock() {
     rm -f ${LCKFILE}
-    logger "PID $$ released lock..."
+#    logger "PID $$ released lock..."
     LOCKED=0
 }
 
