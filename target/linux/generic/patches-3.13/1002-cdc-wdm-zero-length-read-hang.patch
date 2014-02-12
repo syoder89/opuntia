@@ -19,7 +19,7 @@ index 4d387596f3f0..750afa9774b4 100644
 +	clear_bit(WDM_READ, &desc->flags);
 +
 +	/* submit read urb only if the device is waiting for it */
-+	if (!--desc->resp_count)
++	if (!desc->resp_count || !--desc->resp_count)
 +		goto out;
 +
 +	set_bit(WDM_RESPONDING, &desc->flags);

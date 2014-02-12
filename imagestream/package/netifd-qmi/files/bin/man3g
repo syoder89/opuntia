@@ -174,7 +174,7 @@ EOM
 	fi	
 }
 
-display_sms() {
+uqmi_display_sms() {
 	id=$1
 	if [ "$machine" = "0" ] ; then
 		echo -n "Message $((id+1)) "
@@ -209,7 +209,7 @@ display_sms() {
 	fi
 }
 
-display_sms_all() {
+uqmi_display_sms_all() {
 	
 	MSG_LIST=`uqmi -d $CDCDEV --list-messages | sed 's/,//g'`
 	for idx in $MSG_LIST ; do
@@ -222,6 +222,106 @@ display_sms_all() {
 	done
 }
 
+do_parse_sms() {
+	want_id=$1
+	SMS_TMP="/tmp/man3g_sms.$$"
+	gcom -d ${MODEMDEV} -s /etc/gcom/man3g_readallsms.gcom > $SMS_TMP 2>/dev/null
+	while : ;
+	do
+		while : ;
+		do
+			if [ "${line:0:6}" = "+CMGL:" ] ; then
+				break
+			fi
+			read line || break
+		done
+		line=`echo ${line:7}`
+		id=`echo "$line" | cut -d ',' -f 1`
+		if [ "$want_id" != "" ] && [ "$want_id" != "$id" ] ; then
+			continue
+		fi
+		STATUS=`echo "$line" | cut -d ',' -f 2`
+		SMSC=""
+		SENDER=`echo "$line" | cut -d ',' -f 3`
+		ts=`echo "$line" | cut -d ',' -f 5-6`
+		# Ok this needs explaining. The output should look like: "2010-12-13,18:43:49.0,-06:00"
+		# The ts string looks like: "14/02/03,14:31:46-24" so I use a neat bash substring trick to
+		# print all but the last character of ts (substring start at 0 through length -1) and
+		# also split the timezone from -0600 to the format -06:00.
+		tzo=`date +%z`
+		cent=`date +%C`
+		ts=`echo "${cent}${ts:1:2}-${ts:4:2}-${ts:7:11}.0,${tzo:0:3}:${tzo:3}"`
+		if [ "$machine" = "0" ] ; then
+			echo -n "Message "
+		fi
+		echo "$((id+1))"
+		if [ "$machine" = "0" ] ; then
+			echo "Status: $STATUS"
+		else
+			echo "0"
+		fi
+		if [ "$machine" = "0" ] ; then
+			echo -n "SMSC: "
+		fi
+		echo '""'
+		if [ "$machine" = "0" ] ; then
+			echo -n "Sender: "
+		fi
+		echo "$SENDER"
+		if [ "$machine" = "0" ] ; then
+			echo -n "Date: "
+		fi
+		echo "\"$ts\""
+		if [ "$machine" = "0" ] ; then
+			echo -n "Text: "
+		fi
+		message=""
+		while read line
+		do
+			if [ "${line:0:2}" = "OK" ] || [ "${line:0:6}" = "+CMGL:" ] ; then
+				break
+			fi
+			message="${message} ${line}"
+		done
+ 		message=`echo $message | tr -d '\r'`
+		if [ "$machine" = "1" ] ; then
+			echo ${#message}
+		fi
+		echo \"$message\"
+		if [ "$machine" = "0" ] ; then
+			echo
+		fi
+		if [ "${line:0:6}" != "+CMGL:" ] ; then
+			read line || break
+		fi
+		if [ "$want_id" == "$id" ] ; then
+			break
+		fi
+	done < ${SMS_TMP}
+	rm -f ${SMS_TMP}
+}
+
+display_sms() {
+	id=$1
+	do_parse_sms $id
+}
+
+display_sms_all() {
+	do_parse_sms
+}
+
+uqmi_display_sms_all() {
+	
+	MSG_LIST=`uqmi -d $CDCDEV --list-messages | sed 's/,//g'`
+	for idx in $MSG_LIST ; do
+		case $idx in
+			''|*[!0-9]*) ;;
+			*)
+				display_sms $idx
+			;;
+		esac
+	done
+}
 send_sms() {
 	export SMS_NUMBER="$number"
 	export SMS_MESSAGE="$message"
@@ -305,7 +405,7 @@ msgid=-1
 while [ $# -gt 0 ] ; do
 	if [ "$1" = "--machine" ] ; then
 		machine=1
-	elif [ "$1" = "--msgid" ] ; then
+	elif [ "$1" = "--msgid" ] || [ "$1" = "--id" ] ; then
 		shift
 		msgid=$1
 		let msgid=msgid-1
@@ -324,6 +424,15 @@ done
 case $cmd in
 	status)
 		status
+	;;
+	udisplay-sms)
+		do_lock
+		if [ $((msgid)) -ge 0 ] ; then
+			uqmi_display_sms $msgid
+		else
+			uqmi_display_sms_all
+		fi
+		do_unlock
 	;;
 	display-sms)
 		do_lock
