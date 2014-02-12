@@ -1,0 +1,12 @@
+opengt
+ set com 115200n81
+ set comecho off
+ set senddelay 0.02
+
+:start
+ send "AT+CMGF=1^m"
+ waitfor 5 "OK"
+ send "AT+CMGL=\"ALL\"^m"
+ get 1 "" $s
+ print $s
+ exit 0
