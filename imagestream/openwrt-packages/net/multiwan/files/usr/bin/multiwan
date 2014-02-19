@@ -827,7 +827,7 @@ flush() {
     while [ $((i++)) -lt $wancount ]; do 
 	ip rule del prio $(($i * 10)) > /dev/null 2>&1
 	ip rule del prio $(($i * 10 + 1)) > /dev/null 2>&1
-	ip route del default > /dev/null 2>&1
+        [ "$restore_single" != "leave" ] && ip route del default > /dev/null 2>&1
 	ip route flush table $(($i + 170)) > /dev/null 2>&1
     done
 
@@ -1182,7 +1182,7 @@ jobfile="/tmp/.mwan/jobqueue"
 
 case $1 in
     agent) silencer main_init;;
-    stop) silencer stop;;
+    stop) silencer stop leave;;
     restart) silencer stop restart;;
     single) silencer stop single;;
 esac
