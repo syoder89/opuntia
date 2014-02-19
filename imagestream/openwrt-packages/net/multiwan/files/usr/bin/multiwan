@@ -237,7 +237,7 @@ query_config() {
 }
 
 mwan_kill() {
-    local otherpids=$(ps 2>&1 | grep 'multiwan agent' | grep -v $$ | awk '{print $1}')
+    local otherpids=$(ps ax 2>&1 | grep 'multiwan agent' | grep -v $$ | awk '{print $1}')
     [ -n "$otherpids" ] && kill $otherpids > /dev/null 2>&1
     sleep 2
 }
