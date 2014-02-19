@@ -63,6 +63,12 @@ start_instance() {
                 config_set "$s" dev $dev_type
         fi
 
+	# Client mode is specified by an empty "mode" variable. We need the client bool flag set instead -- Scott
+        config_get mode "$s" 'mode'
+        if [ "$mode" = "" ] ; then
+                config_set "$s" client 1
+	fi
+
 	ARGS=""
 
 	# append flags

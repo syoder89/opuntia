@@ -26,13 +26,10 @@ p.instance = name
 
 s = m:section( NamedSection, name, "openvpn" )
 	
-local client = s:option( Flag, "client", translate( "Configure client mode" ) )
-  client.value = "1"
-  
-local mode = s:option(ListValue, "mode", translate( "Server Mode" ) )
+local mode = s:option(ListValue, "mode", translate( "Mode" ) )
+  mode:value("", "Client")
   mode:value("p2p", "Point to point")
   mode:value("server", "Server")
-  mode:depends("client", "")
 
 local dev_type = s:option( ListValue, "dev_type", translate("Type") )
   dev_type:value( "tun", "TUN" )
@@ -45,20 +42,23 @@ local proto = s:option( ListValue,"proto", translate("Protocol") )
   proto:value( "tcp-server", "TCP Server" )
 
 local host = s:option( Value, "local", translate("Source IP address") )
-  host:depends("client", "")
 
 local port = s:option( Value, "lport", translate("Source port") )
-  port.value = "1194"
-  port:depends("client", "") 
 
 local remote = s:option(Value, "remote", translate("Destination IP address") )
   remote:depends("mode", "p2p")
-  remote:depends("client", "1")
+  remote:depends("mode", "")
 
 local rport = s:option( Value, "rport", translate("Destination port") )
   rport.value = "1194"
   rport:depends("mode", "p2p")
-  rport:depends("client", "1")
+  rport:depends("mode", "")
+
+local ifconfig = s:option( Value, "ifconfig", translate("Tunnel IP Addresses"), translate("For tap mode use an IP address and subnet mask. For tun mode use the local IP and remote point-to-point IP addresses") )
+  ifconfig.placeholder = "192.168.55.1 192.168.55.2"
+
+local comp_lzo = s:option( Flag, "comp_lzo", translate( "Enable Compression" ) )
+  comp_lzo.value = "1"
 
 local secret_type = s:option( ListValue, "secret_type", translate("Type of Static Key") )
   secret_type:value( "passphrase", "Password Phrase Generator" )
@@ -68,13 +68,11 @@ local secret_type = s:option( ListValue, "secret_type", translate("Type of Stati
 local sec_phrase = s:option(Value, "secret_phrase", translate("Secret Phrase") )
   sec_phrase:depends({mode = "p2p", secret_type = "passphrase"})
 
-local key = s:option(FileUpload, "secret", translate("Local Static Key") )
-  key:depends({mode = "p2p", secret_type = "file"})
- 
 local server = s:option(Value, "server", translate("Local VPN network") )
   server.value = "10.10.0.0 255.255.255.0"
   server:depends({mode = "server", dev_type = "tun"})
   server.description = translate( "Serverside_Network_IP Netmask" )
+
 local client_to_client = s:option(Flag, "client_to_client", translate("Allow client-to-client traffic") )
   client_to_client:depends("mode", "server")
 
@@ -82,14 +80,23 @@ local route = s:option(DynamicList, "route", translate("Add route"))
 local routegw = s:option(Value, "route_gateway", translate("Route gateway"))
 
 local ca = s:option(FileUpload, "ca", translate("Certificate authority") )
-  ca:depends("client", "1")
   ca:depends("mode", "server")
+  ca:depends("mode", "")
+
 local cert = s:option( FileUpload, "cert", translate("Local certificate") )
-  cert:depends("client", "1")
   cert:depends("mode", "server")
+  cert:depends("mode", "")
+
+local key = s:option(FileUpload, "secret", translate("Local key") )
+  key:depends({mode = "p2p", secret_type = "file"})
+
+local tls_key = s:option(FileUpload, "key", translate("Local key") )
+  tls_key:depends("mode", "server")
+  tls_key:depends("mode", "")
+ 
 local pkcs12 = s:option( FileUpload, "pkcs12", translate("PKCS#12 file containing keys") )
-  pkcs12:depends("client", "1")
   pkcs12:depends("mode", "server")
+  pkcs12:depends("mode", "")
 
 function m.on_before_save(self) 
 	if(self.changed) then

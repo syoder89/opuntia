@@ -783,7 +783,28 @@ refresh_routes() {
     done
 
     ip route flush cache
-    last_route_csum=$(ip route | md5sum)
+}
+
+check_routing_tables()
+{
+    local tables_updated="0"
+
+    main_route_csum=$(ip route | grep -Ev ^default | md5sum)
+    local i=0
+    while [ $((i++)) -lt $wancount ]; do 
+	TABLE=$(($i + 170))
+    	route_csum=$(ip route show table $TABLE | grep -Ev ^default | md5sum)
+	if [ "$route_csum" = "$main_route_csum" ] ; then
+		continue
+	fi
+	tables_updated="1"
+	ip route | grep -Ev ^default | while read ROUTE; do
+	    ip route add table $TABLE to $ROUTE
+	done
+    done
+    [ "$tables_updated" != "0" ] && mwnote "Routing table change detected, multiwan tables updated."
+
+    ip route flush cache
 }
 
 iprules_config() {
@@ -1068,7 +1089,6 @@ do_tasks() {
     local check_iptables
     local queued_task
     local current_resolv_file
-    local current_route_csum
 
     while :; do
 
@@ -1090,13 +1110,7 @@ do_tasks() {
 		refresh_dns
 	    fi
 
-            current_route_csum=$(ip route | md5sum)
-
-            if [ "$last_route_csum" != "$current_route_csum" ] ; then
-                mwnote "Routing table update detected, updating multiwan routing tables..."
-                refresh_routes
-            fi
-
+            check_routing_tables
 	    rule_counter=0
 	fi
 
