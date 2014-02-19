@@ -783,6 +783,7 @@ refresh_routes() {
     done
 
     ip route flush cache
+    last_route_csum=$(ip route | md5sum)
 }
 
 iprules_config() {
@@ -813,14 +814,19 @@ flush() {
     local restore_single=$1
     echo "## Flushing IP Rules & Routes ##"
 
-    ip rule flush > /dev/null 2>&1
-    ip rule add lookup main prio 32766 > /dev/null 2>&1
-    ip rule add lookup default prio 32767 > /dev/null 2>&1
+#    ip rule flush > /dev/null 2>&1
+#    ip rule add lookup main prio 32766 > /dev/null 2>&1
+#    ip rule add lookup default prio 32767 > /dev/null 2>&1
+
+    # Delete loadbalancer
+    ip rule del prio 9 > /dev/null 2>&1
 
     ip route flush table 170 > /dev/null
 
     local i=0
     while [ $((i++)) -lt $wancount ]; do 
+	ip rule del prio $(($i * 10)) > /dev/null 2>&1
+	ip rule del prio $(($i * 10 + 1)) > /dev/null 2>&1
 	ip route del default > /dev/null 2>&1
 	ip route flush table $(($i + 170)) > /dev/null 2>&1
     done
@@ -1062,6 +1068,7 @@ do_tasks() {
     local check_iptables
     local queued_task
     local current_resolv_file
+    local current_route_csum
 
     while :; do
 
@@ -1072,7 +1079,7 @@ do_tasks() {
 	    check_iptables=$(iptables -n -L MultiWan -t mangle | grep "references" | awk -F "(" '{print $2}' | cut -d " " -f 1)
 
 	    if [ -z "$check_iptables" -o "$check_iptables" -lt 4 ]; then
-		mwnote "Netfilter rules appear to of been altered."
+		mwnote "Netfilter rules appear to have been altered."
 		/etc/init.d/multiwan restart
 		exit
 	    fi
@@ -1082,6 +1089,13 @@ do_tasks() {
 	    if [ "$last_resolv_update" != "$current_resolv_file" ]; then
 		refresh_dns
 	    fi
+
+            current_route_csum=$(ip route | md5sum)
+
+            if [ "$last_route_csum" != "$current_route_csum" ] ; then
+                mwnote "Routing table update detected, updating multiwan routing tables..."
+                refresh_routes
+            fi
 
 	    rule_counter=0
 	fi

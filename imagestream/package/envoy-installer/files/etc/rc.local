@@ -1,4 +1,4 @@
-# ImageStream WIFI AP netboot installer
+# ImageStream Envoy netboot installer
 
 . /lib/functions.sh
 . /lib/upgrade/platform.sh
