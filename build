@@ -82,6 +82,7 @@ case "$CMD" in
 				fi
 				echo "Failed to build $section! Probably just a transient error, trying again ($retries left)"
 				let retries=retries-1
+				make package/bash/{clean,compile}
 			done
 			if [ $((retries)) -eq 0 ] ; then
 				echo "Trying in single-threaded mode..."
