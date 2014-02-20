@@ -71,7 +71,8 @@ case "$CMD" in
 		# The toolchain must be single-thread built
 		make defconfig
 		NUM_CPUS=$((`cat /proc/cpuinfo | grep bogomips | wc -l` * 2))
-		for section in tools/bison/install tools/install toolchain/install target/linux/compile package/cleanup package/compile package/toolchain/compile world ; do
+#		for section in tools/bison/install tools/install toolchain/install target/linux/compile package/cleanup package/compile package/toolchain/compile world ; do
+		for section in world ; do
 			let retries=2
 			while [ $((retries)) -gt 0 ] ; do
 				echo "*** Building $section ***"
