@@ -332,7 +332,7 @@ CONFIG_FEATURE_drawing-backend_DirectFB=y
 #
 CONFIG_PACKAGE_base-files=y
 # CONFIG_PACKAGE_block-mount is not set
-# CONFIG_PACKAGE_bridge is not set
+CONFIG_PACKAGE_bridge=y
 CONFIG_PACKAGE_busybox=y
 CONFIG_BUSYBOX_CUSTOM=y
 CONFIG_BUSYBOX_DEFAULT_HAVE_DOT_CONFIG=y
