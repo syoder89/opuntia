@@ -1,0 +1,44 @@
+--- a/net/core/dev.c
++++ b/net/core/dev.c
+@@ -230,6 +230,8 @@ static void list_netdevice(struct net_de
+  */
+ static void unlist_netdevice(struct net_device *dev)
+ {
++	struct net *net = dev_net(dev);
++
+ 	ASSERT_RTNL();
+ 
+ 	/* Unlink dev from the device chain */
+@@ -240,6 +242,9 @@ static void unlist_netdevice(struct net_
+ 	write_unlock_bh(&dev_base_lock);
+ 
+ 	dev_base_seq_inc(dev_net(dev));
++
++	if (!net->ifindex || dev->ifindex < net->ifindex)
++		net->ifindex = dev->ifindex;
+ }
+ 
+ /*
+@@ -5446,10 +5451,10 @@ static int dev_new_index(struct net *net
+ {
+ 	int ifindex = net->ifindex;
+ 	for (;;) {
+-		if (++ifindex <= 0)
+-			ifindex = 1;
+ 		if (!__dev_get_by_index(net, ifindex))
+ 			return net->ifindex = ifindex;
++		if (++ifindex <= 0)
++			ifindex = 1;
+ 	}
+ }
+ 
+--- a/net/core/net_namespace.c
++++ b/net/core/net_namespace.c
+@@ -158,6 +158,7 @@ static __net_init int setup_net(struct n
+ 	atomic_set(&net->passive, 1);
+ 	net->dev_base_seq = 1;
+ 	net->user_ns = user_ns;
++	net->ifindex = 1;
+ 
+ #ifdef NETNS_REFCNT_DEBUG
+ 	atomic_set(&net->use_count, 0);
