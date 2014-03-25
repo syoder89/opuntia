@@ -39,7 +39,7 @@ provider:value("telcel", "TELCEL") --6 334 20 internet.itelcel.com webgprs webgp
 provider:value("movistar", "Movistar") --6 334 3 internet.movistar.mx movistar movistar
 provider:value("iusacell", "Iusacell") --6 334 50 web.iusacellgsm.mx iusacellgsm iusacellgsm
 provider:value("tigo_colombia", "Tigo Colombia") --6 732 103 web.colombiamovil.com.co
-provider:value("movistar_columbia", "Movistar Colombia") --6 732 123 internet.movistar.com.co movistar movistar
+provider:value("movistar_colombia", "Movistar Colombia") --6 732 123 internet.movistar.com.co movistar movistar
 provider:value("comcel", "Comcel") --6 732 101 internet.comcel.com.co comcel comcel
 provider:value("vodafone", "Vodafone") --0 222 10 ppbundle.internet web web
 provider:value("telefonica", "Telefonica") --7 234 15 wap.vodafone.co.uk wap wap
