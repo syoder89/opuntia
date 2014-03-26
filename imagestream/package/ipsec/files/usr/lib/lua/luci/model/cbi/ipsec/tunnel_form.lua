@@ -58,7 +58,7 @@ s.addremove = false
 
 s:option(Flag, "enabled", translate("Enabled"))
 
-gt = s:option(Value, "gateway", translate("Gateway"))
+gt = s:option(Value, "gateway", translate("Gateway/Remote IP"))
 
 key = s:option(ListValue, "keyexchange", translate("Key Exchange"))
 key.widget = "select"
@@ -89,7 +89,8 @@ t = s:option(Value, "local_subnet", translate("Local subnet"))
 
 n = s:option(Value, "remote_subnet", translate("Remote subnet"))
 
-g = s:option(Value, "local_nat", translate("Local NAT"))
+-- This doesn't do anything! Scott
+--g = s:option(Value, "local_nat", translate("Local NAT"))
 
 e1 = s:option(ListValue, "esp_encryption", translate("ESP Encryption"))
 e1:value("", "Automatic") 

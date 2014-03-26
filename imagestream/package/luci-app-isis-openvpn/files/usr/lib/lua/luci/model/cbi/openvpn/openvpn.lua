@@ -29,7 +29,7 @@ function s.create(self, name)
 
     if name and not name:match("[^a-zA-Z0-9_]") then
 	uci:section( "openvpn", "openvpn", name, { 
-		client  	= "1",
+		mode 	 	= "p2p",
 		enabled		= "1",
 		dev_type	= "tun"
    	} ) 
