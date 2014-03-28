@@ -67,6 +67,8 @@ start_instance() {
         config_get mode "$s" 'mode'
         if [ "$mode" = "" ] ; then
                 config_set "$s" client 1
+	else
+                config_set "$s" client 0
 	fi
 
 	ARGS=""
