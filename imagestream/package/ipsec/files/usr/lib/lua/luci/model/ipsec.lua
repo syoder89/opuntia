@@ -129,9 +129,13 @@ function _get_command_status(self, n)
 	end
 
 	if(stat == "") then
-		stat = "Not running"
+		local enabled = _uci_real:get("ipsec", "remote_" .. n, "enabled")
+		if(enabled=="0") then
+			stat = "Administratively shut down"
+		else
+			stat = "Not running"
+		end
 	end
-
 	return stat
 end
 

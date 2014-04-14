@@ -324,20 +324,21 @@ CheckTunnel() {
   fi
 
   # Check routing via correct interface
+  # Not working as of 04-14-2014 - Scott
 
-  current_ep=`echo $ends_o | awk '{print $2}'`
-
-  # Do a DNS lookup because ip route can't handle FQDN
-  Remote=`nslookup $RemoteGateway | tail -n 1 | awk '{print $3}'`
-  if [ "$Remote" = "" ] ; then
-  	$Remote="$RemoteGateway"
-  fi
-  LocalGateway=`ip route get $Remote | awk -F"src" '/src/{gsub(/ /,"");print $2}'`
-
-  if [ "$current_ep" != "$LocalGateway" ] ; then
-  	FailTunnel "$conn" "Tunnel is routed on wrong interface $current_ep s/b $LocalGateway"
-	return
-  fi
+#  current_ep=`echo $ends_o | awk '{print $2}'`
+#
+#  # Do a DNS lookup because ip route can't handle FQDN
+#  Remote=`nslookup $RemoteGateway | tail -n 1 | awk '{print $3}'`
+#  if [ "$Remote" = "" ] ; then
+#  	$Remote="$RemoteGateway"
+#  fi
+#  LocalGateway=`ip route get $Remote | awk -F"src" '/src/{gsub(/ /,"");print $2}'`
+#
+#  if [ "$current_ep" != "$LocalGateway" ] ; then
+#  	FailTunnel "$conn" "Tunnel is routed on wrong interface $current_ep s/b $LocalGateway"
+#	return
+#  fi
   # All good
   let failcnt[$conn]=0
 }

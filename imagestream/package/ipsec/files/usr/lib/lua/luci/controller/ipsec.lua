@@ -58,6 +58,7 @@ function tunnel_delete(tunnel)
 	local ipm = require "luci.model.ipsec".init()
 	local tun = ipm:del_tunnel(tunnel)
 	if tun then
+                luci.sys.call("env -i /sbin/uci set ipsec.remote_%q.enabled=0 && uci commit ipsec >/dev/null 2>/dev/null" %{tunnel})
 		luci.sys.call("env -i /usr/sbin/ipsec down remote_%q-%q >/dev/null 2>/dev/null" %{tunnel, tunnel})
 		ipm:commit("ipsec_pre")
 		luci.http.redirect(luci.dispatcher.build_url("admin/network/ipsec"))
@@ -71,6 +72,7 @@ function tunnel_reconnect(tunnel)
 	local ipm = require "luci.model.ipsec".init()
 	local tun = ipm:get_tunnel(tunnel)
 	if tun then
+                luci.sys.call("env -i /sbin/uci set ipsec.remote_%q.enabled=1 && uci commit ipsec >/dev/null 2>/dev/null" %{tunnel})
 		luci.sys.call("env -i /usr/sbin/ipsec up remote_%q-%q >/dev/null 2>/dev/null" %{tunnel, tunnel})
 		luci.http.status(200, "Reconnected")
 		return
@@ -83,6 +85,7 @@ function tunnel_shutdown(tunnel)
 	local ipm = require "luci.model.ipsec".init()
 	local tun = ipm:get_tunnel(tunnel)
 	if tun then
+                luci.sys.call("env -i /sbin/uci set ipsec.remote_%q.enabled=0 && uci commit ipsec >/dev/null 2>/dev/null" %{tunnel})
 		luci.sys.call("env -i /usr/sbin/ipsec down remote_%q-%q >/dev/null 2>/dev/null" %{tunnel, tunnel})
 		luci.http.status(200, "Shutdown")
 		return
