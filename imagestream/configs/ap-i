@@ -2085,12 +2085,14 @@ CONFIG_PACKAGE_gdb=m
 # ImageStream
 #
 # CONFIG_PACKAGE_gobi3k is not set
-CONFIG_PACKAGE_imagestream-envoy-configs=y
+# CONFIG_PACKAGE_imagestream-envoy-configs is not set
 # CONFIG_PACKAGE_imagestream-envoy-installer is not set
 CONFIG_PACKAGE_imagestream-overrides=y
 CONFIG_PACKAGE_imagestream-snmp-mibs=y
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs is not set
+CONFIG_PACKAGE_imagestream-wifi-ap-configs-i=y
 # CONFIG_PACKAGE_imagestream-wifi-ap-installer is not set
+# CONFIG_PACKAGE_imagestream-wifi-ap-installer-i is not set
 # CONFIG_PACKAGE_ktt30-graphics is not set
 # CONFIG_PACKAGE_luci-app-ISismesh is not set
 CONFIG_PACKAGE_luci-app-ipsec=y
@@ -2122,7 +2124,7 @@ CONFIG_PACKAGE_uqmi=y
 # CONFIG_PACKAGE_kmod-nbd is not set
 # CONFIG_PACKAGE_kmod-scsi-cdrom is not set
 CONFIG_PACKAGE_kmod-scsi-core=y
-# CONFIG_PACKAGE_kmod-scsi-generic is not set
+CONFIG_PACKAGE_kmod-scsi-generic=y
 
 #
 # CAN Support
