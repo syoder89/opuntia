@@ -17,7 +17,7 @@ MP_CONFIG_STRING="mesh_power_mode"
 drv_mac80211_init_device_config() {
 	hostapd_common_add_device_config
 
-	config_add_string path phy macaddr
+	config_add_string path phy 'macaddr:macaddr'
 	config_add_string hwmode
 	config_add_int beacon_int chanbw frag rts
 	config_add_int rxantenna txantenna antenna_gain txpower distance
@@ -42,7 +42,7 @@ drv_mac80211_init_device_config() {
 drv_mac80211_init_iface_config() {
 	hostapd_common_add_bss_config
 
-	config_add_string macaddr ifname
+	config_add_string 'macaddr:macaddr' ifname
 
 	config_add_boolean wds powersave
 	config_add_int maxassoc
@@ -50,6 +50,7 @@ drv_mac80211_init_iface_config() {
 	config_add_int dtim_interval
 
 	# mesh
+	config_add_string mesh_id
 	config_add_int $MP_CONFIG_INT
 	config_add_boolean $MP_CONFIG_BOOL
 	config_add_string $MP_CONFIG_STRING
@@ -448,6 +449,7 @@ mac80211_setup_adhoc() {
 
 mac80211_setup_vif() {
 	local name="$1"
+	local failed
 
 	json_select data
 	json_get_vars ifname
@@ -472,7 +474,19 @@ mac80211_setup_vif() {
 				json_get_var mp_val "$var"
 				[ -n "$mp_val" ] && iw dev "$ifname" set mesh_param "$var" "$mp_val"
 			done
-			# todo: authsae
+
+			# authsae
+			json_get_vars key
+			if [ -n "$key" ]; then
+				if [ -e "/lib/wifi/authsae.sh" ]; then
+					. /lib/wifi/authsae.sh
+					authsae_start_interface || failed=1
+				else
+					wireless_setup_vif_failed AUTHSAE_NOT_INSTALLED
+					json_select ..
+					return
+				fi
+			fi
 		;;
 		adhoc)
 			wireless_vif_parse_encryption

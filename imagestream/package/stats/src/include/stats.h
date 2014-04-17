@@ -6,6 +6,8 @@
 #ifndef STATS_H
 #define STATS_H
 
+#include<stdlib.h>
+#include<string.h>
 #include<time.h>
 #include"stat_if.h"
 

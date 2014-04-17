@@ -124,7 +124,7 @@ config wifi-iface
 	option device   radio$devidx
 	option network  lan
 	option mode     ap
-	option ssid     Opuntia
+	option ssid     OpenWrt
 	option encryption none
 
 EOF
