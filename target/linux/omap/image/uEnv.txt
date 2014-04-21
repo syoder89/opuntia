@@ -1,0 +1,6 @@
+mmcroot=/dev/mtdblock0 ro
+mmcrootfstype=squashfs rootwait
+optargs=block2mtd.block2mtd=/dev/mmcblk0p2,65536,rootfs
+loadfdt=fatload mmc 0:1 ${fdtaddr} ${fdtfile}
+loaduimage=fatload mmc 0:1 ${kloadaddr} zImage
+uenvcmd=run loaduimage; run loadfdt; run mmcargs; bootz ${kloadaddr} - ${fdtaddr}
