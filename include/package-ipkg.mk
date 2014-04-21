@@ -83,6 +83,9 @@ ifeq ($(DUMP),)
       ifneq ($(CONFIG_PACKAGE_$(1))$(SDK)$(DEVELOPER),)
         IPKGS += $(1)
         compile: $$(IPKG_$(1)) $(PKG_INFO_DIR)/$(1).provides $(STAGING_DIR_ROOT)/stamp/.$(1)_installed
+        ifneq ($(ABI_VERSION),)
+        compile: $(PKG_INFO_DIR)/$(1).version
+        endif
 
         ifeq ($(CONFIG_PACKAGE_$(1)),y)
           .PHONY: $(PKG_INSTALL_STAMP).$(1)
@@ -124,6 +127,10 @@ ifeq ($(DUMP),)
 	rm -rf $(STAGING_DIR_ROOT)/tmp-$(1)
 	touch $$@
 
+    $(PKG_INFO_DIR)/$(1).version: $$(IPKG_$(1))
+	echo '$(ABI_VERSION)' | cmp -s - $$@ || \
+		echo '$(ABI_VERSION)' > $$@
+
     $(PKG_INFO_DIR)/$(1).provides: $$(IPKG_$(1))
     $$(IPKG_$(1)): $(STAMP_BUILT) $(INCLUDE_DIR)/package-ipkg.mk
 	@rm -rf $(PACKAGE_DIR)/$(1)_* $$(IDIR_$(1))
@@ -139,7 +146,7 @@ ifeq ($(DUMP),)
 		done; $(Package/$(1)/extra_provides) \
 	) | sort -u > $(PKG_INFO_DIR)/$(1).provides
 	$(if $(PROVIDES),@for pkg in $(PROVIDES); do cp $(PKG_INFO_DIR)/$(1).provides $(PKG_INFO_DIR)/$$$$pkg.provides; done)
-	$(CheckDependencies)
+#	$(CheckDependencies)
 
 	$(RSTRIP) $$(IDIR_$(1))
 	( \

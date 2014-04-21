@@ -111,8 +111,10 @@ ifneq ($(wildcard $(LINUX_DIR)/drivers/usb/phy/phy-nop.ko),)
   FILES:=$(LINUX_DIR)/drivers/usb/phy/phy-nop.ko
   AUTOLOAD:=$(call AutoLoad,43,phy-nop)
 else
-  FILES:=$(LINUX_DIR)/drivers/usb/otg/nop-usb-xceiv.ko
-  AUTOLOAD:=$(call AutoLoad,43,nop-usb-xceiv)
+#  FILES:=$(LINUX_DIR)/drivers/usb/otg/nop-usb-xceiv.ko
+#  AUTOLOAD:=$(call AutoLoad,43,nop-usb-xceiv)
+  FILES:=$(LINUX_DIR)/drivers/usb/phy/phy-generic.ko
+  AUTOLOAD:=$(call AutoLoad,43,phy-generic)
 endif
 endif
   $(call AddDepends/usb)

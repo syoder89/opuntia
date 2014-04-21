@@ -698,6 +698,7 @@ define KernelPackage/sched-core
 	CONFIG_NET_EMATCH=y \
 	CONFIG_NET_EMATCH_U32
   FILES:=$(SCHED_FILES)
+  DEPENDS:=kmod-ipt-ipset
   AUTOLOAD:=$(call AutoLoad,70, $(SCHED_MODULES_CORE))
 endef
 

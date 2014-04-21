@@ -13,7 +13,8 @@ FEATURES:=usb usbgadget ext4 targz fpu audio display
 CPU_TYPE:=cortex-a9
 CPU_SUBTYPE:=vfpv3
 
-LINUX_VERSION:=3.12.5
+LINUX_VERSION:=3.14.1
+#LINUX_VERSION:=3.12.5
 
 MAINTAINER:=Imre Kaloz <kaloz@openwrt.org>
 
