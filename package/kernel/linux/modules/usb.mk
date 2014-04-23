@@ -340,7 +340,9 @@ define KernelPackage/usb2-omap
   TITLE:=Support for USB2 for OMAP
   DEPENDS:=@TARGET_omap +kmod-usb-phy-nop +kmod-usb-phy-am335x
   KCONFIG:=CONFIG_USB_EHCI_HCD_OMAP
-  FILES:=$(LINUX_DIR)/drivers/usb/host/ehci-omap.ko
+  FILES:= \
+	$(LINUX_DIR)/drivers/usb/host/ehci-omap.ko \
+	$(LINUX_DIR)/drivers/usb/host/ehci-hcd.ko
   AUTOLOAD:=$(call AutoLoad,39,ehci-omap)
   $(call AddDepends/usb)
 endef

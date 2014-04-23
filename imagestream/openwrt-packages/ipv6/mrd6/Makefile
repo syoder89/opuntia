@@ -48,6 +48,8 @@ MRD6_MAKEFLAGS:= \
 	DESTDIR="$(PKG_INSTALL_DIR)" \
 	PREFIX="/usr"
 
+#	CXXFLAGS="$(TARGET_CXXFLAGS) $(TARGET_CPPFLAGS)" \
+
 define Build/Compile
 	+$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR)/src $(MRD6_MAKEFLAGS) all
 endef

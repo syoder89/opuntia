@@ -288,11 +288,12 @@ CONFIGURE_ARGS += \
   --datadir=/usr/share/nut \
   --with-user=root \
   --with-group=root \
-  --with-usb \
   --with-snmp \
   --without-libltdl \
   --with-dev
 
+# Doesn't work on ARM - Scott 04-22-2014
+#  --with-usb \
 
 $(eval $(call BuildPackage,nut))
 $(eval $(call BuildPackage,nut-client))
