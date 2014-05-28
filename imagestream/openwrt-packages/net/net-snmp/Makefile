@@ -165,7 +165,7 @@ CONFIGURE_ARGS += \
 	--enable-applications \
 	--disable-debugging \
 	--disable-manuals \
-	--with-mib-modules="smux disman/event-mib" \
+	--with-mib-modules="smux disman/event-mib ieee802dot11" \
 	--with-out-transports="$(SNMP_TRANSPORTS_EXCLUDED)" \
 	--with-transports="$(SNMP_TRANSPORTS_INCLUDED)" \
 	--without-openssl \

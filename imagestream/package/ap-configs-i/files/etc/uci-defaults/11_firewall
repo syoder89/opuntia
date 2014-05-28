@@ -105,6 +105,20 @@ set firewall.@rule[6].icmp_type="echo-request echo-reply destination-unreachable
 set firewall.@rule[6].limit="1000/sec"
 set firewall.@rule[6].family="ipv6"
 set firewall.@rule[6].target="ACCEPT"
+add firewall rule
+set firewall.@rule[7]="rule"
+set firewall.@rule[7].target="ACCEPT"
+set firewall.@rule[7].src="wan"
+set firewall.@rule[7].proto="tcp"
+set firewall.@rule[7].dest_port="443"
+set firewall.@rule[7].name="Allow-Web-Admin-SSL"
+add firewall rule
+set firewall.@rule[8]="rule"
+set firewall.@rule[8].target="ACCEPT"
+set firewall.@rule[8].src="wan"
+set firewall.@rule[8].proto="udp"
+set firewall.@rule[8].dest_port="161"
+set firewall.@rule[8].name="Allow-SNMP"
 add firewall include
 set firewall.@include[0]="include"
 set firewall.@include[0].path="/etc/firewall.user"
