@@ -20,4 +20,8 @@ endef
 define Build/Compile
 endef
 
+define Package/$(PKG_NAME)/install
+	$(CP) -a ./files/* $(1)/ 2>/dev/null || true
+endef
+
 $(eval $(call BuildPackage,$(PKG_NAME)))
