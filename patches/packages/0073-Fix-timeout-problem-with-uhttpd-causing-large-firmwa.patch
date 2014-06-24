@@ -1,0 +1,46 @@
+From f99c3b15b76cb907798ebbdbbb0050b02b4c1702 Mon Sep 17 00:00:00 2001
+From: syoder <syoder@imagestream.com>
+Date: Thu, 21 Nov 2013 09:46:06 -0600
+Subject: [PATCH] Fix timeout problem with uhttpd causing large firmware
+ uploads to fail over slower links. Update libqmi to latest version 1.6.0 to
+ support username/passwords with the APN. Update/commit ap-installer configs.
+
+---
+ imagestream/configs/ap-installer                   | 1459 ++++++--
+ imagestream/configs/ap-installer-mikrotik          | 3686 ++++++++++++++++++++
+ imagestream/openwrt-packages/libs/libqmi/Makefile  |   10 +-
+ .../libs/libqmi/patches/10-gtk-doc.patch           |  283 ++
+ .../ap-configs/files/etc/uci-defaults/11_firewall  |   52 +-
+ imagestream/package/ap-installer.mikrotik/Makefile |   34 +
+ .../ap-installer.mikrotik/files/etc/rc.local       |   61 +
+ .../package/ap-installer/files/etc/product_id.txt  |    3 +
+ .../package/ap-installer/files/etc/rc.local        |   33 +-
+ .../network/services/uhttpd/files/uhttpd.config    |   18 +-
+ package/network/services/uhttpd/files/uhttpd.init  |    4 +-
+ 11 files changed, 5227 insertions(+), 416 deletions(-)
+ create mode 100644 imagestream/configs/ap-installer-mikrotik
+ create mode 100644 imagestream/openwrt-packages/libs/libqmi/patches/10-gtk-doc.patch
+ create mode 100644 imagestream/package/ap-installer.mikrotik/Makefile
+ create mode 100755 imagestream/package/ap-installer.mikrotik/files/etc/rc.local
+ create mode 100644 imagestream/package/ap-installer/files/etc/product_id.txt
+
+--- a/package/network/services/uhttpd/files/uhttpd.init
++++ b/package/network/services/uhttpd/files/uhttpd.init
+@@ -46,7 +46,7 @@ generate_keys() {
+ 	[ -x "$PX5G_BIN" ] && {
+ 		$PX5G_BIN selfsigned -der \
+ 			-days ${days:-730} -newkey rsa:${bits:-1024} -keyout "$UHTTPD_KEY" -out "$UHTTPD_CERT" \
+-			-subj /C="${country:-DE}"/ST="${state:-Saxony}"/L="${location:-Leipzig}"/CN="${commonname:-OpenWrt}"
++			-subj /C="${country:-DE}"/ST="${state:-Saxony}"/L="${location:-Leipzig}"/CN="${commonname:-Opuntia}"
+ 	}
+ }
+ 
+@@ -64,7 +64,7 @@ start_instance()
+ 	procd_set_param command "$UHTTPD_BIN" -f
+ 
+ 	append_arg "$cfg" home "-h"
+-	append_arg "$cfg" realm "-r" "${realm:-OpenWrt}"
++	append_arg "$cfg" realm "-r" "${realm:-Opuntia}"
+ 	append_arg "$cfg" config "-c"
+ 	append_arg "$cfg" cgi_prefix "-x"
+ 	[ -f /usr/lib/uhttpd_lua.so ] && {

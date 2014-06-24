@@ -1,0 +1,57 @@
+From 62cd67eea821a8c1be4ace809aeb7632e8f60dd3 Mon Sep 17 00:00:00 2001
+From: syoder <syoder@imagestream.com>
+Date: Thu, 5 Dec 2013 17:29:07 -0600
+Subject: [PATCH 13/14] Update AP config. Add inactive time to wifi status.
+ Modify mesh wifi config - localmanagement now is a DHCP served network on all
+ APs so you can connect to the ISisManagement SSID and connect to a
+ 10.10.198.0/24 netowrk on each AP. This network is forwarded to management
+ and wan and is natted. Change root's shell to bash.
+
+---
+ .../modules/admin-full/luasrc/view/admin_network/wifi_overview.htm      | 2 ++
+ .../openwrt-luci/modules/admin-full/luasrc/view/admin_status/index.htm  | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm b/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm
+index 556f394..fcc638a 100644
+--- a/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm
++++ b/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm
+@@ -313,6 +313,7 @@ You may obtain a copy of the License at
+ 							tr.insertCell(-1).innerHTML = arptable[assoclist[j].bssid]
+ 								? arptable[assoclist[j].bssid] : '?';
+ 
++							tr.insertCell(-1).innerHTML = nowrap(String.format('%.1f <%:s%>', assoclist[j].inactive / 1000));
+ 							tr.insertCell(-1).innerHTML = nowrap(String.format('%d <%:dBm%>', assoclist[j].signal));
+ 							tr.insertCell(-1).innerHTML = nowrap(String.format('%d <%:dBm%>', assoclist[j].noise));
+ 
+@@ -423,6 +424,7 @@ You may obtain a copy of the License at
+ 				<th class="cbi-section-table-cell"><%:SSID%></th>
+ 				<th class="cbi-section-table-cell"><%:MAC-Address%></th>
+ 				<th class="cbi-section-table-cell"><%:IPv4-Address%></th>
++				<th class="cbi-section-table-cell"><%:Inactive%></th>
+ 				<th class="cbi-section-table-cell"><%:Signal%></th>
+ 				<th class="cbi-section-table-cell"><%:Noise%></th>
+ 				<th class="cbi-section-table-cell"><%:RX Rate%></th>
+diff --git a/modules/admin-full/luasrc/view/admin_status/index.htm b/modules/admin-full/luasrc/view/admin_status/index.htm
+index 3067d1d..1b1e20c 100644
+--- a/modules/admin-full/luasrc/view/admin_status/index.htm
++++ b/modules/admin-full/luasrc/view/admin_status/index.htm
+@@ -441,6 +441,7 @@ You may obtain a copy of the License at
+ 							'%h'.format(assoclist[i].name).nobr()
+ 					);
+ 
++					tr.insertCell(-1).innerHTML = String.format('%.1f <%:s%>', assoclist[i].inactive / 1000).nobr();
+ 					tr.insertCell(-1).innerHTML = String.format('%d <%:dBm%>', assoclist[i].signal).nobr();
+ 					tr.insertCell(-1).innerHTML = String.format('%d <%:dBm%>', assoclist[i].noise).nobr();
+ 
+@@ -642,6 +643,7 @@ You may obtain a copy of the License at
+ 			<th class="cbi-section-table-cell">&#160;</th>
+ 			<th class="cbi-section-table-cell"><%:MAC-Address%></th>
+ 			<th class="cbi-section-table-cell"><%:Network%></th>
++			<th class="cbi-section-table-cell"><%:Inactive%></th>
+ 			<th class="cbi-section-table-cell"><%:Signal%></th>
+ 			<th class="cbi-section-table-cell"><%:Noise%></th>
+ 			<th class="cbi-section-table-cell"><%:RX Rate%></th>
+-- 
+2.0.0
+

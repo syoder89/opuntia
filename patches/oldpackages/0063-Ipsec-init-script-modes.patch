@@ -1,0 +1,482 @@
+From bf632d18ad7cd2d0ad0d0ef8dccdb88a50753446 Mon Sep 17 00:00:00 2001
+From: syoder <syoder@imagestream.com>
+Date: Wed, 27 Nov 2013 15:46:25 -0600
+Subject: [PATCH] Set default root password to 'imagestream' Copy our custom
+ ipsec init script and ipsec.user script into StrongSwan because of the
+ parallel build process ours might not get copied in last!
+
+---
+ .../net/strongswan/files/ipsec.init                | 426 ++++++++++++++++++++-
+ .../net/strongswan/files/ipsec.user                |  17 +
+ package/base-files/files/etc/shadow                |   2 +-
+ 3 files changed, 434 insertions(+), 11 deletions(-)
+ mode change 100644 => 100755 feeds/oldpackages/net/strongswan/files/ipsec.init
+
+diff --git a/feeds/oldpackages/net/strongswan/files/ipsec.init b/feeds/oldpackages/net/strongswan/files/ipsec.init
+old mode 100644
+new mode 100755
+index 391a2ae..94a5649
+--- a/feeds/oldpackages/net/strongswan/files/ipsec.init
++++ b/feeds/oldpackages/net/strongswan/files/ipsec.init
+@@ -1,20 +1,426 @@
+-#!/bin/sh /etc/rc.common
+-
++#!/bin/bash /etc/rc.common
++#/etc/init.d/ipsec - version 4
++ 
++NAME=ipsec
+ START=90
+ STOP=10
++ 
++. /lib/functions.sh
++ 
++FileSecrets=/var/ipsec/ipsec.secrets
++FileConn=/var/ipsec/ipsec.conf
++FileCommon=/var/ipsec/strongswan.conf
++ 
++FolderCerts=/var/ipsec/ipsec.d
++ 
++ConfigUser()
++{
++  local enabled
++  local xauth
++  local name
++  local password
++  local crt_subject
++ 
++  config_get_bool enabled $1 enabled 0
++  [[ "$enabled" == "0" ]] && return
++ 
++  config_get_bool xauth       $1 xauth       0
++  config_get      name        $1 name        ""
++  config_get      password    $1 password    ""
++ 
++  if [ $xauth -eq 1 -a "$name" != "" -a "$password" != "" ]; then
++    echo "$name : XAUTH \"$password\"" >> $FileSecrets
++  fi
++}
++ 
++ 
++ConfigPhase1() {
++  local encryption_algorithm
++  local hash_algorithm
++  local dh_group
++ 
++  config_get encryption_algorithm  "$1" encryption_algorithm
++  config_get hash_algorithm        "$1" hash_algorithm
++  config_get dh_group              "$1" dh_group
++ 
++  Phase1Proposal=${Phase1Proposal}","${encryption_algorithm}-${hash_algorithm}-${dh_group}
++}
++ 
++ConfigTunnel() {
++  local local_subnet
++  local local_nat
++  local remote_subnet
++  local p2_proposal
++  local pfs_group
++  local encryption_algorithm
++  local authentication_algorithm
++ 
++  config_get local_subnet             "$1"           local_subnet
++  config_get local_nat                "$1"           local_nat ""
++  config_get remote_subnet            "$1"           remote_subnet
++  config_get p2_proposal              "$1"           p2_proposal
++  config_get pfs_group                "$p2_proposal" pfs_group
++  config_get encryption_algorithm     "$p2_proposal" encryption_algorithm
++  config_get authentication_algorithm "$p2_proposal" authentication_algorithm
++ 
++  [[ "$local_nat" != "" ]] && local_subnet=$local_nat
++ 
++  p2_proposal="${encryption_algorithm}-${authentication_algorithm}-${pfs_group}"
++ 
++  echo "conn $ConfigName-$1" >> $FileConn
++  echo "  keyexchange=$KeyExchange" >> $FileConn
++  echo "  left=$LocalGateway" >> $FileConn
++  echo "  right=$RemoteGateway" >> $FileConn
++  echo "  rightallowany=yes" >> $FileConn
++  echo "  leftsubnet=$local_subnet" >> $FileConn
++  if [ "$AuthenticationMethod" = "psk" ]; then
++    echo "  authby=psk" >> $FileConn
++    echo "  rightsubnet=$remote_subnet" >> $FileConn
++# should be auto=route when going to 5.0.1
++    echo "  auto=start" >> $FileConn
++  elif [ "$AuthenticationMethod" = "xauth_psk_server" ]; then
++    echo "  authby=xauthpsk" >> $FileConn
++    echo "  xauth=server" >> $FileConn
++    echo "  modeconfig=pull" >> $FileConn
++    echo "  rightsourceip=$remote_subnet" >> $FileConn
++    echo "  auto=add" >> $FileConn
++  fi
++  if [ "$ExchangeMode" = "aggressive" ]; then
++    echo "  aggressive=yes" >> $FileConn
++  fi
++  if [ "$LocalIdentifier" != "" ]; then
++    echo "  leftid=$LocalIdentifier" >> $FileConn
++  fi
++  if [ "$RemoteIdentifier" != "" ]; then
++    echo "  rightid=$RemoteIdentifier" >> $FileConn
++  fi
++  if [ "$DPDAction" != "" ]; then
++    echo "  dpdaction=$dpdaction" >> $FileConn
++  fi
++ 
++#  echo "  auth=esp" >> $FileConn
++  echo "  esp=$p2_proposal" >> $FileConn
++  echo "  ike=$Phase1Proposal" >> $FileConn
++  echo "  type=tunnel" >> $FileConn
+ 
+-start() {
+-	ipsec start
++  # We do NAT
++  echo "  leftfirewall=yes" >> $FileConn
++  echo "  rightfirewall=yes" >> $FileConn
++  echo "  closeaction=restart" >> $FileConn
++}
++ 
++ConfigRemote() {
++  local enabled
++  local gateway
++  local pre_shared_key
++  local authentication_method
++  local local_identifier
++  local remote_identifier
++  local dpdaction
++  local keyexchange 
++  local exchange_mode
++ 
++  ConfigName=$1
++ 
++  config_get_bool enabled "$1" enabled 0
++  [[ "$enabled" == "0" ]] && return
++ 
++  config_get gateway               "$1" gateway
++  config_get pre_shared_key        "$1" pre_shared_key
++  config_get authentication_method "$1" authentication_method
++  config_get local_identifier      "$1" local_identifier
++  config_get remote_identifier     "$1" remote_identifier
++  config_get dpdaction             "$1" dpdaction
++  config_get keyexchange           "$1" keyexchange
++  config_get exchange_mode         "$1" exchange_mode
++  DPDAction=$dpdaction
++ 
++  AuthenticationMethod=$authentication_method
++  LocalIdentifier=$local_identifier
++  RemoteIdentifier=$remote_identifier
++  KeyExchange=$keyexchange
++  ExchangeMode=$exchange_mode
++ 
++  RemoteGateway=$gateway
++  if [ "$RemoteGateway" = "any" ]; then
++    RemoteGateway="%any"
++    LocalGateway=`ip route get 1.1.1.1 | awk -F"src" '/src/{gsub(/ /,"");print $2}'`
++  else
++#    LocalGateway="%any"
++    # Do a DNS lookup because ip route can't handle FQDN
++    Remote=`nslookup $RemoteGateway | tail -n 1 | awk '{print $3}'`
++    if [ "$Remote" = "" ] ; then
++    	$Remote="$RemoteGateway"
++    fi
++    # If a FQDN is specified without a RemoteIdentifier, set the ID to the IP
++    if [ "$Remote" != "$RemoteGateway" ] && [ "$RemoteIdentifier" = "" ] ; then
++    	RemoteIdentifier="$Remote"
++    fi
++    LocalGateway=`ip route get $Remote | awk -F"src" '/src/{gsub(/ /,"");print $2}'`
++  fi
++  if [ "$LocalIdentifier" != "" ]; then
++    PSKleft="$LocalIdentifier"
++  else
++    PSKleft="$LocalGateway"
++  fi
++  if [ "$RemoteIdentifier" != "" ]; then
++    PSKright="$RemoteIdentifier"
++  else
++    PSKright="$RemoteGateway"
++  fi
++  echo "$PSKleft $PSKright : PSK \"$pre_shared_key\"" >> $FileSecrets
++ 
++  Phase1Proposal=""
++  config_list_foreach "$1" p1_proposal ConfigPhase1
++  Phase1Proposal=`echo $Phase1Proposal | cut -b 2-`
++ 
++  config_list_foreach "$1" tunnel ConfigTunnel
++}
++ 
++PrepareEnvironment() {
++  for d in cacerts aacerts ocspcerts crls acerts; do
++    mkdir -p $FolderCerts/$d 2>/dev/null
++  done
++ 
++  if [ ! -L /etc/ipsec.d ]; then
++    rm -rf /etc/ipsec.d 2>/dev/null
++    ln -s $FolderCerts /etc/ipsec.d
++  fi
++ 
++  if [ ! -L /etc/ipsec.secrets ]; then
++    rm /etc/ipsec.secrets 2>/dev/null
++    ln -s $FileSecrets /etc/ipsec.secrets
++  fi
++ 
++  if [ ! -L /etc/strongswan.conf ]; then
++    rm /etc/strongswan.conf 2>/dev/null
++    ln -s $FileCommon /etc/strongswan.conf
++  fi
++ 
++  if [ ! -L /etc/ipsec.conf ]; then
++    rm /etc/ipsec.conf 2>/dev/null
++    ln -s $FileConn /etc/ipsec.conf
++  fi
++ 
++ 
++  echo "# generated by /etc/init.d/ipsec" > $FileConn
++  echo "version 2" > $FileConn
++  echo "config setup" >> $FileConn
++  echo "  charondebug = \"ike 0,knl 0\"" >> $FileConn
++ 
++  echo "# generated by /etc/init.d/ipsec" > $FileSecrets
++}
++ 
++CheckInstallation() {
++  if [ ! -x /usr/sbin/ip ]; then
++    echo /usr/sbin/ip missing
++    echo install with \"opkg install ip\"
++    exit
++  fi
++ 
++  for f in aes authenc cbc hmac md5 sha1; do
++    if [ `opkg list kmod-crypto-$f | wc -l` -eq 0 ]; then
++      echo kmod-crypto-$f missing
++      echo install with  \"opkg install kmod-crypto-$f --nodeps\"
++      exit
++    fi
++  done
++ 
++  for f in aes gmp hmac kernel-netlink md5 random sha1 updown attr resolve; do
++    if [ ! -f /usr/lib/ipsec/plugins/libstrongswan-${f}.so ]; then
++      echo /usr/lib/ipsec/plugins/$f missing
++      echo install with \"opkg install strongswan-mod-$f --nodeps\"
++      exit
++    fi
++  done
++}
++ 
++FailTunnel() {
++	if [ "${failcnt[$1]}" == "" ] ; then
++		let failcnt[$1]=0
++	fi
++	let failcnt[$1]=failcnt[$1]+1
++	if [ $((failcnt[$1])) -lt 3 ] ; then
++		logger "Failing tunnel $1, reason: $2, count ${failcnt[$1]} / 3"
++		return
++	fi
++	logger "Tunnel $1 failed - restarting, reason: $2"
++	/etc/init.d/ipsec restart &
++# This would be nice but StrongSwan seems to have so many bugs that we can't
++# just restart one tunnel. A good example is click connect on the WWAN interface
++# if a tunnel is running over it - changes the IP address and ipsec loses its
++# mind and must be restarted.
++#	ipsec unroute $1
++#	ipsec down $1
++#  	PrepareEnvironment
++# 
++#  	config_load users
++#  	config_foreach ConfigUser user
++# 
++#  	config_load ipsec
++#  	config_foreach ConfigRemote remote
++#	ipsec update rereadall
++#	ipsec up $1
++#  	let failcnt[$conn]=0
+ }
+ 
+-stop() {
+-	ipsec stop
++CheckTunnel() {
++  local local_subnet
++  local local_nat
++  local remote_subnet
++  local p2_proposal
++  local pfs_group
++  local encryption_algorithm
++  local authentication_algorithm
++ 
++  conn="$ConfigName-$1"
++
++  ipsec status $conn | grep ESTABLISHED > /dev/null 2>&1
++  if [ "$?" != "0" ] ; then
++  	FailTunnel "$conn" "Connection not established!"
++	return
++  fi
++
++  #Check SPIs according to StrongSwan
++  spis=`ipsec status $conn | grep SPIs: | cut -d ':' -f 3 | cut -d '_' -f 1-2`
++  spi_i=`echo $spis | cut -d '_' -f 1 | awk '{print $1}'`
++  spi_o=`echo $spis | awk '{print $2}'`
++  ends_i=`ip xfrm state show spi 0x$spi_i | head -n 1`
++  if [ "$?" != "0" ] ; then
++  	FailTunnel "$conn" "In SPI $spi_i not found!"
++	return
++  fi
++  ends_o=`ip xfrm state show spi 0x$spi_o | head -n 1`
++  if [ "$?" != "0" ] ; then
++  	FailTunnel "$conn" "Out SPI $spi_o not found!"
++	return
++  fi
++
++  config_get local_subnet             "$1"           local_subnet
++  config_get local_nat                "$1"           local_nat ""
++  config_get remote_subnet            "$1"           remote_subnet
++  [[ "$local_nat" != "" ]] && local_subnet=$local_nat
++
++  # Check that policies exist to route the subnets and that the policy endpoints
++  # match the state endpoints! I've seen this be wrong
++  p_ends_i=`ip xfrm policy show dst $local_subnet src $remote_subnet dir in | grep tmpl | cut -d ' ' -f 2-`
++  if [ "$?" != "0" -o "$p_ends_i" = "" ] ; then
++  	FailTunnel "$conn" "No policy for $remote_subnet to $local_subnet"
++	return
++  fi
++  if [ "$ends_i" != "$p_ends_i" ] ; then
++  	FailTunnel "$conn" "Policy for $remote_subnet to $local_subnet is for another connection $p_ends_i s/b $ends_i"
++	return
++  fi
++
++  p_ends_o=`ip xfrm policy show src $local_subnet dst $remote_subnet dir out | grep tmpl | cut -d ' ' -f 2-`
++  if [ "$?" != "0" -o "$p_ends_o" = "" ] ; then
++  	FailTunnel "$conn" "No policy for $local_subnet to $remote_subnet"
++	return
++  fi
++  if [ "$ends_o" != "$p_ends_o" ] ; then
++  	FailTunnel "$conn" "Policy for $local_subnet to $remote_subnet is for another connection $p_ends_o s/b $ends_o"
++	return
++  fi
++
++  # Check routing via correct interface
++
++  current_ep=`echo $ends_o | awk '{print $2}'`
++
++  # Do a DNS lookup because ip route can't handle FQDN
++  Remote=`nslookup $RemoteGateway | tail -n 1 | awk '{print $3}'`
++  if [ "$Remote" = "" ] ; then
++  	$Remote="$RemoteGateway"
++  fi
++  LocalGateway=`ip route get $Remote | awk -F"src" '/src/{gsub(/ /,"");print $2}'`
++
++  if [ "$current_ep" != "$LocalGateway" ] ; then
++  	FailTunnel "$conn" "Tunnel is routed on wrong interface $current_ep s/b $LocalGateway"
++	return
++  fi
++  # All good
++  let failcnt[$conn]=0
++}
++
++CheckRemote() {
++  local enabled
++  local gateway
++  local local_identifier
++  local remote_identifier
++ 
++  ConfigName=$1
++ 
++  config_get_bool enabled "$1" enabled 0
++  [[ "$enabled" == "0" ]] && return
++ 
++  config_get gateway               "$1" gateway
++  RemoteGateway=$gateway
++  config_list_foreach "$1" tunnel CheckTunnel
++}
++
++start_watchdog() {
++	(
++		declare -A failcnt
++		set -o pipefail
++		let counter=0
++		while sleep 10; do
++  			config_load ipsec
++  			config_foreach CheckRemote remote
++		done
++	) </dev/null > /dev/null 2>&1 &
++	local watchdog_pid=$!
++	echo $watchdog_pid > /var/run/ipsec-watchdog.pid
++	logger "Started ipsec watchdog pid $watchdog_pid"
+ }
+ 
+-restart() {
+-	ipsec restart
++stop_watchdog() {
++	[ -e /var/run/ipsec-watchdog.pid ] && {
++		kill -9 $(cat /var/run/ipsec-watchdog.pid)
++		rm /var/run/ipsec-watchdog.pid
++	}
+ }
+ 
+-reload() {
+-	ipsec update
++do_lock() {
++  [ -e /var/run/ipsec-init.pid ] && {
++  	kill -0 $(cat /var/run/ipsec-init.pid)
++	if [ "$?" = "0" ] ; then
++		logger "IPSec init script already starting..."
++		exit 0
++	else
++		logger "IPSec init script detected stale pidfile..."
++	fi
++  }
++  echo "$$" > /var/run/ipsec-init.pid
++}
++
++do_unlock() {
++  rm /var/run/ipsec-init.pid
++}
++
++start() {
++  do_lock
++#  lock /var/run/ipsec-init.pid
++  stop_watchdog
++  CheckInstallation
++  PrepareEnvironment
++ 
++  config_load users
++  config_foreach ConfigUser user
++ 
++  config_load ipsec
++  config_foreach ConfigRemote remote
++ 
++  /usr/sbin/ipsec start
++  start_watchdog
++  do_unlock
++#  lock -u /var/run/ipsec-init.pid
++}
++ 
++stop() {
++  do_lock
++  stop_watchdog
++  /usr/sbin/ipsec stop
++  # ipsec stop should do this but doesn't always...
++  killall charon
++  do_unlock
+ }
+diff --git a/feeds/oldpackages/net/strongswan/files/ipsec.user b/feeds/oldpackages/net/strongswan/files/ipsec.user
+index 4351ace..f373b5b 100644
+--- a/feeds/oldpackages/net/strongswan/files/ipsec.user
++++ b/feeds/oldpackages/net/strongswan/files/ipsec.user
+@@ -4,3 +4,20 @@
+ # /usr/lib/ipsec/_updown which by default
+ # strongswan executes.
+ 
++case "$PLUTO_VERB:$1" in
++up-client:iptables)
++	  iptables -t nat -I POSTROUTING 1 -p $PLUTO_PEER_PROTOCOL \
++	      -s $PLUTO_MY_CLIENT $S_MY_PORT \
++	      -d $PLUTO_PEER_CLIENT $D_PEER_PORT -j ACCEPT
++	  conntrack -F
++	;;
++
++
++down-client:iptables)
++	  iptables -t nat -D POSTROUTING -p $PLUTO_PEER_PROTOCOL \
++	      -s $PLUTO_MY_CLIENT $S_MY_PORT \
++	      -d $PLUTO_PEER_CLIENT $D_PEER_PORT \
++	         -j ACCEPT
++	  conntrack -F
++	;;
++esac

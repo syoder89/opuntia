@@ -1,0 +1,45 @@
+--- a/package/base-files/files/etc/init.d/boot
++++ b/package/base-files/files/etc/init.d/boot
+@@ -17,6 +17,17 @@ uci_apply_defaults() {
+ 	uci commit
+ }
+ 
++restore_config() {
++	[ -f /sysupgrade.tgz ] && {
++		echo "- config restore -"
++		cd /
++		mv sysupgrade.tgz /tmp
++		tar xzf /tmp/sysupgrade.tgz
++		rm -f /tmp/sysupgrade.tgz
++		sync
++	}
++}
++
+ boot() {
+ 	[ -f /proc/mounts ] || /sbin/mount_root
+ 	[ -f /proc/jffs2_bbc ] && echo "S" > /proc/jffs2_bbc
+@@ -47,6 +58,7 @@ boot() {
+ 	rm -f /tmp/wireless.tmp
+ 
+ 	uci_apply_defaults
++	restore_config
+ 	
+ 	# temporary hack until configd exists
+ 	/sbin/reload_config
+--- a/package/base-files/files/lib/preinit/80_mount_root
++++ b/package/base-files/files/lib/preinit/80_mount_root
+@@ -5,14 +5,6 @@
+ do_mount_root() {
+ 	mount_root
+ 	boot_run_hook preinit_mount_root
+-	[ -f /sysupgrade.tgz ] && {
+-		echo "- config restore -"
+-		cd /
+-		mv sysupgrade.tgz /tmp
+-		tar xzf /tmp/sysupgrade.tgz
+-		rm -f /tmp/sysupgrade.tgz
+-		sync
+-	}
+ }
+ 
+ [ "$INITRAMFS" = "1" ] || boot_hook_add preinit_main do_mount_root

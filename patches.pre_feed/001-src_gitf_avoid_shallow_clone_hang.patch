@@ -1,0 +1,24 @@
+--- a/scripts/feeds
++++ b/scripts/feeds
+@@ -123,6 +123,13 @@ my %update_method = (
+ 		'update'	=> "git pull --ff",
+ 		'controldir'	=> ".git",
+ 		'revision'	=> "git show --abbrev-commit HEAD | head -n 1 | cut -d ' ' -f 2 | tr -d '\n'"},
++	'src-gitf' => {
++		'init'          => "git clone '%s' '%s'",
++		'init_branch'   => "git clone --branch '%s' '%s' '%s'",
++		'init_commit'   => "git clone '%s' '%s' && cd '%s' && git checkout -b '%s' '%s' && cd -",
++		'update'	=> "git pull --ff",
++		'controldir'	=> ".git",
++		'revision'	=> "git show --abbrev-commit HEAD | head -n 1 | cut -d ' ' -f 2 | tr -d '\n'"},
+ 	'src-gitsvn' => {
+ 		'init'	=> "git svn clone -r HEAD '%s' '%s'",
+ 		'update'	=> "git svn rebase",
+@@ -319,6 +326,7 @@ my %install_method = (
+ 	'src-cpy' => \&install_generic,
+ 	'src-link' => \&install_generic,
+ 	'src-git' => \&install_generic,
++	'src-gitf' => \&install_generic,
+ 	'src-gitsvn' => \&install_generic,
+ 	'src-bzr' => \&install_generic,
+ 	'src-hg' => \&install_generic,

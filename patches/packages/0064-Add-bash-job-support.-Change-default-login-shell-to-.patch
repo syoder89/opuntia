@@ -1,0 +1,49 @@
+From 8962f91daa1700c98c114f0926cecec4ca2b7267 Mon Sep 17 00:00:00 2001
+From: syoder <syoder@imagestream.com>
+Date: Wed, 27 Nov 2013 12:25:16 -0600
+Subject: [PATCH] Add bash job support. Change default login shell to bash.
+ Remove busybox ps so that the full ps is the default. Odd bug with ipsec -
+ enable and start the service from uci-defaults/luci-app-ipsec so that it
+ starts and is enabled after a firmware update. QMI: reset the modem before
+ starting.
+
+---
+ imagestream/configs/alix2                          | 25 ++++++++--------------
+ feeds/oldpackages/utils/bash/Makefile   |  6 +++++-
+ imagestream/package/ipsec/files/etc/init.d/ipsec   |  4 ++--
+ .../ipsec/files/etc/uci-defaults/luci-app-ipsec    |  3 +++
+ .../netifd-qmi/files/lib/netifd/proto/qmi.sh       | 14 ++++++++++++
+ target/linux/x86/base-files/etc/inittab            |  4 ++--
+ 6 files changed, 35 insertions(+), 21 deletions(-)
+
+diff --git a/feeds/oldpackages/utils/bash/Makefile b/feeds/oldpackages/utils/bash/Makefile
+index d877441..b73e468 100644
+--- a/feeds/oldpackages/utils/bash/Makefile
++++ b/feeds/oldpackages/utils/bash/Makefile
+@@ -35,7 +35,11 @@ endef
+ define Build/Configure
+ 	$(call Build/Configure/Default, \
+ 		--without-bash-malloc \
+-                --bindir=/bin \
++                --bindir=/bin, \
++        	bash_cv_job_control_missing=present \
++        	bash_cv_sys_named_pipes=present \
++        	bash_cv_func_sigsetjmp=present \
++        	bash_cv_printf_a_format=yes \
+ 	)
+ endef
+ 
+diff --git a/target/linux/x86/base-files/etc/inittab b/target/linux/x86/base-files/etc/inittab
+index ca90fd8..caf6b4a 100644
+--- a/target/linux/x86/base-files/etc/inittab
++++ b/target/linux/x86/base-files/etc/inittab
+@@ -1,4 +1,4 @@
+ ::sysinit:/etc/init.d/rcS S boot
+ ::shutdown:/etc/init.d/rcS K shutdown
+-ttyS0::askfirst:/bin/ash --login
+-tty1::askfirst:/bin/ash --login
++ttyS0::askfirst:/bin/bash --login
++tty1::askfirst:/bin/bash --login
+-- 
+2.0.0
+

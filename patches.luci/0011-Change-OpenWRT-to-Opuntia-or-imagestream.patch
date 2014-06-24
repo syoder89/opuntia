@@ -1,0 +1,155 @@
+From 7a046df148e385c07d6e175ef19b30483395e0a7 Mon Sep 17 00:00:00 2001
+From: syoder <syoder@imagestream.com>
+Date: Wed, 25 Sep 2013 12:35:00 -0500
+Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
+
+---
+ build/mkversion.sh                    |  4 ++--
+ contrib/package/luci/Makefile         |  2 +-
+ .../modules/admin-full/luasrc/controller/admin/network.lua     |  2 +-
+ .../admin-full/luasrc/model/cbi/admin_system/system.lua        |  2 +-
+ .../admin-full/luasrc/view/admin_network/diagnostics.htm       |  6 +++---
+ .../modules/admin-full/luasrc/view/admin_status/index.htm      | 10 ++++------
+ .../modules/admin-full/luasrc/view/admin_system/flashops.htm   |  4 ++--
+ 7 files changed, 14 insertions(+), 16 deletions(-)
+
+diff --git a/build/mkversion.sh b/build/mkversion.sh
+index afb34b4..b65171b 100755
+--- a/build/mkversion.sh
++++ b/build/mkversion.sh
+@@ -12,11 +12,11 @@ local pcall, dofile, _G = pcall, dofile, _G
+ 
+ module "luci.version"
+ 
+-if pcall(dofile, "/etc/openwrt_release") and _G.DISTRIB_DESCRIPTION then
++if pcall(dofile, "/etc/opuntia_release") and _G.DISTRIB_DESCRIPTION then
+ 	distname    = ""
+ 	distversion = _G.DISTRIB_DESCRIPTION
+ else
+-	distname    = "${2:-OpenWrt}"
++	distname    = "${2:-Opuntia}"
+ 	distversion = "${3:-Development Snapshot}"
+ end
+ 
+diff --git a/contrib/package/luci/Makefile b/contrib/package/luci/Makefile
+index 7706645..7cd0f73 100644
+--- a/contrib/package/luci/Makefile
++++ b/contrib/package/luci/Makefile
+@@ -45,7 +45,7 @@ endef
+ define Package/luci-lib-core/install
+ 	$(call Package/luci/install/template,$(1),libs/core)
+ 	$(PKG_BUILD_DIR)/build/mkversion.sh $(1)/usr/lib/lua/luci/version.lua \
+-		"OpenWrt Firmware" \
++		"Opuntia Firmware" \
+ 		"$(OPENWRTVERSION)" \
+ 		"trunk" \
+ 		"$(PKG_VERSION)"
+diff --git a/modules/admin-full/luasrc/controller/admin/network.lua b/modules/admin-full/luasrc/controller/admin/network.lua
+index 340c5b4..46097e5 100644
+--- a/modules/admin-full/luasrc/controller/admin/network.lua
++++ b/modules/admin-full/luasrc/controller/admin/network.lua
+@@ -215,7 +215,7 @@ function wifi_add()
+ 	if dev then
+ 		local net = dev:add_wifinet({
+ 			mode       = "ap",
+-			ssid       = "OpenWrt",
++			ssid       = "Opuntia",
+ 			encryption = "none"
+ 		})
+ 
+diff --git a/modules/admin-full/luasrc/model/cbi/admin_system/system.lua b/modules/admin-full/luasrc/model/cbi/admin_system/system.lua
+index 3a884c4..47c7cc5 100644
+--- a/modules/admin-full/luasrc/model/cbi/admin_system/system.lua
++++ b/modules/admin-full/luasrc/model/cbi/admin_system/system.lua
+@@ -159,7 +159,7 @@ if has_ntpd then
+ 	if m:formvalue("cbid.system._timeserver._enable") then
+ 		m.uci:section("system", "timeserver", "ntp",
+ 			{
+-                	server = { "0.openwrt.pool.ntp.org", "1.openwrt.pool.ntp.org", "2.openwrt.pool.ntp.org", "3.openwrt.pool.ntp.org" }
++                	server = { "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" }
+ 			}
+ 		)
+ 
+diff --git a/modules/admin-full/luasrc/view/admin_network/diagnostics.htm b/modules/admin-full/luasrc/view/admin_network/diagnostics.htm
+index d1bef2a..af41b8d 100644
+--- a/modules/admin-full/luasrc/view/admin_network/diagnostics.htm
++++ b/modules/admin-full/luasrc/view/admin_network/diagnostics.htm
+@@ -72,7 +72,7 @@ local has_traceroute6 = fs.access("/usr/bin/traceroute6")
+ 			<br />
+ 
+ 			<div style="width:30%; float:left">
+-				<input style="margin: 5px 0" type="text" value="openwrt.org" name="ping" /><br />
++				<input style="margin: 5px 0" type="text" value="imagestream.com" name="ping" /><br />
+ 				<% if has_ping6 then %>
+ 				<select name="ping_proto" style="width:auto">
+ 					<option value="" selected="selected"><%:IPv4%></option>
+@@ -85,7 +85,7 @@ local has_traceroute6 = fs.access("/usr/bin/traceroute6")
+ 			</div>
+ 
+ 			<div style="width:33%; float:left">
+-				<input style="margin: 5px 0" type="text" value="openwrt.org" name="traceroute" /><br />
++				<input style="margin: 5px 0" type="text" value="imagestream.com" name="traceroute" /><br />
+ 				<% if has_traceroute6 then %>
+ 				<select name="traceroute_proto" style="width:auto">
+ 					<option value="" selected="selected"><%:IPv4%></option>
+@@ -102,7 +102,7 @@ local has_traceroute6 = fs.access("/usr/bin/traceroute6")
+ 			</div>
+ 
+ 			<div style="width:33%; float:left;">
+-				<input style="margin: 5px 0" type="text" value="openwrt.org" name="nslookup" /><br />
++				<input style="margin: 5px 0" type="text" value="imagestream.com" name="nslookup" /><br />
+ 				<input type="button" value="<%:Nslookup%>" class="cbi-button cbi-button-apply" onclick="update_status(this.form.nslookup)" />
+ 			</div>
+ 
+diff --git a/modules/admin-full/luasrc/view/admin_status/index.htm b/modules/admin-full/luasrc/view/admin_status/index.htm
+index fe9ea92..3067d1d 100644
+--- a/modules/admin-full/luasrc/view/admin_status/index.htm
++++ b/modules/admin-full/luasrc/view/admin_status/index.htm
+@@ -530,18 +530,16 @@ You may obtain a copy of the License at
+ 
+ 	<table width="100%" cellspacing="10">
+ 		<tr><td width="33%"><%:Hostname%></td><td><%=luci.sys.hostname() or "?"%></td></tr>
+-		<tr><td width="33%"><%:Model%></td><td><%=pcdata(model or "?")%></td></tr>
+-		<tr><td width="33%"><%:Firmware Version%></td><td>
+-			<%=pcdata(luci.version.distname)%> <%=pcdata(luci.version.distversion)%> /
+-			<%=pcdata(luci.version.luciname)%> (<%=pcdata(luci.version.luciversion)%>)
+-		</td></tr>
+-		<tr><td width="33%"><%:Kernel Version%></td><td><%=luci.sys.exec("uname -r")%></td></tr>
+ 		<tr><td width="33%"><%:License%></td><td>
+ 			Router type:   <%=pcdata(luci.sys.exec("/bin/get_license router_build product_name"))%><br/>
+ 			Serial number: <%=pcdata(luci.sys.exec("/bin/get_license router_build serial_number"))%><br/>
+ 			Build date:    <%=pcdata(luci.sys.exec("/bin/get_license router_build build_date"))%><br/>
+ 			Product id:    <%=pcdata(luci.sys.exec("/bin/get_license router_build product_id"))%>, revision <%=pcdata(luci.sys.exec("/bin/get_license router_build product_rev"))%><br/>
+ 		</td></tr>
++		<tr><td width="33%"><%:Firmware Version%></td><td>
++			<%=pcdata(luci.version.distname)%> <%=pcdata(luci.version.distversion)%>
++		</td></tr>
++		<tr><td width="33%"><%:Kernel Version%></td><td><%=luci.sys.exec("uname -r")%></td></tr>
+ 		<tr><td width="33%"><%:Local Time%></td><td id="localtime">-</td></tr>
+ 		<tr><td width="33%"><%:Uptime%></td><td id="uptime">-</td></tr>
+ 		<tr><td width="33%"><%:Load Average%></td><td id="loadavg">-</td></tr>
+diff --git a/modules/admin-full/luasrc/view/admin_system/flashops.htm b/modules/admin-full/luasrc/view/admin_system/flashops.htm
+index 0ba22a5..b794544 100644
+--- a/modules/admin-full/luasrc/view/admin_system/flashops.htm
++++ b/modules/admin-full/luasrc/view/admin_system/flashops.htm
+@@ -64,7 +64,7 @@ $Id$
+ 		<legend><%:Flash new firmware image%></legend>
+ 		<% if upgrade_avail then %>
+ 			<form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
+-				<div class="cbi-section-descr"><%:Upload a sysupgrade-compatible image here to replace the running firmware. Check "Keep settings" to retain the current configuration (requires an OpenWrt compatible firmware image).%></div>
++				<div class="cbi-section-descr"><%:Upload a sysupgrade-compatible image here to replace the running firmware. Check "Keep settings" to retain the current configuration (requires an Opuntia compatible firmware image).%></div>
+ 				<div class="cbi-section-node">
+ 					<div class="cbi-value">
+ 						<label class="cbi-value-title" for="keep"><%:Keep settings%>:</label>
+@@ -85,7 +85,7 @@ $Id$
+ 				<% end %>
+ 			</form>
+ 		<% else %>
+-			<div class="cbi-section-descr"><%:Sorry, there is no sysupgrade support present, a new firmware image must be flashed manually. Please refer to the OpenWrt wiki for device specific install instructions.%></div>
++			<div class="cbi-section-descr"><%:Sorry, there is no sysupgrade support present, a new firmware image must be flashed manually. Please refer to the ImageStream wiki for device specific install instructions.%></div>
+ 		<% end %>
+ 	</fieldset>
+ 
+-- 
+2.0.0
+

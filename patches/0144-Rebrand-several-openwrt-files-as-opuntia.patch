@@ -1,0 +1,129 @@
+From 194a873d558c63f6d23b58abb8a0a9fbd9aab402 Mon Sep 17 00:00:00 2001
+From: syoder <syoder@imagestream.com>
+Date: Fri, 16 Aug 2013 09:57:00 -0500
+Subject: [PATCH] Rebrand several openwrt files as opuntia
+
+---
+ imagestream/package/file_overrides/files/bin/man3g | 82 ----------------------
+ imagestream/package/netifd-qmi/files/bin/man3g     | 82 ++++++++++++++++++++++
+ package/base-files/Makefile                        |  4 +-
+ package/base-files/files/etc/banner                | 13 ----
+ package/base-files/files/etc/config/system         | 10 +--
+ package/base-files/files/etc/init.d/boot           |  2 +-
+ package/base-files/files/etc/openwrt_release       |  6 --
+ package/base-files/files/etc/openwrt_version       |  1 -
+ package/base-files/files/etc/opuntia_release       |  6 ++
+ package/base-files/files/etc/opuntia_version       |  1 +
+ .../files/lib/preinit/10_indicate_preinit          |  2 +-
+ target/imagebuilder/Makefile                       |  2 +-
+ .../linux/x86/alix2/base-files/etc/config/system   | 26 +++----
+ target/linux/x86/image/grub-iso.cfg                |  2 +-
+ target/linux/x86/image/grub.cfg                    |  4 +-
+ target/sdk/Makefile                                |  2 +-
+ target/toolchain/Makefile                          |  2 +-
+ 17 files changed, 117 insertions(+), 130 deletions(-)
+ delete mode 100755 imagestream/package/file_overrides/files/bin/man3g
+ create mode 100755 imagestream/package/netifd-qmi/files/bin/man3g
+ delete mode 100644 package/base-files/files/etc/banner
+ delete mode 100644 package/base-files/files/etc/openwrt_release
+ delete mode 100644 package/base-files/files/etc/openwrt_version
+ create mode 100644 package/base-files/files/etc/opuntia_release
+ create mode 100644 package/base-files/files/etc/opuntia_version
+
+--- a/package/base-files/Makefile
++++ b/package/base-files/Makefile
+@@ -110,8 +110,8 @@ define Package/base-files/install
+ 
+ 	$(VERSION_SED) \
+ 		$(1)/etc/banner \
+-		$(1)/etc/openwrt_version \
+-		$(1)/etc/openwrt_release
++		$(1)/etc/opuntia_version \
++		$(1)/etc/opuntia_release
+ 
+ 	mkdir -p $(1)/CONTROL
+ 	mkdir -p $(1)/dev
+--- a/package/base-files/files/etc/openwrt_release
++++ /dev/null
+@@ -1,7 +0,0 @@
+-DISTRIB_ID="%D"
+-DISTRIB_RELEASE="%C"
+-DISTRIB_REVISION="%R"
+-DISTRIB_CODENAME="%n"
+-DISTRIB_TARGET="%S"
+-DISTRIB_DESCRIPTION="%D %N %V"
+-DISTRIB_TAINTS="%t"
+--- a/package/base-files/files/etc/openwrt_version
++++ /dev/null
+@@ -1 +0,0 @@
+-%V
+--- /dev/null
++++ b/package/base-files/files/etc/opuntia_release
+@@ -0,0 +1,6 @@
++DISTRIB_ID="%D"
++DISTRIB_RELEASE="%C"
++DISTRIB_REVISION="%R"
++DISTRIB_CODENAME="%n"
++DISTRIB_TARGET="%S"
++DISTRIB_DESCRIPTION="%D %N %V"
+--- /dev/null
++++ b/package/base-files/files/etc/opuntia_version
+@@ -0,0 +1 @@
++%V
+--- a/target/imagebuilder/Makefile
++++ b/target/imagebuilder/Makefile
+@@ -15,7 +15,7 @@ override MAKEFLAGS=
+ PKG_OS:=$(word 2,$(subst -, ,$(shell $(HOSTCC) -dumpmachine)))
+ PKG_CPU:=$(word 1,$(subst -, ,$(shell $(HOSTCC) -dumpmachine)))
+ 
+-IB_NAME:=OpenWrt-ImageBuilder-$(BOARD)$(if $(SUBTARGET),_$(SUBTARGET))-for-$(PKG_OS)-$(PKG_CPU)
++IB_NAME:=Opuntia-ImageBuilder-$(BOARD)$(if $(SUBTARGET),_$(SUBTARGET))-for-$(PKG_OS)-$(PKG_CPU)
+ PKG_BUILD_DIR:=$(BUILD_DIR)/$(IB_NAME)
+ IB_KDIR:=$(patsubst $(TOPDIR)/%,$(PKG_BUILD_DIR)/%,$(KERNEL_BUILD_DIR))
+ IB_LDIR:=$(patsubst $(TOPDIR)/%,$(PKG_BUILD_DIR)/%,$(LINUX_DIR))
+--- a/target/linux/x86/image/grub-iso.cfg
++++ b/target/linux/x86/image/grub-iso.cfg
+@@ -5,6 +5,6 @@ set default="0"
+ set timeout="@TIMEOUT@"
+ set root='(cd)'
+ 
+-menuentry "OpenWrt" {
++menuentry "Opuntia" {
+ 	linux /boot/vmlinuz @CMDLINE@ noinitrd
+ }
+--- a/target/linux/x86/image/grub.cfg
++++ b/target/linux/x86/image/grub.cfg
+@@ -5,9 +5,9 @@ set default="0"
+ set timeout="@TIMEOUT@"
+ set root='(hd0,msdos1)'
+ 
+-menuentry "OpenWrt" {
++menuentry "Opuntia" {
+ 	linux /boot/vmlinuz @CMDLINE@ noinitrd
+ }
+-menuentry "OpenWrt (failsafe)" {
++menuentry "Opuntia (failsafe)" {
+ 	linux /boot/vmlinuz failsafe=true @CMDLINE@ noinitrd
+ }
+--- a/target/sdk/Makefile
++++ b/target/sdk/Makefile
+@@ -14,7 +14,7 @@ override MAKEFLAGS=
+ PKG_OS:=$(word 2,$(subst -, ,$(shell $(HOSTCC) -dumpmachine)))
+ PKG_CPU:=$(word 1,$(subst -, ,$(shell $(HOSTCC) -dumpmachine)))
+ 
+-SDK_NAME:=OpenWrt-SDK-$(BOARD)-for-$(PKG_OS)-$(PKG_CPU)-gcc-$(GCCV)_$(LIBC)-$(LIBCV)
++SDK_NAME:=Opuntia-SDK-$(BOARD)-for-$(PKG_OS)-$(PKG_CPU)-gcc-$(GCCV)_$(LIBC)-$(LIBCV)
+ SDK_BUILD_DIR:=$(BUILD_DIR)/$(SDK_NAME)
+ 
+ STAGING_SUBDIR_HOST := staging_dir/host
+--- a/target/toolchain/Makefile
++++ b/target/toolchain/Makefile
+@@ -16,7 +16,7 @@ override MAKEFLAGS=
+ PKG_OS:=$(word 2,$(subst -, ,$(shell $(HOSTCC) -dumpmachine)))
+ PKG_CPU:=$(word 1,$(subst -, ,$(shell $(HOSTCC) -dumpmachine)))
+ 
+-TOOLCHAIN_NAME:=OpenWrt-Toolchain-$(BOARD)-for-$(ARCH)$(ARCH_SUFFIX)-gcc-$(GCCV)$(DIR_SUFFIX)
++TOOLCHAIN_NAME:=Opuntia-Toolchain-$(BOARD)-for-$(ARCH)$(ARCH_SUFFIX)-gcc-$(GCCV)$(DIR_SUFFIX)
+ TOOLCHAIN_BUILD_DIR:=$(BUILD_DIR)/$(TOOLCHAIN_NAME)
+ EXCLUDE_DIRS:=*/ccache \
+ 	*/stamp \

@@ -1,0 +1,31 @@
+From 4f0b00e05e7875d5c3c2347fa5bc1ad65c4d2c1a Mon Sep 17 00:00:00 2001
+From: syoder <syoder@imagestream.com>
+Date: Thu, 6 Feb 2014 09:40:15 -0600
+Subject: [PATCH] Fix panic in ledtrig-netdev due to a netdev callback on a dev
+ with no name!
+
+---
+ .../generic/patches-3.13/1003-scott-ledtrig-netdev.patch      | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+ create mode 100644 target/linux/generic/patches-3.13/1003-scott-ledtrig-netdev.patch
+
+diff --git a/target/linux/generic/patches-3.13/1003-scott-ledtrig-netdev.patch b/target/linux/generic/patches-3.13/1003-scott-ledtrig-netdev.patch
+new file mode 100644
+index 0000000..f3a10f0
+--- /dev/null
++++ b/target/linux/generic/patches-3.13/1003-scott-ledtrig-netdev.patch
+@@ -0,0 +1,11 @@
++--- a/drivers/leds/ledtrig-netdev.c
+++++ b/drivers/leds/ledtrig-netdev.c
++@@ -274,7 +274,7 @@ static int netdev_trig_notify(struct not
++ 
++ 	write_lock(&trigger_data->lock);
++ 
++-	if (strcmp(dev->name, trigger_data->device_name))
+++	if (!strlen(trigger_data->device_name) || strcmp(dev->name, trigger_data->device_name))
++ 		goto done;
++ 
++ 	if (evt == NETDEV_REGISTER) {
+-- 
+2.0.0
+

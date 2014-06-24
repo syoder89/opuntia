@@ -1,0 +1,30 @@
+From fc96507ce5c6b67234967a4014dca6f1f0f44cfd Mon Sep 17 00:00:00 2001
+From: syoder <syoder@imagestream.com>
+Date: Mon, 25 Nov 2013 12:08:26 -0600
+Subject: [PATCH 12/14] Fix failover with IPSec. Add multiwan option for
+ restarting IPSec on failure/recovery.
+
+---
+ .../luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua            | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/applications/luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua b/applications/luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
+index 4797fbd..743485d 100644
+--- a/applications/luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
++++ b/applications/luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
+@@ -92,6 +92,12 @@ recovery.default = "5"
+ recovery.optional = false
+ recovery.rmempty = false
+ 
++restart_ipsec_fail = s:option(Flag, "restart_ipsec_on_fail", translate("Restart IPSec on Failure"))
++restart_ipsec_fail.rmempty = false
++
++restart_ipsec_recovery = s:option(Flag, "restart_ipsec_on_recovery", translate("Restart IPSec on Recovery"))
++restart_ipsec_recovery.rmempty = false
++
+ failover_to = s:option(ListValue, "failover_to", translate("Failover Traffic Destination"))
+ failover_to:value("disable", translate("None"))
+ luci.tools.webadmin.cbi_add_networks(failover_to)
+-- 
+2.0.0
+

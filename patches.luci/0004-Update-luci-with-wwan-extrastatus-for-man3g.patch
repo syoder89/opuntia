@@ -1,0 +1,74 @@
+From c05f57e52e1659fa0a894782f0f52157bc255585 Mon Sep 17 00:00:00 2001
+From: syoder <syoder@imagestream.com>
+Date: Thu, 15 Aug 2013 18:06:16 -0500
+Subject: [PATCH 04/14] Update luci with wwan "extrastatus" for man3g
+
+---
+ .../luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua          | 1 +
+ imagestream/openwrt-luci/libs/core/luasrc/model/network.lua       | 8 ++++++++
+ .../modules/admin-full/luasrc/controller/admin/network.lua        | 1 +
+ .../modules/admin-full/luasrc/view/admin_network/iface_status.htm | 5 +++++
+ 4 files changed, 15 insertions(+)
+
+diff --git a/applications/luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua b/applications/luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
+index 586b630..4797fbd 100644
+--- a/applications/luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
++++ b/applications/luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
+@@ -52,6 +52,7 @@ interval.rmempty = false
+ 
+ icmp_hosts = s:option(Value, "icmp_hosts", translate("Health Monitor ICMP Host(s)"))
+ icmp_hosts:value("disable", translate("Disable"))
++icmp_hosts:value("arp_gateway", "WAN Gateway using ARP")
+ icmp_hosts:value("dns", "DNS Server(s)")
+ icmp_hosts:value("gateway", "WAN Gateway")
+ icmp_hosts.default = "dns"
+diff --git a/modules/base/luasrc/model/network.lua b/modules/base/luasrc/model/network.lua
+index 6496116..389eeef 100644
+--- a/modules/base/luasrc/model/network.lua
++++ b/modules/base/luasrc/model/network.lua
+@@ -1023,6 +1023,14 @@ function protocol.adminlink(self)
+ 	return dsp.build_url("admin", "network", "network", self.sid)
+ end
+ 
++function protocol.extrastatus(self)
++	local p = self:proto()
++	if p == "qmi" then
++		return utl.exec("man3g -i %s status" % self:get("ifname"))
++	end
++	return 0
++end
++
+ 
+ interface = utl.class()
+ 
+diff --git a/modules/admin-full/luasrc/controller/admin/network.lua b/modules/admin-full/luasrc/controller/admin/network.lua
+index 54afa1b..340c5b4 100644
+--- a/modules/admin-full/luasrc/controller/admin/network.lua
++++ b/modules/admin-full/luasrc/controller/admin/network.lua
+@@ -272,6 +272,7 @@ function iface_status(ifaces)
+ 				tx_bytes   = device:tx_bytes(),
+ 				rx_packets = device:rx_packets(),
+ 				tx_packets = device:tx_packets(),
++				extrastatus = net:extrastatus(),
+ 
+ 				ipaddrs    = { },
+ 				ip6addrs   = { },
+diff --git a/modules/admin-full/luasrc/view/admin_network/iface_status.htm b/modules/admin-full/luasrc/view/admin_network/iface_status.htm
+index 8136383..e6d369a 100644
+--- a/modules/admin-full/luasrc/view/admin_network/iface_status.htm
++++ b/modules/admin-full/luasrc/view/admin_network/iface_status.htm
+@@ -67,6 +67,11 @@
+ 						html += '<br />';
+ 					}
+ 
++					if (ifc.extrastatus)
++					{
++						html += String.format('<pre style=" width: 320px;">%s</pre></div><br />', ifc.extrastatus);
++					}
++
+ 					d.innerHTML = html;
+ 				}
+ 				else if (d)
+-- 
+2.0.0
+

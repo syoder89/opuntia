@@ -1,0 +1,11 @@
+0002-Add-remove-table-margin-patch.patch
+0004-Update-luci-with-wwan-extrastatus-for-man3g.patch
+0005-Update-theme-openvpn.patch
+0006-Add-license-info-to-overview-page.patch
+0007-Add-multiwan-to-network-config-ucitrack-list.patch
+0008-Add-802.11s-SAE-authentication-support-in-Luci-and-..patch
+0009-Fixup-display-of-wireless-interface-in-mesh-mode.patch
+0010-Add-mesh-parameters-announce-gateway-and-root-mode.patch
+0011-Change-OpenWRT-to-Opuntia-or-imagestream.patch
+0012-Fix-failover-with-IPSec.patch
+0013-Update-AP-config.-Add-inactive-time-to-wifi-status.-.patch

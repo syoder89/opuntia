@@ -1,0 +1,44 @@
+--- a/package/base-files/files/lib/upgrade/common.sh
++++ b/package/base-files/files/lib/upgrade/common.sh
+@@ -220,6 +220,10 @@ do_upgrade() {
+ 		platform_copy_config
+ 	fi
+ 
++	if type 'platform_copy_licenses' >/dev/null 2>/dev/null; then
++		platform_copy_licenses
++	fi
++
+ 	v "Upgrade completed"
+ 	[ -n "$DELAY" ] && sleep "$DELAY"
+ 	ask_bool 1 "Reboot" && {
+--- a/target/linux/x86/base-files/lib/upgrade/platform.sh
++++ b/target/linux/x86/base-files/lib/upgrade/platform.sh
+@@ -34,6 +34,16 @@ platform_copy_config() {
+ 	umount /mnt
+ }
+ 
++platform_copy_licenses() {
++	local rootfs="$(x86_get_rootfs)"
++	local rootfsdev="${rootfs##*:}"
++	
++	mount -t ext4 -o rw,noatime "${rootfsdev%[0-9]}1" /mnt
++	cp -af "/etc/licenses" /mnt/
++	cp -af "/etc/product_id.txt" /mnt/
++	umount /mnt
++}
++
+ platform_do_upgrade() {
+ 	local rootfs="$(x86_get_rootfs)"
+ 	local rootfsdev="${rootfs##*:}"
+--- a/target/linux/x86/image/gen_image_generic.sh
++++ b/target/linux/x86/image/gen_image_generic.sh
+@@ -34,6 +34,8 @@ dd if="$ROOTFSIMAGE" of="$OUTPUT" bs=512
+ 
+ [ -n "$NOGRUB" ] && exit 0
+ 
+-genext2fs -d "$KERNELDIR" -b "$BLOCKS" "$OUTPUT.kernel"
++# Scott added inodes (100) to allow copying our licenses. Default is num files + 1
++genext2fs -d "$KERNELDIR" -b "$BLOCKS" -N 100 "$OUTPUT.kernel"
++
+ dd if="$OUTPUT.kernel" of="$OUTPUT" bs=512 seek="$KERNELOFFSET" conv=notrunc
+ rm -f "$OUTPUT.kernel"

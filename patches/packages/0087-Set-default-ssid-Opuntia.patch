@@ -1,0 +1,27 @@
+From e275386987a0ed3506d0ca8e49977e13d1f29a5a Mon Sep 17 00:00:00 2001
+From: syoder <syoder@imagestream.com>
+Date: Wed, 25 Sep 2013 17:08:49 -0500
+Subject: [PATCH] Set default configs for ap
+
+---
+ package/kernel/mac80211/files/lib/wifi/mac80211.sh |   2 +-
+ .../network/config/firewall/files/firewall.config  | 295 ++++++++-------------
+ target/linux/ar71xx/base-files.mk                  |   6 +-
+ target/linux/ar71xx/base-files/etc/config/network  |  20 +-
+ .../base-files/etc/uci-defaults/10_wifi_mesh       |  52 ++++
+ 5 files changed, 180 insertions(+), 195 deletions(-)
+ create mode 100755 target/linux/ar71xx/base-files/etc/uci-defaults/10_wifi_mesh
+
+diff --git a/package/kernel/mac80211/files/lib/wifi/mac80211.sh b/package/kernel/mac80211/files/lib/wifi/mac80211.sh
+index 13afa81..e1d7411 100644
+--- a/package/kernel/mac80211/files/lib/wifi/mac80211.sh
++++ b/package/kernel/mac80211/files/lib/wifi/mac80211.sh
+@@ -648,7 +648,7 @@ config wifi-iface
+ 	option device   radio$devidx
+ 	option network  lan
+ 	option mode     ap
+-	option ssid     OpenWrt
++	option ssid     Opuntia
+ 	option encryption none
+ 
+ EOF

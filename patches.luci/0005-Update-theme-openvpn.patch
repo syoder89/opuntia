@@ -1,0 +1,23 @@
+From f9da0dadbf98c1b006dc4cd9e511070f1585454e Mon Sep 17 00:00:00 2001
+From: syoder <syoder@imagestream.com>
+Date: Wed, 4 Sep 2013 17:30:33 -0500
+Subject: [PATCH 05/14] Update theme + openvpn
+
+---
+ .../openwrt-luci/applications/luci-qos/luasrc/model/cbi/qos/qos.lua      | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/applications/luci-qos/luasrc/model/cbi/qos/qos.lua b/applications/luci-qos/luasrc/model/cbi/qos/qos.lua
+index 1af3bdb..6c54b45 100644
+--- a/applications/luci-qos/luasrc/model/cbi/qos/qos.lua
++++ b/applications/luci-qos/luasrc/model/cbi/qos/qos.lua
+@@ -95,5 +95,6 @@ ports.rmempty = true
+ ports:value("", translate("all"))
+ 
+ bytes = s:option(Value, "connbytes", translate("Number of bytes"))
++bytes.size = 6
+ 
+ return m
+-- 
+2.0.0
+

@@ -1,0 +1,62 @@
+From 9b7abca1d8db440fae76dc438777fe6a26380fda Mon Sep 17 00:00:00 2001
+From: syoder <syoder@imagestream.com>
+Date: Mon, 9 Sep 2013 10:18:13 -0500
+Subject: [PATCH] iproute2 gre keepalive patch
+
+---
+ .../package/gre/files/lib/netifd/proto/gre.sh      | 13 ++++---
+ .../iproute2/patches/901-scott-gre-keepalive.patch | 42 ++++++++++++++++++++++
+ 2 files changed, 51 insertions(+), 4 deletions(-)
+ create mode 100644 package/network/utils/iproute2/patches/901-scott-gre-keepalive.patch
+
+diff --git a/package/network/utils/iproute2/patches/901-scott-gre-keepalive.patch b/package/network/utils/iproute2/patches/901-scott-gre-keepalive.patch
+new file mode 100644
+index 0000000..566782a
+--- /dev/null
++++ b/package/network/utils/iproute2/patches/901-scott-gre-keepalive.patch
+@@ -0,0 +1,42 @@
++--- a/ip/iptunnel.c
+++++ b/ip/iptunnel.c
++@@ -38,6 +38,7 @@ static void usage(void)
++ 	fprintf(stderr, "          [ prl-default ADDR ] [ prl-nodefault ADDR ] [ prl-delete ADDR ]\n");
++ 	fprintf(stderr, "          [ 6rd-prefix ADDR ] [ 6rd-relay_prefix ADDR ] [ 6rd-reset ]\n");
++ 	fprintf(stderr, "          [ ttl TTL ] [ tos TOS ] [ [no]pmtudisc ] [ dev PHYS_DEV ]\n");
+++        fprintf(stderr, "          [ keepalive NUMBER ] [ retries NUMBER ]\n");
++ 	fprintf(stderr, "\n");
++ 	fprintf(stderr, "Where: NAME := STRING\n");
++ 	fprintf(stderr, "       ADDR := { IP_ADDRESS | any }\n");
++@@ -203,6 +204,18 @@ static int parse_args(int argc, char **a
++ 					invarg("bad TOS value", *argv);
++ 				p->iph.tos |= uval;
++ 			}
+++                } else if (strcmp(*argv, "keepalive") == 0) {
+++                        unsigned uval;
+++                        NEXT_ARG();
+++                        if (get_unsigned(&uval, *argv, 0))
+++                                invarg("invalid keepalive value\n", *argv);
+++                        p->ka_interval = uval;
+++                } else if (strcmp(*argv, "retries") == 0) {
+++                        unsigned uval;
+++                        NEXT_ARG();
+++                        if (get_unsigned(&uval, *argv, 0))
+++                                invarg("invalid retries value\n", *argv);
+++                        p->ka_retries = uval;
++ 		} else {
++ 			if (strcmp(*argv, "name") == 0) {
++ 				NEXT_ARG();
++--- a/include/linux/if_tunnel.h
+++++ b/include/linux/if_tunnel.h
++@@ -35,6 +35,10 @@ struct ip_tunnel_parm {
++ 	__be32			i_key;
++ 	__be32			o_key;
++ 	struct iphdr		iph;
+++        struct timer_list               *timer;
+++        int             ka_interval;
+++        int             ka_retries;
+++        int             ka_cur_retries;
++ };
++ 
++ enum {
+-- 
+2.0.0
+
