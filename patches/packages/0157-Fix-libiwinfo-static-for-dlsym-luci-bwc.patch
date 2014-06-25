@@ -1,0 +1,148 @@
+--- a/package/network/utils/iwinfo/src/iwinfo_madwifi.c
++++ b/package/network/utils/iwinfo/src/iwinfo_madwifi.c
+@@ -337,12 +337,12 @@ static void madwifi_ifdel(const char *if
+ }
+ 
+ 
+-static int madwifi_probe(const char *ifname)
++int madwifi_probe(const char *ifname)
+ {
+ 	return ( !!madwifi_isvap(ifname, NULL) || madwifi_iswifi(ifname) );
+ }
+ 
+-static void madwifi_close(void)
++void madwifi_close(void)
+ {
+ 	/* Nop */
+ }
+@@ -412,7 +412,7 @@ static int madwifi_get_txpower(const cha
+ 	return wext_ops.txpower(ifname, buf);
+ }
+ 
+-static int madwifi_get_bitrate(const char *ifname, int *buf)
++int madwifi_get_bitrate(const char *ifname, int *buf)
+ {
+ 	unsigned int mode, len, rate, rate_count;
+ 	uint8_t tmp[24*1024];
+@@ -458,7 +458,7 @@ static int madwifi_get_bitrate(const cha
+ 	return -1;
+ }
+ 
+-static int madwifi_get_signal(const char *ifname, int *buf)
++int madwifi_get_signal(const char *ifname, int *buf)
+ {
+ 	unsigned int mode, len, rssi, rssi_count;
+ 	uint8_t tmp[24*1024];
+@@ -504,7 +504,7 @@ static int madwifi_get_signal(const char
+ 	return -1;
+ }
+ 
+-static int madwifi_get_noise(const char *ifname, int *buf)
++int madwifi_get_noise(const char *ifname, int *buf)
+ {
+ 	return wext_ops.noise(ifname, buf);
+ }
+--- a/package/network/utils/iwinfo/src/iwinfo_nl80211.c
++++ b/package/network/utils/iwinfo/src/iwinfo_nl80211.c
+@@ -28,7 +28,7 @@
+ 
+ static struct nl80211_state *nls = NULL;
+ 
+-static void nl80211_close(void)
++void nl80211_close(void)
+ {
+ 	if (nls)
+ 	{
+@@ -782,7 +782,7 @@ static void nl80211_hostapd_hup(const ch
+ }
+ 
+ 
+-static int nl80211_probe(const char *ifname)
++int nl80211_probe(const char *ifname)
+ {
+ 	return !!nl80211_ifname2phy(ifname);
+ }
+@@ -1126,7 +1126,7 @@ static void nl80211_fill_signal(const ch
+ 	}
+ }
+ 
+-static int nl80211_get_bitrate(const char *ifname, int *buf)
++int nl80211_get_bitrate(const char *ifname, int *buf)
+ {
+ 	struct nl80211_rssi_rate rr;
+ 
+@@ -1141,7 +1141,7 @@ static int nl80211_get_bitrate(const cha
+ 	return -1;
+ }
+ 
+-static int nl80211_get_signal(const char *ifname, int *buf)
++int nl80211_get_signal(const char *ifname, int *buf)
+ {
+ 	struct nl80211_rssi_rate rr;
+ 
+@@ -1184,7 +1184,7 @@ static int nl80211_get_noise_cb(struct n
+ }
+ 
+ 
+-static int nl80211_get_noise(const char *ifname, int *buf)
++int nl80211_get_noise(const char *ifname, int *buf)
+ {
+ 	int8_t noise;
+ 	struct nl80211_msg_conveyor *req;
+--- a/package/network/utils/iwinfo/src/iwinfo_wext.c
++++ b/package/network/utils/iwinfo/src/iwinfo_wext.c
+@@ -65,7 +65,7 @@ static int wext_probe(const char *ifname
+ 	return 0;
+ }
+ 
+-static void wext_close(void)
++void wext_close(void)
+ {
+ 	/* Nop */
+ }
+--- a/package/network/utils/iwinfo/src/iwinfo_wl.c
++++ b/package/network/utils/iwinfo/src/iwinfo_wl.c
+@@ -73,14 +73,14 @@ static struct wl_maclist * wl_read_assoc
+ }
+ 
+ 
+-static int wl_probe(const char *ifname)
++int wl_probe(const char *ifname)
+ {
+ 	int magic;
+ 	return (!wl_ioctl(ifname, WLC_GET_MAGIC, &magic, sizeof(magic)) &&
+ 			(magic == WLC_IOCTL_MAGIC));
+ }
+ 
+-static void wl_close(void)
++void wl_close(void)
+ {
+ 	/* Nop */
+ }
+@@ -152,7 +152,7 @@ static int wl_get_txpower(const char *if
+ 	return wext_ops.txpower(ifname, buf);
+ }
+ 
+-static int wl_get_bitrate(const char *ifname, int *buf)
++int wl_get_bitrate(const char *ifname, int *buf)
+ {
+ 	int ret = -1;
+ 	int rate = 0;
+@@ -163,7 +163,7 @@ static int wl_get_bitrate(const char *if
+ 	return ret;
+ }
+ 
+-static int wl_get_signal(const char *ifname, int *buf)
++int wl_get_signal(const char *ifname, int *buf)
+ {
+ 	unsigned int ap, rssi, i, rssi_count;
+ 	int ioctl_req_version = 0x2000;
+@@ -207,7 +207,7 @@ static int wl_get_signal(const char *ifn
+ 	return 0;
+ }
+ 
+-static int wl_get_noise(const char *ifname, int *buf)
++int wl_get_noise(const char *ifname, int *buf)
+ {
+ 	unsigned int ap, noise;
+ 	int ioctl_req_version = 0x2000;

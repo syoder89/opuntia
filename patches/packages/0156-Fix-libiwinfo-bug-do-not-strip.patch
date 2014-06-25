@@ -1,0 +1,18 @@
+--- a/package/network/utils/iwinfo/Makefile
++++ b/package/network/utils/iwinfo/Makefile
+@@ -27,6 +27,7 @@ define Package/libiwinfo
+   DEPENDS:=+PACKAGE_kmod-mac80211:libnl-tiny
+   ABI_VERSION:=$(PKG_RELEASE)
+   MAINTAINER:=Jo-Philipp Wich <xm@subsignal.org>
++  RSTRIP := true
+ endef
+ 
+ define Package/libiwinfo/description
+@@ -42,6 +43,7 @@ define Package/libiwinfo-lua
+   TITLE:=libiwinfo Lua binding
+   DEPENDS:=+libiwinfo +liblua
+   MAINTAINER:=Jo-Philipp Wich <xm@subsignal.org>
++  RSTRIP := true
+ endef
+ 
+ define Package/libiwinfo-lua/description

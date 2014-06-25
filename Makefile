@@ -11,7 +11,7 @@ built=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_built
 configured=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_configured
 
 build: prepare $(built)
-	$(MAKE) -j 32 -C $(BUILD_DIR) defconfig package/bash/clean package/bash/compile world || make -C $(BUILD_DIR) defconfig package/bash/compile world V=s
+	$(MAKE) -j 32 -C $(BUILD_DIR) defconfig world || ($(MAKE) -C $(BUILD_DIR) package/bash/clean package/bash/compile && $(MAKE) -j 32 -C $(BUILD_DIR) world || $(MAKE) -C $(BUILD_DIR) world V=s)
 
 checkout_openwrt:
 	@if [ ! -d $(BUILD_DIR) ] ; then \
@@ -32,6 +32,9 @@ $(patches):
 	quilt push -a; \
 	cd ..; \
 	cp -a patches.luci $(BUILD_DIR)/feeds/luci/patches ; \
+	cd $(BUILD_DIR)/feeds/luci; \
+	quilt push -a; \
+	cd ../../..; \
 	touch $@
 
 $(feeds):
