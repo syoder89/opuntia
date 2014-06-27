@@ -1,0 +1,22 @@
+--- a/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
++++ b/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
+@@ -199,7 +199,8 @@ if hwtype == "mac80211" then
+ 		htmode = s:taboption("advanced", ListValue, "htmode", translate("HT mode (802.11n)"))
+ 		htmode:value("", translate("disabled"))
+ 		htmode:value("HT20", "20MHz")
+-		htmode:value("HT40", "40MHz")
++		htmode:value("HT40-", translate("40MHz 2nd channel below"))
++		htmode:value("HT40+", translate("40MHz 2nd channel above"))
+ 
+ 		function mode.cfgvalue(...)
+ 			local v = Value.cfgvalue(...)
+@@ -213,7 +214,8 @@ if hwtype == "mac80211" then
+ 
+ 		noscan = s:taboption("advanced", Flag, "noscan", translate("Force 40MHz mode"),
+ 			translate("Always use 40MHz channels even if the secondary channel overlaps. Using this option does not comply with IEEE 802.11n-2009!"))
+-		noscan:depends("htmode", "HT40")
++		noscan:depends("htmode", "HT40+")
++		noscan:depends("htmode", "HT40-")
+ 		noscan.default = noscan.disabled
+ 	else
+ 		if hw_modes.g then mode:value("11g", "2.4GHz (802.11g)") end

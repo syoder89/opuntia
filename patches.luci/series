@@ -9,3 +9,4 @@
 0011-Change-OpenWRT-to-Opuntia-or-imagestream.patch
 0012-Fix-failover-with-IPSec.patch
 0013-Update-AP-config.-Add-inactive-time-to-wifi-status.-.patch
+0014-Add-back-HT40+-modes.patch
