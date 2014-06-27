@@ -22,3 +22,4 @@ packages/0158-Fix-netifd-authsae-link-severed-error.patch
 packages/0159-Update-authsae-06-2014.patch
 packages/0160-Authsae-fix-bad-frames-in-commit-8531ab1.patch
 packages/0161-Mac80211-fix-uninitialized-htmode-for-mesh.patch
+packages/0162-Mac80211-fix-duplicate-mesh-ids.patch

@@ -1,0 +1,11 @@
+--- a/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
++++ b/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
+@@ -532,7 +532,7 @@ mac80211_setup_vif() {
+ 	case "$mode" in
+ 		mesh)
+ 			# authsae
+-			json_get_vars key
++			json_get_vars key mesh_id
+ 			if [ -n "$key" ]; then
+ 				if [ -e "/lib/wifi/authsae.sh" ]; then
+ 					. /lib/wifi/authsae.sh
