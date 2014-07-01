@@ -1,26 +1,30 @@
 --- a/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
 +++ b/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-@@ -531,11 +531,6 @@ mac80211_setup_vif() {
- 
- 	case "$mode" in
+@@ -426,11 +426,11 @@ mac80211_prepare_vif() {
+ 		;;
  		mesh)
--			for var in $MP_CONFIG_INT $MP_CONFIG_BOOL $MP_CONFIG_STRING; do
--				json_get_var mp_val "$var"
--				[ -n "$mp_val" ] && iw dev "$ifname" set mesh_param "$var" "$mp_val"
--			done
+ 			json_get_vars key mesh_id
+-			if [ -n "$key" ]; then
+-				iw phy "$phy" interface add "$ifname" type mp
+-			else
+-				iw phy "$phy" interface add "$ifname" type mp mesh_id "$mesh_id"
+-			fi
++			# Originally mesh_id is set by meshd-nl80211 if authsae is used, but---
++			# Scott changed to always add mesh_id so the mesh params can be set later
++			# and avoid link has been severed errors. The kernel will not allow
++			# mesh params to be set with no mesh_id
++			iw phy "$phy" interface add "$ifname" type mp mesh_id "$mesh_id"
+ 		;;
+ 		monitor)
+ 			iw phy "$phy" interface add "$ifname" type monitor
+@@ -535,9 +535,8 @@ mac80211_setup_vif() {
+ 				json_get_var mp_val "$var"
+ 				[ -n "$mp_val" ] && iw dev "$ifname" set mesh_param "$var" "$mp_val"
+ 			done
 -
  			# authsae
- 			json_get_vars key
+-			json_get_vars key
++			json_get_vars key mesh_id
  			if [ -n "$key" ]; then
-@@ -548,6 +543,11 @@ mac80211_setup_vif() {
- 					return
- 				fi
- 			fi
-+
-+			for var in $MP_CONFIG_INT $MP_CONFIG_BOOL $MP_CONFIG_STRING; do
-+				json_get_var mp_val "$var"
-+				[ -n "$mp_val" ] && iw dev "$ifname" set mesh_param "$var" "$mp_val"
-+			done
- 		;;
- 		adhoc)
- 			wireless_vif_parse_encryption
+ 				if [ -e "/lib/wifi/authsae.sh" ]; then
+ 					. /lib/wifi/authsae.sh
