@@ -1,0 +1,13 @@
+--- a/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
++++ b/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
+@@ -424,6 +424,10 @@ rootmode:value("2", translate("Root STA
+ rootmode:value("3", translate("Root STA proactive PREQ with PREP"))
+ rootmode:value("4", translate("Root STA proactive RANN"))
+ 
++peer_timeout = s:taboption("general", Value, "mesh_plink_timeout", translate("Peer Link Timeout (seconds)"))
++peer_timeout:depends({mode="mesh"})
++peer_timeout.default = 60
++
+ rssi_thresh = s:taboption("general", Value, "mesh_rssi_threshold", translate("Peer RSSI Threshold (-dBm)"))
+ rssi_thresh:depends({mode="mesh"})
+ 
