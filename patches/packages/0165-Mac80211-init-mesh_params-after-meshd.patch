@@ -1,0 +1,26 @@
+--- a/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
++++ b/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
+@@ -547,10 +547,6 @@ mac80211_setup_vif() {
+ 
+ 	case "$mode" in
+ 		mesh)
+-			for var in $MP_CONFIG_INT $MP_CONFIG_BOOL $MP_CONFIG_STRING; do
+-				json_get_var mp_val "$var"
+-				[ -n "$mp_val" ] && iw dev "$ifname" set mesh_param "$var" "$mp_val"
+-			done
+ 			# authsae
+ 			json_get_vars key mesh_id
+ 			if [ -n "$key" ]; then
+@@ -563,6 +559,12 @@ mac80211_setup_vif() {
+ 					return
+ 				fi
+ 			fi
++			# Let meshd get established because it will reset the mesh params back to defaults
++			sleep 1
++			for var in $MP_CONFIG_INT $MP_CONFIG_BOOL $MP_CONFIG_STRING; do
++				json_get_var mp_val "$var"
++				[ -n "$mp_val" ] && iw dev "$ifname" set mesh_param "$var" "$mp_val"
++			done
+ 		;;
+ 		adhoc)
+ 			wireless_vif_parse_encryption

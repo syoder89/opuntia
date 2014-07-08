@@ -20,16 +20,17 @@ diff --git a/feeds/oldpackages/utils/bash/Makefile b/feeds/oldpackages/utils/bas
 index d877441..b73e468 100644
 --- a/feeds/oldpackages/utils/bash/Makefile
 +++ b/feeds/oldpackages/utils/bash/Makefile
-@@ -35,7 +35,11 @@ endef
+@@ -35,7 +35,12 @@ endef
  define Build/Configure
  	$(call Build/Configure/Default, \
  		--without-bash-malloc \
 -                --bindir=/bin \
++                --enable-job-control \
 +                --bindir=/bin, \
-+        	bash_cv_job_control_missing=present \
-+        	bash_cv_sys_named_pipes=present \
-+        	bash_cv_func_sigsetjmp=present \
-+        	bash_cv_printf_a_format=yes \
++        	ac_cv_job_control_missing=present \
++        	ac_cv_sys_named_pipes=present \
++        	ac_cv_func_sigsetjmp=present \
++        	ac_cv_printf_a_format=yes \
  	)
  endef
  

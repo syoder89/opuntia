@@ -24,3 +24,4 @@ packages/0160-Authsae-fix-bad-frames-in-commit-8531ab1.patch
 packages/0161-Mac80211-fix-uninitialized-htmode-for-mesh.patch
 packages/0163-Mac80211-fix-fail-to-set-vif-mac-addr.patch
 packages/0164-Authsae-check-if-running.patch
+packages/0165-Mac80211-init-mesh_params-after-meshd.patch

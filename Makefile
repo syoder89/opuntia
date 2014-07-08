@@ -1,8 +1,10 @@
 OPENWRT_GIT:=git://git.openwrt.org/openwrt.git
-OPENWRT_COMMIT:=132abb4f6851eeb32c68fa2b62af6893d1cc57ce
+OPENWRT_COMMIT:=eda2c487b0ec35e0153c144f8988bf426e38debd
+#OPENWRT_COMMIT:=132abb4f6851eeb32c68fa2b62af6893d1cc57ce
 OPENWRT_DEPTH:=20
 
 BUILD_DIR=build_dir
+IMAGE_DIR=images
 
 pre_patches=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_pre_patched
 patches=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_patched
@@ -11,8 +13,16 @@ built=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_built
 configured=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_configured
 
 build: prepare $(built)
-	$(MAKE) -j 32 -C $(BUILD_DIR) defconfig world || ($(MAKE) -C $(BUILD_DIR) package/bash/clean package/bash/compile && $(MAKE) -j 32 -C $(BUILD_DIR) world || $(MAKE) -C $(BUILD_DIR) world V=s)
+	$(MAKE) -j 32 -C $(BUILD_DIR) defconfig world || ($(MAKE) -C $(BUILD_DIR) package/bash/clean package/bash/compile && $(MAKE) -j 32 -C $(BUILD_DIR) world || $(MAKE) -C $(BUILD_DIR) world V=s) && make copybin
 
+copybin:
+	@if [ ! -d $(IMAGE_DIR) ] ; then \
+		mkdir $(IMAGE_DIR); \
+	fi \
+	conf=`cat $(configured)` && \
+	image=`find build_dir/bin/ -name '*combined*.img' | head -n 1` && \
+	cp -f $$image $(IMAGE_DIR)/opuntia-$$conf-$$version_$$build.img
+	
 checkout_openwrt:
 	@if [ ! -d $(BUILD_DIR) ] ; then \
 		git clone --depth $(OPENWRT_DEPTH) $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
@@ -21,7 +31,7 @@ checkout_openwrt:
 $(pre_patches):
 	@cd $(BUILD_DIR); \
 	for patch in ../patches.pre_feed/* ; do \
-		patch -p1  < $$patch ; \
+		patch -p1  < $$patch || (echo "$$patch failed to apply!" && exit 1); \
 	done; \
 	cd ..; \
 	touch $@
@@ -29,11 +39,11 @@ $(pre_patches):
 $(patches):
 	@cp -a patches $(BUILD_DIR)/ ;
 	cd $(BUILD_DIR); \
-	quilt push -a; \
+	quilt push -a || (echo "$$patch failed to apply!" && exit 1); \
 	cd ..; \
 	cp -a patches.luci $(BUILD_DIR)/feeds/luci/patches ; \
 	cd $(BUILD_DIR)/feeds/luci; \
-	quilt push -a; \
+	quilt push -a || (echo "$$patch failed to apply!" && exit 1); \
 	cd ../../..; \
 	touch $@
 
@@ -56,7 +66,7 @@ configure:
 	fi
 
 prepare:
-	make checkout_openwrt $(pre_patches) $(feeds)
+	make $(pre_patches) $(feeds)
 
 clean:
 	echo rm -f $(built)
@@ -69,6 +79,7 @@ distclean:
 .DEFAULT:
 	@if [ -f configs/$@ ] ; then \
 		echo "Configuring for $@"; \
+		$(MAKE) checkout_openwrt; \
 		echo $@ > $(configured); \
 		$(MAKE) configure prepare build; \
 	else \
