@@ -4,26 +4,27 @@ OPENWRT_COMMIT:=eda2c487b0ec35e0153c144f8988bf426e38debd
 OPENWRT_DEPTH:=20
 
 BUILD_DIR=build_dir
-IMAGE_DIR=images
+DESTDIR?=images
 
 pre_patches=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_pre_patched
 patches=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_patched
 feeds=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_feeds
 built=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_built
 configured=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_configured
-buildid:=1
+BUILD_NUMBER?=1
 
 build: prepare $(built)
-	$(MAKE) -j 32 -C $(BUILD_DIR) defconfig world || ($(MAKE) -C $(BUILD_DIR) package/bash/clean package/bash/compile && $(MAKE) -j 32 -C $(BUILD_DIR) world || $(MAKE) -C $(BUILD_DIR) world V=s) && make copybin
+	(make -j 32 -C $(BUILD_DIR) DESTDIR= defconfig world || make -C $(BUILD_DIR) DESTDIR= world V=s) && touch $(built)
+#	make -j 32 -C $(BUILD_DIR) defconfig world || (make -C $(BUILD_DIR) package/bash/clean package/bash/compile && make -j 32 -C $(BUILD_DIR) world || make -C $(BUILD_DIR) world V=s)
 
-copybin:
-	@if [ ! -d $(IMAGE_DIR) ] ; then \
-		mkdir $(IMAGE_DIR); \
+install: $(built)
+	@if [ ! -d $(DESTDIR) ] ; then \
+		mkdir $(DESTDIR); \
 	fi; \
 	conf=`cat $(configured)` && \
 	image=`find build_dir/bin/ -name '*combined*.img' | head -n 1` && \
 	ver=`grep CONFIG_VERSION_NUMBER $(BUILD_DIR)/.config | cut -d '"' -f 2` && \
-	cp -f $${image} $(IMAGE_DIR)/opuntia-$${conf}-$${ver}_$(buildid).img
+	cp -f $${image} $(DESTDIR)/opuntia-$${conf}-$${ver}_$(BUILD_NUMBER).img
 	
 checkout_openwrt:
 	@if [ ! -d $(BUILD_DIR) ] ; then \
@@ -81,9 +82,9 @@ distclean:
 .DEFAULT:
 	@if [ -f configs/$@ ] ; then \
 		echo "Configuring for $@"; \
-		$(MAKE) checkout_openwrt; \
+		make checkout_openwrt; \
 		echo $@ > $(configured); \
-		$(MAKE) configure prepare build; \
+		make configure prepare build; \
 	else \
 		echo "Configuration file for $@ not found!"; \
 		exit 1; \
