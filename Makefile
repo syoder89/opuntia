@@ -12,10 +12,12 @@ feeds=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_feeds
 built=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_built
 configured=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_configured
 BUILD_NUMBER?=1
+NUM_CPU=$(shell grep '^processor' /proc/cpuinfo | wc -l)
+PARALLEL_MAKE=-j $(shell echo $$(( $(NUM_CPU) * 2 )))
 
 build: prepare $(built)
-	(make -j 32 -C $(BUILD_DIR) DESTDIR= defconfig world || make -C $(BUILD_DIR) DESTDIR= world V=s) && touch $(built)
-#	make -j 32 -C $(BUILD_DIR) defconfig world || (make -C $(BUILD_DIR) package/bash/clean package/bash/compile && make -j 32 -C $(BUILD_DIR) world || make -C $(BUILD_DIR) world V=s)
+	(make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= defconfig world || (make -C $(BUILD_DIR) DESTDIR= package/bash/clean package/bash/compile && make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= world || make -C $(BUILD_DIR) DESTDIR= world V=s)) && touch $(built)
+#	(make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= defconfig world || make -C $(BUILD_DIR) DESTDIR= world V=s) && touch $(built)
 
 install: $(built)
 	@if [ ! -d $(DESTDIR) ] ; then \
