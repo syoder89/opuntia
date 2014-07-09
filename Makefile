@@ -11,6 +11,7 @@ patches=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_patched
 feeds=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_feeds
 built=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_built
 configured=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_configured
+buildid:=1
 
 build: prepare $(built)
 	$(MAKE) -j 32 -C $(BUILD_DIR) defconfig world || ($(MAKE) -C $(BUILD_DIR) package/bash/clean package/bash/compile && $(MAKE) -j 32 -C $(BUILD_DIR) world || $(MAKE) -C $(BUILD_DIR) world V=s) && make copybin
@@ -18,10 +19,11 @@ build: prepare $(built)
 copybin:
 	@if [ ! -d $(IMAGE_DIR) ] ; then \
 		mkdir $(IMAGE_DIR); \
-	fi \
+	fi; \
 	conf=`cat $(configured)` && \
 	image=`find build_dir/bin/ -name '*combined*.img' | head -n 1` && \
-	cp -f $$image $(IMAGE_DIR)/opuntia-$$conf-$$version_$$build.img
+	ver=`grep CONFIG_VERSION_NUMBER $(BUILD_DIR)/.config | cut -d '"' -f 2` && \
+	cp -f $${image} $(IMAGE_DIR)/opuntia-$${conf}-$${ver}_$(buildid).img
 	
 checkout_openwrt:
 	@if [ ! -d $(BUILD_DIR) ] ; then \
@@ -69,10 +71,10 @@ prepare:
 	make $(pre_patches) $(feeds)
 
 clean:
-	echo rm -f $(built)
+	rm -f $(built)
 
 distclean:
-	echo rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)
 
 .$(OPENWRT_COMMIT)_%:
 	
