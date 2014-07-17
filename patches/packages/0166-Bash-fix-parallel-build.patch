@@ -1,0 +1,15 @@
+--- a/feeds/oldpackages/utils/bash/Makefile
++++ b/feeds/oldpackages/utils/bash/Makefile
+@@ -50,7 +50,11 @@ define Build/Compile
+ 	$(MAKE) -C $(PKG_BUILD_DIR) \
+ 		DESTDIR="$(PKG_INSTALL_DIR)" \
+ 		SHELL="/bin/bash" \
+-		all install
++		all
++	$(MAKE) -C $(PKG_BUILD_DIR) \
++		DESTDIR="$(PKG_INSTALL_DIR)" \
++		SHELL="/bin/bash" \
++		install
+ endef
+ 
+ define Package/bash/postinst
