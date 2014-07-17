@@ -27,10 +27,10 @@ index d877441..b73e468 100644
 -                --bindir=/bin \
 +                --enable-job-control \
 +                --bindir=/bin, \
-+        	ac_cv_job_control_missing=present \
-+        	ac_cv_sys_named_pipes=present \
-+        	ac_cv_func_sigsetjmp=present \
-+        	ac_cv_printf_a_format=yes \
++        	bash_cv_job_control_missing=present \
++        	bash_cv_sys_named_pipes=present \
++        	bash_cv_func_sigsetjmp=present \
++        	bash_cv_printf_a_format=yes \
  	)
  endef
  
