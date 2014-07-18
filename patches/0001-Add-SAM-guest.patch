@@ -1,0 +1,191 @@
+--- a/target/linux/x86/Makefile
++++ b/target/linux/x86/Makefile
+@@ -11,7 +11,7 @@ BOARD:=x86
+ BOARDNAME:=x86
+ FEATURES:=squashfs ext4 vdi vmdk pcmcia targz
+ SUBTARGETS=generic olpc xen_domu ep80579 net5501 kvm_guest geos alix2 thincan \
+-	   rdc
++	   rdc sam
+ 
+ LINUX_VERSION:=3.10.44
+ 
+--- /dev/null
++++ b/target/linux/x86/sam/base-files/etc/config/network
+@@ -0,0 +1,28 @@
++# Copyright (C) 2011 OpenWrt.org
++
++config interface loopback
++	option ifname	lo
++	option proto	static
++	option ipaddr	127.0.0.1
++	option netmask	255.0.0.0
++
++# N.B. the labels on the Netgate boxes actually reverse the LAN and WAN
++# port markings.
++config interface lan
++	option ifname	eth1
++	option type 	bridge
++	option proto	static
++	option ipaddr	192.168.1.1
++	option netmask	255.255.255.0
++	option ip6assign 60
++
++config interface wan
++	option ifname	eth0
++	option proto	dhcp
++
++config interface wan6
++	option ifname   @wan
++	option proto    dhcpv6
++
++config globals globals
++	option ula_prefix auto
+--- /dev/null
++++ b/target/linux/x86/sam/base-files/etc/config/system
+@@ -0,0 +1,29 @@
++config system
++	option hostname	OpenWrt
++	option timezone	UTC
++
++config timeserver ntp
++	list server	0.openwrt.pool.ntp.org
++	list server	1.openwrt.pool.ntp.org
++	list server	2.openwrt.pool.ntp.org
++	list server	3.openwrt.pool.ntp.org
++
++config led
++	option default	1
++	option name	LAN
++	option sysfs	'alix:1'
++	option trigger	netdev
++	option mode	'tx rx'
++	option dev	'br-lan'
++
++config led
++	option default	1
++	option name	WiFi
++	option sysfs	'alix:2'
++	option trigger	'phy0tpt'
++
++config led
++	option default	0
++	option name	Heartbeat
++	option sysfs	'alix:3'
++	option trigger	'heartbeat'
+--- /dev/null
++++ b/target/linux/x86/sam/config-3.13
+@@ -0,0 +1,99 @@
++CONFIG_ACPI=y
++# CONFIG_ACPI_AC is not set
++# CONFIG_ACPI_BATTERY is not set
++CONFIG_ACPI_BLACKLIST_YEAR=0
++CONFIG_ACPI_BUTTON=y
++# CONFIG_ACPI_CMPC is not set
++# CONFIG_ACPI_CONTAINER is not set
++# CONFIG_ACPI_CUSTOM_DSDT is not set
++# CONFIG_ACPI_DEBUG is not set
++# CONFIG_ACPI_DOCK is not set
++# CONFIG_ACPI_EC_DEBUGFS is not set
++# CONFIG_ACPI_FAN is not set
++# CONFIG_ACPI_INITRD_TABLE_OVERRIDE is not set
++# CONFIG_ACPI_PCI_SLOT is not set
++CONFIG_ACPI_PROCESSOR=y
++# CONFIG_ACPI_PROCESSOR_AGGREGATOR is not set
++# CONFIG_ACPI_PROCFS is not set
++# CONFIG_ACPI_PROCFS_POWER is not set
++# CONFIG_ACPI_PROC_EVENT is not set
++# CONFIG_ACPI_SBS is not set
++# CONFIG_ACPI_THERMAL is not set
++# CONFIG_ACPI_WMI is not set
++# CONFIG_ASUS_LAPTOP is not set
++CONFIG_CONSOLE_TRANSLATIONS=y
++CONFIG_CPU_IDLE_GOV_MENU=y
++CONFIG_DUMMY_CONSOLE=y
++# CONFIG_EEEPC_LAPTOP is not set
++# CONFIG_EFI is not set
++CONFIG_HOTPLUG_PCI=y
++CONFIG_HOTPLUG_PCI_ACPI=y
++# CONFIG_HOTPLUG_PCI_ACPI_IBM is not set
++# CONFIG_HOTPLUG_PCI_COMPAQ is not set
++# CONFIG_HOTPLUG_PCI_CPCI is not set
++# CONFIG_HOTPLUG_PCI_IBM is not set
++CONFIG_HOTPLUG_PCI_PCIE=y
++# CONFIG_HOTPLUG_PCI_SHPC is not set
++# CONFIG_HPET is not set
++# CONFIG_HP_ACCEL is not set
++CONFIG_HVC_DRIVER=y
++CONFIG_HW_CONSOLE=y
++# CONFIG_HW_RANDOM_VIRTIO is not set
++CONFIG_HYPERVISOR_GUEST=y
++CONFIG_INPUT=y
++CONFIG_INPUT_KEYBOARD=y
++# CONFIG_INTEL_IPS is not set
++CONFIG_KEYBOARD_ATKBD=y
++# CONFIG_KVM is not set
++CONFIG_KVM_GUEST=y
++# CONFIG_LGUEST is not set
++# CONFIG_LGUEST_GUEST is not set
++CONFIG_NLS=y
++CONFIG_NO_HZ=y
++CONFIG_PARAVIRT=y
++CONFIG_PARAVIRT_CLOCK=y
++# CONFIG_PARAVIRT_DEBUG is not set
++CONFIG_PARAVIRT_TIME_ACCOUNTING=y
++CONFIG_PCIEAER=y
++CONFIG_PCIEPORTBUS=y
++CONFIG_PCI_IOAPIC=y
++CONFIG_PCI_LABEL=y
++CONFIG_PCI_MMCONFIG=y
++CONFIG_PNP=y
++CONFIG_PNPACPI=y
++CONFIG_PNP_DEBUG_MESSAGES=y
++# CONFIG_PVPANIC is not set
++# CONFIG_SCSI_VIRTIO is not set
++CONFIG_SERIAL_8250_PNP=y
++# CONFIG_THINKPAD_ACPI is not set
++# CONFIG_TOPSTAR_LAPTOP is not set
++# CONFIG_TOSHIBA_BT_RFKILL is not set
++# CONFIG_VGACON_SOFT_SCROLLBACK is not set
++CONFIG_VGA_CONSOLE=y
++# CONFIG_VHOST_NET is not set
++CONFIG_VIRTIO=y
++CONFIG_VIRTIO_BLK=y
++CONFIG_VIRTIO_CONSOLE=y
++# CONFIG_VIRTIO_NET is not set
++CONFIG_VIRTIO_PCI=y
++CONFIG_VIRTUALIZATION=y
++# CONFIG_VMWARE_BALLOON is not set
++CONFIG_VT=y
++CONFIG_VT_CONSOLE=y
++# CONFIG_VT_HW_CONSOLE_BINDING is not set
++# CONFIG_X86_ACPI_CPUFREQ is not set
++# CONFIG_X86_E_POWERSAVER is not set
++# CONFIG_X86_GENERIC is not set
++# CONFIG_X86_INTEL_LPSS is not set
++CONFIG_X86_INTERNODE_CACHE_SHIFT=4
++CONFIG_X86_L1_CACHE_SHIFT=4
++# CONFIG_X86_LONGHAUL is not set
++# CONFIG_X86_PAT is not set
++# CONFIG_X86_PCC_CPUFREQ is not set
++CONFIG_X86_PM_TIMER=y
++# CONFIG_X86_PPRO_FENCE is not set
++# CONFIG_XEN_PRIVILEGED_GUEST is not set
++# CONFIG_XO15_EBOOK is not set
++# CONFIG_KVM_DEBUG_FS is not set
++# CONFIG_GPIO_LYNXPOINT is not set
++# CONFIG_SAMSUNG_Q10 is not set
+--- /dev/null
++++ b/target/linux/x86/sam/target.mk
+@@ -0,0 +1,12 @@
++BOARDNAME:=ImageStream Virtual SAM
++FEATURES:=ext4 pci usb squashfs
++DEFAULT_PACKAGES += kmod-virtio-balloon kmod-virtio-net kmod-virtio-random \
++			kmod-crypto-ocf kmod-crypto-aes kmod-crypto-cbc \
++			kmod-8139cp \
++			kmod-usb-core kmod-usb2 kmod-usb2-pci kmod-usb-ohci \
++			kmod-cfg80211 kmod-mac80211 \
++			kmod-mppe kmod-pppoe kmod-pppol2tp \
++			kmod-ath5k kmod-ath9k \
++			kmod-cpu-msr hwclock wpad
++
++LINUX_VERSION:=3.13.7
