@@ -26,3 +26,4 @@ packages/0163-Mac80211-fix-fail-to-set-vif-mac-addr.patch
 packages/0164-Authsae-check-if-running.patch
 packages/0165-Mac80211-init-mesh_params-after-meshd.patch
 packages/0166-Bash-fix-parallel-build.patch
+oldpackages/0066-Multiwan-work-with-qos-mark-mask-fixes.patch

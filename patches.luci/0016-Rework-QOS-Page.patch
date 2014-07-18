@@ -1,0 +1,86 @@
+--- a/applications/luci-qos/luasrc/model/cbi/qos/qos.lua
++++ b/applications/luci-qos/luasrc/model/cbi/qos/qos.lua
+@@ -27,9 +27,12 @@ s.anonymous = false
+ e = s:option(Flag, "enabled", translate("Enable"))
+ e.rmempty = false
+ 
+-c = s:option(ListValue, "classgroup", translate("Classification group"))
+-c:value("Default", translate("default"))
+-c.default = "Default"
++c = s:option(ListValue, "classgroup", translate("Policy"))
++m.uci:foreach("qos", "classgroup", 
++	function(fn)
++		c:value(fn[".name"])
++	end
++)
+ 
+ s:option(Flag, "overhead", translate("Calculate overhead"))
+ 
+@@ -41,18 +44,51 @@ dl.datatype = "and(uinteger,min(1))"
+ ul = s:option(Value, "upload", translate("Upload speed (kbit/s)"))
+ ul.datatype = "and(uinteger,min(1))"
+ 
++
++s= m:section(TypedSection, "classgroup", translate("Policies"))
++s.template = "cbi/tblsection"
++s.addremove = true
++
++c = s:option( MultiValue, "classes", translate("Include Classes") )
++m.uci:foreach("qos", "class", 
++	function(fn)
++		c:value(fn[".name"])
++	end
++)
++
++d = s:option(ListValue, "default", translate("Default Class"))
++m.uci:foreach("qos", "class", 
++	function(fn)
++		d:value(fn[".name"])
++	end
++)
++
++s = m:section(TypedSection, "class", translate("Classes"))
++s.template = "cbi/tblsection"
++s.addremove = true
++
++p = s:option(Value, "priority", translate("Priority (0-20)"))
++p.datatype = "range(0,20)"
++p.default = 5
++p.size=2
++
++bytes = s:option(Value, "limitrate", translate("BW Rate Limit (%)"))
++bytes.size = 3
++bytes.default = 100
++
+ s = m:section(TypedSection, "classify", translate("Classification Rules"))
+ s.template = "cbi/tblsection"
+ s.anonymous = true
+ s.addremove = true
+ s.sortable  = true
+ 
+-t = s:option(ListValue, "target", translate("Target"))
+-t:value("Priority", translate("priority"))
+-t:value("Express", translate("express"))
+-t:value("Normal", translate("normal"))
+-t:value("Bulk", translate("low"))
+-t.default = "Normal"
++t = s:option(ListValue, "target", translate("Class"))
++m.uci:foreach("qos", "class", 
++	function(fn)
++		t:value(fn[".name"])
++	end
++)
++t.default="Normal"
+ 
+ srch = s:option(Value, "srchost", translate("Source host"))
+ srch.rmempty = true
+@@ -94,9 +130,6 @@ ports = s:option(Value, "ports", transla
+ ports.rmempty = true
+ ports:value("", translate("all"))
+ 
+-bytes = s:option(Value, "connbytes", translate("Number of bytes"))
+-bytes.size = 6
+-
+ comment = s:option(Value, "comment", translate("Comment"))
+ 
+ return m
