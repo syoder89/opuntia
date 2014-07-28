@@ -16,7 +16,7 @@ NUM_CPU=$(shell grep '^processor' /proc/cpuinfo | wc -l)
 PARALLEL_MAKE=-j $(shell echo $$(( $(NUM_CPU) * 2 )))
 
 build: prepare $(built)
-	(make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= defconfig world || (make -C $(BUILD_DIR) DESTDIR= package/bash/clean package/bash/compile && make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= world || make -C $(BUILD_DIR) DESTDIR= world V=s)) && touch $(built)
+	(make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= defconfig world || (make -C $(BUILD_DIR) DESTDIR= package/bash/clean && make -C $(BUILD_DIR) DESTDIR= -j1 package/bash/compile && make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= world || make -C $(BUILD_DIR) DESTDIR= world V=s)) && touch $(built)
 #	(make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= defconfig world || make -C $(BUILD_DIR) DESTDIR= world V=s) && touch $(built)
 
 install: $(built)
