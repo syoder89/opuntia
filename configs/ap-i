@@ -36,6 +36,7 @@ CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_kirkwood is not set
 # CONFIG_TARGET_orion is not set
 # CONFIG_TARGET_pxa is not set
+# CONFIG_TARGET_rb532 is not set
 # CONFIG_TARGET_mcs814x is not set
 # CONFIG_TARGET_au1000 is not set
 # CONFIG_TARGET_ramips is not set
@@ -50,6 +51,7 @@ CONFIG_TARGET_x86=y
 # CONFIG_TARGET_x86_net5501 is not set
 # CONFIG_TARGET_x86_kvm_guest is not set
 CONFIG_TARGET_x86_alix2=y
+# CONFIG_TARGET_x86_sam is not set
 CONFIG_TARGET_x86_alix2_Default=y
 CONFIG_HAS_SUBTARGETS=y
 CONFIG_TARGET_BOARD="x86"
@@ -2348,6 +2350,7 @@ CONFIG_PACKAGE_kmod-nls-base=y
 # CONFIG_PACKAGE_kmod-nls-cp862 is not set
 # CONFIG_PACKAGE_kmod-nls-cp864 is not set
 # CONFIG_PACKAGE_kmod-nls-cp866 is not set
+# CONFIG_PACKAGE_kmod-nls-cp932 is not set
 # CONFIG_PACKAGE_kmod-nls-iso8859-1 is not set
 # CONFIG_PACKAGE_kmod-nls-iso8859-13 is not set
 # CONFIG_PACKAGE_kmod-nls-iso8859-15 is not set
@@ -2440,6 +2443,7 @@ CONFIG_PACKAGE_kmod-nfnetlink-queue=m
 # CONFIG_PACKAGE_kmod-hfcmulti is not set
 # CONFIG_PACKAGE_kmod-hfcpci is not set
 CONFIG_PACKAGE_kmod-ifb=y
+# CONFIG_PACKAGE_kmod-igb is not set
 # CONFIG_PACKAGE_kmod-libphy is not set
 # CONFIG_PACKAGE_kmod-macvlan is not set
 CONFIG_PACKAGE_kmod-mii=y
@@ -2858,47 +2862,26 @@ CONFIG_PACKAGE_php5-pecl-http=y
 #
 # CONFIG_PACKAGE_microperl is not set
 CONFIG_PACKAGE_perl=m
-# CONFIG_PACKAGE_perl-compress-bzip2 is not set
-# CONFIG_PACKAGE_perl-dbi is not set
-# CONFIG_PACKAGE_perl-html-parser is not set
-# CONFIG_PACKAGE_perl-html-tagset is not set
-# CONFIG_PACKAGE_perl-html-tree is not set
-# CONFIG_PACKAGE_perl-lockfile-simple is not set
-# CONFIG_PACKAGE_perl-net-telnet is not set
-# CONFIG_PACKAGE_perl-test-harness is not set
-# CONFIG_PACKAGE_perl-uri is not set
-# CONFIG_PACKAGE_perl-www is not set
-# CONFIG_PACKAGE_perl-www-curl is not set
-# CONFIG_PACKAGE_perl-www-mechanize is not set
-# CONFIG_PACKAGE_perlbase-abbrev is not set
 # CONFIG_PACKAGE_perlbase-anydbm-file is not set
 # CONFIG_PACKAGE_perlbase-archive is not set
-# CONFIG_PACKAGE_perlbase-assert is not set
 # CONFIG_PACKAGE_perlbase-attribute is not set
 # CONFIG_PACKAGE_perlbase-attributes is not set
-# CONFIG_PACKAGE_perlbase-attrs is not set
 CONFIG_PACKAGE_perlbase-autoloader=m
 # CONFIG_PACKAGE_perlbase-autosplit is not set
 # CONFIG_PACKAGE_perlbase-autouse is not set
 # CONFIG_PACKAGE_perlbase-b is not set
 CONFIG_PACKAGE_perlbase-base=m
 # CONFIG_PACKAGE_perlbase-benchmark is not set
-# CONFIG_PACKAGE_perlbase-bigfloat is not set
 # CONFIG_PACKAGE_perlbase-bigint is not set
 # CONFIG_PACKAGE_perlbase-bignum is not set
-# CONFIG_PACKAGE_perlbase-bigrat is not set
 # CONFIG_PACKAGE_perlbase-blib is not set
 # CONFIG_PACKAGE_perlbase-bytes is not set
-# CONFIG_PACKAGE_perlbase-cacheout is not set
 # CONFIG_PACKAGE_perlbase-cgi is not set
 # CONFIG_PACKAGE_perlbase-charnames is not set
 # CONFIG_PACKAGE_perlbase-class is not set
-# CONFIG_PACKAGE_perlbase-complete is not set
 # CONFIG_PACKAGE_perlbase-compress is not set
 CONFIG_PACKAGE_perlbase-config=m
 # CONFIG_PACKAGE_perlbase-cpan is not set
-# CONFIG_PACKAGE_perlbase-cpanplus is not set
-# CONFIG_PACKAGE_perlbase-ctime is not set
 CONFIG_PACKAGE_perlbase-cwd=m
 # CONFIG_PACKAGE_perlbase-data is not set
 # CONFIG_PACKAGE_perlbase-db is not set
@@ -2908,7 +2891,6 @@ CONFIG_PACKAGE_perlbase-cwd=m
 # CONFIG_PACKAGE_perlbase-diagnostics is not set
 # CONFIG_PACKAGE_perlbase-digest is not set
 # CONFIG_PACKAGE_perlbase-dirhandle is not set
-# CONFIG_PACKAGE_perlbase-dotsh is not set
 # CONFIG_PACKAGE_perlbase-dumpvalue is not set
 # CONFIG_PACKAGE_perlbase-dumpvar is not set
 # CONFIG_PACKAGE_perlbase-dynaloader is not set
@@ -2918,9 +2900,7 @@ CONFIG_PACKAGE_perlbase-cwd=m
 # CONFIG_PACKAGE_perlbase-env is not set
 CONFIG_PACKAGE_perlbase-errno=m
 CONFIG_PACKAGE_perlbase-essential=m
-# CONFIG_PACKAGE_perlbase-exceptions is not set
 # CONFIG_PACKAGE_perlbase-extutils is not set
-# CONFIG_PACKAGE_perlbase-fastcwd is not set
 # CONFIG_PACKAGE_perlbase-fatal is not set
 CONFIG_PACKAGE_perlbase-fcntl=m
 # CONFIG_PACKAGE_perlbase-feature is not set
@@ -2930,27 +2910,18 @@ CONFIG_PACKAGE_perlbase-file=m
 # CONFIG_PACKAGE_perlbase-filehandle is not set
 # CONFIG_PACKAGE_perlbase-filetest is not set
 # CONFIG_PACKAGE_perlbase-filter is not set
-# CONFIG_PACKAGE_perlbase-find is not set
 CONFIG_PACKAGE_perlbase-findbin=m
-# CONFIG_PACKAGE_perlbase-finddepth is not set
-# CONFIG_PACKAGE_perlbase-flush is not set
 # CONFIG_PACKAGE_perlbase-gdbm-file is not set
-# CONFIG_PACKAGE_perlbase-getcwd is not set
 CONFIG_PACKAGE_perlbase-getopt=m
-# CONFIG_PACKAGE_perlbase-getoptpl is not set
 # CONFIG_PACKAGE_perlbase-hash is not set
-# CONFIG_PACKAGE_perlbase-hostname is not set
 # CONFIG_PACKAGE_perlbase-i18n is not set
 # CONFIG_PACKAGE_perlbase-if is not set
-# CONFIG_PACKAGE_perlbase-importenv is not set
 CONFIG_PACKAGE_perlbase-integer=m
 CONFIG_PACKAGE_perlbase-io=m
 # CONFIG_PACKAGE_perlbase-ipc is not set
 # CONFIG_PACKAGE_perlbase-less is not set
 CONFIG_PACKAGE_perlbase-list=m
 # CONFIG_PACKAGE_perlbase-locale is not set
-# CONFIG_PACKAGE_perlbase-log is not set
-# CONFIG_PACKAGE_perlbase-look is not set
 CONFIG_PACKAGE_perlbase-math=m
 # CONFIG_PACKAGE_perlbase-memoize is not set
 # CONFIG_PACKAGE_perlbase-mime is not set
@@ -2959,7 +2930,6 @@ CONFIG_PACKAGE_perlbase-math=m
 # CONFIG_PACKAGE_perlbase-net is not set
 # CONFIG_PACKAGE_perlbase-next is not set
 # CONFIG_PACKAGE_perlbase-o is not set
-# CONFIG_PACKAGE_perlbase-object is not set
 # CONFIG_PACKAGE_perlbase-opcode is not set
 # CONFIG_PACKAGE_perlbase-open is not set
 # CONFIG_PACKAGE_perlbase-ops is not set
@@ -2969,7 +2939,6 @@ CONFIG_PACKAGE_perlbase-math=m
 # CONFIG_PACKAGE_perlbase-perlio is not set
 CONFIG_PACKAGE_perlbase-pod=m
 CONFIG_PACKAGE_perlbase-posix=m
-# CONFIG_PACKAGE_perlbase-pwd is not set
 # CONFIG_PACKAGE_perlbase-re is not set
 # CONFIG_PACKAGE_perlbase-safe is not set
 CONFIG_PACKAGE_perlbase-scalar=m
@@ -2977,33 +2946,24 @@ CONFIG_PACKAGE_perlbase-scalar=m
 # CONFIG_PACKAGE_perlbase-search is not set
 CONFIG_PACKAGE_perlbase-selectsaver=m
 # CONFIG_PACKAGE_perlbase-selfloader is not set
-# CONFIG_PACKAGE_perlbase-shell is not set
-# CONFIG_PACKAGE_perlbase-shellwords is not set
 # CONFIG_PACKAGE_perlbase-sigtrap is not set
 CONFIG_PACKAGE_perlbase-socket=m
 # CONFIG_PACKAGE_perlbase-sort is not set
-# CONFIG_PACKAGE_perlbase-stat is not set
 # CONFIG_PACKAGE_perlbase-storable is not set
-# CONFIG_PACKAGE_perlbase-switch is not set
 CONFIG_PACKAGE_perlbase-symbol=m
 # CONFIG_PACKAGE_perlbase-sys is not set
-# CONFIG_PACKAGE_perlbase-syslog is not set
-# CONFIG_PACKAGE_perlbase-tainted is not set
 # CONFIG_PACKAGE_perlbase-term is not set
-# CONFIG_PACKAGE_perlbase-termcap is not set
 # CONFIG_PACKAGE_perlbase-test is not set
 # CONFIG_PACKAGE_perlbase-text is not set
 # CONFIG_PACKAGE_perlbase-thread is not set
 # CONFIG_PACKAGE_perlbase-threads is not set
 CONFIG_PACKAGE_perlbase-tie=m
 # CONFIG_PACKAGE_perlbase-time is not set
-# CONFIG_PACKAGE_perlbase-timelocal is not set
 # CONFIG_PACKAGE_perlbase-unicode is not set
 # CONFIG_PACKAGE_perlbase-unicore is not set
 CONFIG_PACKAGE_perlbase-universal=m
 # CONFIG_PACKAGE_perlbase-user is not set
 # CONFIG_PACKAGE_perlbase-utf8 is not set
-# CONFIG_PACKAGE_perlbase-validate is not set
 # CONFIG_PACKAGE_perlbase-version is not set
 CONFIG_PACKAGE_perlbase-xsloader=m
 
@@ -3090,6 +3050,8 @@ CONFIG_PACKAGE_python-mini=m
 #
 # Filesystem
 #
+# CONFIG_PACKAGE_libacl is not set
+CONFIG_PACKAGE_libattr=y
 # CONFIG_PACKAGE_libext2fs is not set
 # CONFIG_PACKAGE_libfuse is not set
 # CONFIG_PACKAGE_libnfsidmap is not set
@@ -3464,6 +3426,7 @@ CONFIG_PACKAGE_libuuid=y
 # CONFIG_PACKAGE_libvncserver is not set
 # CONFIG_PACKAGE_libvorbis is not set
 # CONFIG_PACKAGE_libvorbisidec is not set
+# CONFIG_PACKAGE_libwebcam is not set
 CONFIG_PACKAGE_libwrap=y
 # CONFIG_PACKAGE_libwxbase is not set
 # CONFIG_PACKAGE_libxapian is not set
@@ -3515,7 +3478,7 @@ CONFIG_PACKAGE_luci-ssl=y
 CONFIG_PACKAGE_luci-mod-admin-full=y
 # CONFIG_PACKAGE_luci-mod-failsafe is not set
 # CONFIG_PACKAGE_luci-mod-freifunk is not set
-# CONFIG_PACKAGE_luci-mod-rpc is not set
+CONFIG_PACKAGE_luci-mod-rpc=y
 
 #
 # 3. Applications
@@ -3613,7 +3576,7 @@ CONFIG_PACKAGE_luci-base=y
 # CONFIG_PACKAGE_luci-base_srcdiet is not set
 CONFIG_PACKAGE_luci-base_source=y
 # CONFIG_PACKAGE_luci-lib-httpclient is not set
-# CONFIG_PACKAGE_luci-lib-json is not set
+CONFIG_PACKAGE_luci-lib-json=y
 # CONFIG_PACKAGE_luci-lib-luaneightbl is not set
 CONFIG_PACKAGE_luci-lib-nixio=y
 CONFIG_PACKAGE_luci-lib-nixio_notls=y
@@ -3860,6 +3823,8 @@ CONFIG_PACKAGE_proftpd=m
 # CONFIG_PACKAGE_pure-ftpd is not set
 # CONFIG_PACKAGE_pure-ftpd-tls is not set
 CONFIG_PACKAGE_rsync=y
+# CONFIG_RSYNC_xattr is not set
+# CONFIG_RSYNC_acl is not set
 CONFIG_PACKAGE_rsyncd=m
 CONFIG_PACKAGE_tftp-hpa=m
 CONFIG_PACKAGE_tftpd-hpa=m
@@ -4036,6 +4001,10 @@ CONFIG_PACKAGE_isc-dhcp-server-ipv6=m
 # CONFIG_PACKAGE_mdnsd is not set
 # CONFIG_PACKAGE_mdnsresponder is not set
 # CONFIG_PACKAGE_ndyndns is not set
+# CONFIG_PACKAGE_nsd is not set
+# CONFIG_PACKAGE_nsd-control is not set
+# CONFIG_PACKAGE_nsd-control-setup is not set
+# CONFIG_PACKAGE_nsd-nossl is not set
 # CONFIG_PACKAGE_ohybridproxy is not set
 # CONFIG_PACKAGE_rarpd is not set
 # CONFIG_PACKAGE_unbound is not set
@@ -4473,6 +4442,7 @@ CONFIG_PACKAGE_git=y
 # CONFIG_PACKAGE_privoxy is not set
 # CONFIG_PACKAGE_redsocks is not set
 # CONFIG_PACKAGE_seeks is not set
+# CONFIG_PACKAGE_shadowsocks-client is not set
 # CONFIG_PACKAGE_sockd is not set
 # CONFIG_PACKAGE_socksify is not set
 # CONFIG_PACKAGE_spawn-fcgi is not set
@@ -4644,6 +4614,7 @@ CONFIG_PACKAGE_keynote=m
 # CONFIG_PACKAGE_mac-to-devinfo is not set
 # CONFIG_PACKAGE_madwimax is not set
 # CONFIG_PACKAGE_map is not set
+# CONFIG_PACKAGE_mdns is not set
 # CONFIG_PACKAGE_memcached is not set
 # CONFIG_PACKAGE_mgen is not set
 CONFIG_PACKAGE_mii-tool=m
@@ -4699,7 +4670,6 @@ CONFIG_PACKAGE_odhcpd_ext_cer_id=0
 # CONFIG_PACKAGE_openrrcp is not set
 # CONFIG_PACKAGE_openslp is not set
 # CONFIG_PACKAGE_oping is not set
-# CONFIG_PACKAGE_p0f is not set
 # CONFIG_PACKAGE_paris-traceroute is not set
 # CONFIG_PACKAGE_pen is not set
 CONFIG_PACKAGE_portmap=y
@@ -4827,7 +4797,6 @@ CONFIG_PACKAGE_xinetd=m
 # CONFIG_PACKAGE_mt-daapd is not set
 # CONFIG_PACKAGE_pianobar is not set
 # CONFIG_PACKAGE_pulseaudio-daemon is not set
-# CONFIG_PACKAGE_pulseaudio-daemon-avahi is not set
 # CONFIG_PACKAGE_scmpc is not set
 # CONFIG_PACKAGE_shell-fm is not set
 # CONFIG_PACKAGE_sox is not set
@@ -4868,6 +4837,8 @@ CONFIG_PACKAGE_vim-full=y
 #
 # Filesystem
 #
+# CONFIG_PACKAGE_acl is not set
+# CONFIG_PACKAGE_attr is not set
 # CONFIG_PACKAGE_badblocks is not set
 # CONFIG_PACKAGE_btrfs-progs is not set
 # CONFIG_PACKAGE_disktype is not set
@@ -5356,6 +5327,7 @@ CONFIG_PACKAGE_psmisc=y
 # CONFIG_PACKAGE_pwgen is not set
 CONFIG_PACKAGE_px5g=y
 # CONFIG_PACKAGE_px5g-standalone is not set
+# CONFIG_PACKAGE_qemu is not set
 # CONFIG_PACKAGE_rcs is not set
 # CONFIG_PACKAGE_remind is not set
 # CONFIG_PACKAGE_rename is not set
@@ -5418,6 +5390,7 @@ CONFIG_PACKAGE_usbreset=y
 CONFIG_PACKAGE_usbutils=y
 # CONFIG_PACKAGE_uuidd is not set
 # CONFIG_PACKAGE_uuidgen is not set
+# CONFIG_PACKAGE_uvcdynctrl is not set
 # CONFIG_PACKAGE_v4l-utils is not set
 # CONFIG_PACKAGE_watchcat is not set
 # CONFIG_PACKAGE_wattsup is not set
