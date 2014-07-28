@@ -25,8 +25,10 @@ install: $(built)
 	fi; \
 	conf=`cat $(configured)` && \
 	image=`find build_dir/bin/ -name '*combined*.img' | head -n 1` && \
+	packages=`find build_dir/bin/ -name 'packages' | head -n 1` && \
 	ver=`grep CONFIG_VERSION_NUMBER $(BUILD_DIR)/.config | cut -d '"' -f 2` && \
-	cp -f $${image} $(DESTDIR)/opuntia-$${conf}-$${ver}_$(BUILD_NUMBER).img
+	cp -f $${image} $(DESTDIR)/opuntia-$${conf}-$${ver}_$(BUILD_NUMBER).img && \
+	cp -af $${packages} $(DESTDIR)/
 	
 checkout_openwrt:
 	@if [ ! -d $(BUILD_DIR) ] ; then \
