@@ -1,6 +1,15 @@
 --- a/feeds/oldpackages/utils/bash/Makefile
 +++ b/feeds/oldpackages/utils/bash/Makefile
-@@ -50,7 +50,11 @@ define Build/Compile
+@@ -17,6 +17,8 @@ PKG_MD5SUM:=3fb927c7c33022f1c327f14a81c0
+ 
+ include $(INCLUDE_DIR)/package.mk
+ 
++.NOTPARALLEL:
++
+ define Package/bash
+   SECTION:=utils
+   CATEGORY:=Utilities
+@@ -50,7 +52,11 @@ define Build/Compile
  	$(MAKE) -C $(PKG_BUILD_DIR) \
  		DESTDIR="$(PKG_INSTALL_DIR)" \
  		SHELL="/bin/bash" \
