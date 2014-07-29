@@ -1,10 +1,11 @@
 OPENWRT_GIT:=git://git.openwrt.org/openwrt.git
-OPENWRT_COMMIT:=eda2c487b0ec35e0153c144f8988bf426e38debd
-#OPENWRT_COMMIT:=132abb4f6851eeb32c68fa2b62af6893d1cc57ce
-OPENWRT_DEPTH:=20
+OPENWRT_COMMIT:=1ba980ffeb17dbb4846c02f31a35a280d1ac7c37
+OPENWRT_DEPTH:=100
 
 BUILD_DIR=build_dir
 DESTDIR?=images
+
+SHELL := $(SHELL) -e
 
 pre_patches=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_pre_patched
 patches=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_patched
@@ -87,9 +88,9 @@ distclean:
 	
 .DEFAULT:
 	@if [ -f configs/$@ ] ; then \
-		echo "Configuring for $@"; \
-		make checkout_openwrt; \
-		echo $@ > $(configured); \
+		echo "Configuring for $@" && \
+		make checkout_openwrt && \
+		echo $@ > $(configured) && \
 		make configure prepare build; \
 	else \
 		echo "Configuration file for $@ not found!"; \

@@ -32,27 +32,19 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
 
 --- a/package/base-files/Makefile
 +++ b/package/base-files/Makefile
-@@ -110,8 +110,8 @@ define Package/base-files/install
+@@ -110,10 +110,10 @@ define Package/base-files/install
  
  	$(VERSION_SED) \
  		$(1)/etc/banner \
--		$(1)/etc/openwrt_version \
--		$(1)/etc/openwrt_release
-+		$(1)/etc/opuntia_version \
-+		$(1)/etc/opuntia_release
+-		$(1)/etc/openwrt_version
++		$(1)/etc/opuntia_version
+ 
+ 	$(VERSION_SED_SCRIPT) \
+-		$(1)/etc/openwrt_release \
++		$(1)/etc/opuntia_release \
+ 		$(1)/etc/device_info
  
  	mkdir -p $(1)/CONTROL
- 	mkdir -p $(1)/dev
---- a/package/base-files/files/etc/openwrt_release
-+++ /dev/null
-@@ -1,7 +0,0 @@
--DISTRIB_ID="%D"
--DISTRIB_RELEASE="%C"
--DISTRIB_REVISION="%R"
--DISTRIB_CODENAME="%n"
--DISTRIB_TARGET="%S"
--DISTRIB_DESCRIPTION="%D %N %V"
--DISTRIB_TAINTS="%t"
 --- a/package/base-files/files/etc/openwrt_version
 +++ /dev/null
 @@ -1 +0,0 @@
