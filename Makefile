@@ -69,7 +69,9 @@ $(feeds):
 configure:
 	@if [ -d $(BUILD_DIR) ] ; then \
 		conf=`cat $(configured)` && \
-		cp configs/$$conf $(BUILD_DIR)/.config; \
+		ver=`cat version` && \
+		cp configs/$$conf $(BUILD_DIR)/.config && \
+		sed -i "s/^CONFIG_VERSION_NUMBER=.*/CONFIG_VERSION_NUMBER=\"$$ver\"/" $(BUILD_DIR)/.config; \
 	fi
 
 prepare:
