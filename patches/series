@@ -28,3 +28,7 @@ packages/0165-Mac80211-init-mesh_params-after-meshd.patch
 packages/0166-Bash-fix-parallel-build.patch
 oldpackages/0066-Multiwan-work-with-qos-mark-mask-fixes.patch
 0001-Add-SAM-guest.patch
+0150-Fix-Linux-Pam-URL.patch
+0160-Add-wpj344-support.patch
+kernel/0055-Add-wpj344-eth-support.patch
+packages/0170-iwinfo-handle-802.11ac-mode-for-lua.patch

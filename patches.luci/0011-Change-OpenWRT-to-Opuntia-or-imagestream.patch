@@ -13,11 +13,9 @@ Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
  .../modules/admin-full/luasrc/view/admin_system/flashops.htm   |  4 ++--
  7 files changed, 14 insertions(+), 16 deletions(-)
 
-diff --git a/build/mkversion.sh b/build/mkversion.sh
-index afb34b4..b65171b 100755
 --- a/build/mkversion.sh
 +++ b/build/mkversion.sh
-@@ -12,11 +12,11 @@ local pcall, dofile, _G = pcall, dofile, _G
+@@ -12,11 +12,11 @@ local pcall, dofile, _G = pcall, dofile,
  
  module "luci.version"
  
@@ -31,24 +29,20 @@ index afb34b4..b65171b 100755
  	distversion = "${3:-Development Snapshot}"
  end
  
-diff --git a/contrib/package/luci/Makefile b/contrib/package/luci/Makefile
-index 7706645..7cd0f73 100644
 --- a/contrib/package/luci/Makefile
 +++ b/contrib/package/luci/Makefile
-@@ -45,7 +45,7 @@ endef
- define Package/luci-lib-core/install
- 	$(call Package/luci/install/template,$(1),libs/core)
+@@ -46,7 +46,7 @@ endef
+ define Package/luci-base/install
+ 	$(call Package/luci/install/template,$(1),modules/base)
  	$(PKG_BUILD_DIR)/build/mkversion.sh $(1)/usr/lib/lua/luci/version.lua \
 -		"OpenWrt Firmware" \
 +		"Opuntia Firmware" \
  		"$(OPENWRTVERSION)" \
  		"trunk" \
  		"$(PKG_VERSION)"
-diff --git a/modules/admin-full/luasrc/controller/admin/network.lua b/modules/admin-full/luasrc/controller/admin/network.lua
-index 340c5b4..46097e5 100644
 --- a/modules/admin-full/luasrc/controller/admin/network.lua
 +++ b/modules/admin-full/luasrc/controller/admin/network.lua
-@@ -215,7 +215,7 @@ function wifi_add()
+@@ -208,7 +208,7 @@ function wifi_add()
  	if dev then
  		local net = dev:add_wifinet({
  			mode       = "ap",
@@ -57,8 +51,6 @@ index 340c5b4..46097e5 100644
  			encryption = "none"
  		})
  
-diff --git a/modules/admin-full/luasrc/model/cbi/admin_system/system.lua b/modules/admin-full/luasrc/model/cbi/admin_system/system.lua
-index 3a884c4..47c7cc5 100644
 --- a/modules/admin-full/luasrc/model/cbi/admin_system/system.lua
 +++ b/modules/admin-full/luasrc/model/cbi/admin_system/system.lua
 @@ -159,7 +159,7 @@ if has_ntpd then
@@ -70,11 +62,9 @@ index 3a884c4..47c7cc5 100644
  			}
  		)
  
-diff --git a/modules/admin-full/luasrc/view/admin_network/diagnostics.htm b/modules/admin-full/luasrc/view/admin_network/diagnostics.htm
-index d1bef2a..af41b8d 100644
 --- a/modules/admin-full/luasrc/view/admin_network/diagnostics.htm
 +++ b/modules/admin-full/luasrc/view/admin_network/diagnostics.htm
-@@ -72,7 +72,7 @@ local has_traceroute6 = fs.access("/usr/bin/traceroute6")
+@@ -72,7 +72,7 @@ local has_traceroute6 = fs.access("/usr/
  			<br />
  
  			<div style="width:30%; float:left">
@@ -83,7 +73,7 @@ index d1bef2a..af41b8d 100644
  				<% if has_ping6 then %>
  				<select name="ping_proto" style="width:auto">
  					<option value="" selected="selected"><%:IPv4%></option>
-@@ -85,7 +85,7 @@ local has_traceroute6 = fs.access("/usr/bin/traceroute6")
+@@ -85,7 +85,7 @@ local has_traceroute6 = fs.access("/usr/
  			</div>
  
  			<div style="width:33%; float:left">
@@ -92,7 +82,7 @@ index d1bef2a..af41b8d 100644
  				<% if has_traceroute6 then %>
  				<select name="traceroute_proto" style="width:auto">
  					<option value="" selected="selected"><%:IPv4%></option>
-@@ -102,7 +102,7 @@ local has_traceroute6 = fs.access("/usr/bin/traceroute6")
+@@ -102,7 +102,7 @@ local has_traceroute6 = fs.access("/usr/
  			</div>
  
  			<div style="width:33%; float:left;">
@@ -101,11 +91,9 @@ index d1bef2a..af41b8d 100644
  				<input type="button" value="<%:Nslookup%>" class="cbi-button cbi-button-apply" onclick="update_status(this.form.nslookup)" />
  			</div>
  
-diff --git a/modules/admin-full/luasrc/view/admin_status/index.htm b/modules/admin-full/luasrc/view/admin_status/index.htm
-index fe9ea92..3067d1d 100644
 --- a/modules/admin-full/luasrc/view/admin_status/index.htm
 +++ b/modules/admin-full/luasrc/view/admin_status/index.htm
-@@ -530,18 +530,16 @@ You may obtain a copy of the License at
+@@ -561,18 +561,16 @@ You may obtain a copy of the License at
  
  	<table width="100%" cellspacing="10">
  		<tr><td width="33%"><%:Hostname%></td><td><%=luci.sys.hostname() or "?"%></td></tr>
@@ -128,8 +116,6 @@ index fe9ea92..3067d1d 100644
  		<tr><td width="33%"><%:Local Time%></td><td id="localtime">-</td></tr>
  		<tr><td width="33%"><%:Uptime%></td><td id="uptime">-</td></tr>
  		<tr><td width="33%"><%:Load Average%></td><td id="loadavg">-</td></tr>
-diff --git a/modules/admin-full/luasrc/view/admin_system/flashops.htm b/modules/admin-full/luasrc/view/admin_system/flashops.htm
-index 0ba22a5..b794544 100644
 --- a/modules/admin-full/luasrc/view/admin_system/flashops.htm
 +++ b/modules/admin-full/luasrc/view/admin_system/flashops.htm
 @@ -64,7 +64,7 @@ $Id$
@@ -145,11 +131,8 @@ index 0ba22a5..b794544 100644
  				<% end %>
  			</form>
  		<% else %>
--			<div class="cbi-section-descr"><%:Sorry, there is no sysupgrade support present, a new firmware image must be flashed manually. Please refer to the OpenWrt wiki for device specific install instructions.%></div>
-+			<div class="cbi-section-descr"><%:Sorry, there is no sysupgrade support present, a new firmware image must be flashed manually. Please refer to the ImageStream wiki for device specific install instructions.%></div>
+-			<div class="cbi-section-descr"><%:Sorry, there is no sysupgrade support present; a new firmware image must be flashed manually. Please refer to the OpenWrt wiki for device specific install instructions.%></div>
++			<div class="cbi-section-descr"><%:Sorry, there is no sysupgrade support present. A new firmware image must be flashed manually. Please refer to the ImageStream wiki for device specific install instructions.%></div>
  		<% end %>
  	</fieldset>
  
--- 
-2.0.0
-

@@ -1,0 +1,12 @@
+--- a/package/network/utils/iwinfo/src/iwinfo_lua.c
++++ b/package/network/utils/iwinfo/src/iwinfo_lua.c
+@@ -499,6 +499,9 @@ static int iwinfo_L_hwmodelist(lua_State
+ 		lua_pushboolean(L, hwmodes & IWINFO_80211_N);
+ 		lua_setfield(L, -2, "n");
+ 
++		lua_pushboolean(L, hwmodes & IWINFO_80211_AC);
++		lua_setfield(L, -2, "ac");
++
+ 		return 1;
+ 	}
+ 
