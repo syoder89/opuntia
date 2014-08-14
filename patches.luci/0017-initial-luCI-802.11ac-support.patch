@@ -1,0 +1,109 @@
+--- a/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
++++ b/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
+@@ -192,7 +192,16 @@ if hwtype == "mac80211" then
+ 
+ 	mode = s:taboption("advanced", ListValue, "hwmode", translate("Band"))
+ 
+-	if hw_modes.n then
++	if hw_modes.ac then
++		if hw_modes.ac then mode:value("11nac", "5GHz (802.11n+ac)") end
++
++		htmode = s:taboption("advanced", ListValue, "htmode", translate("VHT mode (802.11ac)"))
++		htmode:value("", translate("disabled"))
++		htmode:value("VHT20", "20MHz")
++		htmode:value("VHT40", "40MHz")
++		htmode:value("VHT80", "80MHz")
++
++	elseif hw_modes.n then
+ 		if hw_modes.g then mode:value("11g", "2.4GHz (802.11g+n)") end
+ 		if hw_modes.a then mode:value("11a", "5GHz (802.11a+n)") end
+ 
+--- a/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm
++++ b/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm
+@@ -36,6 +36,7 @@ You may obtain a copy of the License at
+ 				if bl.b then bands = bands .. "b" end
+ 				if bl.g then bands = bands .. "g" end
+ 				if bl.n then bands = bands .. "n" end
++				if bl.ac then bands = bands .. "ac" end
+ 			end
+ 
+ 			local hw = dev.iwinfo.hardware_name
+@@ -317,12 +318,16 @@ You may obtain a copy of the License at
+ 							tr.insertCell(-1).innerHTML = nowrap(String.format('%d <%:dBm%>', assoclist[j].signal));
+ 							tr.insertCell(-1).innerHTML = nowrap(String.format('%d <%:dBm%>', assoclist[j].noise));
+ 
+-							tr.insertCell(-1).innerHTML = nowrap((assoclist[j].rx_mcs > -1)
++							tr.insertCell(-1).innerHTML = nowrap((assoclist[j].rx_vht_mcs > -1)
++								? String.format('%.1f <%:Mbit/s%>, VHT-MCS %d, %s<%:MHz%>, NSS %d', assoclist[j].rx_rate / 1000, assoclist[j].rx_vht_mcs, assoclist[j].rx_160mhz ? "160" : assoclist[j].rx_80mhz ? "80" : assoclist[j].rx_80p80mhz ? "80P80" : assoclist[j].rx_40mhz ? "40" : "20", assoclist[j].rx_vht_nss)
++								: (assoclist[j].rx_mcs > -1)
+ 								? String.format('%.1f <%:Mbit/s%>, MCS %d, %d<%:MHz%>', assoclist[j].rx_rate / 1000, assoclist[j].rx_mcs, assoclist[j].rx_40mhz ? 40 : 20)
+ 								: String.format('%.1f <%:Mbit/s%>', assoclist[j].rx_rate / 1000)
+ 							);
+ 
+-							tr.insertCell(-1).innerHTML = nowrap((assoclist[j].tx_mcs > -1)
++							tr.insertCell(-1).innerHTML = nowrap((assoclist[j].tx_vht_mcs > -1)
++								? String.format('%.1f <%:Mbit/s%>, VHT-MCS %d, %s<%:MHz%>, NSS %d', assoclist[j].tx_rate / 1000, assoclist[j].tx_vht_mcs, assoclist[j].tx_160mhz ? "160" : assoclist[j].tx_80mhz ? "80" : assoclist[j].tx_80p80mhz ? "80P80" : assoclist[j].tx_40mhz ? "40" : "20", assoclist[j].tx_vht_nss)
++								: (assoclist[j].tx_mcs > -1)
+ 								? String.format('%.1f <%:Mbit/s%>, MCS %d, %d<%:MHz%>', assoclist[j].tx_rate / 1000, assoclist[j].tx_mcs, assoclist[j].tx_40mhz ? 40 : 20)
+ 								: String.format('%.1f <%:Mbit/s%>', assoclist[j].tx_rate / 1000)
+ 							);
+--- a/modules/base/luasrc/model/network.lua
++++ b/modules/base/luasrc/model/network.lua
+@@ -1282,6 +1282,7 @@ function wifidev.get_i18n(self)
+ 	if l.b then m = m .. "b" end
+ 	if l.g then m = m .. "g" end
+ 	if l.n then m = m .. "n" end
++	if l.ac then m = m .. "ac" end
+ 
+ 	return "%s 802.11%s Wireless Controller (%s)" %{ t, m, self:name() }
+ end
+--- a/modules/admin-full/luasrc/view/admin_status/index.htm
++++ b/modules/admin-full/luasrc/view/admin_status/index.htm
+@@ -410,10 +410,20 @@ You may obtain a copy of the License at
+ 								noise:    net.assoclist[bssid].noise,
+ 								rx_rate:  net.assoclist[bssid].rx_rate,
+ 								rx_mcs:   net.assoclist[bssid].rx_mcs,
++								rx_vht_mcs: net.assoclist[bssid].rx_vht_mcs,
++								rx_vht_nss: net.assoclist[bssid].rx_vht_nss,
+ 								rx_40mhz: net.assoclist[bssid].rx_40mhz,
++								rx_80mhz: net.assoclist[bssid].rx_80mhz,
++								rx_80p80mhz: net.assoclist[bssid].rx_80p80mhz,
++								rx_160mhz: net.assoclist[bssid].rx_160mhz,
+ 								tx_rate:  net.assoclist[bssid].tx_rate,
+ 								tx_mcs:   net.assoclist[bssid].tx_mcs,
++								tx_vht_mcs:   net.assoclist[bssid].tx_vht_mcs,
++								tx_vht_nss:   net.assoclist[bssid].tx_vht_nss,
+ 								tx_40mhz: net.assoclist[bssid].tx_40mhz,
++								tx_80mhz: net.assoclist[bssid].tx_80mhz,
++								tx_80p80mhz: net.assoclist[bssid].tx_80p80mhz,
++								tx_160mhz: net.assoclist[bssid].tx_160mhz,
+ 								link:     net.link,
+ 								name:     net.name
+ 							});
+@@ -476,15 +486,20 @@ You may obtain a copy of the License at
+ 					tr.insertCell(-1).innerHTML = String.format('%d <%:dBm%>', assoclist[i].signal).nobr();
+ 					tr.insertCell(-1).innerHTML = String.format('%d <%:dBm%>', assoclist[i].noise).nobr();
+ 
+-					tr.insertCell(-1).innerHTML = (assoclist[i].rx_mcs > -1)
+-						? String.format('%.1f <%:Mbit/s%>, MCS %d, %d<%:MHz%>', assoclist[i].rx_rate / 1000, assoclist[i].rx_mcs, assoclist[i].rx_40mhz ? 40 : 20).nobr()
+-						: String.format('%.1f <%:Mbit/s%>', assoclist[i].rx_rate / 1000).nobr()
++					tr.insertCell(-1).innerHTML = (assoclist[[i]].rx_vht_mcs > -1)
++						? String.format('%.1f <%:Mbit/s%>, VHT-MCS %d, %s<%:MHz%>, NSS %d', assoclist[[i]].rx_rate / 1000, assoclist[[i]].rx_vht_mcs, assoclist[[i]].rx_160mhz ? "160" : assoclist[[i]].rx_80mhz ? "80" : assoclist[[i]].rx_80p80mhz ? "80P80" : assoclist[[i]].rx_40mhz ? "40" : "20", assoclist[[i]].rx_vht_nss).nobr()
++						: (assoclist[[i]].rx_mcs > -1)
++						? String.format('%.1f <%:Mbit/s%>, MCS %d, %d<%:MHz%>', assoclist[[i]].rx_rate / 1000, assoclist[[i]].rx_mcs, assoclist[[i]].rx_40mhz ? 40 : 20).nobr()
++						: String.format('%.1f <%:Mbit/s%>', assoclist[[i]].rx_rate / 1000).nobr()
+ 					;
+ 
+-					tr.insertCell(-1).innerHTML = (assoclist[i].tx_mcs > -1)
+-						? String.format('%.1f <%:Mbit/s%>, MCS %d, %d<%:MHz%>', assoclist[i].tx_rate / 1000, assoclist[i].tx_mcs, assoclist[i].tx_40mhz ? 40 : 20).nobr()
+-						: String.format('%.1f <%:Mbit/s%>', assoclist[i].tx_rate / 1000).nobr()
++					tr.insertCell(-1).innerHTML = (assoclist[[i]].tx_vht_mcs > -1)
++						? String.format('%.1f <%:Mbit/s%>, VHT-MCS %d, %s<%:MHz%>, NSS %d', assoclist[[i]].tx_rate / 1000, assoclist[[i]].tx_vht_mcs, assoclist[[i]].tx_160mhz ? "160" : assoclist[[i]].tx_80mhz ? "80" : assoclist[[i]].tx_80p80mhz ? "80P80" : assoclist[[i]].tx_40mhz ? "40" : "20", assoclist[[i]].tx_vht_nss).nobr()
++						: (assoclist[[i]].tx_mcs > -1)
++						? String.format('%.1f <%:Mbit/s%>, MCS %d, %d<%:MHz%>', assoclist[[i]].tx_rate / 1000, assoclist[[i]].tx_mcs, assoclist[[i]].tx_40mhz ? 40 : 20).nobr()
++						: String.format('%.1f <%:Mbit/s%>', assoclist[[i]].tx_rate / 1000).nobr()
+ 					;
++
+ 				}
+ 
+ 				if (ac.rows.length == 1)

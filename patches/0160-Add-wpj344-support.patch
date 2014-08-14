@@ -43,7 +43,7 @@
  $(eval $(call SingleProfile,MyLoader,64k,WPE72_16M,wpe72,,ttyS0,115200,0x1000000,16M))
  
 +$(eval $(call SingleProfile,AthLzma,64k,WPJ344_8M,wpj344,DB120,ttyS0,115200,$$(wpj344_mtdlayout_8M),RKuImage))
-+$(eval $(call SingleProfile,AthLzma,64k,WPJ344_16M,wpj344,DB120,ttyS0,115200,$$(wpj344_mtdlayout_16M),RKuImage))
++$(eval $(call SingleProfile,AthLzma,64k,WPJ344_16M,wpj344,DB120,ttyS0,115200,$$(wpj344_mtdlayout_16M),KRuImage))
 +
  $(eval $(call SingleProfile,Netgear,64kraw,WNR2000V3,wnr2000v3,WNR2000V3,ttyS0,115200,$$(wnr2000v3_mtdlayout),0x32303033,WNR2000V3,"" NA,))
  $(eval $(call SingleProfile,Netgear,64kraw,WNR2200,wnr2200,WNR2200,ttyS0,115200,$$(wnr2200_mtdlayout),0x32323030,WNR2200,"" NA,))
@@ -56,3 +56,55 @@
  
  $(eval $(call MultiProfile,Minimal,$(SINGLE_PROFILES)))
  $(eval $(call MultiProfile,Madwifi,EAP7660D UBNTRS UBNTRSPRO UBNTLSSR71 WP543))
+--- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
++++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
+@@ -137,6 +137,7 @@ platform_check_image() {
+ 
+ 	[ "$#" -gt 1 ] && return 1
+ 
++# Scott moved db120 to magic value 2705 (kernel elf header) because the Compex WPJ344 16 MB flash puts the kernel first.
+ 	case "$board" in
+ 	all0315n | \
+ 	all0258n | \
+@@ -153,7 +154,6 @@ platform_check_image() {
+ 	ap136-020 | \
+ 	ap135-020 | \
+ 	ap96 | \
+-	db120 | \
+ 	hornet-ub | \
+ 	bxu2000n-2-a1 | \
+ 	zcn-1523h-2 | \
+@@ -167,6 +167,7 @@ platform_check_image() {
+ 	ap81 | \
+ 	ap83 | \
+ 	ap132 | \
++	db120 | \
+ 	dir-505-a1 | \
+ 	dir-600-a1 | \
+ 	dir-615-c1 | \
+--- a/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
++++ b/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
+@@ -62,7 +62,6 @@ tl-wdr4900-v2)
+ 	ucidef_add_switch_vlan "switch0" "2" "1 6"
+ 	;;
+ 
+-db120 |\
+ rb-2011l | \
+ rb-2011uas |\
+ rb-2011uias |\
+@@ -426,6 +425,15 @@ wndr3700)
+ 	uci set network.@switch_port[-1].led='2'
+ 	;;
+ 
++db120)
++	ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
++	ucidef_add_switch "switch0" "1" "1"
++	ucidef_add_switch_vlan "switch0" "0" "0t 2"
++	uci set network.@switch_vlan[-1].vid='4000'
++	ucidef_add_switch_vlan "switch0" "1" "0t 1"
++	uci set network.@switch_vlan[-1].vid='4001'
++	;;
++
+ *)
+ 	ucidef_set_interfaces_lan_wan "eth0" "eth1"
+ 	;;
