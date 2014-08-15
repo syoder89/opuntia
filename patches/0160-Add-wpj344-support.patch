@@ -42,8 +42,8 @@
  $(eval $(call SingleProfile,MyLoader,64k,WPE72_8M,wpe72,,ttyS0,115200,0x800000,8M))
  $(eval $(call SingleProfile,MyLoader,64k,WPE72_16M,wpe72,,ttyS0,115200,0x1000000,16M))
  
-+$(eval $(call SingleProfile,AthLzma,64k,WPJ344_8M,wpj344,DB120,ttyS0,115200,$$(wpj344_mtdlayout_8M),RKuImage))
-+$(eval $(call SingleProfile,AthLzma,64k,WPJ344_16M,wpj344,DB120,ttyS0,115200,$$(wpj344_mtdlayout_16M),KRuImage))
++$(eval $(call SingleProfile,AthLzma,64k,WPJ344_8M,wpj344,WPJ344,ttyS0,115200,$$(wpj344_mtdlayout_8M),RKuImage))
++$(eval $(call SingleProfile,AthLzma,64k,WPJ344_16M,wpj344,WPJ344,ttyS0,115200,$$(wpj344_mtdlayout_16M),KRuImage))
 +
  $(eval $(call SingleProfile,Netgear,64kraw,WNR2000V3,wnr2000v3,WNR2000V3,ttyS0,115200,$$(wnr2000v3_mtdlayout),0x32303033,WNR2000V3,"" NA,))
  $(eval $(call SingleProfile,Netgear,64kraw,WNR2200,wnr2200,WNR2200,ttyS0,115200,$$(wnr2200_mtdlayout),0x32323030,WNR2200,"" NA,))
@@ -58,30 +58,14 @@
  $(eval $(call MultiProfile,Madwifi,EAP7660D UBNTRS UBNTRSPRO UBNTLSSR71 WP543))
 --- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
 +++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
-@@ -137,6 +137,7 @@ platform_check_image() {
- 
- 	[ "$#" -gt 1 ] && return 1
- 
-+# Scott moved db120 to magic value 2705 (kernel elf header) because the Compex WPJ344 16 MB flash puts the kernel first.
- 	case "$board" in
- 	all0315n | \
- 	all0258n | \
-@@ -153,7 +154,6 @@ platform_check_image() {
- 	ap136-020 | \
- 	ap135-020 | \
- 	ap96 | \
--	db120 | \
- 	hornet-ub | \
- 	bxu2000n-2-a1 | \
- 	zcn-1523h-2 | \
-@@ -167,6 +167,7 @@ platform_check_image() {
- 	ap81 | \
- 	ap83 | \
- 	ap132 | \
-+	db120 | \
- 	dir-505-a1 | \
- 	dir-600-a1 | \
- 	dir-615-c1 | \
+@@ -194,6 +194,7 @@ platform_check_image() {
+ 	nanostation-m-xw | \
+ 	rw2458n | \
+ 	wndap360 | \
++	wpj344 | \
+ 	wzr-hp-g300nh2 | \
+ 	wzr-hp-g300nh | \
+ 	wzr-hp-g450h | \
 --- a/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
 +++ b/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
 @@ -62,7 +62,6 @@ tl-wdr4900-v2)
@@ -108,3 +92,26 @@
  *)
  	ucidef_set_interfaces_lan_wan "eth0" "eth1"
  	;;
+--- a/target/linux/ar71xx/config-3.14
++++ b/target/linux/ar71xx/config-3.14
+@@ -121,6 +121,8 @@ CONFIG_ATH79_MACH_WNR2000_V3=y
+ CONFIG_ATH79_MACH_WNR2200=y
+ CONFIG_ATH79_MACH_WP543=y
+ CONFIG_ATH79_MACH_WPE72=y
++# CONFIG_ATH79_MACH_WPJ342 is not set
++CONFIG_ATH79_MACH_WPJ344=y
+ CONFIG_ATH79_MACH_WRT160NL=y
+ CONFIG_ATH79_MACH_WRT400N=y
+ CONFIG_ATH79_MACH_WZR_HP_AG300H=y
+--- a/target/linux/ar71xx/base-files/lib/ar71xx.sh
++++ b/target/linux/ar71xx/base-files/lib/ar71xx.sh
+@@ -295,6 +295,9 @@ ar71xx_board_detect() {
+ 	*CAP4200AG)
+ 		name="cap4200ag"
+ 		;;
++        *"Compex WPJ344")
++                name="wpj344"
++                ;;
+ 	*"DB120 reference board")
+ 		name="db120"
+ 		;;
