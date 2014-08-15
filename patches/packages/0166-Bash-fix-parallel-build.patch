@@ -1,5 +1,5 @@
---- a/feeds/oldpackages/utils/bash/Makefile
-+++ b/feeds/oldpackages/utils/bash/Makefile
+--- a/feeds/packages/utils/bash/Makefile
++++ b/feeds/packages/utils/bash/Makefile
 @@ -17,6 +17,8 @@ PKG_MD5SUM:=3fb927c7c33022f1c327f14a81c0
  
  include $(INCLUDE_DIR)/package.mk

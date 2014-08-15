@@ -9,17 +9,17 @@ Subject: [PATCH] Add bash job support. Change default login shell to bash.
 
 ---
  imagestream/configs/alix2                          | 25 ++++++++--------------
- feeds/oldpackages/utils/bash/Makefile   |  6 +++++-
+ feeds/packages/utils/bash/Makefile   |  6 +++++-
  imagestream/package/ipsec/files/etc/init.d/ipsec   |  4 ++--
  .../ipsec/files/etc/uci-defaults/luci-app-ipsec    |  3 +++
  .../netifd-qmi/files/lib/netifd/proto/qmi.sh       | 14 ++++++++++++
  target/linux/x86/base-files/etc/inittab            |  4 ++--
  6 files changed, 35 insertions(+), 21 deletions(-)
 
-diff --git a/feeds/oldpackages/utils/bash/Makefile b/feeds/oldpackages/utils/bash/Makefile
+diff --git a/feeds/packages/utils/bash/Makefile b/feeds/packages/utils/bash/Makefile
 index d877441..b73e468 100644
---- a/feeds/oldpackages/utils/bash/Makefile
-+++ b/feeds/oldpackages/utils/bash/Makefile
+--- a/feeds/packages/utils/bash/Makefile
++++ b/feeds/packages/utils/bash/Makefile
 @@ -35,7 +35,12 @@ endef
  define Build/Configure
  	$(call Build/Configure/Default, \
