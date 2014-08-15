@@ -80,7 +80,7 @@
  	uci set network.@switch_port[-1].led='2'
  	;;
  
-+db120)
++wpj344)
 +	ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
 +	ucidef_add_switch "switch0" "1" "1"
 +	ucidef_add_switch_vlan "switch0" "0" "0t 2"
