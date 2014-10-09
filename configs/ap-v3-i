@@ -2238,6 +2238,7 @@ CONFIG_PACKAGE_hardware-watchdog=y
 # CONFIG_PACKAGE_imagestream-envoy-installer is not set
 CONFIG_PACKAGE_imagestream-overrides=y
 CONFIG_PACKAGE_imagestream-snmp-mibs=y
+# CONFIG_PACKAGE_imagestream-utm-configs is not set
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs is not set
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs-i is not set
 CONFIG_PACKAGE_imagestream-wifi-ap-configs-i.v3=y
@@ -3379,7 +3380,7 @@ CONFIG_PACKAGE_libnetsnmp=y
 # CONFIG_PACKAGE_libnfc is not set
 CONFIG_PACKAGE_libnfnetlink=y
 CONFIG_PACKAGE_libnids=y
-CONFIG_PACKAGE_libnl=m
+CONFIG_PACKAGE_libnl=y
 CONFIG_PACKAGE_libnl-tiny=y
 # CONFIG_PACKAGE_libnmeap is not set
 # CONFIG_PACKAGE_libogg is not set

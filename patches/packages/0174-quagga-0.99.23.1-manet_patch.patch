@@ -1,0 +1,90 @@
+--- a/feeds/routing/quagga/patches/120-quagga_manet.patch	2014-10-08 15:54:43.046667045 -0500
++++ b/feeds/routing/quagga/patches/120-quagga_manet.patch	2014-10-09 16:38:25.102076009 -0500
+@@ -105,18 +105,6 @@
+    {0, 0, NULL}
+  };
+  
+---- a/zebra/rt_netlink.c
+-+++ b/zebra/rt_netlink.c
+-@@ -1609,6 +1609,9 @@ netlink_route_multipath (int cmd, struct
+-                         addattr_l (&req.n, sizeof req, RTA_PREFSRC,
+- 				 &nexthop->src.ipv4, bytelen);
+- 
+-+		      if (rib->type == ZEBRA_ROUTE_OLSR)
+-+			req.r.rtm_scope = RT_SCOPE_LINK;
+-+
+- 		      if (IS_ZEBRA_DEBUG_KERNEL)
+- 			zlog_debug("netlink_route_multipath() (single hop): "
+- 				   "nexthop via if %u", nexthop->ifindex);
+ --- a/zebra/zebra_rib.c
+ +++ b/zebra/zebra_rib.c
+ @@ -68,6 +68,9 @@ static const struct
+@@ -129,9 +117,9 @@
+    [ZEBRA_ROUTE_BABEL]   = {ZEBRA_ROUTE_BABEL,    95},
+    /* no entry/default: 150 */
+  };
+-@@ -456,6 +459,18 @@ nexthop_active_ipv4 (struct rib *rib, st
++@@ -538,6 +541,18 @@ nexthop_active_ipv4 (struct rib *rib, st
+  		  }
+- 	      return 0;
++ 	      return resolved;
+  	    }
+ +	  else if (match->type == ZEBRA_ROUTE_OLSR)
+ +	    {
+@@ -148,9 +136,9 @@
+  	  else
+  	    {
+  	      return 0;
+-@@ -560,6 +575,18 @@ nexthop_active_ipv6 (struct rib *rib, st
++@@ -674,6 +689,18 @@ nexthop_active_ipv6 (struct rib *rib, st
+  		  }
+- 	      return 0;
++ 	      return resolved;
+  	    }
+ +	  else if (match->type == ZEBRA_ROUTE_OLSR)
+ +	    {
+@@ -167,7 +155,7 @@
+  	  else
+  	    {
+  	      return 0;
+-@@ -1376,6 +1403,8 @@ static const u_char meta_queue_map[ZEBRA
++@@ -1509,6 +1536,8 @@ static const u_char meta_queue_map[ZEBRA
+    [ZEBRA_ROUTE_ISIS]    = 2,
+    [ZEBRA_ROUTE_BGP]     = 3,
+    [ZEBRA_ROUTE_HSLS]    = 4,
+@@ -193,7 +181,7 @@
+      }
+ --- a/zebra/zebra_vty.c
+ +++ b/zebra/zebra_vty.c
+-@@ -558,7 +558,10 @@ vty_show_ip_route_detail (struct vty *vt
++@@ -559,7 +559,10 @@ vty_show_ip_route_detail (struct vty *vt
+  	  || rib->type == ZEBRA_ROUTE_OSPF
+  	  || rib->type == ZEBRA_ROUTE_BABEL
+  	  || rib->type == ZEBRA_ROUTE_ISIS
+@@ -205,7 +193,7 @@
+  	{
+  	  time_t uptime;
+  	  struct tm *tm;
+-@@ -784,7 +787,10 @@ vty_show_ip_route (struct vty *vty, stru
++@@ -754,7 +757,10 @@ vty_show_ip_route (struct vty *vty, stru
+  	  || rib->type == ZEBRA_ROUTE_OSPF
+  	  || rib->type == ZEBRA_ROUTE_BABEL
+  	  || rib->type == ZEBRA_ROUTE_ISIS
+@@ -217,7 +205,7 @@
+  	{
+  	  time_t uptime;
+  	  struct tm *tm;
+-@@ -1577,7 +1583,10 @@ vty_show_ipv6_route_detail (struct vty *
++@@ -1550,7 +1556,10 @@ vty_show_ipv6_route_detail (struct vty *
+  	  || rib->type == ZEBRA_ROUTE_OSPF6
+  	  || rib->type == ZEBRA_ROUTE_BABEL
+  	  || rib->type == ZEBRA_ROUTE_ISIS
+@@ -229,7 +217,7 @@
+  	{
+  	  time_t uptime;
+  	  struct tm *tm;
+-@@ -1757,7 +1766,10 @@ vty_show_ipv6_route (struct vty *vty, st
++@@ -1692,7 +1701,10 @@ vty_show_ipv6_route (struct vty *vty, st
+  	  || rib->type == ZEBRA_ROUTE_OSPF6
+  	  || rib->type == ZEBRA_ROUTE_BABEL
+  	  || rib->type == ZEBRA_ROUTE_ISIS

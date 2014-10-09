@@ -10,14 +10,14 @@ Subject: [PATCH] Set default root password to 'imagestream' Copy our custom
  .../net/strongswan/files/ipsec.user                |  17 +
  package/base-files/files/etc/shadow                |   2 +-
  3 files changed, 434 insertions(+), 11 deletions(-)
- mode change 100644 => 100755 feeds/oldpackages/net/strongswan/files/ipsec.init
+ mode change 100644 => 100755 feeds/packages/net/strongswan/files/ipsec.init
 
-diff --git a/feeds/oldpackages/net/strongswan/files/ipsec.init b/feeds/oldpackages/net/strongswan/files/ipsec.init
+diff --git a/feeds/packages/net/strongswan/files/ipsec.init b/feeds/packages/net/strongswan/files/ipsec.init
 old mode 100644
 new mode 100755
 index 391a2ae..94a5649
---- a/feeds/oldpackages/net/strongswan/files/ipsec.init
-+++ b/feeds/oldpackages/net/strongswan/files/ipsec.init
+--- a/feeds/packages/net/strongswan/files/ipsec.init
++++ b/feeds/packages/net/strongswan/files/ipsec.init
 @@ -1,20 +1,426 @@
 -#!/bin/sh /etc/rc.common
 -
@@ -455,10 +455,10 @@ index 391a2ae..94a5649
 +  killall charon
 +  do_unlock
  }
-diff --git a/feeds/oldpackages/net/strongswan/files/ipsec.user b/feeds/oldpackages/net/strongswan/files/ipsec.user
+diff --git a/feeds/packages/net/strongswan/files/ipsec.user b/feeds/packages/net/strongswan/files/ipsec.user
 index 4351ace..f373b5b 100644
---- a/feeds/oldpackages/net/strongswan/files/ipsec.user
-+++ b/feeds/oldpackages/net/strongswan/files/ipsec.user
+--- a/feeds/packages/net/strongswan/files/ipsec.user
++++ b/feeds/packages/net/strongswan/files/ipsec.user
 @@ -4,3 +4,20 @@
  # /usr/lib/ipsec/_updown which by default
  # strongswan executes.

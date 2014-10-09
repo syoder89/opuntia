@@ -1,0 +1,29 @@
+--- a/package/network/utils/iproute2/Makefile
++++ b/package/network/utils/iproute2/Makefile
+@@ -27,7 +27,7 @@ define Package/iproute2/Default
+   URL:=http://www.linuxfoundation.org/collaborate/workgroups/networking/iproute2
+   SUBMENU:=Routing and Redirection
+   MAINTAINER:=Russell Senior <russell@personaltelco.net>
+-  DEPENDS:= +libnl-tiny
++  DEPENDS:= +libnl
+   VARIANT:=$(1)
+ endef
+ 
+@@ -59,7 +59,7 @@ $(call Package/iproute2/Default)
+ endef
+ 
+ ifeq ($(BUILD_VARIANT),tiny)
+-  IP_CONFIG_TINY:=y
++  IP_CONFIG_TINY:=n
+ endif
+ ifeq ($(BUILD_VARIANT),full)
+   IP_CONFIG_TINY:=n
+@@ -84,7 +84,7 @@ endif
+ TARGET_CFLAGS += -ffunction-sections -fdata-sections
+ 
+ MAKE_FLAGS += \
+-	EXTRA_CCOPTS="$(TARGET_CFLAGS) -I../include -I$(STAGING_DIR)/usr/include/libnl-tiny" \
++	EXTRA_CCOPTS="$(TARGET_CFLAGS) -I../include -I$(STAGING_DIR)/usr/include/libnl" \
+ 	KERNEL_INCLUDE="$(LINUX_DIR)/include" \
+ 	SHARED_LIBS="" \
+ 	LDFLAGS="-Wl,--gc-sections" \

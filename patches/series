@@ -6,7 +6,7 @@ kernel/0043-Fix-panic-in-ledtrig-netdev-due-to-a-netdev-callback.patch
 kernel/0044-Linux-3.13-updates.patch
 packages/0061-Change-root-shell-to-bash.patch
 packages/0062-Set-root-password.patch
-oldpackages/0063-Ipsec-init-script-modes.patch
+packages/0063-Ipsec-init-script-modes.patch
 packages/0064-Add-bash-job-support.-Change-default-login-shell-to-.patch
 oldpackages/0065-Multiwan-fixes.patch
 packages/0073-Fix-timeout-problem-with-uhttpd-causing-large-firmwa.patch
@@ -37,3 +37,8 @@ packages/0171-add-802.11ac-support.patch
 kernel/0056-Add-wpj344-board.patch
 0172-add-delay-hostapd.patch
 kernel/0060-Fix-layer7.patch
+packages/0172-remove-ip-tiny.patch
+kernel/0020-3.14-Add-ifindex-reuse-patch-so-tunnels-will-reuse-their-.patch
+kernel/0045-Linux-3.14-updates.patch
+packages/0173-quagga-0.99.23.1-to-fix-readline.patch
+packages/0174-quagga-0.99.23.1-manet_patch.patch
