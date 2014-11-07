@@ -18,195 +18,198 @@
 + 		*)
 + 			if [ "$channel" -gt 14 ]; then
 + 				hwmode=a
---- a/package/network/utils/iwinfo/src/include/iwinfo.h
-+++ b/package/network/utils/iwinfo/src/include/iwinfo.h
-@@ -69,8 +69,13 @@ extern const char *IWINFO_OPMODE_NAMES[]
- struct iwinfo_rate_entry {
- 	uint32_t rate;
- 	int8_t mcs;
-+	int8_t vht_mcs;
- 	uint8_t is_40mhz:1;
-+	uint8_t is_80mhz:1;
-+	uint8_t is_80p80mhz:1;
-+	uint8_t is_160mhz:1;
- 	uint8_t is_short_gi:1;
-+	uint8_t vht_nss;
- };
- 
- struct iwinfo_assoclist_entry {
---- a/package/network/utils/iwinfo/src/iwinfo_cli.c
-+++ b/package/network/utils/iwinfo/src/iwinfo_cli.c
-@@ -293,7 +293,29 @@ static char * format_assocrate(struct iw
- 		p += snprintf(p, l, "%s", format_rate(r->rate));
- 		l = sizeof(buf) - (p - buf);
- 
--		if (r->mcs >= 0)
-+		if (r->vht_mcs >= 0)
-+		{
-+			p += snprintf(p, l, ", VHT-MCS %d, ", r->vht_mcs);
-+			l = sizeof(buf) - (p - buf);
-+
-+			if (r->is_40mhz)
-+				p += snprintf(p, l, "40 MHz");
-+			else if (r->is_80mhz)
-+				p += snprintf(p, l, "80 MHz");
-+			else if (r->is_80p80mhz)
-+				p += snprintf(p, l, "80P80 MHz");
-+			else if (r->is_160mhz)
-+				p += snprintf(p, l, "160 MHz");
-+			else
-+				p += snprintf(p, l, "20 MHz");
-+
-+			if (r->is_short_gi)
-+				p += snprintf(p, l, ", short GI");
-+
-+			if (r->vht_nss > 0)
-+				p += snprintf(p, l, ", VHT-NSS %d", r->vht_nss);
-+		}
-+		else if (r->mcs >= 0)
- 		{
- 			p += snprintf(p, l, ", MCS %d, %dMHz", r->mcs, 20 + r->is_40mhz*20);
- 			l = sizeof(buf) - (p - buf);
---- a/package/network/utils/iwinfo/src/iwinfo_lua.c
-+++ b/package/network/utils/iwinfo/src/iwinfo_lua.c
-@@ -293,7 +293,30 @@ static int iwinfo_L_assoclist(lua_State
- 			lua_pushnumber(L, e->tx_rate.rate);
- 			lua_setfield(L, -2, "tx_rate");
- 
--			if (e->rx_rate.mcs >= 0)
-+			if (e->rx_rate.vht_mcs >= 0)
-+			{
-+				lua_pushnumber(L, e->rx_rate.vht_mcs);
-+				lua_setfield(L, -2, "rx_vht_mcs");
-+
-+				lua_pushboolean(L, e->rx_rate.is_40mhz);
-+				lua_setfield(L, -2, "rx_40mhz");
-+
-+				lua_pushboolean(L, e->rx_rate.is_80mhz);
-+				lua_setfield(L, -2, "rx_80mhz");
-+
-+				lua_pushboolean(L, e->rx_rate.is_80p80mhz);
-+				lua_setfield(L, -2, "rx_80p80mhz");
-+
-+				lua_pushboolean(L, e->rx_rate.is_160mhz);
-+				lua_setfield(L, -2, "rx_160mhz");
-+
-+				lua_pushboolean(L, e->rx_rate.is_short_gi);
-+				lua_setfield(L, -2, "rx_short_gi");
-+
-+				lua_pushnumber(L, e->rx_rate.vht_nss);
-+				lua_setfield(L, -2, "rx_vht_nss");
-+			}
-+			else if (e->rx_rate.mcs >= 0)
- 			{
- 				lua_pushnumber(L, e->rx_rate.mcs);
- 				lua_setfield(L, -2, "rx_mcs");
-@@ -305,7 +328,30 @@ static int iwinfo_L_assoclist(lua_State
- 				lua_setfield(L, -2, "rx_short_gi");
- 			}
- 
--			if (e->tx_rate.mcs >= 0)
-+			if (e->tx_rate.vht_mcs >= 0)
-+			{
-+				lua_pushnumber(L, e->tx_rate.vht_mcs);
-+				lua_setfield(L, -2, "tx_vht_mcs");
-+
-+				lua_pushboolean(L, e->tx_rate.is_40mhz);
-+				lua_setfield(L, -2, "tx_40mhz");
-+
-+				lua_pushboolean(L, e->tx_rate.is_80mhz);
-+				lua_setfield(L, -2, "tx_80mhz");
-+
-+				lua_pushboolean(L, e->tx_rate.is_80p80mhz);
-+				lua_setfield(L, -2, "tx_80p80mhz");
-+
-+				lua_pushboolean(L, e->tx_rate.is_160mhz);
-+				lua_setfield(L, -2, "tx_160mhz");
-+
-+				lua_pushboolean(L, e->tx_rate.is_short_gi);
-+				lua_setfield(L, -2, "tx_short_gi");
-+
-+				lua_pushnumber(L, e->tx_rate.vht_nss);
-+				lua_setfield(L, -2, "tx_vht_nss");
-+			}
-+			else if (e->tx_rate.mcs >= 0)
- 			{
- 				lua_pushnumber(L, e->tx_rate.mcs);
- 				lua_setfield(L, -2, "tx_mcs");
---- a/package/network/utils/iwinfo/src/iwinfo_nl80211.c
-+++ b/package/network/utils/iwinfo/src/iwinfo_nl80211.c
-@@ -1468,13 +1468,20 @@ static int nl80211_get_assoclist_cb(stru
- 	static struct nla_policy rate_policy[NL80211_RATE_INFO_MAX + 1] = {
- 		[NL80211_RATE_INFO_BITRATE]      = { .type = NLA_U16    },
- 		[NL80211_RATE_INFO_MCS]          = { .type = NLA_U8     },
-+		[NL80211_RATE_INFO_VHT_MCS]      = { .type = NLA_U8     },
- 		[NL80211_RATE_INFO_40_MHZ_WIDTH] = { .type = NLA_FLAG   },
-+		[NL80211_RATE_INFO_80_MHZ_WIDTH] = { .type = NLA_FLAG   },
-+		[NL80211_RATE_INFO_80P80_MHZ_WIDTH] = { .type = NLA_FLAG   },
-+		[NL80211_RATE_INFO_160_MHZ_WIDTH] = { .type = NLA_FLAG   },
- 		[NL80211_RATE_INFO_SHORT_GI]     = { .type = NLA_FLAG   },
-+		[NL80211_RATE_INFO_VHT_NSS]      = { .type = NLA_U8     },
- 	};
- 
- 	/* advance to end of array */
- 	e += arr->count;
- 	memset(e, 0, sizeof(*e));
-+	e->rx_rate.mcs = e->rx_rate.vht_mcs = -1;
-+	e->tx_rate.mcs = e->tx_rate.vht_mcs = -1;
- 
- 	if (attr[NL80211_ATTR_MAC])
- 		memcpy(e->mac, nla_data(attr[NL80211_ATTR_MAC]), 6);
-@@ -1506,11 +1513,26 @@ static int nl80211_get_assoclist_cb(stru
- 			if (rinfo[NL80211_RATE_INFO_MCS])
- 				e->rx_rate.mcs = nla_get_u8(rinfo[NL80211_RATE_INFO_MCS]);
- 
-+			if (rinfo[NL80211_RATE_INFO_VHT_MCS])
-+				e->rx_rate.vht_mcs = nla_get_u8(rinfo[NL80211_RATE_INFO_VHT_MCS]);
-+
- 			if (rinfo[NL80211_RATE_INFO_40_MHZ_WIDTH])
- 				e->rx_rate.is_40mhz = 1;
- 
-+			if (rinfo[NL80211_RATE_INFO_80_MHZ_WIDTH])
-+				e->rx_rate.is_80mhz = 1;
-+
-+			if (rinfo[NL80211_RATE_INFO_80P80_MHZ_WIDTH])
-+				e->rx_rate.is_80p80mhz = 1;
-+
-+			if (rinfo[NL80211_RATE_INFO_160_MHZ_WIDTH])
-+				e->rx_rate.is_160mhz = 1;
-+
- 			if (rinfo[NL80211_RATE_INFO_SHORT_GI])
- 				e->rx_rate.is_short_gi = 1;
-+
-+			if (rinfo[NL80211_RATE_INFO_VHT_NSS])
-+				e->rx_rate.vht_nss = nla_get_u8(rinfo[NL80211_RATE_INFO_VHT_NSS]);
- 		}
- 
- 		if (sinfo[NL80211_STA_INFO_TX_BITRATE] &&
-@@ -1524,11 +1546,26 @@ static int nl80211_get_assoclist_cb(stru
- 			if (rinfo[NL80211_RATE_INFO_MCS])
- 				e->tx_rate.mcs = nla_get_u8(rinfo[NL80211_RATE_INFO_MCS]);
- 
-+			if (rinfo[NL80211_RATE_INFO_VHT_MCS])
-+				e->tx_rate.vht_mcs = nla_get_u8(rinfo[NL80211_RATE_INFO_VHT_MCS]);
-+
- 			if (rinfo[NL80211_RATE_INFO_40_MHZ_WIDTH])
- 				e->tx_rate.is_40mhz = 1;
- 
-+			if (rinfo[NL80211_RATE_INFO_80_MHZ_WIDTH])
-+				e->tx_rate.is_80mhz = 1;
-+
-+			if (rinfo[NL80211_RATE_INFO_80P80_MHZ_WIDTH])
-+				e->tx_rate.is_80p80mhz = 1;
-+
-+			if (rinfo[NL80211_RATE_INFO_160_MHZ_WIDTH])
-+				e->tx_rate.is_160mhz = 1;
-+
- 			if (rinfo[NL80211_RATE_INFO_SHORT_GI])
- 				e->tx_rate.is_short_gi = 1;
-+
-+			if (rinfo[NL80211_RATE_INFO_VHT_NSS])
-+				e->tx_rate.vht_nss = nla_get_u8(rinfo[NL80211_RATE_INFO_VHT_NSS]);
- 		}
- 	}
- 
+--- /dev/null
++++ b/package/network/utils/iwinfo/patches/001-initial-802.11ac-support.patch
+@@ -0,0 +1,192 @@
++--- a/include/iwinfo.h
+++++ b/include/iwinfo.h
++@@ -69,8 +69,13 @@ extern const char *IWINFO_OPMODE_NAMES[]
++ struct iwinfo_rate_entry {
++ 	uint32_t rate;
++ 	int8_t mcs;
+++	int8_t vht_mcs;
++ 	uint8_t is_40mhz:1;
+++	uint8_t is_80mhz:1;
+++	uint8_t is_80p80mhz:1;
+++	uint8_t is_160mhz:1;
++ 	uint8_t is_short_gi:1;
+++	uint8_t vht_nss;
++ };
++ 
++ struct iwinfo_assoclist_entry {
++--- a/iwinfo_cli.c
+++++ b/iwinfo_cli.c
++@@ -293,7 +293,29 @@ static char * format_assocrate(struct iw
++ 		p += snprintf(p, l, "%s", format_rate(r->rate));
++ 		l = sizeof(buf) - (p - buf);
++ 
++-		if (r->mcs >= 0)
+++		if (r->vht_mcs >= 0)
+++		{
+++			p += snprintf(p, l, ", VHT-MCS %d, ", r->vht_mcs);
+++			l = sizeof(buf) - (p - buf);
+++
+++			if (r->is_40mhz)
+++				p += snprintf(p, l, "40 MHz");
+++			else if (r->is_80mhz)
+++				p += snprintf(p, l, "80 MHz");
+++			else if (r->is_80p80mhz)
+++				p += snprintf(p, l, "80P80 MHz");
+++			else if (r->is_160mhz)
+++				p += snprintf(p, l, "160 MHz");
+++			else
+++				p += snprintf(p, l, "20 MHz");
+++
+++			if (r->is_short_gi)
+++				p += snprintf(p, l, ", short GI");
+++
+++			if (r->vht_nss > 0)
+++				p += snprintf(p, l, ", VHT-NSS %d", r->vht_nss);
+++		}
+++		else if (r->mcs >= 0)
++ 		{
++ 			p += snprintf(p, l, ", MCS %d, %dMHz", r->mcs, 20 + r->is_40mhz*20);
++ 			l = sizeof(buf) - (p - buf);
++--- a/iwinfo_lua.c
+++++ b/iwinfo_lua.c
++@@ -293,7 +293,30 @@ static int iwinfo_L_assoclist(lua_State
++ 			lua_pushnumber(L, e->tx_rate.rate);
++ 			lua_setfield(L, -2, "tx_rate");
++ 
++-			if (e->rx_rate.mcs >= 0)
+++			if (e->rx_rate.vht_mcs >= 0)
+++			{
+++				lua_pushnumber(L, e->rx_rate.vht_mcs);
+++				lua_setfield(L, -2, "rx_vht_mcs");
+++
+++				lua_pushboolean(L, e->rx_rate.is_40mhz);
+++				lua_setfield(L, -2, "rx_40mhz");
+++
+++				lua_pushboolean(L, e->rx_rate.is_80mhz);
+++				lua_setfield(L, -2, "rx_80mhz");
+++
+++				lua_pushboolean(L, e->rx_rate.is_80p80mhz);
+++				lua_setfield(L, -2, "rx_80p80mhz");
+++
+++				lua_pushboolean(L, e->rx_rate.is_160mhz);
+++				lua_setfield(L, -2, "rx_160mhz");
+++
+++				lua_pushboolean(L, e->rx_rate.is_short_gi);
+++				lua_setfield(L, -2, "rx_short_gi");
+++
+++				lua_pushnumber(L, e->rx_rate.vht_nss);
+++				lua_setfield(L, -2, "rx_vht_nss");
+++			}
+++			else if (e->rx_rate.mcs >= 0)
++ 			{
++ 				lua_pushnumber(L, e->rx_rate.mcs);
++ 				lua_setfield(L, -2, "rx_mcs");
++@@ -305,7 +328,30 @@ static int iwinfo_L_assoclist(lua_State
++ 				lua_setfield(L, -2, "rx_short_gi");
++ 			}
++ 
++-			if (e->tx_rate.mcs >= 0)
+++			if (e->tx_rate.vht_mcs >= 0)
+++			{
+++				lua_pushnumber(L, e->tx_rate.vht_mcs);
+++				lua_setfield(L, -2, "tx_vht_mcs");
+++
+++				lua_pushboolean(L, e->tx_rate.is_40mhz);
+++				lua_setfield(L, -2, "tx_40mhz");
+++
+++				lua_pushboolean(L, e->tx_rate.is_80mhz);
+++				lua_setfield(L, -2, "tx_80mhz");
+++
+++				lua_pushboolean(L, e->tx_rate.is_80p80mhz);
+++				lua_setfield(L, -2, "tx_80p80mhz");
+++
+++				lua_pushboolean(L, e->tx_rate.is_160mhz);
+++				lua_setfield(L, -2, "tx_160mhz");
+++
+++				lua_pushboolean(L, e->tx_rate.is_short_gi);
+++				lua_setfield(L, -2, "tx_short_gi");
+++
+++				lua_pushnumber(L, e->tx_rate.vht_nss);
+++				lua_setfield(L, -2, "tx_vht_nss");
+++			}
+++			else if (e->tx_rate.mcs >= 0)
++ 			{
++ 				lua_pushnumber(L, e->tx_rate.mcs);
++ 				lua_setfield(L, -2, "tx_mcs");
++--- a/iwinfo_nl80211.c
+++++ b/iwinfo_nl80211.c
++@@ -1468,13 +1468,20 @@ static int nl80211_get_assoclist_cb(stru
++ 	static struct nla_policy rate_policy[NL80211_RATE_INFO_MAX + 1] = {
++ 		[NL80211_RATE_INFO_BITRATE]      = { .type = NLA_U16    },
++ 		[NL80211_RATE_INFO_MCS]          = { .type = NLA_U8     },
+++		[NL80211_RATE_INFO_VHT_MCS]      = { .type = NLA_U8     },
++ 		[NL80211_RATE_INFO_40_MHZ_WIDTH] = { .type = NLA_FLAG   },
+++		[NL80211_RATE_INFO_80_MHZ_WIDTH] = { .type = NLA_FLAG   },
+++		[NL80211_RATE_INFO_80P80_MHZ_WIDTH] = { .type = NLA_FLAG   },
+++		[NL80211_RATE_INFO_160_MHZ_WIDTH] = { .type = NLA_FLAG   },
++ 		[NL80211_RATE_INFO_SHORT_GI]     = { .type = NLA_FLAG   },
+++		[NL80211_RATE_INFO_VHT_NSS]      = { .type = NLA_U8     },
++ 	};
++ 
++ 	/* advance to end of array */
++ 	e += arr->count;
++ 	memset(e, 0, sizeof(*e));
+++	e->rx_rate.mcs = e->rx_rate.vht_mcs = -1;
+++	e->tx_rate.mcs = e->tx_rate.vht_mcs = -1;
++ 
++ 	if (attr[NL80211_ATTR_MAC])
++ 		memcpy(e->mac, nla_data(attr[NL80211_ATTR_MAC]), 6);
++@@ -1506,11 +1513,26 @@ static int nl80211_get_assoclist_cb(stru
++ 			if (rinfo[NL80211_RATE_INFO_MCS])
++ 				e->rx_rate.mcs = nla_get_u8(rinfo[NL80211_RATE_INFO_MCS]);
++ 
+++			if (rinfo[NL80211_RATE_INFO_VHT_MCS])
+++				e->rx_rate.vht_mcs = nla_get_u8(rinfo[NL80211_RATE_INFO_VHT_MCS]);
+++
++ 			if (rinfo[NL80211_RATE_INFO_40_MHZ_WIDTH])
++ 				e->rx_rate.is_40mhz = 1;
++ 
+++			if (rinfo[NL80211_RATE_INFO_80_MHZ_WIDTH])
+++				e->rx_rate.is_80mhz = 1;
+++
+++			if (rinfo[NL80211_RATE_INFO_80P80_MHZ_WIDTH])
+++				e->rx_rate.is_80p80mhz = 1;
+++
+++			if (rinfo[NL80211_RATE_INFO_160_MHZ_WIDTH])
+++				e->rx_rate.is_160mhz = 1;
+++
++ 			if (rinfo[NL80211_RATE_INFO_SHORT_GI])
++ 				e->rx_rate.is_short_gi = 1;
+++
+++			if (rinfo[NL80211_RATE_INFO_VHT_NSS])
+++				e->rx_rate.vht_nss = nla_get_u8(rinfo[NL80211_RATE_INFO_VHT_NSS]);
++ 		}
++ 
++ 		if (sinfo[NL80211_STA_INFO_TX_BITRATE] &&
++@@ -1524,11 +1546,26 @@ static int nl80211_get_assoclist_cb(stru
++ 			if (rinfo[NL80211_RATE_INFO_MCS])
++ 				e->tx_rate.mcs = nla_get_u8(rinfo[NL80211_RATE_INFO_MCS]);
++ 
+++			if (rinfo[NL80211_RATE_INFO_VHT_MCS])
+++				e->tx_rate.vht_mcs = nla_get_u8(rinfo[NL80211_RATE_INFO_VHT_MCS]);
+++
++ 			if (rinfo[NL80211_RATE_INFO_40_MHZ_WIDTH])
++ 				e->tx_rate.is_40mhz = 1;
++ 
+++			if (rinfo[NL80211_RATE_INFO_80_MHZ_WIDTH])
+++				e->tx_rate.is_80mhz = 1;
+++
+++			if (rinfo[NL80211_RATE_INFO_80P80_MHZ_WIDTH])
+++				e->tx_rate.is_80p80mhz = 1;
+++
+++			if (rinfo[NL80211_RATE_INFO_160_MHZ_WIDTH])
+++				e->tx_rate.is_160mhz = 1;
+++
++ 			if (rinfo[NL80211_RATE_INFO_SHORT_GI])
++ 				e->tx_rate.is_short_gi = 1;
+++
+++			if (rinfo[NL80211_RATE_INFO_VHT_NSS])
+++				e->tx_rate.vht_nss = nla_get_u8(rinfo[NL80211_RATE_INFO_VHT_NSS]);
++ 		}
++ 	}
++ 

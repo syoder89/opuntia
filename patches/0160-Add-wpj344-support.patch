@@ -1,10 +1,11 @@
 --- a/target/linux/ar71xx/Makefile
 +++ b/target/linux/ar71xx/Makefile
-@@ -13,7 +13,7 @@ FEATURES:=mips16
+@@ -13,7 +13,8 @@ FEATURES:=mips16
  CPU_TYPE=34kc
  SUBTARGETS:=generic nand mikrotik
  
--LINUX_VERSION:=3.10.49
+-KERNEL_PATCHVER:=3.10
++KERNEL_PATCHVER:=3.14
 +LINUX_VERSION:=3.14.16
  
  include $(INCLUDE_DIR)/target.mk
@@ -29,16 +30,16 @@
 +
 --- a/target/linux/ar71xx/image/Makefile
 +++ b/target/linux/ar71xx/image/Makefile
-@@ -291,6 +291,8 @@ mynet_n600_mtdlayout=mtdparts=spi0.0:256
- mynet_rext_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,7808k(firmware),64k(nvram)ro,64k(ART)ro,6848k@0x130000(filesystem)
+@@ -307,6 +307,8 @@ mynet_rext_mtdlayout=mtdparts=spi0.0:256
  zyx_nbg6716_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(env)ro,64k(RFdata)ro,-(nbu);ar934x-nfc:2048k(zyxel_rfsd),2048k(romd),1024k(header),2048k(kernel),-(ubi)
+ qihoo_c301_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env),64k(devdata),64k(devconf),15744k(firmware),64k(warm_start),64k(action_image_config),64k(radiocfg)ro;spi0.1:15360k(upgrade2),1024k(privatedata)
  
 +wpj344_mtdlayout_8M=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,6336k(rootfs),1408k(kernel),64k(nvram),64k(art)ro,7744k@0x50000(firmware)
 +wpj344_mtdlayout_16M=mtdparts=spi0.0:192k(u-boot)ro,1536k(kernel),14528k(rootfs),64k(nvram),64k(art)ro,16064k@0x30000(firmware)
  
  define Image/BuildKernel
  	cp $(KDIR)/vmlinux.elf $(VMLINUX).elf
-@@ -1104,6 +1106,9 @@ $(eval $(call SingleProfile,MyLoader,64k
+@@ -1147,6 +1149,9 @@ $(eval $(call SingleProfile,MyLoader,64k
  $(eval $(call SingleProfile,MyLoader,64k,WPE72_8M,wpe72,,ttyS0,115200,0x800000,8M))
  $(eval $(call SingleProfile,MyLoader,64k,WPE72_16M,wpe72,,ttyS0,115200,0x1000000,16M))
  
@@ -48,7 +49,7 @@
  $(eval $(call SingleProfile,Netgear,64kraw,WNR2000V3,wnr2000v3,WNR2000V3,ttyS0,115200,$$(wnr2000v3_mtdlayout),0x32303033,WNR2000V3,"" NA,))
  $(eval $(call SingleProfile,Netgear,64kraw,WNR2200,wnr2200,WNR2200,ttyS0,115200,$$(wnr2200_mtdlayout),0x32323030,WNR2200,"" NA,))
  $(eval $(call SingleProfile,Netgear,64kraw,REALWNR612V2,wnr612v2,WNR612V2,ttyS0,115200,$$(wnr2000v3_mtdlayout),0x32303631,WNR612V2,"",))
-@@ -1273,6 +1278,7 @@ $(eval $(call MultiProfile,WNDR3700,WNDR
+@@ -1321,6 +1326,7 @@ $(eval $(call MultiProfile,WNDR3700,WNDR
  $(eval $(call MultiProfile,WNR612V2,REALWNR612V2 N150R))
  $(eval $(call MultiProfile,WP543,WP543_2M WP543_4M WP543_8M WP543_16M))
  $(eval $(call MultiProfile,WPE72,WPE72_4M WPE72_8M WPE72_16M))
@@ -58,7 +59,7 @@
  $(eval $(call MultiProfile,Madwifi,EAP7660D UBNTRS UBNTRSPRO UBNTLSSR71 WP543))
 --- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
 +++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
-@@ -194,6 +194,7 @@ platform_check_image() {
+@@ -196,6 +196,7 @@ platform_check_image() {
  	nanostation-m-xw | \
  	rw2458n | \
  	wndap360 | \
@@ -68,7 +69,7 @@
  	wzr-hp-g450h | \
 --- a/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
 +++ b/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
-@@ -62,7 +62,6 @@ tl-wdr4900-v2)
+@@ -63,7 +63,6 @@ tl-wdr4900-v2)
  	ucidef_add_switch_vlan "switch0" "2" "1 6"
  	;;
  
@@ -76,7 +77,7 @@
  rb-2011l | \
  rb-2011uas |\
  rb-2011uias |\
-@@ -426,6 +425,15 @@ wndr3700)
+@@ -430,6 +429,15 @@ wndr3700)
  	uci set network.@switch_port[-1].led='2'
  	;;
  
@@ -94,7 +95,7 @@
  	;;
 --- a/target/linux/ar71xx/config-3.14
 +++ b/target/linux/ar71xx/config-3.14
-@@ -121,6 +121,8 @@ CONFIG_ATH79_MACH_WNR2000_V3=y
+@@ -122,6 +122,8 @@ CONFIG_ATH79_MACH_WNR2000_V3=y
  CONFIG_ATH79_MACH_WNR2200=y
  CONFIG_ATH79_MACH_WP543=y
  CONFIG_ATH79_MACH_WPE72=y
@@ -102,10 +103,10 @@
 +CONFIG_ATH79_MACH_WPJ344=y
  CONFIG_ATH79_MACH_WRT160NL=y
  CONFIG_ATH79_MACH_WRT400N=y
- CONFIG_ATH79_MACH_WZR_HP_AG300H=y
+ CONFIG_ATH79_MACH_WZR_450HP2=y
 --- a/target/linux/ar71xx/base-files/lib/ar71xx.sh
 +++ b/target/linux/ar71xx/base-files/lib/ar71xx.sh
-@@ -295,6 +295,9 @@ ar71xx_board_detect() {
+@@ -302,6 +302,9 @@ ar71xx_board_detect() {
  	*CAP4200AG)
  		name="cap4200ag"
  		;;
