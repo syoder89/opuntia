@@ -1,0 +1,10 @@
+--- a/feeds/oldpackages/utils/vim/Makefile
++++ b/feeds/oldpackages/utils/vim/Makefile
+@@ -98,6 +98,7 @@ CONFIGURE_ARGS += \
+ 	--disable-netbeans \
+ 	--disable-cscope \
+ 	--disable-gpm \
++	--disable-acl \
+ 	--with-tlib=ncurses
+ 
+ CONFIGURE_VARS += \
