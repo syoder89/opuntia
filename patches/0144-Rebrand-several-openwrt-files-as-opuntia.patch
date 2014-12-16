@@ -32,7 +32,7 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
 
 --- a/package/base-files/Makefile
 +++ b/package/base-files/Makefile
-@@ -110,10 +110,10 @@ define Package/base-files/install
+@@ -111,10 +111,10 @@ define Package/base-files/install
  
  	$(VERSION_SED) \
  		$(1)/etc/banner \
@@ -51,13 +51,16 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
 -%V
 --- /dev/null
 +++ b/package/base-files/files/etc/opuntia_release
-@@ -0,0 +1,6 @@
+@@ -0,0 +1,9 @@
 +DISTRIB_ID="%D"
 +DISTRIB_RELEASE="%C"
 +DISTRIB_REVISION="%R"
 +DISTRIB_CODENAME="%n"
 +DISTRIB_TARGET="%S"
 +DISTRIB_DESCRIPTION="%D %N %V"
++DISTRIB_MANUFACTURER="%M"
++DISTRIB_PRODUCT="%P"
++DISTRIB_HWREV="%h"
 --- /dev/null
 +++ b/package/base-files/files/etc/opuntia_version
 @@ -0,0 +1 @@
@@ -118,7 +121,7 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
 +TOOLCHAIN_NAME:=Opuntia-Toolchain-$(BOARD)-for-$(ARCH)$(ARCH_SUFFIX)-gcc-$(GCCV)$(DIR_SUFFIX)
  TOOLCHAIN_BUILD_DIR:=$(BUILD_DIR)/$(TOOLCHAIN_NAME)
  EXCLUDE_DIRS:=*/ccache \
- 	*/stamp \
+ 	*/initial \
 --- a/package/base-files/files/etc/openwrt_release
 +++ /dev/null
 @@ -1,7 +0,0 @@

@@ -28,26 +28,69 @@
 +
 --- a/target/linux/ar71xx/image/Makefile
 +++ b/target/linux/ar71xx/image/Makefile
-@@ -310,6 +310,8 @@ mynet_rext_mtdlayout=mtdparts=spi0.0:256
+@@ -311,6 +311,8 @@ mynet_rext_mtdlayout=mtdparts=spi0.0:256
  zyx_nbg6716_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(env)ro,64k(RFdata)ro,-(nbu);ar934x-nfc:2048k(zyxel_rfsd),2048k(romd),1024k(header),2048k(kernel),-(ubi)
  qihoo_c301_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env),64k(devdata),64k(devconf),15744k(firmware),64k(warm_start),64k(action_image_config),64k(radiocfg)ro;spi0.1:15360k(upgrade2),1024k(privatedata)
  
-+wpj344_mtdlayout_8M=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,6336k(rootfs),1408k(kernel),64k(nvram),64k(art)ro,7744k@0x50000(firmware)
-+wpj344_mtdlayout_16M=mtdparts=spi0.0:192k(u-boot)ro,1536k(kernel),14528k(rootfs),64k(nvram),64k(art)ro,16064k@0x30000(firmware)
++wpj344_8m_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,6336k(rootfs),1408k(kernel),64k(nvram),64k(art)ro,7744k@0x50000(firmware)
++wpj344_16m_mtdlayout=mtdparts=spi0.0:192k(u-boot)ro,1536k(kernel),14528k(rootfs),64k(nvram),64k(art)ro,16064k@0x30000(firmware)
  
  define Image/BuildKernel
  	cp $(KDIR)/vmlinux.elf $(VMLINUX).elf
-@@ -1187,6 +1189,9 @@ $(eval $(call SingleProfile,MyLoader,64k
+@@ -343,6 +345,42 @@ define Image/Build/WRT400N
+ 	fi
+ endef
+ 
++define CpxwrtImageParams
++	ifeq ($(1),14876672)
++		FSIZE=1000000
++		IVER=16M
++		KSTART=30000
++		RSTART=1b0000
++		P1START=fe0000
++		P2START=ff0000
++	else
++		FSIZE=800000
++		IVER=8M
++		KSTART=680000
++		RSTART=50000
++		P1START=7e0000
++		P2START=7f0000
++	endif
++endef
++
++define Image/Build/CpxwrtWPJ344
++	$(call MkuImageLzma,$(2),$(3) $(4))
++	$(call FirmwareVersion)
++	$(eval $(call CpxwrtImageParams,$(6)))
++	$(call Sysupgrade/KRuImage,$(1),$(2),$(5),$(6),64)
++	$(STAGING_DIR_HOST)/bin/mkmylofw -B WPE72 -i 0x11f6:0x687:0x11f6:0x687 -s 0x$(FSIZE) \
++		-p0x$(KSTART):$(5):al:0x80060000:"$(FIRMWAREVERSION)":$(KDIR_TMP)/vmlinux-$(2).uImage \
++		-p0x$(RSTART):$(6):::rootfs:$(KDIR)/root.$(1) \
++		-p0x$(P1START):0x010000 \
++		-p0x$(P2START):0x010000 \
++		$(call imgname,$(1),$(2))-$(IVER)-factory.img
++endef
++
++define Image/Build/CpxwrtWPJ344/initramfs
++	$(call PatchKernelLzma,$(2),$(3) $(4))
++	cp $(KDIR_TMP)/vmlinux-$(2) $(call imgname,initramfs,$(2)).bin
++endef
++
+ 
+ define Image/Build/CameoAP94/buildkernel
+ 	$(call MkuImageLzma,$(2),$(3) $(4))
+@@ -1194,6 +1232,9 @@ $(eval $(call SingleProfile,MyLoader,64k
  $(eval $(call SingleProfile,MyLoader,64k,WPE72_8M,wpe72,,ttyS0,115200,0x800000,8M))
  $(eval $(call SingleProfile,MyLoader,64k,WPE72_16M,wpe72,,ttyS0,115200,0x1000000,16M))
  
-+$(eval $(call SingleProfile,AthLzma,64k,WPJ344_8M,wpj344,WPJ344,ttyS0,115200,$$(wpj344_mtdlayout_8M),RKuImage))
-+$(eval $(call SingleProfile,AthLzma,64k,WPJ344_16M,wpj344,WPJ344,ttyS0,115200,$$(wpj344_mtdlayout_16M),KRuImage))
++$(eval $(call SingleProfile,CpxwrtWPJ344,64k,WPJ344_8M,wpj344,WPJ344,ttyS0,115200,$$(wpj344_8m_mtdlayout),1441792,6488064,RKuImage))
++$(eval $(call SingleProfile,CpxwrtWPJ344,64k,WPJ344_16M,wpj344,WPJ344,ttyS0,115200,$$(wpj344_16m_mtdlayout),1572864,14876672,KRuImage))
 +
  $(eval $(call SingleProfile,Netgear,64kraw,WNR2000V3,wnr2000v3,WNR2000V3,ttyS0,115200,$$(wnr2000v3_mtdlayout),0x32303033,WNR2000V3,"" NA,))
  $(eval $(call SingleProfile,NetgearLzma,64kraw,WNR2000V4,wnr2000v4,WNR2000V4,ttyS0,115200,$$(wnr2000v4_mtdlayout),0x32303034,WNR2000V4,"" NA,))
  $(eval $(call SingleProfile,Netgear,64kraw,WNR2200,wnr2200,WNR2200,ttyS0,115200,$$(wnr2200_mtdlayout),0x32323030,WNR2200,"" NA,))
-@@ -1365,6 +1370,7 @@ $(eval $(call MultiProfile,WNDR3700,WNDR
+@@ -1374,6 +1415,7 @@ $(eval $(call MultiProfile,WNDR3700,WNDR
  $(eval $(call MultiProfile,WNR612V2,REALWNR612V2 N150R))
  $(eval $(call MultiProfile,WP543,WP543_2M WP543_4M WP543_8M WP543_16M))
  $(eval $(call MultiProfile,WPE72,WPE72_4M WPE72_8M WPE72_16M))
@@ -57,7 +100,7 @@
  $(eval $(call MultiProfile,Madwifi,EAP7660D UBNTRS UBNTRSPRO UBNTLSSR71 WP543))
 --- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
 +++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
-@@ -224,6 +224,7 @@ platform_check_image() {
+@@ -225,6 +225,7 @@ platform_check_image() {
  	nanostation-m-xw | \
  	rw2458n | \
  	wndap360 | \
@@ -75,7 +118,7 @@
  rb-2011l | \
  rb-2011uas |\
  rb-2011uias |\
-@@ -443,6 +442,15 @@ wndr3700)
+@@ -444,6 +443,15 @@ wndr3700)
  	uci set network.@switch_port[-1].led='2'
  	;;
  
@@ -93,7 +136,7 @@
  	;;
 --- a/target/linux/ar71xx/config-3.14
 +++ b/target/linux/ar71xx/config-3.14
-@@ -127,6 +127,8 @@ CONFIG_ATH79_MACH_WNR2000_V4=y
+@@ -128,6 +128,8 @@ CONFIG_ATH79_MACH_WNR2000_V4=y
  CONFIG_ATH79_MACH_WNR2200=y
  CONFIG_ATH79_MACH_WP543=y
  CONFIG_ATH79_MACH_WPE72=y

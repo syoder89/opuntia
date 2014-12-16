@@ -15,7 +15,7 @@ Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
 
 --- a/build/mkversion.sh
 +++ b/build/mkversion.sh
-@@ -12,11 +12,11 @@ local pcall, dofile, _G = pcall, dofile,
+@@ -28,14 +28,14 @@ local pcall, dofile, _G = pcall, dofile,
  
  module "luci.version"
  
@@ -23,12 +23,15 @@ Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
 +if pcall(dofile, "/etc/opuntia_release") and _G.DISTRIB_DESCRIPTION then
  	distname    = ""
  	distversion = _G.DISTRIB_DESCRIPTION
+ 	distproduct = _G.DISTRIB_PRODUCT
+ 	distmanufacturer = _G.DISTRIB_MANUFACTURER
+ 	disthwrev = _G.DISTRIB_HWREV
  else
 -	distname    = "${2:-OpenWrt}"
 +	distname    = "${2:-Opuntia}"
  	distversion = "${3:-Development Snapshot}"
- end
- 
+ 	distproduct = "Unknown"
+ 	distmanufacturer = "ISis ImageStream Internet Solutions"
 --- a/contrib/package/luci/Makefile
 +++ b/contrib/package/luci/Makefile
 @@ -46,7 +46,7 @@ endef
@@ -91,31 +94,6 @@ Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
  				<input type="button" value="<%:Nslookup%>" class="cbi-button cbi-button-apply" onclick="update_status(this.form.nslookup)" />
  			</div>
  
---- a/modules/admin-full/luasrc/view/admin_status/index.htm
-+++ b/modules/admin-full/luasrc/view/admin_status/index.htm
-@@ -561,18 +561,16 @@ You may obtain a copy of the License at
- 
- 	<table width="100%" cellspacing="10">
- 		<tr><td width="33%"><%:Hostname%></td><td><%=luci.sys.hostname() or "?"%></td></tr>
--		<tr><td width="33%"><%:Model%></td><td><%=pcdata(model or "?")%></td></tr>
--		<tr><td width="33%"><%:Firmware Version%></td><td>
--			<%=pcdata(luci.version.distname)%> <%=pcdata(luci.version.distversion)%> /
--			<%=pcdata(luci.version.luciname)%> (<%=pcdata(luci.version.luciversion)%>)
--		</td></tr>
--		<tr><td width="33%"><%:Kernel Version%></td><td><%=luci.sys.exec("uname -r")%></td></tr>
- 		<tr><td width="33%"><%:License%></td><td>
- 			Router type:   <%=pcdata(luci.sys.exec("/bin/get_license router_build product_name"))%><br/>
- 			Serial number: <%=pcdata(luci.sys.exec("/bin/get_license router_build serial_number"))%><br/>
- 			Build date:    <%=pcdata(luci.sys.exec("/bin/get_license router_build build_date"))%><br/>
- 			Product id:    <%=pcdata(luci.sys.exec("/bin/get_license router_build product_id"))%>, revision <%=pcdata(luci.sys.exec("/bin/get_license router_build product_rev"))%><br/>
- 		</td></tr>
-+		<tr><td width="33%"><%:Firmware Version%></td><td>
-+			<%=pcdata(luci.version.distname)%> <%=pcdata(luci.version.distversion)%>
-+		</td></tr>
-+		<tr><td width="33%"><%:Kernel Version%></td><td><%=luci.sys.exec("uname -r")%></td></tr>
- 		<tr><td width="33%"><%:Local Time%></td><td id="localtime">-</td></tr>
- 		<tr><td width="33%"><%:Uptime%></td><td id="uptime">-</td></tr>
- 		<tr><td width="33%"><%:Load Average%></td><td id="loadavg">-</td></tr>
 --- a/modules/admin-full/luasrc/view/admin_system/flashops.htm
 +++ b/modules/admin-full/luasrc/view/admin_system/flashops.htm
 @@ -64,7 +64,7 @@ $Id$
