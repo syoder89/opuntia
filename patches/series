@@ -42,3 +42,5 @@ kernel/0045-Linux-3.14-updates.patch
 packages/0173-quagga-0.99.23.1-to-fix-readline.patch
 packages/0174-quagga-0.99.23.1-manet_patch.patch
 oldpackages/0067-vim-libacl.patch
+packages/0175-netifd-openvswitch-support.patch
+faec8fe8ec23eb993189a22250c99652c067bf22.patch
