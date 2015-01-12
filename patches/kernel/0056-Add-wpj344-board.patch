@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj344.c
-@@ -0,0 +1,197 @@
+@@ -0,0 +1,202 @@
 +/*
 + * Compex WPJ344 board support
 + *
@@ -142,6 +142,9 @@
 +	},
 +};
 +
++u8 ath10k_macaddr[ETH_ALEN];
++EXPORT_SYMBOL_GPL(ath10k_macaddr);
++
 +static void __init wpj344_setup(void)
 +{
 +	u8 *art = (u8 *) KSEG1ADDR(0x1fff0000);
@@ -156,9 +159,11 @@
 +					ARRAY_SIZE(wpj344_gpio_keys),
 +					wpj344_gpio_keys);
 +	ath79_register_usb();
-+	ath79_init_mac(mac, (u8 *) KSEG1ADDR(0x1f02e010) + WPJ344_MAC0_OFFSET, 1);
-+	ath79_register_wmac(art + WPJ344_WMAC_CALDATA_OFFSET, mac);
++	/* Reserve one for LAN */
 +	ath79_init_mac(mac, (u8 *) KSEG1ADDR(0x1f02e010) + WPJ344_MAC0_OFFSET, 2);
++	ath79_register_wmac(art + WPJ344_WMAC_CALDATA_OFFSET, mac);
++	ath79_init_mac(mac, (u8 *) KSEG1ADDR(0x1f02e010) + WPJ344_MAC0_OFFSET, 3);
++	memcpy(ath10k_macaddr, mac, ETH_ALEN);
 +	ap91_pci_init(NULL, mac);
 +        pdata = ap9x_pci_get_wmac_data(0);
 +        if (pdata) {

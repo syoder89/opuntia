@@ -12,3 +12,4 @@
 0015-Add-mesh-plink-timeout-param.patch
 0016-Rework-QOS-Page.patch
 0017-initial-luCI-802.11ac-support.patch
+0018-disable-mesh-and_adhoc-for-ac.patch

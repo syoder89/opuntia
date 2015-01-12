@@ -34,6 +34,7 @@ packages/0170-iwinfo-handle-802.11ac-mode-for-lua.patch
 packages/0171-add-802.11ac-support.patch
 0172-change-ath9k-module-load-order.patch
 kernel/0056-Add-wpj344-board.patch
+kernel/0057-wpj344-ath10k-set-mac-address-hack.patch
 0172-add-delay-hostapd.patch
 kernel/0060-Fix-layer7.patch
 packages/0172-remove-ip-tiny.patch
@@ -42,5 +43,4 @@ kernel/0045-Linux-3.14-updates.patch
 packages/0173-quagga-0.99.23.1-to-fix-readline.patch
 packages/0174-quagga-0.99.23.1-manet_patch.patch
 oldpackages/0067-vim-libacl.patch
-packages/0175-netifd-openvswitch-support.patch
-faec8fe8ec23eb993189a22250c99652c067bf22.patch
+0176-ntpdate-waiting-for-maintainer.patch
