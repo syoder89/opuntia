@@ -63,7 +63,7 @@ Subject: [PATCH] Update correct openvpn init script
  		done
  		unset IFS
  	done
-@@ -51,41 +51,32 @@ section_enabled() {
+@@ -51,42 +51,33 @@ section_enabled() {
  	[ $enable -gt 0 ] || [ $enabled -gt 0 ]
  }
  
@@ -78,6 +78,7 @@ Subject: [PATCH] Update correct openvpn init script
 -		--cd "$dir" \
 -		--config "$conf"
 -	procd_set_param file "$dir/$conf"
+-	procd_set_param respawn
 -	procd_close_instance
 -}
 -
@@ -93,6 +94,11 @@ Subject: [PATCH] Update correct openvpn init script
 -	if [ ! -z "$config" ]; then
 -		openvpn_add_instance "$s" "$(dirname "$config")" "$(basename "$config")"
 -		return
+-	fi
+-
+-	[ ! -d "/var/etc" ] && mkdir -p "/var/etc"
+-	[ -f "/var/etc/openvpn-$s.conf" ] && rm "/var/etc/openvpn-$s.conf"
+-
 +	# Check to be sure we specify a device. If none specified, we use dynamic tun/tap -- Scott
 +        config_get dev "$s" 'dev'
 +        if [ "$dev" = "" ] ; then
@@ -106,12 +112,11 @@ Subject: [PATCH] Update correct openvpn init script
 +                config_set "$s" client 1
 +	else
 +                config_set "$s" client 0
- 	fi
- 
--	[ ! -d "/var/etc" ] && mkdir -p "/var/etc"
--	[ -f "/var/etc/openvpn-$s.conf" ] && rm "/var/etc/openvpn-$s.conf"
-+	ARGS=""
- 
++ 	fi
++ 
+++	ARGS=""
++ 
++ 	# append flags
  	# append flags
  	append_bools "$s" \
  		auth_nocache auth_retry auth_user_pass_optional bind ccd_exclusive client client_cert_not_required \
@@ -120,7 +125,7 @@ Subject: [PATCH] Update correct openvpn init script
  		disable_occ down_pre duplicate_cn fast_io float http_proxy_retry \
  		ifconfig_noexec ifconfig_nowarn ifconfig_pool_linear management_forget_disconnect management_hold \
  		management_query_passwords management_signal mktun mlock mtu_test multihome mute_replay_warnings \
-@@ -98,7 +89,7 @@ start_instance() {
+@@ -99,7 +90,7 @@ start_instance() {
  	# append params
  	append_params "$s" \
  		cd askpass auth auth_user_pass auth_user_pass_verify bcast_buffers ca cert \
@@ -129,7 +134,7 @@ Subject: [PATCH] Update correct openvpn init script
  		connect_retry connect_timeout connect_retry_max crl_verify dev dev_node dev_type dh \
  		echo engine explicit_exit_notify fragment group hand_window hash_size \
  		http_proxy http_proxy_option http_proxy_timeout ifconfig ifconfig_pool \
-@@ -113,13 +104,66 @@ start_instance() {
+@@ -114,13 +105,66 @@ start_instance() {
  		route_metric route_up rport script_security secret server server_bridge setenv shaper sndbuf \
  		socks_proxy status status_version syslog tcp_queue_limit tls_auth \
  		tls_cipher tls_remote tls_timeout tls_verify tmp_dir topology tran_window \

@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/target/linux/ar71xx/patches-3.14/980-wpj344_eth_support.patch
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,58 @@
 +--- a/arch/mips/ath79/mach-db120.c
 ++++ b/arch/mips/ath79/mach-db120.c
 +@@ -98,7 +98,7 @@ static struct ar8327_pad_cfg db120_ar832
@@ -38,7 +38,17 @@
 + }
 +--- a/drivers/net/phy/ar8216.c
 ++++ b/drivers/net/phy/ar8216.c
-+@@ -1454,8 +1454,8 @@ ar8327_hw_config_pdata(struct ar8xxx_pri
++@@ -1744,6 +1744,7 @@ ar8xxx_phy_config_aneg(struct phy_device
++ static const u32 ar8xxx_phy_ids[] = {
++ 	0x004dd033,
++ 	0x004dd034, /* AR8327 */
+++	0x004dd035, /* AR8334 */
++ 	0x004dd036, /* AR8337 */
++ 	0x004dd041,
++ 	0x004dd042,
++--- a/drivers/net/phy/ar8327.c
+++++ b/drivers/net/phy/ar8327.c
++@@ -508,8 +508,8 @@ ar8327_hw_config_pdata(struct ar8xxx_pri
 + 	data->port6_status = ar8327_get_port_init_status(&pdata->port6_cfg);
 + 
 + 	t = ar8327_get_pad_cfg(pdata->pad0_cfg);
@@ -47,13 +57,5 @@
 ++//	if (chip_is_ar8337(priv))
 ++//		t |= AR8337_PAD_MAC06_EXCHANGE_EN;
 + 
-+ 	priv->write(priv, AR8327_REG_PAD0_MODE, t);
++ 	ar8xxx_write(priv, AR8327_REG_PAD0_MODE, t);
 + 	t = ar8327_get_pad_cfg(pdata->pad5_cfg);
-+@@ -2788,6 +2788,7 @@ ar8xxx_phy_config_aneg(struct phy_device
-+ static const u32 ar8xxx_phy_ids[] = {
-+ 	0x004dd033,
-+ 	0x004dd034, /* AR8327 */
-++	0x004dd035, /* AR8334 */
-+ 	0x004dd036, /* AR8337 */
-+ 	0x004dd041,
-+ 	0x004dd042,

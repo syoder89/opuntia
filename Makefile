@@ -1,5 +1,5 @@
 OPENWRT_GIT:=git://git.openwrt.org/openwrt.git
-OPENWRT_COMMIT:=1ae59ea6f5f0b2680f03c5a1ef36b627480d5e2e
+OPENWRT_COMMIT:=6f9f3e0bf01a50ca7d32934d84968cd06ba07ea0
 #OPENWRT_COMMIT:=33b7bc6d7a8417692f0e0818f93215c09a2dcdea
 #OPENWRT_COMMIT:=6c049d04b6be1e953865f1361f8b6481a0ba9558
 #OPENWRT_COMMIT:=5899ac4d0d971fb46077915153f844d44089726b
@@ -27,12 +27,16 @@ install: $(built)
 	@if [ ! -d $(DESTDIR) ] ; then \
 		mkdir $(DESTDIR); \
 	fi; \
-	conf=`cat $(configured)` && \
-	image=`find build_dir/bin/ -name '*combined*.img' | head -n 1` && \
-	packages=`find build_dir/bin/ -name 'packages' | head -n 1` && \
+	conf=`cat $(configured) | awk '{print toupper($$0)}'` && \
+	sysup=`find build_dir/bin/ -name '*sysupgrade*' | head -n 1` && \
+	factory=`find build_dir/bin/ -name '*factory*' | head -n 1` && \
 	ver=`grep CONFIG_VERSION_NUMBER $(BUILD_DIR)/.config | cut -d '"' -f 2` && \
-	cp -f $${image} $(DESTDIR)/opuntia-$${conf}-$${ver}_$(BUILD_NUMBER).img && \
-	cp -af $${packages} $(DESTDIR)/
+	rel=`cd build_dir && ./scripts/getver.sh` && \
+	cp -f $${sysup} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-sysupgrade.bin && \
+	cp -f $${factory} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-factory.img
+
+#	packages=`find build_dir/bin/ -name 'packages' | head -n 1` && \
+#	cp -af $${packages} $(DESTDIR)/
 	
 checkout_openwrt:
 	@if [ ! -d $(BUILD_DIR) ] ; then \
