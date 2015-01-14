@@ -74,7 +74,7 @@ configure:
 	@if [ -d $(BUILD_DIR) ] ; then \
 		conf=`cat $(configured)` && \
 		ver=`cat version` && \
-		cp configs/$$conf $(BUILD_DIR)/.config && \
+		cat configs/base configs/$$conf > $(BUILD_DIR)/.config && \
 		sed -i "s/^CONFIG_VERSION_NUMBER=.*/CONFIG_VERSION_NUMBER=\"$$ver\"/" $(BUILD_DIR)/.config; \
 	fi
 
