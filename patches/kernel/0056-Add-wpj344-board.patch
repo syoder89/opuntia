@@ -160,9 +160,9 @@
 +					wpj344_gpio_keys);
 +	ath79_register_usb();
 +	/* Reserve one for LAN */
-+	ath79_init_mac(mac, (u8 *) KSEG1ADDR(0x1f02e010) + WPJ344_MAC0_OFFSET, 2);
-+	ath79_register_wmac(art + WPJ344_WMAC_CALDATA_OFFSET, mac);
 +	ath79_init_mac(mac, (u8 *) KSEG1ADDR(0x1f02e010) + WPJ344_MAC0_OFFSET, 3);
++	ath79_register_wmac(art + WPJ344_WMAC_CALDATA_OFFSET, mac);
++	ath79_init_mac(mac, (u8 *) KSEG1ADDR(0x1f02e010) + WPJ344_MAC0_OFFSET, 2);
 +	memcpy(ath10k_macaddr, mac, ETH_ALEN);
 +	ap91_pci_init(NULL, mac);
 +        pdata = ap9x_pci_get_wmac_data(0);
