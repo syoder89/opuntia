@@ -42,3 +42,4 @@ packages/0173-quagga-0.99.23.1-to-fix-readline.patch
 packages/0174-quagga-0.99.23.1-manet_patch.patch
 oldpackages/0067-vim-libacl.patch
 0177-bash-default-shell-ar71xx.patch
+0178-gmp-http-download.patch
