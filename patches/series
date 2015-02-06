@@ -43,3 +43,5 @@ packages/0174-quagga-0.99.23.1-manet_patch.patch
 oldpackages/0067-vim-libacl.patch
 0177-bash-default-shell-ar71xx.patch
 0178-gmp-http-download.patch
+kernel/0070-x86-kernel-3.18.patch
+kernel/0046-Linux-3.18-updates.patch

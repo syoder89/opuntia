@@ -1,0 +1,861 @@
+--- /dev/null
++++ b/target/linux/x86/config-3.18
+@@ -0,0 +1,436 @@
++# CONFIG_60XX_WDT is not set
++# CONFIG_64BIT is not set
++# CONFIG_ACPI is not set
++# CONFIG_ACQUIRE_WDT is not set
++# CONFIG_ADVANTECH_WDT is not set
++# CONFIG_ALIM1535_WDT is not set
++# CONFIG_ALIX is not set
++CONFIG_AMD_NB=y
++CONFIG_ARCH_BINFMT_ELF_RANDOMIZE_PIE=y
++CONFIG_ARCH_CLOCKSOURCE_DATA=y
++CONFIG_ARCH_DEFCONFIG="arch/x86/configs/i386_defconfig"
++CONFIG_ARCH_DISCARD_MEMBLOCK=y
++CONFIG_ARCH_HAS_ATOMIC64_DEC_IF_POSITIVE=y
++CONFIG_ARCH_HAS_CACHE_LINE_SIZE=y
++CONFIG_ARCH_HAS_CPU_RELAX=y
++CONFIG_ARCH_HAS_DEBUG_STRICT_USER_COPY_CHECKS=y
++CONFIG_ARCH_HAS_FAST_MULTIPLIER=y
++CONFIG_ARCH_HAS_SG_CHAIN=y
++CONFIG_ARCH_HAVE_NMI_SAFE_CMPXCHG=y
++CONFIG_ARCH_HIBERNATION_POSSIBLE=y
++CONFIG_ARCH_HWEIGHT_CFLAGS="-fcall-saved-ecx -fcall-saved-edx"
++CONFIG_ARCH_MAY_HAVE_PC_FDC=y
++CONFIG_ARCH_MIGHT_HAVE_PC_PARPORT=y
++CONFIG_ARCH_MIGHT_HAVE_PC_SERIO=y
++# CONFIG_ARCH_NEEDS_CPU_IDLE_COUPLED is not set
++# CONFIG_ARCH_RANDOM is not set
++CONFIG_ARCH_SELECT_MEMORY_MODEL=y
++CONFIG_ARCH_SPARSEMEM_ENABLE=y
++CONFIG_ARCH_SUPPORTS_ATOMIC_RMW=y
++CONFIG_ARCH_SUPPORTS_DEBUG_PAGEALLOC=y
++CONFIG_ARCH_SUPPORTS_MEMORY_FAILURE=y
++CONFIG_ARCH_SUPPORTS_OPTIMIZED_INLINING=y
++CONFIG_ARCH_SUPPORTS_UPROBES=y
++CONFIG_ARCH_SUSPEND_POSSIBLE=y
++CONFIG_ARCH_USES_PG_UNCACHED=y
++CONFIG_ARCH_USE_BUILTIN_BSWAP=y
++CONFIG_ARCH_USE_QUEUE_RWLOCK=y
++CONFIG_ARCH_WANT_FRAME_POINTERS=y
++CONFIG_ARCH_WANT_GENERAL_HUGETLB=y
++CONFIG_ARCH_WANT_HUGE_PMD_SHARE=y
++CONFIG_ARCH_WANT_IPC_PARSE_VERSION=y
++CONFIG_ARCH_WANT_OPTIONAL_GPIOLIB=y
++CONFIG_ATA=y
++CONFIG_ATA_GENERIC=y
++CONFIG_ATA_PIIX=y
++# CONFIG_AUDIT_ARCH is not set
++CONFIG_BINFMT_MISC=y
++CONFIG_BLK_DEV_SD=y
++CONFIG_BOUNCE=y
++CONFIG_CLKBLD_I8253=y
++CONFIG_CLKEVT_I8253=y
++CONFIG_CLKSRC_I8253=y
++CONFIG_CLOCKSOURCE_VALIDATE_LAST_CYCLE=y
++CONFIG_CLOCKSOURCE_WATCHDOG=y
++CONFIG_CLONE_BACKWARDS=y
++CONFIG_COMPAT_VDSO=y
++CONFIG_CONSOLE_TRANSLATIONS=y
++# CONFIG_CPU5_WDT is not set
++CONFIG_CPU_FREQ=y
++# CONFIG_CPU_FREQ_DEFAULT_GOV_CONSERVATIVE is not set
++# CONFIG_CPU_FREQ_DEFAULT_GOV_ONDEMAND is not set
++CONFIG_CPU_FREQ_DEFAULT_GOV_PERFORMANCE=y
++# CONFIG_CPU_FREQ_DEFAULT_GOV_POWERSAVE is not set
++# CONFIG_CPU_FREQ_DEFAULT_GOV_USERSPACE is not set
++# CONFIG_CPU_FREQ_GOV_CONSERVATIVE is not set
++# CONFIG_CPU_FREQ_GOV_ONDEMAND is not set
++CONFIG_CPU_FREQ_GOV_PERFORMANCE=y
++# CONFIG_CPU_FREQ_GOV_POWERSAVE is not set
++# CONFIG_CPU_FREQ_GOV_USERSPACE is not set
++CONFIG_CPU_FREQ_STAT=y
++CONFIG_CPU_FREQ_STAT_DETAILS=y
++CONFIG_CPU_IDLE=y
++CONFIG_CPU_IDLE_GOV_LADDER=y
++CONFIG_CPU_SUP_AMD=y
++CONFIG_CPU_SUP_CENTAUR=y
++CONFIG_CPU_SUP_CYRIX_32=y
++CONFIG_CPU_SUP_INTEL=y
++CONFIG_CPU_SUP_TRANSMETA_32=y
++CONFIG_CPU_SUP_UMC_32=y
++CONFIG_CRC16=y
++CONFIG_CRYPTO_CRC32C=y
++# CONFIG_CRYPTO_CRC32_PCLMUL is not set
++CONFIG_CRYPTO_HASH=y
++CONFIG_CRYPTO_HASH2=y
++# CONFIG_CRYPTO_SERPENT_SSE2_586 is not set
++# CONFIG_CX_ECAT is not set
++CONFIG_DCACHE_WORD_ACCESS=y
++# CONFIG_DCDBAS is not set
++# CONFIG_DEBUG_BOOT_PARAMS is not set
++CONFIG_DEBUG_MEMORY_INIT=y
++# CONFIG_DEBUG_NMI_SELFTEST is not set
++# CONFIG_DEBUG_TLBFLUSH is not set
++# CONFIG_DEBUG_VIRTUAL is not set
++CONFIG_DECOMPRESS_BZIP2=y
++CONFIG_DECOMPRESS_GZIP=y
++CONFIG_DEFAULT_IO_DELAY_TYPE=0
++# CONFIG_DELL_RBU is not set
++# CONFIG_DMI is not set
++CONFIG_DNOTIFY=y
++CONFIG_DUMMY_CONSOLE=y
++CONFIG_EARLY_PRINTK=y
++# CONFIG_EARLY_PRINTK_DBGP is not set
++# CONFIG_EDD is not set
++# CONFIG_EUROTECH_WDT is not set
++CONFIG_EXT4_FS=y
++# CONFIG_F71808E_WDT is not set
++CONFIG_FIRMWARE_IN_KERNEL=y
++CONFIG_FIRMWARE_MEMMAP=y
++CONFIG_FIX_EARLYCON_MEM=y
++CONFIG_FS_MBCACHE=y
++CONFIG_GENERIC_BUG=y
++CONFIG_GENERIC_CLOCKEVENTS=y
++CONFIG_GENERIC_CLOCKEVENTS_BROADCAST=y
++CONFIG_GENERIC_CLOCKEVENTS_BUILD=y
++CONFIG_GENERIC_CLOCKEVENTS_MIN_ADJUST=y
++CONFIG_GENERIC_CMOS_UPDATE=y
++CONFIG_GENERIC_CPU_AUTOPROBE=y
++CONFIG_GENERIC_EARLY_IOREMAP=y
++CONFIG_GENERIC_FIND_FIRST_BIT=y
++CONFIG_GENERIC_IO=y
++CONFIG_GENERIC_IOMAP=y
++CONFIG_GENERIC_IRQ_LEGACY_ALLOC_HWIRQ=y
++CONFIG_GENERIC_IRQ_SHOW=y
++CONFIG_GENERIC_ISA_DMA=y
++CONFIG_GENERIC_PCI_IOMAP=y
++CONFIG_GENERIC_SMP_IDLE_THREAD=y
++CONFIG_GENERIC_STRNCPY_FROM_USER=y
++CONFIG_GENERIC_STRNLEN_USER=y
++CONFIG_GENERIC_TIME_VSYSCALL=y
++CONFIG_GLOB=y
++# CONFIG_GOOGLE_FIRMWARE is not set
++# CONFIG_HANGCHECK_TIMER is not set
++CONFIG_HAS_DMA=y
++CONFIG_HAS_IOMEM=y
++CONFIG_HAS_IOPORT_MAP=y
++# CONFIG_HAVE_64BIT_ALIGNED_ACCESS is not set
++CONFIG_HAVE_ALIGNED_STRUCT_PAGE=y
++CONFIG_HAVE_AOUT=y
++CONFIG_HAVE_ARCH_AUDITSYSCALL=y
++CONFIG_HAVE_ARCH_JUMP_LABEL=y
++CONFIG_HAVE_ARCH_KGDB=y
++CONFIG_HAVE_ARCH_KMEMCHECK=y
++CONFIG_HAVE_ARCH_SECCOMP_FILTER=y
++CONFIG_HAVE_ARCH_TRACEHOOK=y
++CONFIG_HAVE_ARCH_TRANSPARENT_HUGEPAGE=y
++CONFIG_HAVE_ATOMIC_IOMAP=y
++# CONFIG_HAVE_BOOTMEM_INFO_NODE is not set
++CONFIG_HAVE_CC_STACKPROTECTOR=y
++CONFIG_HAVE_CMPXCHG_DOUBLE=y
++CONFIG_HAVE_CMPXCHG_LOCAL=y
++CONFIG_HAVE_C_RECORDMCOUNT=y
++CONFIG_HAVE_DEBUG_KMEMLEAK=y
++CONFIG_HAVE_DEBUG_STACKOVERFLOW=y
++CONFIG_HAVE_DMA_API_DEBUG=y
++CONFIG_HAVE_DMA_ATTRS=y
++CONFIG_HAVE_DMA_CONTIGUOUS=y
++CONFIG_HAVE_DYNAMIC_FTRACE=y
++CONFIG_HAVE_DYNAMIC_FTRACE_WITH_REGS=y
++CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS=y
++CONFIG_HAVE_FTRACE_MCOUNT_RECORD=y
++CONFIG_HAVE_FUNCTION_GRAPH_FP_TEST=y
++CONFIG_HAVE_FUNCTION_GRAPH_TRACER=y
++CONFIG_HAVE_FUNCTION_TRACER=y
++CONFIG_HAVE_GENERIC_DMA_COHERENT=y
++CONFIG_HAVE_HW_BREAKPOINT=y
++CONFIG_HAVE_IDE=y
++CONFIG_HAVE_IOREMAP_PROT=y
++CONFIG_HAVE_IRQ_TIME_ACCOUNTING=y
++CONFIG_HAVE_KERNEL_BZIP2=y
++CONFIG_HAVE_KERNEL_GZIP=y
++CONFIG_HAVE_KERNEL_LZ4=y
++CONFIG_HAVE_KERNEL_LZMA=y
++CONFIG_HAVE_KERNEL_LZO=y
++CONFIG_HAVE_KERNEL_XZ=y
++CONFIG_HAVE_KPROBES_ON_FTRACE=y
++CONFIG_HAVE_KVM=y
++CONFIG_HAVE_LATENCYTOP_SUPPORT=y
++CONFIG_HAVE_MEMBLOCK=y
++CONFIG_HAVE_MEMBLOCK_NODE_MAP=y
++CONFIG_HAVE_MIXED_BREAKPOINTS_REGS=y
++CONFIG_HAVE_MMIOTRACE_SUPPORT=y
++CONFIG_HAVE_NET_DSA=y
++CONFIG_HAVE_OPROFILE=y
++CONFIG_HAVE_OPTPROBES=y
++CONFIG_HAVE_PCSPKR_PLATFORM=y
++CONFIG_HAVE_PERF_EVENTS=y
++CONFIG_HAVE_PERF_EVENTS_NMI=y
++CONFIG_HAVE_PERF_REGS=y
++CONFIG_HAVE_PERF_USER_STACK_DUMP=y
++CONFIG_HAVE_REGS_AND_STACK_ACCESS_API=y
++CONFIG_HAVE_SETUP_PER_CPU_AREA=y
++CONFIG_HAVE_SYSCALL_TRACEPOINTS=y
++CONFIG_HAVE_UID16=y
++CONFIG_HAVE_UNSTABLE_SCHED_CLOCK=y
++CONFIG_HAVE_USER_RETURN_NOTIFIER=y
++# CONFIG_HIGHMEM4G is not set
++CONFIG_HPET_EMULATE_RTC=y
++CONFIG_HPET_TIMER=y
++# CONFIG_HP_WATCHDOG is not set
++CONFIG_HT_IRQ=y
++# CONFIG_HUGETLBFS is not set
++CONFIG_HW_CONSOLE=y
++CONFIG_HW_RANDOM=y
++CONFIG_HW_RANDOM_GEODE=y
++CONFIG_HW_RANDOM_VIA=y
++# CONFIG_HYPERVISOR_GUEST is not set
++CONFIG_HZ_PERIODIC=y
++CONFIG_I8253_LOCK=y
++# CONFIG_I8K is not set
++# CONFIG_IB700_WDT is not set
++# CONFIG_IBMASR is not set
++# CONFIG_IBM_RTL is not set
++# CONFIG_IE6XX_WDT is not set
++CONFIG_ILLEGAL_POINTER_VALUE=0
++CONFIG_INITRAMFS_SOURCE=""
++CONFIG_INPUT=y
++CONFIG_INPUT_KEYBOARD=y
++CONFIG_INSTRUCTION_DECODER=y
++# CONFIG_INTEL_POWERCLAMP is not set
++# CONFIG_IOMMU_STRESS is not set
++# CONFIG_IOSF_MBI is not set
++CONFIG_IO_DELAY_0X80=y
++# CONFIG_IO_DELAY_0XED is not set
++# CONFIG_IO_DELAY_NONE is not set
++CONFIG_IO_DELAY_TYPE_0X80=0
++CONFIG_IO_DELAY_TYPE_0XED=1
++CONFIG_IO_DELAY_TYPE_NONE=3
++CONFIG_IO_DELAY_TYPE_UDELAY=2
++# CONFIG_IO_DELAY_UDELAY is not set
++CONFIG_IRQ_DOMAIN=y
++CONFIG_IRQ_FORCED_THREADING=y
++CONFIG_IRQ_WORK=y
++# CONFIG_ISA is not set
++CONFIG_ISA_DMA_API=y
++# CONFIG_IT8712F_WDT is not set
++# CONFIG_IT87_WDT is not set
++# CONFIG_ITCO_WDT is not set
++CONFIG_JBD2=y
++CONFIG_KALLSYMS=y
++CONFIG_KERNFS=y
++CONFIG_KEXEC=y
++CONFIG_KEYBOARD_ATKBD=y
++CONFIG_M486=y
++# CONFIG_M586 is not set
++# CONFIG_M586MMX is not set
++# CONFIG_M586TSC is not set
++# CONFIG_M686 is not set
++# CONFIG_MACHZ_WDT is not set
++CONFIG_MATH_EMULATION=y
++# CONFIG_MATOM is not set
++# CONFIG_MCORE2 is not set
++# CONFIG_MCRUSOE is not set
++# CONFIG_MCYRIXIII is not set
++# CONFIG_MEFFICEON is not set
++# CONFIG_MELAN is not set
++# CONFIG_MEMTEST is not set
++# CONFIG_MGEODEGX1 is not set
++# CONFIG_MGEODE_LX is not set
++# CONFIG_MICROCODE is not set
++# CONFIG_MICROCODE_AMD_EARLY is not set
++# CONFIG_MICROCODE_INTEL_EARLY is not set
++# CONFIG_MK6 is not set
++# CONFIG_MK7 is not set
++# CONFIG_MK8 is not set
++CONFIG_MODULES_USE_ELF_REL=y
++# CONFIG_MPENTIUM4 is not set
++# CONFIG_MPENTIUMII is not set
++# CONFIG_MPENTIUMIII is not set
++# CONFIG_MPENTIUMM is not set
++CONFIG_MTD_BLOCK2MTD=y
++# CONFIG_MTD_CFI is not set
++# CONFIG_MTD_COMPLEX_MAPPINGS is not set
++CONFIG_MTD_SPLIT_SUPPORT=y
++CONFIG_MTRR=y
++# CONFIG_MTRR_SANITIZER is not set
++# CONFIG_MVIAC3_2 is not set
++# CONFIG_MVIAC7 is not set
++# CONFIG_MWINCHIP3D is not set
++# CONFIG_MWINCHIPC6 is not set
++CONFIG_NAMESPACES=y
++CONFIG_NEED_PER_CPU_EMBED_FIRST_CHUNK=y
++CONFIG_NEED_PER_CPU_KM=y
++CONFIG_NEED_PER_CPU_PAGE_FIRST_CHUNK=y
++CONFIG_NEED_SG_DMA_LENGTH=y
++# CONFIG_NET5501 is not set
++# CONFIG_NET_NS is not set
++CONFIG_NOHIGHMEM=y
++CONFIG_NO_BOOTMEM=y
++CONFIG_NR_CPUS=1
++# CONFIG_NSC_GPIO is not set
++# CONFIG_NTB is not set
++CONFIG_NVRAM=y
++CONFIG_OLD_SIGACTION=y
++CONFIG_OLD_SIGSUSPEND3=y
++# CONFIG_OLPC is not set
++CONFIG_OPROFILE_NMI_TIMER=y
++# CONFIG_OPTIMIZE_INLINING is not set
++CONFIG_OUTPUT_FORMAT="elf32-i386"
++CONFIG_PAGEFLAGS_EXTENDED=y
++CONFIG_PAGE_OFFSET=0xC0000000
++# CONFIG_PC8736x_GPIO is not set
++# CONFIG_PC87413_WDT is not set
++CONFIG_PCI=y
++CONFIG_PCI_BIOS=y
++CONFIG_PCI_DIRECT=y
++CONFIG_PCI_DOMAINS=y
++CONFIG_PCI_GOANY=y
++# CONFIG_PCI_GOBIOS is not set
++# CONFIG_PCI_GODIRECT is not set
++# CONFIG_PCI_GOMMCONFIG is not set
++CONFIG_PCI_MSI=y
++CONFIG_PCSPKR_PLATFORM=y
++CONFIG_PERF_EVENTS=y
++CONFIG_PERF_EVENTS_INTEL_UNCORE=y
++CONFIG_PHYSICAL_ALIGN=0x100000
++CONFIG_PHYSICAL_START=0x1000000
++CONFIG_PMC_ATOM=y
++CONFIG_POWER_SUPPLY=y
++# CONFIG_PREEMPT_RCU is not set
++# CONFIG_PROCESSOR_SELECT is not set
++CONFIG_PROC_PAGE_MONITOR=y
++# CONFIG_PROVIDE_OHCI1394_DMA_INIT is not set
++# CONFIG_RCU_STALL_COMMON is not set
++CONFIG_RD_BZIP2=y
++CONFIG_RD_GZIP=y
++# CONFIG_RELOCATABLE is not set
++CONFIG_RTC_CLASS=y
++CONFIG_RWSEM_XCHGADD_ALGORITHM=y
++# CONFIG_SBC7240_WDT is not set
++# CONFIG_SBC8360_WDT is not set
++# CONFIG_SBC_EPX_C3_WATCHDOG is not set
++# CONFIG_SC1200_WDT is not set
++CONFIG_SCHED_HRTICK=y
++CONFIG_SCSI=y
++CONFIG_SCx200=y
++CONFIG_SCx200HR_TIMER=y
++# CONFIG_SCx200_GPIO is not set
++# CONFIG_SCx200_WDT is not set
++CONFIG_SECCOMP=y
++CONFIG_SECCOMP_FILTER=y
++CONFIG_SERIAL_8250_PCI=y
++CONFIG_SERIO=y
++# CONFIG_SERIO_CT82C710 is not set
++CONFIG_SERIO_I8042=y
++CONFIG_SERIO_LIBPS2=y
++CONFIG_SERIO_SERPORT=y
++# CONFIG_SLAB is not set
++CONFIG_SLUB=y
++CONFIG_SLUB_DEBUG=y
++# CONFIG_SLUB_DEBUG_ON is not set
++# CONFIG_SMSC37B787_WDT is not set
++# CONFIG_SMSC_SCH311X_WDT is not set
++CONFIG_SPARSEMEM_STATIC=y
++CONFIG_SPARSE_IRQ=y
++CONFIG_STRICT_DEVMEM=y
++CONFIG_SYSCTL_EXCEPTION_TRACE=y
++# CONFIG_TELCLOCK is not set
++CONFIG_THERMAL=y
++# CONFIG_THERMAL_DEFAULT_GOV_FAIR_SHARE is not set
++CONFIG_THERMAL_DEFAULT_GOV_STEP_WISE=y
++# CONFIG_THERMAL_DEFAULT_GOV_USER_SPACE is not set
++# CONFIG_THERMAL_EMULATION is not set
++# CONFIG_THERMAL_GOV_FAIR_SHARE is not set
++CONFIG_THERMAL_GOV_STEP_WISE=y
++# CONFIG_THERMAL_GOV_USER_SPACE is not set
++CONFIG_TICK_CPU_ACCOUNTING=y
++# CONFIG_TOSHIBA is not set
++CONFIG_UID16=y
++CONFIG_USB_SUPPORT=y
++# CONFIG_USER_NS is not set
++CONFIG_USER_STACKTRACE_SUPPORT=y
++# CONFIG_VGACON_SOFT_SCROLLBACK is not set
++CONFIG_VGA_CONSOLE=y
++# CONFIG_VIA_WDT is not set
++CONFIG_VM86=y
++# CONFIG_VMWARE_VMCI is not set
++CONFIG_VM_EVENT_COUNTERS=y
++CONFIG_VT=y
++CONFIG_VT_CONSOLE=y
++CONFIG_VT_HW_CONSOLE_BINDING=y
++# CONFIG_WAFER_WDT is not set
++CONFIG_X86=y
++# CONFIG_X86_16BIT is not set
++CONFIG_X86_32=y
++# CONFIG_X86_32_IRIS is not set
++CONFIG_X86_32_LAZY_GS=y
++CONFIG_X86_ALIGNMENT_16=y
++# CONFIG_X86_ANCIENT_MCE is not set
++# CONFIG_X86_CHECK_BIOS_CORRUPTION is not set
++# CONFIG_X86_CPUFREQ_NFORCE2 is not set
++# CONFIG_X86_CPUID is not set
++# CONFIG_X86_EXTENDED_PLATFORM is not set
++CONFIG_X86_F00F_BUG=y
++CONFIG_X86_FEATURE_NAMES=y
++CONFIG_X86_GENERIC=y
++# CONFIG_X86_GX_SUSPMOD is not set
++# CONFIG_X86_INTEL_PSTATE is not set
++CONFIG_X86_INTEL_USERCOPY=y
++CONFIG_X86_INTERNODE_CACHE_SHIFT=6
++CONFIG_X86_INVD_BUG=y
++CONFIG_X86_IO_APIC=y
++CONFIG_X86_L1_CACHE_SHIFT=6
++CONFIG_X86_LOCAL_APIC=y
++# CONFIG_X86_LONGRUN is not set
++CONFIG_X86_MCE=y
++CONFIG_X86_MCE_AMD=y
++# CONFIG_X86_MCE_INJECT is not set
++CONFIG_X86_MCE_INTEL=y
++CONFIG_X86_MCE_THRESHOLD=y
++CONFIG_X86_MINIMUM_CPU_FAMILY=4
++CONFIG_X86_MPPARSE=y
++# CONFIG_X86_MSR is not set
++# CONFIG_X86_P4_CLOCKMOD is not set
++# CONFIG_X86_PAE is not set
++CONFIG_X86_PAT=y
++CONFIG_X86_PLATFORM_DEVICES=y
++# CONFIG_X86_POWERNOW_K6 is not set
++# CONFIG_X86_POWERNOW_K7 is not set
++CONFIG_X86_PPRO_FENCE=y
++# CONFIG_X86_PTDUMP is not set
++# CONFIG_X86_REBOOTFIXUPS is not set
++CONFIG_X86_REROUTE_FOR_BROKEN_BOOT_IRQS=y
++CONFIG_X86_RESERVE_LOW=64
++# CONFIG_X86_SMAP is not set
++# CONFIG_X86_SPEEDSTEP_CENTRINO is not set
++# CONFIG_X86_SPEEDSTEP_ICH is not set
++# CONFIG_X86_SPEEDSTEP_LIB is not set
++# CONFIG_X86_SPEEDSTEP_SMI is not set
++CONFIG_X86_SUPPORTS_MEMORY_FAILURE=y
++CONFIG_X86_THERMAL_VECTOR=y
++CONFIG_X86_VERBOSE_BOOTUP=y
++CONFIG_XZ_DEC_BCJ=y
++CONFIG_XZ_DEC_X86=y
++CONFIG_ZLIB_INFLATE=y
++# CONFIG_ZONE_DMA32 is not set
++# CONFIG_CRYPTO_DEV_QAT_DH895xCC is not set
+--- /dev/null
++++ b/target/linux/generic/patches-3.18/1001-scott-bridge-pass-mac-all0s.patch
+@@ -0,0 +1,11 @@
++--- a/net/bridge/br_input.c
+++++ b/net/bridge/br_input.c
++@@ -168,7 +168,7 @@ rx_handler_result_t br_handle_frame(stru
++ 	if (unlikely(skb->pkt_type == PACKET_LOOPBACK))
++ 		return RX_HANDLER_PASS;
++ 
++-	if (!is_valid_ether_addr(eth_hdr(skb)->h_source))
+++	if (!is_valid_ether_addr(eth_hdr(skb)->h_source) && !is_zero_ether_addr(eth_hdr(skb)->h_source))
++ 		goto drop;
++ 
++ 	skb = skb_share_check(skb, GFP_ATOMIC);
+--- /dev/null
++++ b/target/linux/generic/patches-3.18/1001-scott-uc20.patch
+@@ -0,0 +1,32 @@
++--- a/drivers/usb/serial/qcserial.c
+++++ b/drivers/usb/serial/qcserial.c
++@@ -134,6 +134,7 @@ static const struct usb_device_id id_tab
++ 	{USB_DEVICE(0x12D1, 0x14F0)},	/* Sony Gobi 3000 QDL */
++ 	{USB_DEVICE(0x12D1, 0x14F1)},	/* Sony Gobi 3000 Composite */
++ 	{USB_DEVICE(0x0AF0, 0x8120)},	/* Option GTM681W */
+++	{USB_DEVICE(0x05c6, 0x9003)},	/* Quectel UC20 */
++ 
++ 	/* non-Gobi Sierra Wireless devices */
++ 	{DEVICE_SWI(0x0f3d, 0x68a2)},	/* Sierra Wireless MC7700 */
++@@ -235,8 +236,9 @@ static int qcprobe(struct usb_serial *se
++ 		 * 1: DM/DIAG (use libqcdm from ModemManager for communication)
++ 		 * 2: AT-capable modem port
++ 		 * 3: NMEA
+++		 * 4: NDIS (UC20)
++ 		 */
++-		if (nintf < 3 || nintf > 4) {
+++		if (nintf < 3 || nintf > 5) {
++ 			dev_err(dev, "unknown number of interfaces: %d\n", nintf);
++ 			altsetting = -1;
++ 			goto done;
++@@ -261,6 +263,10 @@ static int qcprobe(struct usb_serial *se
++ 			 */
++ 			dev_dbg(dev, "Gobi 2K+ NMEA GPS interface found\n");
++ 			break;
+++		case 4:
+++			/* Don't claim the NDIS interface */
+++			altsetting = -1;
+++			break;
++ 		}
++ 		break;
++ 	case QCSERIAL_SWI:
+--- /dev/null
++++ b/target/linux/generic/patches-3.18/1002-scott-gre-keepalive.patch
+@@ -0,0 +1,206 @@
++--- a/include/uapi/linux/if_tunnel.h
+++++ b/include/uapi/linux/if_tunnel.h
++@@ -35,6 +35,10 @@ struct ip_tunnel_parm {
++ 	__be32			i_key;
++ 	__be32			o_key;
++ 	struct iphdr		iph;
+++        struct timer_list               *timer;
+++        int             ka_interval;
+++        int             ka_retries;
+++        int             ka_cur_retries;
++ };
++ 
++ enum {
++--- a/net/ipv4/ip_gre.c
+++++ b/net/ipv4/ip_gre.c
++@@ -218,6 +218,11 @@ static int ipgre_rcv(struct sk_buff *skb
++ 
++ 	if (tunnel) {
++ 		skb_pop_mac_header(skb);
+++		if (tpi->proto == 0) {
+++			tunnel->parms.ka_cur_retries = tunnel->parms.ka_retries;
+++			if (!netif_carrier_ok(tunnel->dev))
+++				netif_carrier_on(tunnel->dev);
+++		}
++ 		ip_tunnel_rcv(tunnel, skb, tpi, log_ecn_error);
++ 		return PACKET_RCVD;
++ 	}
++--- a/net/ipv4/ip_tunnel.c
+++++ b/net/ipv4/ip_tunnel.c
++@@ -64,6 +64,8 @@
++ #include <net/ip6_route.h>
++ #endif
++ 
+++static void ipgre_keepalive_timer(unsigned long data);
+++
++ static unsigned int ip_tunnel_hash(__be32 key, __be32 remote)
++ {
++ 	return hash_32((__force u32)key ^ (__force u32)remote,
++@@ -799,6 +801,8 @@ tx_error:
++ }
++ EXPORT_SYMBOL_GPL(ip_tunnel_xmit);
++ 
+++void ip_gre_keepalive_setup(struct ip_tunnel *t, struct net_device *dev, int on);
+++
++ static void ip_tunnel_update(struct ip_tunnel_net *itn,
++ 			     struct ip_tunnel *t,
++ 			     struct net_device *dev,
++@@ -829,9 +833,138 @@ static void ip_tunnel_update(struct ip_t
++ 			dev->mtu = mtu;
++ 	}
++ 	ip_tunnel_dst_reset_all(t);
+++	t->parms.ka_interval = p->ka_interval;
+++	t->parms.ka_retries = p->ka_retries;
+++
+++	if (!t->parms.timer && t->parms.ka_interval > 0 && t->parms.ka_retries > 0) {
+++		ip_gre_keepalive_setup(t, t->dev, 1);
+++	} else if (t->parms.timer && (t->parms.ka_interval <= 0 || t->parms.ka_retries <= 0)) {
+++		ip_gre_keepalive_setup(t, t->dev, 0);
+++	}
+++
++ 	netdev_state_change(dev);
++ }
++ 
+++struct ipgre_keepalive {
+++	// 3.10 kernel drops packets with less than 8 bytes of GRE payload for
+++	// some reason - maybe less than hlen? Scott
+++	u32 ts;
+++	u8 pad[4];
+++};
+++
+++static void ipgre_keepalive_xmit(struct net_device *dev)
+++{
+++	struct ip_tunnel *tunnel = netdev_priv(dev);
+++	struct iphdr *iph = &tunnel->parms.iph;
+++	int hlen = sizeof(struct iphdr) + tunnel->hlen;
+++	struct ipgre_keepalive *ipk;
+++	// 2 IP headers and 2 GRE headers, tunnel->hlen = IP header + GRE hreader
+++	struct sk_buff *skb = dev_alloc_skb((hlen * 2) + sizeof(*ipk));
+++	struct iphdr *inner_iph;
+++
+++	skb_reserve(skb, hlen);
+++	skb->dev = dev;
+++	skb->pkt_type = PACKET_OUTGOING;
+++	skb->ip_summed = CHECKSUM_NONE;
+++	skb->protocol = htons(ETH_P_IP);
+++
+++	skb_reset_network_header(skb);
+++	skb_set_transport_header(skb, sizeof(struct iphdr));
+++
+++	inner_iph = (struct iphdr*) skb_put(skb, hlen + sizeof(*ipk));
+++	inner_iph->saddr = iph->daddr;
+++	inner_iph->daddr = iph->saddr;
+++	inner_iph->protocol = IPPROTO_GRE;
+++
+++	inner_iph->version	=	4;
+++	inner_iph->ihl		=	sizeof(struct iphdr) >> 2;
+++	inner_iph->frag_off	=	0;
+++	inner_iph->ttl		=	255;
+++	inner_iph->tos		=	0;
+++	inner_iph->tot_len = htons(skb->len);
+++
+++	ipk = (struct ipgre_keepalive*)(((u8*)inner_iph) + hlen);
+++	ipk->ts = jiffies;
+++	memset(ipk->pad, 0, sizeof(ipk->pad));
+++
+++	((__be16*)(inner_iph+1))[0] = tunnel->parms.o_flags;
+++	((__be16*)(inner_iph+1))[1] = 0;
+++
+++	if (tunnel->parms.o_flags&(GRE_KEY|GRE_CSUM|GRE_SEQ)) {
+++		__be32 *ptr = (__be32*)(((u8*)inner_iph) + hlen - 4);
+++
+++		if (tunnel->parms.o_flags&GRE_SEQ) {
+++			++tunnel->o_seqno;
+++			*ptr = htonl(tunnel->o_seqno);
+++			ptr--;
+++		}
+++		if (tunnel->parms.o_flags&GRE_KEY) {
+++			*ptr = tunnel->parms.o_key;
+++			ptr--;
+++		}
+++		if (tunnel->parms.o_flags&GRE_CSUM) {
+++			*ptr = 0;
+++			*(__sum16*)ptr = ip_compute_csum((void*)(inner_iph+1), skb->len - sizeof(struct iphdr));
+++		}
+++	}
+++
+++	inner_iph->check = 0;
+++	inner_iph->check = ip_fast_csum((unsigned char *)inner_iph, inner_iph->ihl);
+++
+++	dev->netdev_ops->ndo_start_xmit(skb, dev);
+++}
+++
+++static void ipgre_keepalive_schedule(struct ip_tunnel *tunnel)
+++{
+++	struct ip_tunnel_parm *parms = &tunnel->parms;
+++
+++	parms->timer->function = ipgre_keepalive_timer;
+++	/* First keepalive sent in 1 jiffie */
+++	if (parms->timer->data == 0)
+++		parms->timer->expires = jiffies + 1;
+++	else
+++		parms->timer->expires = jiffies + tunnel->parms.ka_interval * HZ;
+++	parms->timer->data = (unsigned long) tunnel;
+++	add_timer(parms->timer);
+++}
+++
+++static void ipgre_keepalive_timer(unsigned long data)
+++{
+++	struct ip_tunnel *tunnel = (struct ip_tunnel*) data;
+++	
+++	if (tunnel->parms.ka_cur_retries > 0 && --tunnel->parms.ka_cur_retries == 0) {
+++		netif_carrier_off(tunnel->dev);
+++	}
+++
+++	ipgre_keepalive_xmit(tunnel->dev);
+++	ipgre_keepalive_schedule(tunnel);
+++}
+++
+++void ip_gre_keepalive_setup(struct ip_tunnel *t, struct net_device *dev, int on)
+++{
+++	struct in_device *in_dev = __in_dev_get_rtnl(dev);
+++	if (on) {
+++		if (!t->parms.timer)
+++			t->parms.timer = kmalloc(sizeof(struct timer_list), GFP_ATOMIC);
+++		init_timer(t->parms.timer);
+++		t->parms.timer->data = 0;
+++		netif_carrier_off(dev);
+++		if (in_dev)
+++			IPV4_DEVCONF(in_dev->cnf, ACCEPT_LOCAL) = 1;
+++		t->parms.ka_cur_retries = t->parms.ka_retries;
+++		ipgre_keepalive_schedule(t);
+++	}
+++	else {
+++		del_timer(t->parms.timer);
+++		kfree(t->parms.timer);
+++		t->parms.timer = NULL;
+++		if (!netif_carrier_ok(dev))
+++			netif_carrier_on(dev);
+++		if (in_dev)
+++			IPV4_DEVCONF(in_dev->cnf, ACCEPT_LOCAL) = 0;
+++	}
+++}
+++
++ int ip_tunnel_ioctl(struct net_device *dev, struct ip_tunnel_parm *p, int cmd)
++ {
++ 	int err = 0;
++@@ -868,6 +1001,7 @@ int ip_tunnel_ioctl(struct net_device *d
++ 
++ 		if (cmd == SIOCADDTUNNEL) {
++ 			if (!t) {
+++				p->timer = NULL;
++ 				t = ip_tunnel_create(net, itn, p);
++ 				err = PTR_ERR_OR_ZERO(t);
++ 				break;
++@@ -921,6 +1055,11 @@ int ip_tunnel_ioctl(struct net_device *d
++ 			if (t == netdev_priv(itn->fb_tunnel_dev))
++ 				goto done;
++ 			dev = t->dev;
+++			if (t && t->parms.timer) {
+++				del_timer(t->parms.timer);
+++				kfree(t->parms.timer);
+++				t->parms.timer = NULL;
+++			}
++ 		}
++ 		unregister_netdevice(dev);
++ 		err = 0;
+--- /dev/null
++++ b/target/linux/generic/patches-3.18/1004-scott-reuse-ifindex.patch
+@@ -0,0 +1,44 @@
++--- a/net/core/dev.c
+++++ b/net/core/dev.c
++@@ -230,6 +230,8 @@ static void list_netdevice(struct net_de
++  */
++ static void unlist_netdevice(struct net_device *dev)
++ {
+++	struct net *net = dev_net(dev);
+++
++ 	ASSERT_RTNL();
++ 
++ 	/* Unlink dev from the device chain */
++@@ -240,6 +242,9 @@ static void unlist_netdevice(struct net_
++ 	write_unlock_bh(&dev_base_lock);
++ 
++ 	dev_base_seq_inc(dev_net(dev));
+++
+++	if (!net->ifindex || dev->ifindex < net->ifindex)
+++		net->ifindex = dev->ifindex;
++ }
++ 
++ /*
++@@ -5446,10 +5451,10 @@ static int dev_new_index(struct net *net
++ {
++ 	int ifindex = net->ifindex;
++ 	for (;;) {
++-		if (++ifindex <= 0)
++-			ifindex = 1;
++ 		if (!__dev_get_by_index(net, ifindex))
++ 			return net->ifindex = ifindex;
+++		if (++ifindex <= 0)
+++			ifindex = 1;
++ 	}
++ }
++ 
++--- a/net/core/net_namespace.c
+++++ b/net/core/net_namespace.c
++@@ -158,6 +158,7 @@ static __net_init int setup_net(struct n
++ 	atomic_set(&net->passive, 1);
++ 	net->dev_base_seq = 1;
++ 	net->user_ns = user_ns;
+++	net->ifindex = 1;
++ 
++ #ifdef NETNS_REFCNT_DEBUG
++ 	atomic_set(&net->use_count, 0);
+--- /dev/null
++++ b/target/linux/generic/patches-3.18/999-scott-fix-layer7-panics.patch
+@@ -0,0 +1,20 @@
++--- a/net/netfilter/xt_layer7.c
+++++ b/net/netfilter/xt_layer7.c
++@@ -69,13 +69,15 @@ static int total_acct_packets(struct nf_
++ 	BUG_ON(ct == NULL);
++ 	return (ct->counters[IP_CT_DIR_ORIGINAL].packets + ct->counters[IP_CT_DIR_REPLY].packets);
++ #else
++-	struct nf_conn_counter *acct;
+++        const struct nf_conn_acct *acct;
+++        const struct nf_conn_counter *counters;
++ 
++ 	BUG_ON(ct == NULL);
++ 	acct = nf_conn_acct_find(ct);
++ 	if (!acct)
++ 		return 0;
++-	return (atomic64_read(&acct[IP_CT_DIR_ORIGINAL].packets) + atomic64_read(&acct[IP_CT_DIR_REPLY].packets));
+++        counters = acct->counter;
+++	return (atomic64_read(&counters[IP_CT_DIR_ORIGINAL].packets) + atomic64_read(&counters[IP_CT_DIR_REPLY].packets));
++ #endif
++ }
++ 
+--- a/package/kernel/linux/modules/netsupport.mk
++++ b/package/kernel/linux/modules/netsupport.mk
+@@ -144,13 +144,38 @@ endef
+ 
+ $(eval $(call KernelPackage,8021q))
+ 
++define KernelPackage/udptunnel4
++  SUBMENU:=$(NETWORK_SUPPORT_MENU)
++  TITLE:=IPv4 UDP tunneling support
++  DEPENDS:=@(!LINUX_3_8&&!LINUX_3_10&&!LINUX_3_13&&!LINUX_3_14)
++  KCONFIG:=CONFIG_NET_UDP_TUNNEL
++  FILES:=$(LINUX_DIR)/net/ipv4/udp_tunnel.ko
++  AUTOLOAD:=$(call AutoLoad,32,udp_tunnel)
++endef
++
++$(eval $(call KernelPackage,udptunnel4))
++
++define KernelPackage/udptunnel6
++  SUBMENU:=$(NETWORK_SUPPORT_MENU)
++  TITLE:=UDP tunneling support
++  DEPENDS:=@!(LINUX_3_8||LINUX_3_10||LINUX_3_13||LINUX_3_14) +kmod-ipv6
++  KCONFIG:=CONFIG_NET_UDP_TUNNEL
++  FILES:=$(LINUX_DIR)/net/ipv6/ip6_udp_tunnel.ko
++  AUTOLOAD:=$(call AutoLoad,32,ip6_udp_tunnel)
++endef
++
++$(eval $(call KernelPackage,udptunnel6))
++
+ define KernelPackage/vxlan
+   SUBMENU:=$(NETWORK_SUPPORT_MENU)
+   TITLE:=Native VXLAN Kernel support
+-  DEPENDS:=+kmod-iptunnel
++  DEPENDS:= \
++        +kmod-iptunnel \
++        +(!LINUX_3_8&&!LINUX_3_10&&!LINUX_3_13&&!LINUX_3_14):kmod-udptunnel4 \
++        +(!LINUX_3_8&&!LINUX_3_10&&!LINUX_3_13&&!LINUX_3_14&&IPV6):kmod-udptunnel6
+   KCONFIG:=CONFIG_VXLAN
+   FILES:=$(LINUX_DIR)/drivers/net/vxlan.ko
+-  AUTOLOAD:=$(call AutoLoad,13,vxlan)
++  AUTOLOAD:=$(call AutoLoad,33,vxlan)
+ endef
+ 
+ define KernelPackage/vxlan/description
+@@ -843,7 +868,10 @@ $(eval $(call KernelPackage,pktgen))
+ define KernelPackage/l2tp
+   SUBMENU:=$(NETWORK_SUPPORT_MENU)
+   TITLE:=Layer Two Tunneling Protocol (L2TP)
+-  DEPENDS:=+IPV6:kmod-ipv6
++  DEPENDS:= \
++        +IPV6:kmod-ipv6 \
++        +(!LINUX_3_8&&!LINUX_3_10&&!LINUX_3_13&&!LINUX_3_14):kmod-udptunnel4 \
++        +(!LINUX_3_8&&!LINUX_3_10&&!LINUX_3_13&&!LINUX_3_14&&IPV6):kmod-udptunnel6
+   KCONFIG:=CONFIG_L2TP \
+ 	CONFIG_L2TP_V3=y \
+ 	CONFIG_L2TP_DEBUGFS=n
+--- a/package/kernel/linux/modules/usb.mk
++++ b/package/kernel/linux/modules/usb.mk
+@@ -1004,7 +1004,9 @@ $(eval $(call KernelPackage,usb-atm-cxac
+ define KernelPackage/usb-net
+   TITLE:=Kernel modules for USB-to-Ethernet convertors
+   DEPENDS:=+kmod-mii
+-  KCONFIG:=CONFIG_USB_USBNET
++  KCONFIG:= \
++	CONFIG_USB_USBNET \
++	CONFIG_USB_NET_DRIVERS
+   AUTOLOAD:=$(call AutoProbe,usbnet)
+   FILES:=$(LINUX_DIR)/drivers/$(USBNET_DIR)/usbnet.ko
+   $(call AddDepends/usb)
+--- /dev/null
++++ b/target/linux/generic/patches-3.18/1005-scott-usb-serial-noecho.patch
+@@ -0,0 +1,23 @@
++--- a/drivers/usb/serial/qcserial.c
+++++ b/drivers/usb/serial/qcserial.c
++@@ -162,6 +162,12 @@ static const struct usb_device_id id_tab
++ };
++ MODULE_DEVICE_TABLE(usb, id_table);
++ 
+++static void qc_init_termios(struct tty_struct *tty)
+++{
+++        tty->termios.c_lflag &= ~ECHO;
+++        tty_encode_baud_rate(tty, 115200, 115200);
+++}
+++
++ static int qcprobe(struct usb_serial *serial, const struct usb_device_id *id)
++ {
++ 	struct usb_host_interface *intf = serial->interface->cur_altsetting;
++@@ -358,6 +364,7 @@ static struct usb_serial_driver qcdevice
++ 	.suspend	     = usb_wwan_suspend,
++ 	.resume		     = usb_wwan_resume,
++ #endif
+++	.init_termios        = qc_init_termios,
++ };
++ 
++ static struct usb_serial_driver * const serial_drivers[] = {
