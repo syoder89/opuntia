@@ -45,3 +45,4 @@ oldpackages/0067-vim-libacl.patch
 0178-gmp-http-download.patch
 kernel/0070-x86-kernel-3.18.patch
 kernel/0046-Linux-3.18-updates.patch
+packages/0180-net-snmp-add-pass-persist.patch
