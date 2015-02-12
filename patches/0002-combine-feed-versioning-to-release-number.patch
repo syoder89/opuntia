@@ -1,0 +1,10 @@
+--- a/scripts/getver.sh
++++ b/scripts/getver.sh
+@@ -31,4 +31,7 @@ try_hg() {
+ }
+ 
+ try_version || try_svn || try_git || try_hg || REV="unknown"
++rel="${REV:1}"
++for i in `cat feeds.conf | awk '{print $2}'`; do count=`git -C feeds/$i rev-list HEAD --count`; rel=$((rel+count)); done
++REV="r$rel"
+ echo "$REV"
