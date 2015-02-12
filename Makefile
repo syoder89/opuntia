@@ -32,7 +32,9 @@ install: $(built)
 	sysup=`find build_dir/bin/ -name '*sysupgrade*' | head -n 1` && \
 	factory=`find build_dir/bin/ -name '*factory*' | head -n 1` && \
 	ver=`grep CONFIG_VERSION_NUMBER $(BUILD_DIR)/.config | cut -d '"' -f 2` && \
-	rel=`cd build_dir && ./scripts/getver.sh` && \
+	rel=`cd build_dir && ./scripts/getver.sh | cut -b 2-` && \
+	for i in `cat feeds.conf | awk '{print $$2}'`; do count=`git -C build_dir/feeds/$$i rev-list HEAD --count`; rel=$$((rel+count)); done && \
+	rel="r$$rel" && \
 	if [ "$${combined}" != "" ] ; then \
 		cp -f $${combined} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-sysupgrade.bin; \
 	elif [ "$${sysup}" != "" ] ; then \

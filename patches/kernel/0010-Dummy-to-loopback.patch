@@ -1,0 +1,23 @@
+--- /dev/null
++++ b/target/linux/generic/patches-3.18/999-scott-dummy-to-loopback.patch
+@@ -0,0 +1,20 @@
++--- a/drivers/net/dummy.c
+++++ b/drivers/net/dummy.c
++@@ -38,7 +38,7 @@
++ #include <net/rtnetlink.h>
++ #include <linux/u64_stats_sync.h>
++ 
++-static int numdummies = 1;
+++static int numdummies = 4;
++ 
++ /* fake multicast ability */
++ static void set_multicast_list(struct net_device *dev)
++@@ -164,7 +164,7 @@ static int __init dummy_init_one(void)
++ 	struct net_device *dev_dummy;
++ 	int err;
++ 
++-	dev_dummy = alloc_netdev(0, "dummy%d", NET_NAME_UNKNOWN, dummy_setup);
+++	dev_dummy = alloc_netdev(0, "loopback%d", NET_NAME_UNKNOWN, dummy_setup);
++ 	if (!dev_dummy)
++ 		return -ENOMEM;
++ 
