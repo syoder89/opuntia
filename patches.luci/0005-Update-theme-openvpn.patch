@@ -4,13 +4,13 @@ Date: Wed, 4 Sep 2013 17:30:33 -0500
 Subject: [PATCH 05/14] Update theme + openvpn
 
 ---
- .../openwrt-luci/applications/luci-qos/luasrc/model/cbi/qos/qos.lua      | 1 +
+ .../openwrt-luci/applications/luci-app-qos/luasrc/model/cbi/qos/qos.lua      | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/applications/luci-qos/luasrc/model/cbi/qos/qos.lua b/applications/luci-qos/luasrc/model/cbi/qos/qos.lua
+diff --git a/applications/luci-app-qos/luasrc/model/cbi/qos/qos.lua b/applications/luci-app-qos/luasrc/model/cbi/qos/qos.lua
 index 1af3bdb..6c54b45 100644
---- a/applications/luci-qos/luasrc/model/cbi/qos/qos.lua
-+++ b/applications/luci-qos/luasrc/model/cbi/qos/qos.lua
+--- a/applications/luci-app-qos/luasrc/model/cbi/qos/qos.lua
++++ b/applications/luci-app-qos/luasrc/model/cbi/qos/qos.lua
 @@ -95,5 +95,6 @@ ports.rmempty = true
  ports:value("", translate("all"))
  

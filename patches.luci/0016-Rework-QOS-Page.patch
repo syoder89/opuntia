@@ -1,5 +1,5 @@
---- a/applications/luci-qos/luasrc/model/cbi/qos/qos.lua
-+++ b/applications/luci-qos/luasrc/model/cbi/qos/qos.lua
+--- a/applications/luci-app-qos/luasrc/model/cbi/qos/qos.lua
++++ b/applications/luci-app-qos/luasrc/model/cbi/qos/qos.lua
 @@ -27,9 +27,12 @@ s.anonymous = false
  e = s:option(Flag, "enabled", translate("Enable"))
  e.rmempty = false

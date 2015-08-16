@@ -4,13 +4,13 @@ Date: Mon, 16 Sep 2013 12:54:27 -0500
 Subject: [PATCH 09/14] Fixup display of wireless interface in mesh mode
 
 ---
- .../openwrt-luci/modules/base/luasrc/model/network.lua      | 16 ++++++++++++----
+ .../openwrt-luci/modules/luci-base/luasrc/model/network.lua      | 16 ++++++++++++----
  1 file changed, 12 insertions(+), 4 deletions(-)
 
-diff --git a/modules/base/luasrc/model/network.lua b/modules/base/luasrc/model/network.lua
+diff --git a/modules/luci-base/luasrc/model/network.lua b/modules/luci-base/luasrc/model/network.lua
 index 389eeef..aea8c97 100644
---- a/modules/base/luasrc/model/network.lua
-+++ b/modules/base/luasrc/model/network.lua
+--- a/modules/luci-base/luasrc/model/network.lua
++++ b/modules/luci-base/luasrc/model/network.lua
 @@ -1378,11 +1378,15 @@ function wifinet.mode(self)
  end
  

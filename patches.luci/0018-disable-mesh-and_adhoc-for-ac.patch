@@ -1,5 +1,5 @@
---- a/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
-+++ b/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
+--- a/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
++++ b/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
 @@ -386,7 +386,9 @@ mode = s:taboption("general", ListValue,
  mode.override_values = true
  mode:value("ap", translate("Access Point"))

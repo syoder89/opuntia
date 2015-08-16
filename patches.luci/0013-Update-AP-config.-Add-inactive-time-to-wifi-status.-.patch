@@ -8,14 +8,14 @@ Subject: [PATCH 13/14] Update AP config. Add inactive time to wifi status.
  and wan and is natted. Change root's shell to bash.
 
 ---
- .../modules/admin-full/luasrc/view/admin_network/wifi_overview.htm      | 2 ++
- .../openwrt-luci/modules/admin-full/luasrc/view/admin_status/index.htm  | 2 ++
+ .../modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm      | 2 ++
+ .../openwrt-luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm  | 2 ++
  2 files changed, 4 insertions(+)
 
-diff --git a/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm b/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm
+diff --git a/modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm b/modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm
 index 556f394..fcc638a 100644
---- a/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm
-+++ b/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm
+--- a/modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm
++++ b/modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm
 @@ -313,6 +313,7 @@ You may obtain a copy of the License at
  							tr.insertCell(-1).innerHTML = arptable[assoclist[j].bssid]
  								? arptable[assoclist[j].bssid] : '?';
@@ -32,10 +32,10 @@ index 556f394..fcc638a 100644
  				<th class="cbi-section-table-cell"><%:Signal%></th>
  				<th class="cbi-section-table-cell"><%:Noise%></th>
  				<th class="cbi-section-table-cell"><%:RX Rate%></th>
-diff --git a/modules/admin-full/luasrc/view/admin_status/index.htm b/modules/admin-full/luasrc/view/admin_status/index.htm
+diff --git a/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm b/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
 index 3067d1d..1b1e20c 100644
---- a/modules/admin-full/luasrc/view/admin_status/index.htm
-+++ b/modules/admin-full/luasrc/view/admin_status/index.htm
+--- a/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
++++ b/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
 @@ -441,6 +441,7 @@ You may obtain a copy of the License at
  							'%h'.format(assoclist[i].name).nobr()
  					);

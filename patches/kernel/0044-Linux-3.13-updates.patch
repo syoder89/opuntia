@@ -3526,16 +3526,42 @@ Subject: [PATCH] Working with 3.13 now but wifi status not functional yet.
 +CONFIG_AVERAGE=y
 +# CONFIG_CORDIC is not set
 +# CONFIG_DDR is not set
---- a/target/linux/x86/alix2/target.mk
+--- /dev/null
 +++ b/target/linux/x86/alix2/target.mk
-@@ -20,6 +20,7 @@ DEFAULT_PACKAGES += \
- 			kmod-ledtrig-netdev \
- 			kmod-cpu-msr hwclock wpad
- CS5535_MASK:=0x0b000042
+@@ -0,0 +1,33 @@
++BOARDNAME:=PCEngines alix2
++FEATURES:=squashfs ext4 pci usb gpio
++DEFAULT_PACKAGES += \
++			kmod-crypto-hw-geode kmod-crypto-ocf kmod-crypto-aes kmod-crypto-cbc \
++			kmod-gpio-cs5535-new kmod-gpio-nsc \
++			kmod-wdt-geode kmod-cs5535-clockevt kmod-cs5535-mfgpt \
++			kmod-cs5536 \
++			kmod-hwmon-core kmod-hwmon-lm90 \
++			kmod-via-rhine \
++			kmod-i2c-core kmod-i2c-gpio \
++			kmod-i2c-algo-bit kmod-i2c-algo-pca kmod-i2c-algo-pcf \
++			kmod-i2c-scx200-acb \
++			kmod-usb-core kmod-usb2 kmod-usb2-pci kmod-usb-ohci \
++			kmod-cfg80211 kmod-mac80211 \
++			kmod-mppe kmod-pppoe kmod-pppol2tp \
++			kmod-ath5k kmod-ath9k \
++			kmod-leds-gpio kmod-input-gpio-keys-polled \
++			kmod-button-hotplug \
++			kmod-ledtrig-heartbeat kmod-ledtrig-gpio \
++			kmod-ledtrig-netdev \
++			kmod-cpu-msr hwclock wpad
++CS5535_MASK:=0x0b000042
 +LINUX_VERSION:=3.13.7
- 
- CPU_TYPE := geode
- 
++
++CPU_TYPE := geode
++
++define Target/Description
++	Build firmware images for PCEngines alix2 board
++endef
++
++define KernelPackage/gpio-cs5535-new/install
++     sed -i -r -e 's/$$$$$$$$/ mask=$(CS5535_MASK)/' $(1)/etc/modules.d/??-gpio-cs5535-new
++endef
 --- /dev/null
 +++ b/target/linux/x86/config-3.13
 @@ -0,0 +1,690 @@
@@ -4229,3 +4255,114 @@ Subject: [PATCH] Working with 3.13 now but wifi status not functional yet.
 +CONFIG_ZLIB_DEFLATE=m
 +CONFIG_ZLIB_INFLATE=y
 +# CONFIG_ZONE_DMA32 is not set
+--- /dev/null
++++ b/target/linux/x86/alix2/base-files/etc/config/network
+@@ -0,0 +1,28 @@
++# Copyright (C) 2011 OpenWrt.org
++
++config interface loopback
++	option ifname	lo
++	option proto	static
++	option ipaddr	127.0.0.1
++	option netmask	255.0.0.0
++
++# N.B. the labels on the Netgate boxes actually reverse the LAN and WAN
++# port markings.
++config interface lan
++	option ifname	eth1
++	option type 	bridge
++	option proto	static
++	option ipaddr	192.168.1.1
++	option netmask	255.255.255.0
++	option ip6assign 60
++
++config interface wan
++	option ifname	eth0
++	option proto	dhcp
++
++config interface wan6
++	option ifname   eth0
++	option proto    dhcpv6
++
++config globals globals
++	option ula_prefix auto
+--- /dev/null
++++ b/target/linux/x86/alix2/base-files/etc/config/system
+@@ -0,0 +1,29 @@
++config system
++	option hostname	OpenWrt
++	option timezone	UTC
++
++config timeserver ntp
++	list server	0.openwrt.pool.ntp.org
++	list server	1.openwrt.pool.ntp.org
++	list server	2.openwrt.pool.ntp.org
++	list server	3.openwrt.pool.ntp.org
++
++config led
++	option default	1
++	option name	LAN
++	option sysfs	'alix:1'
++	option trigger	netdev
++	option mode	'tx rx'
++	option dev	'br-lan'
++
++config led
++	option default	1
++	option name	WiFi
++	option sysfs	'alix:2'
++	option trigger	'phy0tpt'
++
++config led
++	option default	0
++	option name	Heartbeat
++	option sysfs	'alix:3'
++	option trigger	'heartbeat'
+--- /dev/null
++++ b/target/linux/x86/alix2/base-files/etc/hotplug.d/button/50-reboot
+@@ -0,0 +1,13 @@
++#!/bin/sh
++
++logger -t button -p daemon.info "$BUTTON/$ACTION"
++
++case "$BUTTON/$ACTION" in
++
++reset/released)
++  reboot -f
++  ;;
++
++esac
++
++exit 0
+--- /dev/null
++++ b/target/linux/x86/alix2/config-default
+@@ -0,0 +1,29 @@
++CONFIG_ALIX=y
++CONFIG_DEBUG_BUGVERBOSE=y
++CONFIG_DMI=y
++CONFIG_DMIID=y
++CONFIG_DMI_SCAN_MACHINE_NON_EFI_FALLBACK=y
++# CONFIG_DMI_SYSFS is not set
++# CONFIG_GEOS is not set
++CONFIG_GPIOLIB=y
++CONFIG_GPIO_DEVRES=y
++# CONFIG_GPIO_F7188X is not set
++# CONFIG_GPIO_INTEL_MID is not set
++CONFIG_GPIO_SYSFS=y
++# CONFIG_HIGHMEM64G is not set
++CONFIG_HWMON=y
++# CONFIG_KEYBOARD_GPIO is not set
++# CONFIG_LEDS_CLEVO_MAIL is not set
++# CONFIG_M486 is not set
++# CONFIG_MATH_EMULATION is not set
++CONFIG_MGEODE_LX=y
++CONFIG_NLS=y
++CONFIG_PATA_CS5536=y
++CONFIG_PCI_LABEL=y
++# CONFIG_SCx200 is not set
++CONFIG_THERMAL_HWMON=y
++CONFIG_X86_CMOV=y
++CONFIG_X86_DEBUGCTLMSR=y
++CONFIG_X86_TSC=y
++CONFIG_X86_USE_3DNOW=y
++CONFIG_X86_USE_PPRO_CHECKSUM=y

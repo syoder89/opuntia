@@ -10,14 +10,13 @@ Subject: [PATCH] Fix bug with client variable in openvpn init script. Remove
  2 files changed, 2 insertions(+), 398 deletions(-)
 
 --- a/package/network/services/openvpn/files/openvpn.config
-+++ b/package/network/services/openvpn/files/openvpn.config
-@@ -1,398 +1,2 @@
--package openvpn
- 
+--- b/package/network/services/openvpn/files/openvpn.config
+@@ -2,399 +0,0 @@
+-
 -#################################################
 -# Sample to include a custom config file.       #
 -#################################################
- 
+-
 -config openvpn custom_config
 -
 -	# Set to 1 to enable this instance:
@@ -267,6 +266,7 @@ Subject: [PATCH] Fix bug with client variable in openvpn init script. Remove
 -	# of the privilege downgrade.
 -	option persist_key 1
 -	option persist_tun 1
+-	option user nobody
 -
 -	# Output a short status file showing
 -	# current connections, truncated
@@ -351,6 +351,7 @@ Subject: [PATCH] Fix bug with client variable in openvpn init script. Remove
 -	# Try to preserve some state across restarts.
 -	option persist_key 1
 -	option persist_tun 1
+-	option user nobody
 -
 -	# If you are connecting through an
 -	# HTTP proxy to reach the actual OpenVPN

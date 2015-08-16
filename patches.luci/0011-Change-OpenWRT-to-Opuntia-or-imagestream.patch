@@ -6,15 +6,15 @@ Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
 ---
  build/mkversion.sh                    |  4 ++--
  contrib/package/luci/Makefile         |  2 +-
- .../modules/admin-full/luasrc/controller/admin/network.lua     |  2 +-
- .../admin-full/luasrc/model/cbi/admin_system/system.lua        |  2 +-
- .../admin-full/luasrc/view/admin_network/diagnostics.htm       |  6 +++---
- .../modules/admin-full/luasrc/view/admin_status/index.htm      | 10 ++++------
- .../modules/admin-full/luasrc/view/admin_system/flashops.htm   |  4 ++--
+ .../modules/luci-mod-admin-full/luasrc/controller/admin/network.lua     |  2 +-
+ .../luci-mod-admin-full/luasrc/model/cbi/admin_system/system.lua        |  2 +-
+ .../luci-mod-admin-full/luasrc/view/admin_network/diagnostics.htm       |  6 +++---
+ .../modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm      | 10 ++++------
+ .../modules/luci-mod-admin-full/luasrc/view/admin_system/flashops.htm   |  4 ++--
  7 files changed, 14 insertions(+), 16 deletions(-)
 
---- a/build/mkversion.sh
-+++ b/build/mkversion.sh
+--- a/modules/luci-base/src/mkversion.sh
++++ b/modules/luci-base/src/mkversion.sh
 @@ -28,14 +28,14 @@ local pcall, dofile, _G = pcall, dofile,
  
  module "luci.version"
@@ -27,25 +27,14 @@ Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
  	distmanufacturer = _G.DISTRIB_MANUFACTURER
  	disthwrev = _G.DISTRIB_HWREV
  else
--	distname    = "${2:-OpenWrt}"
-+	distname    = "${2:-Opuntia}"
- 	distversion = "${3:-Development Snapshot}"
+-	distname    = "OpenWrt"
++	distname    = "Opuntia"
+ 	distversion = "Development Snapshot"
  	distproduct = "Unknown"
  	distmanufacturer = "ISis ImageStream Internet Solutions"
---- a/contrib/package/luci/Makefile
-+++ b/contrib/package/luci/Makefile
-@@ -46,7 +46,7 @@ endef
- define Package/luci-base/install
- 	$(call Package/luci/install/template,$(1),modules/base)
- 	$(PKG_BUILD_DIR)/build/mkversion.sh $(1)/usr/lib/lua/luci/version.lua \
--		"OpenWrt Firmware" \
-+		"Opuntia Firmware" \
- 		"$(OPENWRTVERSION)" \
- 		"trunk" \
- 		"$(PKG_VERSION)"
---- a/modules/admin-full/luasrc/controller/admin/network.lua
-+++ b/modules/admin-full/luasrc/controller/admin/network.lua
-@@ -208,7 +208,7 @@ function wifi_add()
+--- a/modules/luci-mod-admin-full/luasrc/controller/admin/network.lua
++++ b/modules/luci-mod-admin-full/luasrc/controller/admin/network.lua
+@@ -198,7 +198,7 @@ function wifi_add()
  	if dev then
  		local net = dev:add_wifinet({
  			mode       = "ap",
@@ -54,9 +43,9 @@ Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
  			encryption = "none"
  		})
  
---- a/modules/admin-full/luasrc/model/cbi/admin_system/system.lua
-+++ b/modules/admin-full/luasrc/model/cbi/admin_system/system.lua
-@@ -159,7 +159,7 @@ if has_ntpd then
+--- a/modules/luci-mod-admin-full/luasrc/model/cbi/admin_system/system.lua
++++ b/modules/luci-mod-admin-full/luasrc/model/cbi/admin_system/system.lua
+@@ -147,7 +147,7 @@ if has_ntpd then
  	if m:formvalue("cbid.system._timeserver._enable") then
  		m.uci:section("system", "timeserver", "ntp",
  			{
@@ -65,38 +54,38 @@ Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
  			}
  		)
  
---- a/modules/admin-full/luasrc/view/admin_network/diagnostics.htm
-+++ b/modules/admin-full/luasrc/view/admin_network/diagnostics.htm
-@@ -72,7 +72,7 @@ local has_traceroute6 = fs.access("/usr/
+--- a/modules/luci-mod-admin-full/luasrc/view/admin_network/diagnostics.htm
++++ b/modules/luci-mod-admin-full/luasrc/view/admin_network/diagnostics.htm
+@@ -63,7 +63,7 @@ local has_traceroute6 = fs.access("/usr/
  			<br />
  
  			<div style="width:30%; float:left">
--				<input style="margin: 5px 0" type="text" value="openwrt.org" name="ping" /><br />
+-				<input style="margin: 5px 0" type="text" value="dev.openwrt.org" name="ping" /><br />
 +				<input style="margin: 5px 0" type="text" value="imagestream.com" name="ping" /><br />
  				<% if has_ping6 then %>
  				<select name="ping_proto" style="width:auto">
  					<option value="" selected="selected"><%:IPv4%></option>
-@@ -85,7 +85,7 @@ local has_traceroute6 = fs.access("/usr/
+@@ -76,7 +76,7 @@ local has_traceroute6 = fs.access("/usr/
  			</div>
  
  			<div style="width:33%; float:left">
--				<input style="margin: 5px 0" type="text" value="openwrt.org" name="traceroute" /><br />
+-				<input style="margin: 5px 0" type="text" value="dev.openwrt.org" name="traceroute" /><br />
 +				<input style="margin: 5px 0" type="text" value="imagestream.com" name="traceroute" /><br />
  				<% if has_traceroute6 then %>
  				<select name="traceroute_proto" style="width:auto">
  					<option value="" selected="selected"><%:IPv4%></option>
-@@ -102,7 +102,7 @@ local has_traceroute6 = fs.access("/usr/
+@@ -93,7 +93,7 @@ local has_traceroute6 = fs.access("/usr/
  			</div>
  
  			<div style="width:33%; float:left;">
--				<input style="margin: 5px 0" type="text" value="openwrt.org" name="nslookup" /><br />
+-				<input style="margin: 5px 0" type="text" value="dev.openwrt.org" name="nslookup" /><br />
 +				<input style="margin: 5px 0" type="text" value="imagestream.com" name="nslookup" /><br />
  				<input type="button" value="<%:Nslookup%>" class="cbi-button cbi-button-apply" onclick="update_status(this.form.nslookup)" />
  			</div>
  
---- a/modules/admin-full/luasrc/view/admin_system/flashops.htm
-+++ b/modules/admin-full/luasrc/view/admin_system/flashops.htm
-@@ -64,7 +64,7 @@ $Id$
+--- a/modules/luci-mod-admin-full/luasrc/view/admin_system/flashops.htm
++++ b/modules/luci-mod-admin-full/luasrc/view/admin_system/flashops.htm
+@@ -55,7 +55,7 @@
  		<legend><%:Flash new firmware image%></legend>
  		<% if upgrade_avail then %>
  			<form method="post" action="<%=REQUEST_URI%>" enctype="multipart/form-data">
@@ -105,7 +94,7 @@ Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
  				<div class="cbi-section-node">
  					<div class="cbi-value">
  						<label class="cbi-value-title" for="keep"><%:Keep settings%>:</label>
-@@ -85,7 +85,7 @@ $Id$
+@@ -76,7 +76,7 @@
  				<% end %>
  			</form>
  		<% else %>

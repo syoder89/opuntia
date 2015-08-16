@@ -1,0 +1,21 @@
+--- a/package/libs/cyassl/Makefile
++++ b/package/libs/cyassl/Makefile
+@@ -45,12 +45,12 @@ CONFIGURE_ARGS += \
+ 	--enable-ecc \
+ 	--disable-examples
+ 
+-ifneq ($(CONFIG_TARGET_x86),)
+-	CONFIGURE_ARGS += --enable-intelasm
+-endif
+-ifneq ($(CONFIG_TARGET_x86_64),)
+-	CONFIGURE_ARGS += --enable-intelasm
+-endif
++#ifneq ($(CONFIG_TARGET_x86),)
++#	CONFIGURE_ARGS += --enable-intelasm
++#endif
++#ifneq ($(CONFIG_TARGET_x86_64),)
++#	CONFIGURE_ARGS += --enable-intelasm
++#endif
+ 
+ define Build/InstallDev
+ 	$(INSTALL_DIR) $(1)/usr/include

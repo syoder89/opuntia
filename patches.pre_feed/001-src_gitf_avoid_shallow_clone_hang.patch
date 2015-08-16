@@ -14,11 +14,3 @@
  	'src-gitsvn' => {
  		'init'	=> "git svn clone -r HEAD '%s' '%s'",
  		'update'	=> "git svn rebase",
-@@ -319,6 +326,7 @@ my %install_method = (
- 	'src-cpy' => \&install_generic,
- 	'src-link' => \&install_generic,
- 	'src-git' => \&install_generic,
-+	'src-gitf' => \&install_generic,
- 	'src-gitsvn' => \&install_generic,
- 	'src-bzr' => \&install_generic,
- 	'src-hg' => \&install_generic,

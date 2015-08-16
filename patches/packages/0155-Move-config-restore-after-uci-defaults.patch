@@ -18,9 +18,9 @@
  boot() {
  	[ -f /proc/mounts ] || /sbin/mount_root
  	[ -f /proc/jffs2_bbc ] && echo "S" > /proc/jffs2_bbc
-@@ -47,6 +58,7 @@ boot() {
- 	rm -f /tmp/wireless.tmp
+@@ -50,6 +61,7 @@ boot() {
  
+ 	/bin/board_detect
  	uci_apply_defaults
 +	restore_config
  	
@@ -28,17 +28,14 @@
  	/sbin/reload_config
 --- a/package/base-files/files/lib/preinit/80_mount_root
 +++ b/package/base-files/files/lib/preinit/80_mount_root
-@@ -5,14 +5,6 @@
+@@ -5,11 +5,6 @@
  do_mount_root() {
  	mount_root
  	boot_run_hook preinit_mount_root
 -	[ -f /sysupgrade.tgz ] && {
 -		echo "- config restore -"
 -		cd /
--		mv sysupgrade.tgz /tmp
--		tar xzf /tmp/sysupgrade.tgz
--		rm -f /tmp/sysupgrade.tgz
--		sync
+-		tar xzf /sysupgrade.tgz
 -	}
  }
  

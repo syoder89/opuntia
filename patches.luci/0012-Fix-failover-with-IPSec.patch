@@ -5,13 +5,13 @@ Subject: [PATCH 12/14] Fix failover with IPSec. Add multiwan option for
  restarting IPSec on failure/recovery.
 
 ---
- .../luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua            | 6 ++++++
+ .../luci-app-multiwan/luasrc/model/cbi/multiwan/multiwan.lua            | 6 ++++++
  1 file changed, 6 insertions(+)
 
-diff --git a/applications/luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua b/applications/luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
+diff --git a/applications/luci-app-multiwan/luasrc/model/cbi/multiwan/multiwan.lua b/applications/luci-app-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
 index 4797fbd..743485d 100644
---- a/applications/luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
-+++ b/applications/luci-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
+--- a/applications/luci-app-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
++++ b/applications/luci-app-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
 @@ -92,6 +92,12 @@ recovery.default = "5"
  recovery.optional = false
  recovery.rmempty = false

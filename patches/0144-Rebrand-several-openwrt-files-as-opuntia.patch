@@ -32,7 +32,7 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
 
 --- a/package/base-files/Makefile
 +++ b/package/base-files/Makefile
-@@ -111,10 +111,10 @@ define Package/base-files/install
+@@ -134,10 +134,10 @@ define Package/base-files/install
  
  	$(VERSION_SED) \
  		$(1)/etc/banner \
@@ -67,12 +67,12 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
 +%V
 --- a/target/imagebuilder/Makefile
 +++ b/target/imagebuilder/Makefile
-@@ -15,7 +15,7 @@ override MAKEFLAGS=
- PKG_OS:=$(word 2,$(subst -, ,$(shell $(HOSTCC) -dumpmachine)))
- PKG_CPU:=$(word 1,$(subst -, ,$(shell $(HOSTCC) -dumpmachine)))
+@@ -13,7 +13,7 @@ include $(INCLUDE_DIR)/feeds.mk
  
--IB_NAME:=OpenWrt-ImageBuilder-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),_$(SUBTARGET))-for-$(PKG_OS)-$(PKG_CPU)
-+IB_NAME:=Opuntia-ImageBuilder-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),_$(SUBTARGET))-for-$(PKG_OS)-$(PKG_CPU)
+ override MAKEFLAGS=
+ 
+-IB_NAME:=OpenWrt-ImageBuilder-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET)).$(HOST_OS)-$(HOST_ARCH)
++IB_NAME:=Opuntia-ImageBuilder-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET)).$(HOST_OS)-$(HOST_ARCH)
  PKG_BUILD_DIR:=$(BUILD_DIR)/$(IB_NAME)
  IB_KDIR:=$(patsubst $(TOPDIR)/%,$(PKG_BUILD_DIR)/%,$(KERNEL_BUILD_DIR))
  IB_LDIR:=$(patsubst $(TOPDIR)/%,$(PKG_BUILD_DIR)/%,$(LINUX_DIR))
@@ -102,23 +102,23 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
  }
 --- a/target/sdk/Makefile
 +++ b/target/sdk/Makefile
-@@ -15,7 +15,7 @@ override MAKEFLAGS=
- PKG_OS:=$(word 2,$(subst -, ,$(shell $(HOSTCC) -dumpmachine)))
- PKG_CPU:=$(word 1,$(subst -, ,$(shell $(HOSTCC) -dumpmachine)))
+@@ -12,7 +12,7 @@ include $(INCLUDE_DIR)/version.mk
  
--SDK_NAME:=OpenWrt-SDK-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)-for-$(PKG_OS)-$(PKG_CPU)-gcc-$(GCCV)_$(LIBC)-$(LIBCV)
-+SDK_NAME:=Opuntia-SDK-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)-for-$(PKG_OS)-$(PKG_CPU)-gcc-$(GCCV)_$(LIBC)-$(LIBCV)
+ override MAKEFLAGS=
+ 
+-SDK_NAME:=OpenWrt-SDK-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET))_gcc-$(GCCV)$(DIR_SUFFIX).$(HOST_OS)-$(HOST_ARCH)
++SDK_NAME:=Opuntia-SDK-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET))_gcc-$(GCCV)$(DIR_SUFFIX).$(HOST_OS)-$(HOST_ARCH)
  SDK_BUILD_DIR:=$(BUILD_DIR)/$(SDK_NAME)
  
  STAGING_SUBDIR_HOST := staging_dir/host
 --- a/target/toolchain/Makefile
 +++ b/target/toolchain/Makefile
-@@ -16,7 +16,7 @@ override MAKEFLAGS=
- PKG_OS:=$(word 2,$(subst -, ,$(shell $(HOSTCC) -dumpmachine)))
- PKG_CPU:=$(word 1,$(subst -, ,$(shell $(HOSTCC) -dumpmachine)))
+@@ -13,7 +13,7 @@ include $(INCLUDE_DIR)/host.mk
  
--TOOLCHAIN_NAME:=OpenWrt-Toolchain-$(BOARD)-for-$(ARCH)$(ARCH_SUFFIX)-gcc-$(GCCV)$(DIR_SUFFIX)
-+TOOLCHAIN_NAME:=Opuntia-Toolchain-$(BOARD)-for-$(ARCH)$(ARCH_SUFFIX)-gcc-$(GCCV)$(DIR_SUFFIX)
+ override MAKEFLAGS=
+ 
+-TOOLCHAIN_NAME:=OpenWrt-Toolchain-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET))_gcc-$(GCCV)$(DIR_SUFFIX).$(HOST_OS)-$(HOST_ARCH)
++TOOLCHAIN_NAME:=Opuntia-Toolchain-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET))_gcc-$(GCCV)$(DIR_SUFFIX).$(HOST_OS)-$(HOST_ARCH)
  TOOLCHAIN_BUILD_DIR:=$(BUILD_DIR)/$(TOOLCHAIN_NAME)
  EXCLUDE_DIRS:=*/ccache \
  	*/initial \

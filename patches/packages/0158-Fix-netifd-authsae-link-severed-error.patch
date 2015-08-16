@@ -1,6 +1,6 @@
 --- a/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
 +++ b/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-@@ -426,11 +426,11 @@ mac80211_prepare_vif() {
+@@ -456,11 +456,11 @@ mac80211_prepare_vif() {
  		;;
  		mesh)
  			json_get_vars key mesh_id
@@ -17,12 +17,10 @@
  		;;
  		monitor)
  			iw phy "$phy" interface add "$ifname" type monitor
-@@ -535,9 +535,8 @@ mac80211_setup_vif() {
- 				json_get_var mp_val "$var"
- 				[ -n "$mp_val" ] && iw dev "$ifname" set mesh_param "$var" "$mp_val"
- 			done
--
- 			# authsae
+@@ -594,7 +594,7 @@ mac80211_setup_vif() {
+ 	case "$mode" in
+ 		mesh)
+ 			# authsae or wpa_supplicant
 -			json_get_vars key
 +			json_get_vars key mesh_id
  			if [ -n "$key" ]; then

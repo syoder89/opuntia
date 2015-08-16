@@ -9,96 +9,36 @@ Subject: [PATCH] Update correct openvpn init script
 
 --- a/package/network/services/openvpn/files/openvpn.init
 +++ b/package/network/services/openvpn/files/openvpn.init
-@@ -1,27 +1,27 @@
- #!/bin/sh /etc/rc.common
--# Copyright (C) 2008-2013 OpenWrt.org
-+# Copyright (C) 2008-2011 OpenWrt.org
- # Copyright (C) 2008 Jo-Philipp Wich
+@@ -4,7 +4,7 @@
  # This is free software, licensed under the GNU General Public License v2.
  # See /LICENSE for more information.
  
 -START=90
--STOP=10
 +START=95
+ STOP=10
  
--USE_PROCD=1
--PROG=/usr/sbin/openvpn
-+SERVICE_DAEMONIZE=1
-+SERVICE_WRITE_PID=1
-+
-+EXTRA_COMMANDS="up down"
+ USE_PROCD=1
+@@ -59,14 +59,14 @@ openvpn_add_instance() {
+ 	local dir="$2"
+ 	local conf="$3"
  
- LIST_SEP="
- "
- 
- append_param() {
--	local s="$1"
--	local v="$2"
-+	local v="$1"
- 	case "$v" in
- 		*_*_*_*) v=${v%%_*}-${v#*_}; v=${v%%_*}-${v#*_}; v=${v%%_*}-${v#*_} ;;
- 		*_*_*)   v=${v%%_*}-${v#*_}; v=${v%%_*}-${v#*_} ;;
- 		*_*)     v=${v%%_*}-${v#*_} ;;
- 	esac
--	echo -n "$v" >> "/var/etc/openvpn-$s.conf"
-+	ARGS="$ARGS --$v"
- 	return 0
- }
- 
-@@ -29,7 +29,7 @@ append_bools() {
- 	local p; local v; local s="$1"; shift
- 	for p in $*; do
- 		config_get_bool v "$s" "$p"
--		[ "$v" = 1 ] && append_param "$s" "$p" && echo >> "/var/etc/openvpn-$s.conf"
-+		[ "$v" == 1 ] && append_param "$p"
- 	done
- }
- 
-@@ -39,7 +39,7 @@ append_params() {
- 		config_get v "$s" "$p"
- 		IFS="$LIST_SEP"
- 		for v in $v; do
--			[ -n "$v" ] && append_param "$s" "$p" && echo " $v" >> "/var/etc/openvpn-$s.conf"
-+			[ -n "$v" ] && append_param "$p" && ARGS="$ARGS $v"
- 		done
- 		unset IFS
- 	done
-@@ -51,42 +51,33 @@ section_enabled() {
- 	[ $enable -gt 0 ] || [ $enabled -gt 0 ]
- }
- 
--openvpn_add_instance() {
--	local name="$1"
--	local dir="$2"
--	local conf="$3"
--
 -	procd_open_instance
--	procd_set_param command "$PROG"	\
--		--syslog "openvpn($name)" \
--		--cd "$dir" \
--		--config "$conf"
--	procd_set_param file "$dir/$conf"
++	procd_open_instance $name
+ 	procd_set_param command "$PROG"	\
+ 		--syslog "openvpn($name)" \
+ 		--status "/var/run/openvpn.$name.status" \
+ 		--cd "$dir" \
+ 		--config "$conf"
+ 	procd_set_param file "$dir/$conf"
 -	procd_set_param respawn
--	procd_close_instance
--}
--
- start_instance() {
- 	local s="$1"
++	procd_set_param respawn 3600 10 0
+ 	procd_close_instance
+ }
  
- 	section_enabled "$s" || return 1
+@@ -92,10 +92,25 @@ start_instance() {
+ 	[ ! -d "/var/etc" ] && mkdir -p "/var/etc"
+ 	[ -f "/var/etc/openvpn-$s.conf" ] && rm "/var/etc/openvpn-$s.conf"
  
--	config_get config "$s" config
--
--	[ ! -d "/var/run" ] && mkdir -p "/var/run"
--
--	if [ ! -z "$config" ]; then
--		openvpn_add_instance "$s" "$(dirname "$config")" "$(basename "$config")"
--		return
--	fi
--
--	[ ! -d "/var/etc" ] && mkdir -p "/var/etc"
--	[ -f "/var/etc/openvpn-$s.conf" ] && rm "/var/etc/openvpn-$s.conf"
--
 +	# Check to be sure we specify a device. If none specified, we use dynamic tun/tap -- Scott
 +        config_get dev "$s" 'dev'
 +        if [ "$dev" = "" ] ; then
@@ -114,94 +54,20 @@ Subject: [PATCH] Update correct openvpn init script
 +                config_set "$s" client 0
 + 	fi
 + 
-++	ARGS=""
-+ 
-+ 	# append flags
  	# append flags
  	append_bools "$s" \
- 		auth_nocache auth_retry auth_user_pass_optional bind ccd_exclusive client client_cert_not_required \
+ 		auth_nocache auth_user_pass_optional bind ccd_exclusive client client_cert_not_required \
 -		client_to_client comp_noadapt disable \
 +		client_to_client comp_lzo comp_noadapt disable \
  		disable_occ down_pre duplicate_cn fast_io float http_proxy_retry \
  		ifconfig_noexec ifconfig_nowarn ifconfig_pool_linear management_forget_disconnect management_hold \
  		management_query_passwords management_signal mktun mlock mtu_test multihome mute_replay_warnings \
-@@ -99,7 +90,7 @@ start_instance() {
+@@ -108,7 +123,7 @@ start_instance() {
  	# append params
  	append_params "$s" \
- 		cd askpass auth auth_user_pass auth_user_pass_verify bcast_buffers ca cert \
+ 		cd askpass auth auth_retry auth_user_pass auth_user_pass_verify bcast_buffers ca cert \
 -		chroot cipher client_config_dir client_connect client_disconnect comp_lzo connect_freq \
-+		chroot cipher client_config_dir client_connect client_disconnect config connect_freq \
++		chroot cipher client_config_dir client_connect client_disconnect connect_freq \
  		connect_retry connect_timeout connect_retry_max crl_verify dev dev_node dev_type dh \
  		echo engine explicit_exit_notify fragment group hand_window hash_size \
  		http_proxy http_proxy_option http_proxy_timeout ifconfig ifconfig_pool \
-@@ -114,13 +105,66 @@ start_instance() {
- 		route_metric route_up rport script_security secret server server_bridge setenv shaper sndbuf \
- 		socks_proxy status status_version syslog tcp_queue_limit tls_auth \
- 		tls_cipher tls_remote tls_timeout tls_verify tmp_dir topology tran_window \
--		tun_mtu tun_mtu_extra txqueuelen user verb down push up \
--		ifconfig_ipv6 route_ipv6 server_ipv6 ifconfig_ipv6_pool ifconfig_ipv6_push iroute_ipv6
-+		tun_mtu tun_mtu_extra txqueuelen user verb down push up
-+
- 
--	openvpn_add_instance "$s" "/var/etc" "openvpn-$s.conf"
-+	SERVICE_PID_FILE="/var/run/openvpn-$s.pid"
-+	service_start /usr/sbin/openvpn --syslog "openvpn($s)" --writepid "$SERVICE_PID_FILE" $ARGS
- }
- 
--start_service() {
-+stop_instance() {
-+	local s="$1"
-+
-+	section_enabled "$s" || return 1
-+
-+	SERVICE_PID_FILE="/var/run/openvpn-$s.pid"
-+	service_stop /usr/sbin/openvpn
-+}
-+
-+reload_instance() {
-+	local s="$1"
-+
-+	section_enabled "$s" || return 1
-+
-+	SERVICE_PID_FILE="/var/run/openvpn-$s.pid"
-+	service_reload /usr/sbin/openvpn
-+}
-+
-+start() {
- 	config_load 'openvpn'
- 	config_foreach start_instance 'openvpn'
- }
-+
-+stop() {
-+	config_load 'openvpn'
-+	config_foreach stop_instance 'openvpn'
-+}
-+
-+reload() {
-+	config_load 'openvpn'
-+	config_foreach reload_instance 'openvpn'
-+}
-+
-+up() {
-+	local exists
-+	local instance
-+	config_load 'openvpn'
-+	for instance in "$@"; do
-+		config_get exists "$instance" 'TYPE'
-+		if [ "$exists" == "openvpn" ]; then
-+			start_instance "$instance"
-+		fi
-+	done
-+}
-+
-+down() {
-+	local exists
-+	local instance
-+	config_load 'openvpn'
-+	for instance in "$@"; do
-+		config_get exists "$instance" 'TYPE'
-+		if [ "$exists" == "openvpn" ]; then
-+			stop_instance "$instance"
-+		fi
-+	done
-+}

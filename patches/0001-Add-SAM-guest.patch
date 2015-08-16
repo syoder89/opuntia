@@ -1,14 +1,14 @@
 --- a/target/linux/x86/Makefile
 +++ b/target/linux/x86/Makefile
-@@ -11,7 +11,7 @@ BOARD:=x86
+@@ -10,7 +10,7 @@ ARCH:=i386
+ BOARD:=x86
  BOARDNAME:=x86
  FEATURES:=squashfs ext4 vdi vmdk pcmcia targz
- SUBTARGETS=generic olpc xen_domu ep80579 net5501 kvm_guest geos alix2 thincan \
--	   rdc
-+	   rdc sam
+-SUBTARGETS=generic xen_domu ep80579 geode kvm_guest rdc 64
++SUBTARGETS=generic xen_domu ep80579 geode kvm_guest rdc 64 sam
+ MAINTAINER:=Felix Fietkau <nbd@openwrt.org>
  
- LINUX_VERSION:=3.10.44
- 
+ KERNEL_PATCHVER:=3.18
 --- /dev/null
 +++ b/target/linux/x86/sam/base-files/etc/config/network
 @@ -0,0 +1,28 @@

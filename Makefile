@@ -1,5 +1,7 @@
 OPENWRT_GIT:=git://git.openwrt.org/openwrt.git
-OPENWRT_COMMIT:=94f447ad03964e9c1140a5fec29eada733cc054b
+OPENWRT_COMMIT:=bce56f0f97952b18d75a245a147d2e9915e93b2f
+#OPENWRT_COMMIT:=d0b22067afe3b78a48d3d65a783576549497f951
+#OPENWRT_COMMIT:=94f447ad03964e9c1140a5fec29eada733cc054b
 #OPENWRT_COMMIT:=33b7bc6d7a8417692f0e0818f93215c09a2dcdea
 #OPENWRT_COMMIT:=6c049d04b6be1e953865f1361f8b6481a0ba9558
 #OPENWRT_COMMIT:=5899ac4d0d971fb46077915153f844d44089726b
@@ -18,9 +20,13 @@ configured=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_configured
 BUILD_NUMBER?=1
 NUM_CPU=$(shell grep '^processor' /proc/cpuinfo | wc -l)
 PARALLEL_MAKE=-j $(shell echo $$(( $(NUM_CPU) * 2 )))
+CACHE_DIR?=$(shell pwd)/ccache
 
 build: prepare $(built)
-	(make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= defconfig world || (make -C $(BUILD_DIR) DESTDIR= package/bash/clean && make -C $(BUILD_DIR) DESTDIR= -j1 package/bash/compile && make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= world || make -C $(BUILD_DIR) DESTDIR= world V=s)) && touch $(built)
+	@if [ ! -d $(CACHE_DIR) ] ; then \
+		mkdir $(CACHE_DIR); \
+	fi; \
+	(export CCACHE_DIR=$(CACHE_DIR) && make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= defconfig world || (make -C $(BUILD_DIR) DESTDIR= package/bash/clean && make -C $(BUILD_DIR) DESTDIR= -j1 package/bash/compile && make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= world || make -C $(BUILD_DIR) DESTDIR= world V=s)) && touch $(built)
 #	(make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= defconfig world || make -C $(BUILD_DIR) DESTDIR= world V=s) && touch $(built)
 
 install: $(built)
@@ -45,8 +51,9 @@ install: $(built)
 	
 checkout_openwrt:
 	@if [ ! -d $(BUILD_DIR) ] ; then \
-		git clone $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
+		git clone --depth $(OPENWRT_DEPTH) $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
 	fi
+#		git clone $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
 #		git clone --depth $(OPENWRT_DEPTH) $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
 
 $(pre_patches):

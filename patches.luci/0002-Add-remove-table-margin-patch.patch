@@ -8,8 +8,8 @@ Subject: [PATCH 02/14] Add remove table margin patch
  1 file changed, 31 insertions(+)
  create mode 100644 imagestream/openwrt-luci/patches/015-luci_remove_table_margin.patch
 
---- a/modules/admin-full/luasrc/view/admin_network/iface_overview.htm
-+++ b/modules/admin-full/luasrc/view/admin_network/iface_overview.htm
+--- a/modules/luci-mod-admin-full/luasrc/view/admin_network/iface_overview.htm
++++ b/modules/luci-mod-admin-full/luasrc/view/admin_network/iface_overview.htm
 @@ -216,7 +216,7 @@ You may obtain a copy of the License at
  	<fieldset class="cbi-section">
  		<legend><%:Interface Overview%></legend>
@@ -19,8 +19,8 @@ Subject: [PATCH 02/14] Add remove table margin patch
  			<tr class="cbi-section-table-titles">
  				<th class="cbi-section-table-cell"><%:Network%></th>
  				<th class="cbi-section-table-cell" style="text-align:left"><%:Status%></th>
---- a/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm
-+++ b/modules/admin-full/luasrc/view/admin_network/wifi_overview.htm
+--- a/modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm
++++ b/modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm
 @@ -365,7 +365,7 @@ You may obtain a copy of the License at
  	<% for _, dev in ipairs(devices) do local nets = dev:get_wifinets() %>
  	<!-- device <%=dev:name()%> -->

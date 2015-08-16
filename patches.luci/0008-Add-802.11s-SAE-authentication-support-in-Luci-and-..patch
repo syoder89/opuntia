@@ -5,13 +5,13 @@ Subject: [PATCH 08/14] Add 802.11s SAE authentication support in Luci and
  .config
 
 ---
- .../admin-full/luasrc/model/cbi/admin_network/wifi.lua  | 17 +++++++++++++++--
+ .../luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua  | 17 +++++++++++++++--
  1 file changed, 15 insertions(+), 2 deletions(-)
 
-diff --git a/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua b/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
+diff --git a/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua b/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
 index 6c06b21..6aefa26 100644
---- a/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
-+++ b/modules/admin-full/luasrc/model/cbi/admin_network/wifi.lua
+--- a/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
++++ b/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
 @@ -391,7 +391,16 @@ s:tab("encryption", translate("Wireless Security"))
  s:tab("macfilter", translate("MAC-Filter"))
  s:tab("advanced", translate("Advanced Settings"))
