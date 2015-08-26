@@ -1,0 +1,24 @@
+--- /dev/null
++++ b/feeds/packages/net/squid/patches/200-scott-https-icap-change-ip-to-server-name.patch
+@@ -0,0 +1,21 @@
++--- a/src/client_side_request.cc
+++++ b/src/client_side_request.cc
++@@ -1696,6 +1696,18 @@ ClientHttpRequest::doCallouts()
++ 
++ #if USE_ADAPTATION
++         if (!calloutContext->adaptation_acl_check_done) {
+++        /* Scott modified to allow ICAP access to the real server name with HTTPS */
+++#if USE_OPENSSL
+++            if (calloutContext->http->getConn()->serverBump() && !calloutContext->http->getConn()->serverBump()->clientSni.isEmpty()) {
+++                debugs(81, 5, "Adaptation changine server name to " << calloutContext->http->getConn()->serverBump()->clientSni.c_str());
+++                request->SetHost(calloutContext->http->getConn()->serverBump()->clientSni.c_str());
+++                request->urlpath = urlCanonical(request);
+++                request->header.delById(HDR_HOST);
+++                httpHeaderPutStrf(&request->header, HDR_HOST, "%s:%d",
+++                              request->GetHost(),
+++                              (int) request->port);
+++            }
+++#endif
++             calloutContext->adaptation_acl_check_done = true;
++             if (Adaptation::AccessCheck::Start(
++                         Adaptation::methodReqmod, Adaptation::pointPreCache,
