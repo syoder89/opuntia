@@ -1,32 +1,29 @@
 --- a/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
 +++ b/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-@@ -451,12 +451,28 @@ mac80211_prepare_vif() {
+@@ -481,12 +481,28 @@ mac80211_prepare_vif() {
  		;;
  	esac
  
 +	# Ensure the interface is down
-+	ip link show dev $ifname | grep ',UP' > /dev/null
++	ip link show dev "$ifname" | grep ',UP' > /dev/null
 +	if [ "$?" = "0" ] ; then
 +		echo "Interface $ifname is up prematurely! Taking it back down..."
-+		ip link set $ifname down
++		ip link set "$ifname" down
 +	fi
  	if [ "$mode" != "ap" ]; then
  		# ALL ap functionality will be passed to hostapd
--		# All interfaces must have unique mac addresses
--		# which can either be explicitly set in the device
--		# section, or automatically generated
--		ifconfig "$ifname" hw ether "$macaddr"
+ 		# All interfaces must have unique mac addresses
+ 		# which can either be explicitly set in the device
+ 		# section, or automatically generated
+-		ip link set dev "$ifname" address "$macaddr"
 +		while : ; do
-+			# All interfaces must have unique mac addresses
-+			# which can either be explicitly set in the device
-+			# section, or automatically generated
-+			ifconfig "$ifname" hw ether "$macaddr"
++			ip link set dev "$ifname" address "$macaddr"
 +			ret="$?"
 +			if [ "$ret" == "0" ] ; then
 +				break
 +			else
 +				echo "Error $ret setting $ifname mac to $macaddr"
-+				ip link set $ifname down
++				ip link set "$ifname" down
 +				sleep 1
 +			fi
 +		done

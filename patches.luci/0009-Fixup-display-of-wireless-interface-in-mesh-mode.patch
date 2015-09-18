@@ -7,11 +7,9 @@ Subject: [PATCH 09/14] Fixup display of wireless interface in mesh mode
  .../openwrt-luci/modules/luci-base/luasrc/model/network.lua      | 16 ++++++++++++----
  1 file changed, 12 insertions(+), 4 deletions(-)
 
-diff --git a/modules/luci-base/luasrc/model/network.lua b/modules/luci-base/luasrc/model/network.lua
-index 389eeef..aea8c97 100644
 --- a/modules/luci-base/luasrc/model/network.lua
 +++ b/modules/luci-base/luasrc/model/network.lua
-@@ -1378,11 +1378,15 @@ function wifinet.mode(self)
+@@ -1390,11 +1390,15 @@ function wifinet.mode(self)
  end
  
  function wifinet.ssid(self)
@@ -29,24 +27,21 @@ index 389eeef..aea8c97 100644
  end
  
  function wifinet.network(self)
-@@ -1433,11 +1437,15 @@ function wifinet.active_mode_i18n(self)
+@@ -1446,11 +1450,15 @@ function wifinet.active_mode_i18n(self)
  end
  
  function wifinet.active_ssid(self)
--	return _stror(self.iwinfo.ssid, self.iwdata.ssid)
-+	return _stror(self.iwinfo.ssid, self.iwdata.ssid) or _stror(self.iwinfo.mesh_id, self.iwdata.mesh_id) 
+-	return _stror(self.iwdata.ssid, self.iwinfo.ssid)
++	return _stror(self.iwdata.ssid, self.iwdata.ssid) or _stror(self.iwdata.mesh_id, self.iwdata.mesh_id) 
  end
  
  function wifinet.active_bssid(self)
--	return _stror(self.iwinfo.bssid, self.iwdata.bssid) or "00:00:00:00:00:00"
-+	return _stror(self.iwinfo.bssid, self.iwdata.bssid) or _stror(self.iwinfo.mesh_id, self.iwdata.mesh_id) or "00:00:00:00:00:00"
+-	return _stror(self.iwdata.bssid, self.iwinfo.bssid) or "00:00:00:00:00:00"
++	return _stror(self.iwdata.bssid, self.iwdata.bssid) or _stror(self.iwdata.mesh_id, self.iwdata.mesh_id) or "00:00:00:00:00:00"
 +end
 +
 +function wifinet.active_mesh_id(self)
-+	return _stror(self.iwinfo.mesh_id, self.iwdata.mesh_id)
++	return _stror(self.iwdata.mesh_id, self.iwdata.mesh_id)
  end
  
  function wifinet.active_encryption(self)
--- 
-2.0.0
-

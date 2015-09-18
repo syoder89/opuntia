@@ -1,0 +1,27 @@
+--- a/package/feeds/packages/squid/Makefile
++++ b/package/feeds/packages/squid/Makefile
+@@ -51,19 +51,22 @@ endef
+ 
+ CONFIGURE_ARGS += \
+ 	--config-cache \
++	--enable-storeio=no \
++	--enable-diskio=no \
++	--disable-wccp \
++	--disable-wccpv2 \
++	--disable-htcp \
+ 	--datadir=/usr/share/squid \
+ 	--libexecdir=/usr/lib/squid \
+ 	--sysconfdir=/etc/squid \
+ 	--enable-shared \
+ 	--disable-static \
+ 	--enable-icmp \
+-	--enable-delay-pools \
+ 	--enable-icap-client \
+ 	--enable-kill-parent-hack \
+ 	--disable-snmp \
+ 	--enable-ssl \
+ 	--enable-ssl-crtd \
+-	--enable-cache-digests \
+ 	--enable-linux-netfilter \
+ 	--disable-unlinkd \
+ 	--enable-x-accelerator-vary \

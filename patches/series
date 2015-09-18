@@ -41,8 +41,8 @@ kernel/0046-Linux-3.18-updates.patch
 kernel/0010-Dummy-to-loopback.patch
 0002-combine-feed-versioning-to-release-number.patch
 0180-CCACHE-from-env.patch
-packages/0181-strongswan-eap-tls-copy-fix.patch
 packages/0182-wolfcrypt-fix-missing-register.patch
 packages/0183-squid-minimal.patch
 packages/0184-squid-https-icap-sni-support.patch
-packages/0185-proc-move-dev-shm-to-tmp-shm.patch
+kernel/0058-wpj344-mac-fixes.patch
+packages/0186-squid-reduce-size.patch
