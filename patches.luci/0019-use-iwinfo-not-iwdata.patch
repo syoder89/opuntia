@@ -1,0 +1,21 @@
+--- a/modules/luci-base/luasrc/model/network.lua
++++ b/modules/luci-base/luasrc/model/network.lua
+@@ -1450,15 +1450,15 @@ function wifinet.active_mode_i18n(self)
+ end
+ 
+ function wifinet.active_ssid(self)
+-	return _stror(self.iwdata.ssid, self.iwdata.ssid) or _stror(self.iwdata.mesh_id, self.iwdata.mesh_id) 
++	return _stror(self.iwinfo.ssid, self.iwinfo.ssid) or _stror(self.iwinfo.mesh_id, self.iwinfo.mesh_id) 
+ end
+ 
+ function wifinet.active_bssid(self)
+-	return _stror(self.iwdata.bssid, self.iwdata.bssid) or _stror(self.iwdata.mesh_id, self.iwdata.mesh_id) or "00:00:00:00:00:00"
++	return _stror(self.iwinfo.bssid, self.iwinfo.bssid) or _stror(self.iwinfo.mesh_id, self.iwinfo.mesh_id) or "00:00:00:00:00:00"
+ end
+ 
+ function wifinet.active_mesh_id(self)
+-	return _stror(self.iwdata.mesh_id, self.iwdata.mesh_id)
++	return _stror(self.iwinfo.mesh_id, self.iwinfo.mesh_id)
+ end
+ 
+ function wifinet.active_encryption(self)

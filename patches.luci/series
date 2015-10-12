@@ -13,3 +13,4 @@
 0016-Rework-QOS-Page.patch
 0017-initial-luCI-802.11ac-support.patch
 0018-disable-mesh-and_adhoc-for-ac.patch
+0019-use-iwinfo-not-iwdata.patch

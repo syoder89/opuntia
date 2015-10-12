@@ -46,3 +46,5 @@ packages/0183-squid-minimal.patch
 packages/0184-squid-https-icap-sni-support.patch
 kernel/0058-wpj344-mac-fixes.patch
 packages/0186-squid-reduce-size.patch
+0187-openvpn-iproute2-path-wrong.patch
+kernel/0059-wpj558-mac-fixes.patch

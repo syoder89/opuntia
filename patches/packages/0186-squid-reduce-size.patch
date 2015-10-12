@@ -1,5 +1,5 @@
---- a/package/feeds/packages/squid/Makefile
-+++ b/package/feeds/packages/squid/Makefile
+--- a/feeds/packages/net/squid/Makefile
++++ b/feeds/packages/net/squid/Makefile
 @@ -51,19 +51,22 @@ endef
  
  CONFIGURE_ARGS += \
