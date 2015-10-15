@@ -14,3 +14,5 @@
 0017-initial-luCI-802.11ac-support.patch
 0018-disable-mesh-and_adhoc-for-ac.patch
 0019-use-iwinfo-not-iwdata.patch
+0020-add-wpm.patch
+0021-fix-process-list.patch

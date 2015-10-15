@@ -1,0 +1,14 @@
+--- a/feeds/routing/mrd6/files/mrd6.conf
++++ b/feeds/routing/mrd6/files/mrd6.conf
+@@ -1,7 +1,7 @@
+-log {
+-	attach stderr normal;
+-	attach default "/var/log/mrd6.log" message_err;
+-}
++//log {
++//	attach stderr normal;
++//	attach default "/var/log/mrd6.log" message_err;
++//}
+ 
+ //interfaces disable br-lan;  // Should be vlan0 + eth1 but Linux bridge seems broken for multicast
+ //interfaces disable eth0; // Interface to internal bridge

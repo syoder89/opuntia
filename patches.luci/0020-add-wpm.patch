@@ -1,0 +1,19 @@
+--- a/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
++++ b/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
+@@ -978,4 +978,16 @@ if hwtype == "atheros" or hwtype == "mac
+ 	end
+ end
+ 
++if hwtype == "atheros" or hwtype == "mac80211" then
++	mfp = s:taboption("encryption", ListValue, "ieee80211w", translate("Management Frame Protection"))
++	mfp:value("0", translate("Disabled"))
++	mfp:value("1", translate("Optional"))
++	mfp:value("2", translate("Required"))
++	mfp:depends("encryption", "psk")
++	mfp:depends("encryption", "psk2")
++	mfp:depends("encryption", "psk-mixed")
++	mfp:depends("encryption", "wpa")
++	mfp:depends("encryption", "wpa2")
++end
++
+ return m
