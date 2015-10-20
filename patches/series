@@ -50,3 +50,4 @@ packages/0186-squid-reduce-size.patch
 kernel/0059-wpj558-mac-fixes.patch
 package/0066-conntrack-tools-logging.patch
 package/0067-mrd6-disable-logging.patch
+0060-Fix-GPIO-button-direction.patch
