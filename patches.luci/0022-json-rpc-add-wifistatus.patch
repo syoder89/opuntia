@@ -1,0 +1,25 @@
+--- a/modules/luci-base/luasrc/sys.lua
++++ b/modules/luci-base/luasrc/sys.lua
+@@ -621,6 +621,22 @@ function wifi.getiwinfo(ifname)
+ 	end
+ end
+ 
++function wifi.getwifistatus(ifname)
++	local s    = require "luci.tools.status"
++	return s.wifi_network(ifname)
++end
++
++function wifi.getallwifistatus()
++	local s    = require "luci.tools.status"
++	return s.wifi_networks()
++end
++
++function wifi.getiwscan(radio)
++	local iw
++	iw = wifi.getiwinfo(radio)
++	return iw.scanlist
++end
++
+ 
+ init = {}
+ init.dir = "/etc/init.d/"
