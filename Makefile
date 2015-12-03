@@ -23,12 +23,13 @@ BUILD_NUMBER?=1
 NUM_CPU=$(shell grep '^processor' /proc/cpuinfo | wc -l)
 PARALLEL_MAKE=-j $(shell echo $$(( $(NUM_CPU) * 2 )))
 CACHE_DIR?=$(shell pwd)/ccache
+BUILD_OPTS=
 
 build: prepare $(built)
 	@if [ ! -d $(CACHE_DIR) ] ; then \
 		mkdir $(CACHE_DIR); \
 	fi; \
-	(export CCACHE_DIR=$(CACHE_DIR) && make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= defconfig world || (make -C $(BUILD_DIR) DESTDIR= package/bash/clean && make -C $(BUILD_DIR) DESTDIR= -j1 package/bash/compile && make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= world || make -C $(BUILD_DIR) DESTDIR= world V=s)) && touch $(built)
+	(export CCACHE_DIR=$(CACHE_DIR) && make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) defconfig world || (make -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) package/bash/clean && make -C $(BUILD_DIR) DESTDIR= -j1 $(BUILD_OPTS) package/bash/compile && make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) world || make -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) world V=s)) && touch $(built)
 #	(make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= defconfig world || make -C $(BUILD_DIR) DESTDIR= world V=s) && touch $(built)
 
 install: $(built)

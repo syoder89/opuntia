@@ -17,3 +17,4 @@
 0020-add-wpm.patch
 0021-fix-process-list.patch
 0022-json-rpc-add-wifistatus.patch
+0023-add-collectd-defaults.patch

@@ -51,3 +51,4 @@ kernel/0059-wpj558-mac-fixes.patch
 package/0066-conntrack-tools-logging.patch
 package/0067-mrd6-disable-logging.patch
 0060-Fix-GPIO-button-direction.patch
+packages/0187-collectd-iwinfo-morestats.patch

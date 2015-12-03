@@ -1,0 +1,183 @@
+--- /dev/null
++++ b/feeds/packages/utils/collectd/patches/999-scott-iwinfo-morestats.patch
+@@ -0,0 +1,180 @@
++--- a/src/iwinfo.c
+++++ b/src/iwinfo.c
++@@ -52,12 +52,15 @@ static int iwinfo_config(const char *key
++ 	return 0;
++ }
++ 
++-static void iwinfo_submit(const char *ifname, const char *type, int value)
+++static void new_iwinfo_submit(const char *ifname, const char *type, int derive, const char *type_instance, int value)
++ {
++ 	value_t values[1];
++ 	value_list_t vl = VALUE_LIST_INIT;
++ 
++-	values[0].gauge = value;
+++	if (derive)
+++		values[0].derive = (unsigned int)value;
+++	else
+++		values[0].gauge = value;
++ 
++ 	vl.values = values;
++ 	vl.values_len = 1;
++@@ -66,40 +69,117 @@ static void iwinfo_submit(const char *if
++ 	sstrncpy(vl.plugin, "iwinfo", sizeof(vl.plugin));
++ 	sstrncpy(vl.plugin_instance, ifname, sizeof(vl.plugin_instance));
++ 	sstrncpy(vl.type, type, sizeof(vl.type));
++-	/*sstrncpy(vl.type_instance, "", sizeof(vl.type_instance));*/
+++	if (type_instance)
+++		sstrncpy(vl.type_instance, type_instance, sizeof(vl.type_instance));
++ 
++ 	plugin_dispatch_values(&vl);
++ }
++ 
+++static void iwinfo_submit(const char *ifname, const char *type, int value)
+++{
+++	new_iwinfo_submit(ifname, type, 0, NULL, value);
+++}
+++
++ static void iwinfo_process(const char *ifname)
++ {
++ 	int val;
++ 	char buf[IWINFO_BUFSIZE];
++ 	const struct iwinfo_ops *iw = iwinfo_backend(ifname);
+++	int i;
+++	const char macstr[18];
+++	struct iwinfo_assoclist_entry *e;
+++	const char instance[256];
++ 
++ 	/* does appear to be a wifi iface */
++ 	if (iw)
++ 	{
+++		iw->ssid(ifname, buf);
+++		if (iw->frequency(ifname, &val))
+++			val = 0;
+++		sprintf(instance, "%s_%s_%d", ifname, buf, val/1000);
+++		iwinfo_submit(instance, "frequency", val);
+++
++ 		if (iw->bitrate(ifname, &val))
++ 			val = 0;
++-		iwinfo_submit(ifname, "bitrate", val * 1000);
+++		iwinfo_submit(instance, "bitrate", val * 1000);
+++
+++		if (iw->tx_power(ifname, &val))
+++			val = 0;
+++		iwinfo_submit(instance, "tx_power", val);
+++
+++		if (iw->channel(ifname, &val))
+++			val = 0;
+++		iwinfo_submit(instance, "channel", val);
++ 
++ 		if (iw->signal(ifname, &val))
++ 			val = 0;
++-		iwinfo_submit(ifname, "signal_power", val);
+++		iwinfo_submit(instance, "signal_power", val);
++ 
++ 		if (iw->noise(ifname, &val))
++ 			val = 0;
++-		iwinfo_submit(ifname, "signal_noise", val);
+++		iwinfo_submit(instance, "signal_noise", val);
++ 
++ 		if (iw->quality(ifname, &val))
++ 			val = 0;
++-		iwinfo_submit(ifname, "signal_quality", val);
+++		iwinfo_submit(instance, "signal_quality", val);
++ 
++ 		if (iw->assoclist(ifname, buf, &val))
++ 			val = 0;
++-		iwinfo_submit(ifname, "stations",
+++		iwinfo_submit(instance, "stations",
++ 		              val / sizeof(struct iwinfo_assoclist_entry));
+++
+++		for (i = 0; i < val; i += sizeof(struct iwinfo_assoclist_entry))
+++		{
+++			e = (struct iwinfo_assoclist_entry *) &buf[i];
+++
+++			sprintf(macstr, "%02X:%02X:%02X:%02X:%02X:%02X",
+++				e->mac[0], e->mac[1], e->mac[2],
+++				e->mac[3], e->mac[4], e->mac[5]);
+++
+++			new_iwinfo_submit(instance, "assoc_station_signal", 0, macstr,  e->signal);
+++			new_iwinfo_submit(instance, "assoc_station_noise", 0, macstr,  e->noise);
+++			new_iwinfo_submit(instance, "assoc_station_inactive", 0, macstr,  e->inactive);
+++			new_iwinfo_submit(instance, "assoc_station_rx_packets", 1, macstr,  e->rx_packets);
+++			new_iwinfo_submit(instance, "assoc_station_tx_packets", 1, macstr,  e->tx_packets);
+++			new_iwinfo_submit(instance, "assoc_station_rx_bytes", 1, macstr,  e->rx_bytes);
+++			new_iwinfo_submit(instance, "assoc_station_tx_bytes", 1, macstr,  e->tx_bytes);
+++			new_iwinfo_submit(instance, "assoc_station_rx_rate", 0, macstr,  e->rx_rate.rate);
+++			new_iwinfo_submit(instance, "assoc_station_tx_rate", 0, macstr,  e->tx_rate.rate);
+++
+++			if (e->rx_rate.vht_mcs >= 0)
+++			{
+++				new_iwinfo_submit(instance, "assoc_station_rx_vht_mcs", 0, macstr,  e->rx_rate.vht_mcs);
+++				new_iwinfo_submit(instance, "assoc_station_rx_40mhz", 0, macstr,  e->rx_rate.is_40mhz);
+++				new_iwinfo_submit(instance, "assoc_station_rx_80mhz", 0, macstr,  e->rx_rate.is_80mhz);
+++				new_iwinfo_submit(instance, "assoc_station_rx_80p80mhz", 0, macstr,  e->rx_rate.is_80p80mhz);
+++				new_iwinfo_submit(instance, "assoc_station_rx_160mhz", 0, macstr,  e->rx_rate.is_160mhz);
+++				new_iwinfo_submit(instance, "assoc_station_rx_short_gi", 0, macstr,  e->rx_rate.is_short_gi);
+++				new_iwinfo_submit(instance, "assoc_station_rx_vht_nss", 0, macstr,  e->rx_rate.vht_nss);
+++			}
+++			else if (e->rx_rate.mcs >= 0)
+++			{
+++				new_iwinfo_submit(instance, "assoc_station_rx_mcs", 0, macstr,  e->rx_rate.mcs);
+++				new_iwinfo_submit(instance, "assoc_station_rx_40mhz", 0, macstr,  e->rx_rate.is_40mhz);
+++				new_iwinfo_submit(instance, "assoc_station_rx_short_gi", 0, macstr,  e->rx_rate.is_short_gi);
+++			}
+++
+++			if (e->tx_rate.vht_mcs >= 0)
+++			{
+++				new_iwinfo_submit(instance, "assoc_station_tx_vht_mcs", 0, macstr,  e->tx_rate.vht_mcs);
+++				new_iwinfo_submit(instance, "assoc_station_tx_40mhz", 0, macstr,  e->tx_rate.is_40mhz);
+++				new_iwinfo_submit(instance, "assoc_station_tx_80mhz", 0, macstr,  e->tx_rate.is_80mhz);
+++				new_iwinfo_submit(instance, "assoc_station_tx_80p80mhz", 0, macstr,  e->tx_rate.is_80p80mhz);
+++				new_iwinfo_submit(instance, "assoc_station_tx_160mhz", 0, macstr,  e->tx_rate.is_160mhz);
+++				new_iwinfo_submit(instance, "assoc_station_tx_short_gi", 0, macstr,  e->tx_rate.is_short_gi);
+++				new_iwinfo_submit(instance, "assoc_station_tx_vht_nss", 0, macstr,  e->tx_rate.vht_nss);
+++			}
+++			else if (e->tx_rate.mcs >= 0)
+++			{
+++				new_iwinfo_submit(instance, "assoc_station_tx_mcs", 0, macstr,  e->tx_rate.mcs);
+++				new_iwinfo_submit(instance, "assoc_station_tx_40mhz", 0, macstr,  e->tx_rate.is_40mhz);
+++				new_iwinfo_submit(instance, "assoc_station_tx_short_gi", 0, macstr,  e->tx_rate.is_short_gi);
+++			}
+++		}
++ 	}
++ 
++ 	iwinfo_finish();
++--- a/src/types.db
+++++ b/src/types.db
++@@ -228,6 +228,33 @@ vs_memory		value:GAUGE:0:922337203685477
++ vs_processes		value:GAUGE:0:65535
++ vs_threads		value:GAUGE:0:65535
++ stations		value:GAUGE:0:256
+++tx_power		value:GAUGE:0:U
+++channel			value:GAUGE:0:U
+++assoc_station_signal    value:GAUGE:-200:200
+++assoc_station_noise     value:GAUGE:-200:200
+++assoc_station_inactive  value:GAUGE:0:U
+++assoc_station_rx_packets        value:DERIVE:0:U
+++assoc_station_tx_packets        value:DERIVE:0:U
+++assoc_station_rx_bytes  value:DERIVE:0:U
+++assoc_station_tx_bytes  value:DERIVE:0:U
+++assoc_station_rx_rate   value:GAUGE:0:U
+++assoc_station_tx_rate   value:GAUGE:0:U
+++assoc_station_rx_vht_mcs        value:GAUGE:0:256
+++assoc_station_rx_40mhz  value:GAUGE:0:1
+++assoc_station_rx_80mhz  value:GAUGE:0:1
+++assoc_station_rx_80p80mhz       value:GAUGE:0:1
+++assoc_station_rx_160mhz value:GAUGE:0:1
+++assoc_station_rx_short_gi       value:GAUGE:0:1
+++assoc_station_rx_vht_nss        value:GAUGE:0:256
+++assoc_station_rx_mcs    value:GAUGE:0:256
+++assoc_station_tx_vht_mcs        value:GAUGE:0:256
+++assoc_station_tx_40mhz  value:GAUGE:0:1
+++assoc_station_tx_80mhz  value:GAUGE:0:1
+++assoc_station_tx_80p80mhz       value:GAUGE:0:1
+++assoc_station_tx_160mhz value:GAUGE:0:1
+++assoc_station_tx_short_gi       value:GAUGE:0:1
+++assoc_station_tx_vht_nss        value:GAUGE:0:256
+++assoc_station_tx_mcs    value:GAUGE:0:256
++ 
++ #
++ # Legacy types

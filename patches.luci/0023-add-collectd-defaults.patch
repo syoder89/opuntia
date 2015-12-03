@@ -1,0 +1,101 @@
+--- a/applications/luci-app-statistics/root/etc/config/luci_statistics
++++ b/applications/luci-app-statistics/root/etc/config/luci_statistics
+@@ -40,7 +40,7 @@ config statistics 'collectd_logfile'
+ 	option Timestamp '1'
+ 
+ config statistics 'collectd_network'
+-	option enable '0'
++	option enable '1'
+ 
+ config statistics 'collectd_unixsock'
+ 	option enable '0'
+@@ -50,15 +50,16 @@ config statistics 'collectd_unixsock'
+ # input plugins
+ 
+ config statistics 'collectd_conntrack'
+-	option enable '0'
++	option enable '1'
+ 
+ config statistics 'collectd_cpu'
+-	option enable '0'
++	option enable '1'
++	option ValuesPercentage '1'
+ 
+ config statistics 'collectd_df'
+-	option enable '0'
+-	option Devices '/dev/mtdblock/4'
+-	option MountPoints '/jffs'
++	option enable '1'
++	option Devices '/dev/mtdblock4'
++	option MountPoints '/overlay'
+ 	option FSTypes 'tmpfs'
+ 	option IgnoreSelected '0'
+ 
+@@ -113,10 +114,10 @@ config statistics 'collectd_load'
+ 	option enable '1'
+ 
+ config statistics 'collectd_memory'
+-	option enable '0'
++	option enable '1'
+ 
+ config statistics 'collectd_netlink'
+-	option enable '0'
++	option enable '1'
+ 	option IgnoreSelected '0'
+ 	option VerboseInterfaces 'br-lan'
+ 	option QDiscs 'br-lan'
+@@ -131,14 +132,14 @@ config statistics 'collectd_olsrd'
+ 	option Host '127.0.0.1'
+ 
+ config statistics 'collectd_ping'
+-	option enable '0'
++	option enable '1'
+ 	option TTL '127'
+ 	option Interval '30'
+-	option Hosts '127.0.0.1'
++	option Hosts '8.8.8.8 8.8.4.4 205.159.243.1'
+ 
+ config statistics 'collectd_processes'
+-	option enable '0'
+-	option Processes 'uhttpd dnsmasq dropbear'
++	option enable '1'
++	option Processes 'uhttpd dnsmasq dropbear procd ubusd netifd openvpn zebra ospfd ospf6d bgpd collectd'
+ 
+ config statistics 'collectd_sensors'
+ 	option enable '0'
+@@ -147,10 +148,10 @@ config statistics 'collectd_splash_lease
+ 	option enable '0'
+ 
+ config statistics 'collectd_tcpconns'
+-	option enable '0'
++	option enable '1'
+ 	option ListeningPorts '0'
+-	option LocalPorts '22 80'
++	option LocalPorts '22 80 443'
+ 
+ config statistics 'collectd_uptime'
+-	option enable '0'
++	option enable '1'
+ 
+--- a/applications/luci-app-statistics/root/usr/bin/stat-genconfig
++++ b/applications/luci-app-statistics/root/usr/bin/stat-genconfig
+@@ -269,7 +269,7 @@ plugins = {
+ 
+ 	cpu	= {
+ 		{ },
+-		{ },
++		{ "ValuesPercentage" },
+ 		{ }
+ 	},
+ 
+--- a/applications/luci-app-statistics/luasrc/model/cbi/luci_statistics/cpu.lua
++++ b/applications/luci-app-statistics/luasrc/model/cbi/luci_statistics/cpu.lua
+@@ -12,4 +12,8 @@ s = m:section( NamedSection, "collectd_c
+ enable = s:option( Flag, "enable", translate("Enable this plugin") )
+ enable.default = 0
+ 
++valuespercentage = s:option( Flag, "ValuesPercentage", translate("Use percentages instead of jiffies") )
++valuespercentage.default = 1
++valuespercentage:depends( "enable", 1 )
++
+ return m
