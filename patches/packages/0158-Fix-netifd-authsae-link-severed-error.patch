@@ -1,14 +1,11 @@
 --- a/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
 +++ b/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-@@ -456,11 +456,11 @@ mac80211_prepare_vif() {
+@@ -458,7 +458,12 @@ mac80211_prepare_vif() {
+ 			}
  		;;
  		mesh)
- 			json_get_vars key mesh_id
--			if [ -n "$key" ]; then
--				iw phy "$phy" interface add "$ifname" type mp
--			else
--				iw phy "$phy" interface add "$ifname" type mp mesh_id "$mesh_id"
--			fi
+-			iw phy "$phy" interface add "$ifname" type mp
++ 			json_get_vars mesh_id
 +			# Originally mesh_id is set by meshd-nl80211 if authsae is used, but---
 +			# Scott changed to always add mesh_id so the mesh params can be set later
 +			# and avoid link has been severed errors. The kernel will not allow
@@ -17,7 +14,7 @@
  		;;
  		monitor)
  			iw phy "$phy" interface add "$ifname" type monitor
-@@ -594,7 +594,7 @@ mac80211_setup_vif() {
+@@ -592,7 +597,7 @@ mac80211_setup_vif() {
  	case "$mode" in
  		mesh)
  			# authsae or wpa_supplicant

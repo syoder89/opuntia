@@ -1,26 +1,107 @@
---- a/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
-+++ b/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
-@@ -70,7 +70,6 @@ cpe510)
- 	ucidef_add_switch_vlan "switch0" "2" "0t 4"
+--- a/target/linux/ar71xx/base-files/etc/board.d/02_network
++++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
+@@ -430,10 +430,11 @@ gl-ar300)
  	;;
  
--db120 |\
- rb-2011l | \
- rb-2011uas |\
- rb-2011uias |\
-@@ -444,6 +443,15 @@ wndr3700)
- 	uci set network.@switch_port[-1].led='2'
+ wpj344)
+-	ucidef_set_interfaces_lan_wan "eth0.1" "eth0.2"
+-	ucidef_add_switch "switch0" "1" "1"
+-	ucidef_add_switch_ports "switch0" \
+-		"0@eth0" "3:lan" "2:wan"
++        ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
++        ucidef_add_switch "switch0" "1" "1"
++        ucidef_set_interfaces_vlans_lan_wan "4001" "4000"
++        ucidef_add_switch_vlan "switch0" "4000" "2 0t"
++        ucidef_add_switch_vlan "switch0" "4001" "3 0t"
  	;;
  
-+wpj344)
-+	ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
-+	ucidef_add_switch "switch0" "1" "1"
-+	ucidef_add_switch_vlan "switch0" "0" "0t 2"
-+	uci set network.@switch_vlan[-1].vid='4000'
-+	ucidef_add_switch_vlan "switch0" "1" "0t 3"
-+	uci set network.@switch_vlan[-1].vid='4001'
-+	;;
+ wpj531)
+--- a/package/base-files/files/bin/config_generate
++++ b/package/base-files/files/bin/config_generate
+@@ -26,7 +26,7 @@ generate_network() {
+ 
+ 	json_select network
+ 	json_select "$1"
+-	json_get_vars ifname create_vlan macaddr
++	json_get_vars ifname create_vlan macaddr vlan_id
+ 	json_select ..
+ 	json_select ..
+ 
+@@ -34,8 +34,8 @@ generate_network() {
+ 
+ 	if [ "${create_vlan:-0}" -eq 1 ]; then
+ 		case "$1" in
+-			lan) vlan=1;;
+-			wan) vlan=2;;
++			lan) [ -n "$vlan_id" ] && vlan=$vlan_id || vlan=1;;
++			wan) [ -n "$vlan_id" ] && vlan=$vlan_id || vlan=2;;
+ 			*)
+ 				vlan=$next_vlan
+ 				next_vlan=$((next_vlan + 1))
+@@ -99,10 +99,18 @@ generate_switch_vlan() {
+ 	json_select ..
+ 	json_select ..
+ 
++	if [ $((vlan)) -gt 127 ]; then
++		vid=$vlan
++		vlan=$next_vlan
++		next_vlan=$((next_vlan + 1))
++	else
++		vid=$vlan
++	fi
+ 	uci -q batch <<-EOF
+ 		add network switch_vlan
+ 		set network.@switch_vlan[-1].device='$device'
+ 		set network.@switch_vlan[-1].vlan='$vlan'
++		set network.@switch_vlan[-1].vid='$vid'
+ 		set network.@switch_vlan[-1].ports='$ports ${cpu_port}t'
+ 	EOF
+ }
+--- a/package/base-files/files/lib/functions/uci-defaults-new.sh
++++ b/package/base-files/files/lib/functions/uci-defaults-new.sh
+@@ -198,17 +198,42 @@ ucidef_add_switch_port_attr() {
+ 	json_select ..
+ }
+ 
++ucidef_set_interfaces_vlans_lan_wan() {
++	local lan_vlan="$1"
++	local wan_vlan="$2"
 +
- *)
- 	ucidef_set_interfaces_lan_wan "eth0" "eth1"
- 	;;
++	json_select_object network
++	json_select_object "lan"
++	json_add_int vlan_id $lan_vlan
++	json_select ..
++	json_select_object "wan"
++	json_add_int vlan_id $wan_vlan
++	json_select ..
++	json_select ..
++}
++
+ ucidef_add_switch_vlan() {
+ 	local name="$1"
+ 	local vlan="$2"
+ 	local ports="$3"
+ 	local cpu_port=''
+ 
++	json_select_object network
++	json_select_object "lan"
++	json_get_var vlan_id
++	lan_vlan=$vlan_id
++	json_select ..
++	json_select_object "wan"
++	json_get_var vlan_id
++	wan_vlan=$vlan_id
++	json_select ..
++
+ 	case "$vlan" in
+-	1)	vlan=lan;;
+-	2)	vlan=wan;;
+-	*)	vlan=vlan$vlan;;
++	$lan_vlan)	vlan=lan;;
++	$wan_vlan)	vlan=wan;;
++	*)		vlan=vlan$vlan;;
+ 	esac
++	json_select ..
+ 
+ 	json_select_object switch
+ 	json_select_object "$name"

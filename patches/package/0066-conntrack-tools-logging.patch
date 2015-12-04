@@ -1,14 +1,15 @@
 --- a/package/network/utils/conntrack-tools/Makefile
 +++ b/package/network/utils/conntrack-tools/Makefile
-@@ -56,7 +56,7 @@ TARGET_CFLAGS += -D_GNU_SOURCE=1
- define Package/conntrack-tools/install
- 	$(INSTALL_DIR) $(1)/etc/conntrackd
- 	$(INSTALL_CONF) \
--		$(PKG_BUILD_DIR)/doc/stats/conntrackd.conf \
+@@ -78,6 +78,9 @@ define Package/conntrackd/install
+ 		$(1)/usr/sbin
+ 	$(INSTALL_BIN) 	$(PKG_INSTALL_DIR)/usr/sbin/conntrackd $(1)/usr/sbin/
+ 	$(INSTALL_BIN) ./files/conntrackd.init $(1)/etc/init.d/conntrackd
++ 	$(INSTALL_CONF) \
 +		./files/conntrackd.conf \
- 		$(1)/etc/conntrackd/
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) \
++ 		$(1)/etc/conntrackd/
+ endef
+ 
+ $(eval $(call BuildPackage,conntrack))
 --- /dev/null
 +++ b/package/network/utils/conntrack-tools/files/conntrackd.conf
 @@ -0,0 +1,141 @@

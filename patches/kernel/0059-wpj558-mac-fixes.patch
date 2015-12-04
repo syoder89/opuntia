@@ -95,7 +95,7 @@
  MIPS_MACHINE(ATH79_MACH_WPJ558, "WPJ558", "Compex WPJ558", wpj558_setup);
 --- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
 +++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
-@@ -187,7 +187,6 @@ platform_check_image() {
+@@ -188,7 +188,6 @@ platform_check_image() {
  	hornet-ub | \
  	mr12 | \
  	mr16 | \
@@ -103,7 +103,7 @@
  	zcn-1523h-2 | \
  	zcn-1523h-5)
  		[ "$magic_long" != "68737173" -a "$magic_long" != "19852003" ] && {
-@@ -240,6 +239,7 @@ platform_check_image() {
+@@ -245,6 +244,7 @@ platform_check_image() {
  	wpj531 | \
  	wndap360 | \
  	wpj344 | \
@@ -111,52 +111,3 @@
  	wzr-hp-g300nh2 | \
  	wzr-hp-g300nh | \
  	wzr-hp-g450h | \
---- a/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
-+++ b/target/linux/ar71xx/base-files/etc/uci-defaults/02_network
-@@ -404,10 +404,12 @@ wpe72)
- 	;;
- 
- wpj344)
--	ucidef_set_interfaces_lan_wan "eth0.1" "eth0.2"
-+	ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
- 	ucidef_add_switch "switch0" "1" "1"
-+	ucidef_add_switch_vlan "switch0" "0" "0t 2"
-+	uci set network.@switch_vlan[-1].vid='4000'
- 	ucidef_add_switch_vlan "switch0" "1" "0t 3"
--	ucidef_add_switch_vlan "switch0" "2" "0t 2"
-+	uci set network.@switch_vlan[-1].vid='4001'
- 	;;
- 
- wpj531)
-@@ -415,10 +417,12 @@ wpj531)
- 	;;
- 
- wpj558)
--	ucidef_set_interfaces_lan_wan "eth0.1" "eth0.2"
-+	ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
- 	ucidef_add_switch "switch0" "1" "1"
--	ucidef_add_switch_vlan "switch0" "1" "5 6t"
--	ucidef_add_switch_vlan "switch0" "2" "1 6t"
-+	ucidef_add_switch_vlan "switch0" "0" "5 6t"
-+	uci set network.@switch_vlan[-1].vid='4000'
-+	ucidef_add_switch_vlan "switch0" "1" "1 6t"
-+	uci set network.@switch_vlan[-1].vid='4001'
- 	;;
- 
- ap121 |\
-@@ -517,15 +521,6 @@ wndr3700)
- 	uci set network.@switch_port[-1].led='2'
- 	;;
- 
--wpj344)
--	ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
--	ucidef_add_switch "switch0" "1" "1"
--	ucidef_add_switch_vlan "switch0" "0" "0t 2"
--	uci set network.@switch_vlan[-1].vid='4000'
--	ucidef_add_switch_vlan "switch0" "1" "0t 3"
--	uci set network.@switch_vlan[-1].vid='4001'
--	;;
--
- *)
- 	ucidef_set_interfaces_lan_wan "eth0" "eth1"
- 	;;

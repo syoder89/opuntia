@@ -1,6 +1,6 @@
 --- a/applications/luci-app-qos/luasrc/model/cbi/qos/qos.lua
 +++ b/applications/luci-app-qos/luasrc/model/cbi/qos/qos.lua
-@@ -27,9 +27,12 @@ s.anonymous = false
+@@ -16,9 +16,12 @@ s.anonymous = false
  e = s:option(Flag, "enabled", translate("Enable"))
  e.rmempty = false
  
@@ -16,7 +16,7 @@
  
  s:option(Flag, "overhead", translate("Calculate overhead"))
  
-@@ -41,18 +44,51 @@ dl.datatype = "and(uinteger,min(1))"
+@@ -30,28 +33,51 @@ dl.datatype = "and(uinteger,min(1))"
  ul = s:option(Value, "upload", translate("Upload speed (kbit/s)"))
  ul.datatype = "and(uinteger,min(1))"
  
@@ -63,6 +63,16 @@
 -t:value("Express", translate("express"))
 -t:value("Normal", translate("normal"))
 -t:value("Bulk", translate("low"))
+-
+-local uci = require "luci.model.uci"
+-uci.cursor():foreach("qos", "class",
+-    function (section)
+-        local n = section[".name"]
+-        if string.sub(n,-string.len("_down"))~="_down" then
+-            t:value(n)
+-        end
+-    end)
+-
 -t.default = "Normal"
 +t = s:option(ListValue, "target", translate("Class"))
 +m.uci:foreach("qos", "class", 
@@ -74,7 +84,7 @@
  
  srch = s:option(Value, "srchost", translate("Source host"))
  srch.rmempty = true
-@@ -94,9 +130,6 @@ ports = s:option(Value, "ports", transla
+@@ -74,9 +100,6 @@ ports = s:option(Value, "ports", transla
  ports.rmempty = true
  ports:value("", translate("all"))
  

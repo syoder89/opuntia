@@ -9,39 +9,39 @@ Subject: [PATCH 09/14] Fixup display of wireless interface in mesh mode
 
 --- a/modules/luci-base/luasrc/model/network.lua
 +++ b/modules/luci-base/luasrc/model/network.lua
-@@ -1390,11 +1390,15 @@ function wifinet.mode(self)
+@@ -1456,11 +1456,15 @@ function wifinet.mode(self)
  end
  
  function wifinet.ssid(self)
--	return _uci_state:get("wireless", self.sid, "ssid")
-+	return _uci_state:get("wireless", self.sid, "ssid") or _uci_state:get("wireless", self.sid, "mesh_id")
+-	return self:ubus("net", "config", "ssid") or self:get("ssid")
++	return self:ubus("net", "config", "ssid") or self:get("ssid") or self:get("mesh_id")
  end
  
  function wifinet.bssid(self)
--	return _uci_state:get("wireless", self.sid, "bssid")
-+	return _uci_state:get("wireless", self.sid, "bssid") or _uci_state:get("wireless", self.sid, "mesh_id")
+-	return self:ubus("net", "config", "bssid") or self:get("bssid")
++	return self:ubus("net", "config", "bssid") or self:get("bssid") or self:get("mesh_id")
 +end
 +
 +function wifinet.mesh_id(self)
-+	return _uci_state:get("wireless", self.sid, "mesh_id")
++	return self:ubus("net", "config", "mesh_id") or self:get("mesh_id")
  end
  
  function wifinet.network(self)
-@@ -1446,11 +1450,15 @@ function wifinet.active_mode_i18n(self)
+@@ -1515,11 +1519,15 @@ function wifinet.active_mode_i18n(self)
  end
  
  function wifinet.active_ssid(self)
--	return _stror(self.iwdata.ssid, self.iwinfo.ssid)
-+	return _stror(self.iwdata.ssid, self.iwdata.ssid) or _stror(self.iwdata.mesh_id, self.iwdata.mesh_id) 
+-	return self.iwinfo.ssid or self:ubus("net", "config", "ssid") or self:get("ssid")
++	return self.iwinfo.ssid or self:ubus("net", "config", "ssid") or self:get("ssid") or self:get("mesh_id")
  end
  
  function wifinet.active_bssid(self)
--	return _stror(self.iwdata.bssid, self.iwinfo.bssid) or "00:00:00:00:00:00"
-+	return _stror(self.iwdata.bssid, self.iwdata.bssid) or _stror(self.iwdata.mesh_id, self.iwdata.mesh_id) or "00:00:00:00:00:00"
+-	return self.iwinfo.bssid or self:ubus("net", "config", "bssid") or self:get("bssid")
++	return self.iwinfo.bssid or self:ubus("net", "config", "bssid") or self:get("bssid") or self:get("mesh_id")
 +end
 +
 +function wifinet.active_mesh_id(self)
-+	return _stror(self.iwdata.mesh_id, self.iwdata.mesh_id)
++	return self.iwinfo.mesh_id or self:ubus("net", "config", "mesh_id") or self:get("mesh_id")
  end
  
  function wifinet.active_encryption(self)

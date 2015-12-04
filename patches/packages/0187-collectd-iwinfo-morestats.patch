@@ -61,9 +61,9 @@
 +-		iwinfo_submit(ifname, "bitrate", val * 1000);
 ++		iwinfo_submit(instance, "bitrate", val * 1000);
 ++
-++		if (iw->tx_power(ifname, &val))
+++		if (iw->txpower(ifname, &val))
 ++			val = 0;
-++		iwinfo_submit(instance, "tx_power", val);
+++		iwinfo_submit(instance, "txpower", val);
 ++
 ++		if (iw->channel(ifname, &val))
 ++			val = 0;
@@ -151,7 +151,7 @@
 + vs_processes		value:GAUGE:0:65535
 + vs_threads		value:GAUGE:0:65535
 + stations		value:GAUGE:0:256
-++tx_power		value:GAUGE:0:U
+++txpower		value:GAUGE:0:U
 ++channel			value:GAUGE:0:U
 ++assoc_station_signal    value:GAUGE:-200:200
 ++assoc_station_noise     value:GAUGE:-200:200

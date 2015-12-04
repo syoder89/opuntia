@@ -48,7 +48,10 @@ kernel/0058-wpj344-mac-fixes.patch
 packages/0186-squid-reduce-size.patch
 0187-openvpn-iproute2-path-wrong.patch
 kernel/0059-wpj558-mac-fixes.patch
+0161-Add-wpj558-support.patch
 package/0066-conntrack-tools-logging.patch
 package/0067-mrd6-disable-logging.patch
-0060-Fix-GPIO-button-direction.patch
 packages/0187-collectd-iwinfo-morestats.patch
+packages/0188-net-snmp-5.7.3.patch
+packages/0189-openssl-ftp-dir-change.patch
+packages/0191-ntpdate-missing-lib.patch

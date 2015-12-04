@@ -119,9 +119,9 @@ CONFIG_BINUTILS_VERSION="linaro"
 #
 # Compiler
 #
-CONFIG_GCC_USE_VERSION_4_6_LINARO=y
+# CONFIG_GCC_USE_VERSION_4_6_LINARO=y
 # CONFIG_GCC_USE_VERSION_4_8_LINARO is not set
-# CONFIG_GCC_USE_VERSION_5 is not set
+CONFIG_GCC_USE_VERSION_5=y
 # CONFIG_GCC_USE_GRAPHITE is not set
 CONFIG_EXTRA_GCC_CONFIG_OPTIONS=""
 # CONFIG_SSP_SUPPORT is not set
@@ -1440,20 +1440,20 @@ CONFIG_BUSYBOX_CONFIG_FEATURE_DIFF_DIR=y
 # CONFIG_BUSYBOX_CONFIG_ED is not set
 # CONFIG_BUSYBOX_CONFIG_PATCH is not set
 CONFIG_BUSYBOX_CONFIG_SED=y
-CONFIG_BUSYBOX_CONFIG_VI=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_VI_MAX_LEN=1024
+# CONFIG_BUSYBOX_CONFIG_VI is not set
+# CONFIG_BUSYBOX_CONFIG_FEATURE_VI_MAX_LEN=10 is not set
 # CONFIG_BUSYBOX_CONFIG_FEATURE_VI_8BIT is not set
-CONFIG_BUSYBOX_CONFIG_FEATURE_VI_COLON=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_VI_YANKMARK=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_VI_SEARCH=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_VI_REGEX_SEARCH=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_VI_USE_SIGNALS=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_VI_DOT_CMD=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_VI_READONLY=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_VI_SETOPTS=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_VI_SET=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_VI_WIN_RESIZE=y
-CONFIG_BUSYBOX_CONFIG_FEATURE_VI_ASK_TERMINAL=y
+# CONFIG_BUSYBOX_CONFIG_FEATURE_VI_COLON is not set
+# CONFIG_BUSYBOX_CONFIG_FEATURE_VI_YANKMARK is not set
+# CONFIG_BUSYBOX_CONFIG_FEATURE_VI_SEARCH is not set
+# CONFIG_BUSYBOX_CONFIG_FEATURE_VI_REGEX_SEARCH is not set
+# CONFIG_BUSYBOX_CONFIG_FEATURE_VI_USE_SIGNALS is not set
+# CONFIG_BUSYBOX_CONFIG_FEATURE_VI_DOT_CMD is not set
+# CONFIG_BUSYBOX_CONFIG_FEATURE_VI_READONLY is not set
+# CONFIG_BUSYBOX_CONFIG_FEATURE_VI_SETOPTS is not set
+# CONFIG_BUSYBOX_CONFIG_FEATURE_VI_SET is not set
+# CONFIG_BUSYBOX_CONFIG_FEATURE_VI_WIN_RESIZE is not set
+# CONFIG_BUSYBOX_CONFIG_FEATURE_VI_ASK_TERMINAL is not set
 # CONFIG_BUSYBOX_CONFIG_FEATURE_VI_UNDO is not set
 CONFIG_BUSYBOX_CONFIG_FEATURE_ALLOW_EXEC=y
 
@@ -1691,7 +1691,7 @@ CONFIG_BUSYBOX_CONFIG_LOCK=y
 # CONFIG_BUSYBOX_CONFIG_SETSID is not set
 CONFIG_BUSYBOX_CONFIG_STRINGS=y
 CONFIG_BUSYBOX_CONFIG_TIME=y
-# CONFIG_BUSYBOX_CONFIG_TIMEOUT is not set
+CONFIG_BUSYBOX_CONFIG_TIMEOUT=y
 # CONFIG_BUSYBOX_CONFIG_TTYSIZE is not set
 # CONFIG_BUSYBOX_CONFIG_VOLNAME is not set
 CONFIG_BUSYBOX_CONFIG_WATCHDOG=y
@@ -2013,7 +2013,7 @@ CONFIG_PACKAGE_usign=y
 # CONFIG_PACKAGE_ostiary is not set
 # CONFIG_PACKAGE_send-nsca is not set
 # CONFIG_PACKAGE_sudo is not set
-CONFIG_PACKAGE_syslog-ng=m
+# CONFIG_PACKAGE_syslog-ng is not set
 # CONFIG_PACKAGE_syslog-ng3 is not set
 
 #
@@ -2029,7 +2029,7 @@ CONFIG_PACKAGE_syslog-ng=m
 # CONFIG_PACKAGE_cppunit is not set
 # CONFIG_PACKAGE_diffutils is not set
 # CONFIG_PACKAGE_gcc is not set
-CONFIG_PACKAGE_gdb=m
+# CONFIG_PACKAGE_gdb is not set
 # CONFIG_PACKAGE_gdbserver is not set
 # CONFIG_PACKAGE_lttng-tools is not set
 # CONFIG_PACKAGE_make is not set
@@ -4464,7 +4464,7 @@ CONFIG_PACKAGE_openntpd=m
 # CONFIG_PACKAGE_n2n is not set
 # CONFIG_PACKAGE_ocserv is not set
 # CONFIG_PACKAGE_openconnect is not set
-CONFIG_PACKAGE_openl2tp-full=y
+# CONFIG_PACKAGE_openl2tp-full is not set
 # CONFIG_PACKAGE_openl2tp-mini is not set
 # CONFIG_PACKAGE_opennhrp is not set
 # CONFIG_PACKAGE_openswan is not set
@@ -4754,8 +4754,8 @@ CONFIG_PACKAGE_ethtool=y
 # CONFIG_PACKAGE_fprobe is not set
 # CONFIG_PACKAGE_fprobe-ulog is not set
 # CONFIG_PACKAGE_gnunet is not set
-CONFIG_PACKAGE_gpsd=y
-CONFIG_PACKAGE_gpsd-clients=y
+# CONFIG_PACKAGE_gpsd is not set
+# CONFIG_PACKAGE_gpsd-clients is not set
 CONFIG_PACKAGE_gre=y
 # CONFIG_PACKAGE_grev4 is not set
 # CONFIG_PACKAGE_grev6 is not set
@@ -4831,7 +4831,7 @@ CONFIG_PACKAGE_mii-tool=m
 # CONFIG_PACKAGE_mosquitto-client is not set
 # CONFIG_PACKAGE_mosquitto-client-nossl is not set
 # CONFIG_PACKAGE_mosquitto-nossl is not set
-CONFIG_PACKAGE_mrd6=y
+# CONFIG_PACKAGE_mrd6 is not set
 # CONFIG_PACKAGE_mrtg is not set
 CONFIG_PACKAGE_mtr=y
 CONFIG_PACKAGE_multiwan=y
@@ -4999,7 +4999,7 @@ CONFIG_PACKAGE_wpad=y
 # CONFIG_PACKAGE_wprobe-util is not set
 # CONFIG_PACKAGE_wshaper is not set
 # CONFIG_PACKAGE_wwan is not set
-CONFIG_PACKAGE_xinetd=m
+# CONFIG_PACKAGE_xinetd is not set
 
 #
 # Sound
@@ -5296,7 +5296,7 @@ CONFIG_PACKAGE_collectd-mod-users=y
 # CONFIG_PACKAGE_comgt is not set
 # CONFIG_PACKAGE_comgt-directip is not set
 # CONFIG_PACKAGE_comgt-ncm is not set
-CONFIG_PACKAGE_coreutils=y
+# CONFIG_PACKAGE_coreutils is not set
 # CONFIG_PACKAGE_coreutils-base64 is not set
 # CONFIG_PACKAGE_coreutils-basename is not set
 # CONFIG_PACKAGE_coreutils-cat is not set
@@ -5379,7 +5379,7 @@ CONFIG_PACKAGE_coreutils=y
 # CONFIG_PACKAGE_coreutils-tail is not set
 # CONFIG_PACKAGE_coreutils-tee is not set
 # CONFIG_PACKAGE_coreutils-test is not set
-CONFIG_PACKAGE_coreutils-timeout=y
+# CONFIG_PACKAGE_coreutils-timeouy is not set
 # CONFIG_PACKAGE_coreutils-touch is not set
 # CONFIG_PACKAGE_coreutils-tr is not set
 # CONFIG_PACKAGE_coreutils-true is not set
@@ -5506,46 +5506,46 @@ CONFIG_PACKAGE_macchanger=y
 # CONFIG_PACKAGE_mount-utils is not set
 # CONFIG_PACKAGE_mountd is not set
 # CONFIG_PACKAGE_mpack is not set
-CONFIG_PACKAGE_mtd-utils=y
-CONFIG_PACKAGE_mtd-utils-doc-loadbios=y
-CONFIG_PACKAGE_mtd-utils-docfdisk=y
-CONFIG_PACKAGE_mtd-utils-flash-erase=y
-CONFIG_PACKAGE_mtd-utils-flash-eraseall=y
-CONFIG_PACKAGE_mtd-utils-flash-lock=y
-CONFIG_PACKAGE_mtd-utils-flash-otp-dump=y
+# CONFIG_PACKAGE_mtd-utils is not set
+# CONFIG_PACKAGE_mtd-utils-doc-loadbios is not set
+# CONFIG_PACKAGE_mtd-utils-docfdisk is not set
+# CONFIG_PACKAGE_mtd-utils-flash-erase is not set
+# CONFIG_PACKAGE_mtd-utils-flash-eraseall is not set
+# CONFIG_PACKAGE_mtd-utils-flash-lock is not set
+# CONFIG_PACKAGE_mtd-utils-flash-otp-dump is not set
 # CONFIG_PACKAGE_mtd-utils-flash-otp-lock is not set
 # CONFIG_PACKAGE_mtd-utils-flash-otp-write is not set
-CONFIG_PACKAGE_mtd-utils-flash-unlock=y
-CONFIG_PACKAGE_mtd-utils-flashcp=y
-CONFIG_PACKAGE_mtd-utils-ftl-check=y
-CONFIG_PACKAGE_mtd-utils-ftl-format=y
-CONFIG_PACKAGE_mtd-utils-jffs2dump=y
+# CONFIG_PACKAGE_mtd-utils-flash-unlock is not set
+# CONFIG_PACKAGE_mtd-utils-flashcp is not set
+# CONFIG_PACKAGE_mtd-utils-ftl-check is not set
+# CONFIG_PACKAGE_mtd-utils-ftl-format is not set
+# CONFIG_PACKAGE_mtd-utils-jffs2dump is not set
 # CONFIG_PACKAGE_mtd-utils-jffs2reader is not set
-CONFIG_PACKAGE_mtd-utils-mkfs.jffs2=y
-CONFIG_PACKAGE_mtd-utils-mkfs.ubifs=y
-CONFIG_PACKAGE_mtd-utils-mtd-debug=y
-CONFIG_PACKAGE_mtd-utils-mtdinfo=y
-CONFIG_PACKAGE_mtd-utils-nanddump=y
-CONFIG_PACKAGE_mtd-utils-nandtest=y
-CONFIG_PACKAGE_mtd-utils-nandwrite=y
-CONFIG_PACKAGE_mtd-utils-nftl-format=y
-CONFIG_PACKAGE_mtd-utils-nftldump=y
-CONFIG_PACKAGE_mtd-utils-recv-image=y
-CONFIG_PACKAGE_mtd-utils-rfddump=y
-CONFIG_PACKAGE_mtd-utils-rfdformat=y
-CONFIG_PACKAGE_mtd-utils-serve-image=y
-CONFIG_PACKAGE_mtd-utils-sumtool=y
-CONFIG_PACKAGE_mtd-utils-ubiattach=y
-CONFIG_PACKAGE_mtd-utils-ubicrc32=y
-CONFIG_PACKAGE_mtd-utils-ubidetach=y
-CONFIG_PACKAGE_mtd-utils-ubiformat=y
-CONFIG_PACKAGE_mtd-utils-ubimkvol=y
-CONFIG_PACKAGE_mtd-utils-ubinfo=y
-CONFIG_PACKAGE_mtd-utils-ubinize=y
-CONFIG_PACKAGE_mtd-utils-ubirename=y
-CONFIG_PACKAGE_mtd-utils-ubirmvol=y
-CONFIG_PACKAGE_mtd-utils-ubirsvol=y
-CONFIG_PACKAGE_mtd-utils-ubiupdatevol=y
+# CONFIG_PACKAGE_mtd-utils-mkfs.jffs2 is not set
+# CONFIG_PACKAGE_mtd-utils-mkfs.ubifs is not set
+# CONFIG_PACKAGE_mtd-utils-mtd-debug is not set
+# CONFIG_PACKAGE_mtd-utils-mtdinfo is not set
+# CONFIG_PACKAGE_mtd-utils-nanddump is not set
+# CONFIG_PACKAGE_mtd-utils-nandtest is not set
+# CONFIG_PACKAGE_mtd-utils-nandwrite is not set
+# CONFIG_PACKAGE_mtd-utils-nftl-format is not set
+# CONFIG_PACKAGE_mtd-utils-nftldump is not set
+# CONFIG_PACKAGE_mtd-utils-recv-image is not set
+# CONFIG_PACKAGE_mtd-utils-rfddump is not set
+# CONFIG_PACKAGE_mtd-utils-rfdformat is not set
+# CONFIG_PACKAGE_mtd-utils-serve-image is not set
+# CONFIG_PACKAGE_mtd-utils-sumtool is not set
+# CONFIG_PACKAGE_mtd-utils-ubiattach is not set
+# CONFIG_PACKAGE_mtd-utils-ubicrc32 is not set
+# CONFIG_PACKAGE_mtd-utils-ubidetach is not set
+# CONFIG_PACKAGE_mtd-utils-ubiformat is not set
+# CONFIG_PACKAGE_mtd-utils-ubimkvol is not set
+# CONFIG_PACKAGE_mtd-utils-ubinfo is not set
+# CONFIG_PACKAGE_mtd-utils-ubinize is not set
+# CONFIG_PACKAGE_mtd-utils-ubirename is not set
+# CONFIG_PACKAGE_mtd-utils-ubirmvol is not set
+# CONFIG_PACKAGE_mtd-utils-ubirsvol is not set
+# CONFIG_PACKAGE_mtd-utils-ubiupdatevol is not set
 # CONFIG_PACKAGE_namei is not set
 # CONFIG_PACKAGE_nfc-utils is not set
 # CONFIG_PACKAGE_nprobe is not set
