@@ -1,0 +1,284 @@
+--- a/package/network/utils/iproute2/Makefile
++++ b/package/network/utils/iproute2/Makefile
+@@ -8,12 +8,12 @@
+ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=iproute2
+-PKG_VERSION:=4.0.0
++PKG_VERSION:=4.3.0
+ PKG_RELEASE:=3
+ 
+ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
+ PKG_SOURCE_URL:=http://kernel.org/pub/linux/utils/net/iproute2/
+-PKG_MD5SUM:=3adc263ade4ee76c35032e8f50b54108
++PKG_MD5SUM:=1a2bbb80cfc7ab3f3e987e18b3207c2f
+ PKG_BUILD_PARALLEL:=1
+ PKG_LICENSE:=GPL-2.0
+ 
+@@ -29,7 +29,7 @@ define Package/iproute2/Default
+   SUBMENU:=Routing and Redirection
+   MAINTAINER:=Russell Senior <russell@personaltelco.net>
+   DEPENDS:= +libnl
+-  VARIANT:=$(1)
++  VARIANT:=full
+ endef
+ 
+ define Package/ip
+--- a/package/network/utils/iproute2/patches/007-no_arpd.patch
++++ /dev/null
+@@ -1,11 +0,0 @@
+---- a/misc/Makefile
+-+++ b/misc/Makefile
+-@@ -1,7 +1,7 @@
+- SSOBJ=ss.o ssfilter.o
+- LNSTATOBJ=lnstat.o lnstat_util.o
+- 
+--TARGETS=ss nstat ifstat rtacct arpd lnstat
+-+TARGETS=ss nstat ifstat rtacct lnstat
+- 
+- include ../Config
+- 
+--- a/package/network/utils/iproute2/patches/008-no_netem.patch
++++ /dev/null
+@@ -1,11 +0,0 @@
+---- a/Makefile
+-+++ b/Makefile
+-@@ -36,7 +36,7 @@ WFLAGS += -Wmissing-declarations -Wold-s
+- CFLAGS = $(WFLAGS) $(CCOPTS) -I../include $(DEFINES)
+- YACCFLAGS = -d -t -v
+- 
+--SUBDIRS=lib ip tc bridge misc netem genl man
+-+SUBDIRS=lib ip tc bridge misc genl man
+- 
+- LIBNETLINK=../lib/libnetlink.a ../lib/libutil.a
+- LDLIBS += $(LIBNETLINK)
+--- a/package/network/utils/iproute2/patches/110-extra-ccopts.patch
++++ b/package/network/utils/iproute2/patches/110-extra-ccopts.patch
+@@ -1,9 +1,9 @@
+ --- a/Makefile
+ +++ b/Makefile
+-@@ -29,7 +29,7 @@ ADDLIB+=ipx_ntop.o ipx_pton.o
+- CC = gcc
+- HOSTCC = gcc
++@@ -34,7 +34,7 @@ HOSTCC = gcc
+  DEFINES += -D_GNU_SOURCE
++ # Turn on transparent support for LFS
++ DEFINES += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
+ -CCOPTS = -O2
+ +CCOPTS = -O2 $(EXTRA_CCOPTS)
+  WFLAGS := -Wall -Wstrict-prototypes  -Wmissing-prototypes
+--- a/package/network/utils/iproute2/patches/130-missing_include.patch
++++ b/package/network/utils/iproute2/patches/130-missing_include.patch
+@@ -1,9 +1,9 @@
+ --- a/lib/namespace.c
+ +++ b/lib/namespace.c
+-@@ -9,6 +9,7 @@
+- 
++@@ -10,6 +10,7 @@
+  #include <fcntl.h>
+  #include <dirent.h>
++ #include <limits.h>
+ +#include <sys/param.h>
+  
+  #include "utils.h"
+--- a/package/network/utils/iproute2/patches/210-add-act_connmark.patch
++++ b/package/network/utils/iproute2/patches/210-add-act_connmark.patch
+@@ -1,6 +1,6 @@
+ --- a/tc/Makefile
+ +++ b/tc/Makefile
+-@@ -44,6 +44,7 @@ TCMODULES += m_mirred.o
++@@ -45,6 +45,7 @@ TCMODULES += m_mirred.o
+  TCMODULES += m_nat.o
+  TCMODULES += m_pedit.o
+  TCMODULES += m_skbedit.o
+@@ -8,80 +8,3 @@
+  TCMODULES += m_csum.o
+  TCMODULES += m_simple.o
+  TCMODULES += m_vlan.o
+---- /dev/null
+-+++ b/tc/m_connmark.c
+-@@ -0,0 +1,74 @@
+-+/*
+-+ * m_connmark.c		Connection tracking marking import
+-+ *
+-+ * Copyright (c) 2011 Felix Fietkau <nbd@openwrt.org>
+-+ *
+-+ * This program is free software; you can redistribute it and/or modify it
+-+ * under the terms and conditions of the GNU General Public License,
+-+ * version 2, as published by the Free Software Foundation.
+-+ *
+-+ * This program is distributed in the hope it will be useful, but WITHOUT
+-+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+-+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+-+ * more details.
+-+ *
+-+ * You should have received a copy of the GNU General Public License along with
+-+ * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+-+ * Place - Suite 330, Boston, MA 02111-1307 USA.
+-+ */
+-+
+-+#include <stdio.h>
+-+#include <stdlib.h>
+-+#include <unistd.h>
+-+#include <string.h>
+-+#include "utils.h"
+-+#include "tc_util.h"
+-+
+-+static void
+-+explain(void)
+-+{
+-+	fprintf(stderr, "Usage: ... connmark\n");
+-+}
+-+
+-+static void
+-+usage(void)
+-+{
+-+	explain();
+-+	exit(-1);
+-+}
+-+
+-+static int
+-+parse_connmark(struct action_util *a, int *argc_p, char ***argv_p, int tca_id,
+-+	      struct nlmsghdr *n)
+-+{
+-+	int argc = *argc_p;
+-+	char **argv = *argv_p;
+-+
+-+	if (matches(*argv, "connmark") != 0)
+-+		return -1;
+-+
+-+	NEXT_ARG();
+-+
+-+	if (matches(*argv, "help") == 0)
+-+		usage();
+-+
+-+	*argc_p = argc;
+-+	*argv_p = argv;
+-+	return 0;
+-+}
+-+
+-+static int print_connmark(struct action_util *au, FILE *f, struct rtattr *arg)
+-+{
+-+	if (arg == NULL)
+-+		return -1;
+-+
+-+	fprintf(f, " connmark");
+-+
+-+	return 0;
+-+}
+-+
+-+struct action_util connmark_action_util = {
+-+	.id = "connmark",
+-+	.parse_aopt = parse_connmark,
+-+	.print_aopt = print_connmark,
+-+};
+--- a/package/network/utils/iproute2/patches/300-ip_tiny.patch
++++ b/package/network/utils/iproute2/patches/300-ip_tiny.patch
+@@ -1,6 +1,6 @@
+ --- a/ip/Makefile
+ +++ b/ip/Makefile
+-@@ -16,6 +16,13 @@ ifeq ($(IP_CONFIG_SETNS),y)
++@@ -17,6 +17,13 @@ ifeq ($(IP_CONFIG_SETNS),y)
+  	CFLAGS += -DHAVE_SETNS
+  endif
+  
+@@ -14,7 +14,7 @@
+  ALLOBJ=$(IPOBJ) $(RTMONOBJ)
+  SCRIPTS=ifcfg rtpr routel routef
+  TARGETS=ip rtmon
+-@@ -43,7 +50,7 @@ else
++@@ -44,7 +51,7 @@ else
+  
+  ip: static-syms.o
+  static-syms.o: static-syms.h
+@@ -23,73 +23,27 @@
+  	files="$^" ; \
+  	for s in `grep -B 3 '\<dlsym' $$files | sed -n '/snprintf/{s:.*"\([^"]*\)".*:\1:;s:%s::;p}'` ; do \
+  		sed -n '/'$$s'[^ ]* =/{s:.* \([^ ]*'$$s'[^ ]*\) .*:extern char \1[] __attribute__((weak)); if (!strcmp(sym, "\1")) return \1;:;p}' $$files ; \
+---- a/ip/ip.c
+-+++ b/ip/ip.c
+-@@ -71,30 +71,42 @@ static const struct cmd {
+- 	int (*func)(int argc, char **argv);
+- } cmds[] = {
+- 	{ "address",	do_ipaddr },
+-+#ifndef IPROUTE2_TINY
+- 	{ "addrlabel",	do_ipaddrlabel },
+-+#endif
+- 	{ "maddress",	do_multiaddr },
+- 	{ "route",	do_iproute },
+- 	{ "rule",	do_iprule },
+- 	{ "neighbor",	do_ipneigh },
+- 	{ "neighbour",	do_ipneigh },
+-+#ifndef IPROUTE2_TINY
+- 	{ "ntable",	do_ipntable },
+- 	{ "ntbl",	do_ipntable },
+-+#endif
+- 	{ "link",	do_iplink },
+-+#ifndef IPROUTE2_TINY
+- 	{ "l2tp",	do_ipl2tp },
+-	{ "fou",	do_ipfou },
+-+#endif
+- 	{ "tunnel",	do_iptunnel },
+- 	{ "tunl",	do_iptunnel },
+-+#ifndef IPROUTE2_TINY
+- 	{ "tuntap",	do_iptuntap },
+- 	{ "tap",	do_iptuntap },
+- 	{ "token",	do_iptoken },
+- 	{ "tcpmetrics",	do_tcp_metrics },
+- 	{ "tcp_metrics",do_tcp_metrics },
+-+#endif
+- 	{ "monitor",	do_ipmonitor },
+-+#ifndef IPROUTE2_TINY
+- 	{ "xfrm",	do_xfrm },
+-+#endif
+- 	{ "mroute",	do_multiroute },
+- 	{ "mrule",	do_multirule },
+- 	{ "netns",	do_netns },
+-+#ifndef IPROUTE2_TINY
+- 	{ "netconf",	do_ipnetconf },
+-+#endif
+- 	{ "help",	do_help },
+- 	{ 0 }
+- };
+ --- a/lib/utils.c
+ +++ b/lib/utils.c
+-@@ -642,6 +642,7 @@ const char *rt_addr_n2a(int af, const vo
++@@ -469,12 +469,14 @@ int af_bit_len(int af)
++ 		return 128;
+  	case AF_INET:
+- 	case AF_INET6:
+- 		return inet_ntop(af, addr, buf, buflen);
++ 		return 32;
+ +#ifndef IPROUTE2_TINY
+- 	case AF_IPX:
+- 		return ipx_ntop(af, addr, buf, buflen);
+  	case AF_DECnet:
+-@@ -650,6 +651,7 @@ const char *rt_addr_n2a(int af, const vo
+- 		memcpy(dna.a_addr, addr, 2);
+- 		return dnet_ntop(af, &dna, buf, buflen);
+- 	}
++ 		return 16;
++ 	case AF_IPX:
++ 		return 80;
++ 	case AF_MPLS:
++ 		return 20;
+ +#endif
+- 	default:
+- 		return "???";
+  	}
++ 
++ 	return 0;
+ --- a/lib/Makefile
+ +++ b/lib/Makefile
+ @@ -4,6 +4,10 @@ ifeq ($(IP_CONFIG_SETNS),y)
+-	CFLAGS += -DHAVE_SETNS
++ 	CFLAGS += -DHAVE_SETNS
+  endif
+  
+ +ifeq ($(IP_CONFIG_TINY),y)
+@@ -98,4 +52,4 @@
+ +
+  CFLAGS += $(FPIC)
+  
+- UTILOBJ=utils.o rt_names.o ll_types.o ll_proto.o ll_addr.o inet_proto.o namespace.o \
++ UTILOBJ = utils.o rt_names.o ll_types.o ll_proto.o ll_addr.o \
