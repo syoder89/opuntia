@@ -105,3 +105,71 @@
  
  	json_select_object switch
  	json_select_object "$name"
+--- a/target/linux/ar71xx/image/Makefile
++++ b/target/linux/ar71xx/image/Makefile
+@@ -2194,6 +2194,31 @@ define Image/Build/Zcomax
+ 	fi
+ endef
+ 
++define CpxwrtImageParams
++	FSIZE=1000000
++	IVER=16M
++	KSTART=30000
++	RSTART=1b0000
++	P1START=fe0000
++	P2START=ff0000
++endef
++
++
++Image/Build/Cpxwrt/buildkernel=$(call MkuImageLzma,$(2),$(3) $(4))
++Image/Build/Cpxwrt/initramfs=$(call MkuImageLzma/initramfs,$(2),$(3) $(4))
++
++define Image/Build/Cpxwrt
++	$(call Image/Build/Ath,$(1),$(2),$(3),$(4),$(5),$(6))
++        $(eval $(call CpxwrtImageParams,$(7)))
++
++	$(STAGING_DIR_HOST)/bin/mkmylofw -B $(10) -s $(7) \
++                -p0x$(KSTART):$(8):al:0x80060000:"$(2)":$(KDIR_TMP)/vmlinux-$(2).uImage \
++                -p0x$(RSTART):$(9):::rootfs:$(KDIR)/root.$(1) \
++                -p0x$(P1START):0x010000 \
++                -p0x$(P2START):0x010000 \
++                $(call imgname,$(1),$(2))-factory.img
++endef
++
+ 
+ # $(1): template name to be defined, etc. squashfs-only, 64k, 64kraw, etc.
+ # $(2): jffs2 blocksize.
+@@ -2274,9 +2299,7 @@ $(eval $(call SingleProfile,AthLzma,64k,
+ $(eval $(call SingleProfile,AthLzma,64k,PB92,pb92,PB92,ttyS0,115200,$$(pb92_mtdlayout),KRuImage))
+ $(eval $(call SingleProfile,AthLzma,64k,TUBE2H16M,tube2h-16M,TUBE2H,ttyATH0,115200,$$(alfa_mtdlayout_16M),KRuImage,65536))
+ $(eval $(call SingleProfile,AthLzma,64k,WLR8100,wlr8100,WLR8100,ttyS0,115200,$$(wlr8100_mtdlayout),KRuImage))
+-$(eval $(call SingleProfile,AthLzma,64k,WPJ344_16M,wpj344-16M,WPJ344,ttyS0,115200,$$(wpj344_mtdlayout_16M),KRuImage,65536))
+-$(eval $(call SingleProfile,AthLzma,64k,WPJ531_16M,wpj531-16M,WPJ531,ttyS0,115200,$$(wpj531_mtdlayout_16M),KRuImage,65536))
+-$(eval $(call SingleProfile,AthLzma,64k,WPJ558_16M,wpj558-16M,WPJ558,ttyS0,115200,$$(wpj558_mtdlayout_16M),KRuImage,65536))
++$(eval $(call SingleProfile,Cpxwrt,64k,WPJ344_16M,wpj344-16M,WPJ344,ttyS0,115200,$$(wpj344_mtdlayout_16M),KRuImage,65536,0x1000000,1572864,14876672,WPJ344))
+ $(eval $(call SingleProfile,AthLzma,64k,YUN_8M,yun-8M,Yun,ttyATH0,250000,$$(yun_mtdlayout_8M),RKuImage))
+ $(eval $(call SingleProfile,AthLzma,64k,YUN_16M,yun-16M,Yun,ttyATH0,250000,$$(yun_mtdlayout_16M),RKuImage))
+ 
+--- a/tools/firmware-utils/src/mkmylofw.c
++++ b/tools/firmware-utils/src/mkmylofw.c
+@@ -158,6 +158,10 @@ struct cpx_board boards[] = {
+ 		"WPE72", "Compex WPE72",
+ 		"BareBoard"),
+ 
++	CPX_BOARD_AR71XX(DEVID_COMPEX_WPJ344, 16,
++		"WPJ344", "Compex WPJ344",
++		"BareBoard"),
++
+ 	CPX_BOARD_AR23XX(DEVID_COMPEX_NP25G, 4,
+ 		"NP25G", "Compex NetPassage 25G",
+ 		"Wireless 54Mbps XR Router"),
+--- a/tools/firmware-utils/src/myloader.h
++++ b/tools/firmware-utils/src/myloader.h
+@@ -63,6 +63,7 @@
+ /* Devices based on the Atheros AR71xx */
+ #define DEVID_COMPEX_WP543	0x0640
+ #define DEVID_COMPEX_WPE72	0x0672
++#define DEVID_COMPEX_WPJ344	0x0687
+ 
+ /* Devices based on the IXP422 */
+ #define DEVID_COMPEX_WP18	0x047E
