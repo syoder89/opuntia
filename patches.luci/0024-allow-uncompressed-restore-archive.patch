@@ -1,0 +1,11 @@
+--- a/modules/luci-mod-admin-full/luasrc/controller/admin/system.lua
++++ b/modules/luci-mod-admin-full/luasrc/controller/admin/system.lua
+@@ -335,7 +335,7 @@ function action_restore()
+ 	local upload = http.formvalue("archive")
+ 	if upload and #upload > 0 then
+ 		luci.template.render("admin_system/applyreboot")
+-		os.execute("tar -C / -xzf %q >/dev/null 2>&1" % archive_tmp)
++		os.execute("tar -C / -xzf %q >/dev/null 2>&1 || tar -C / -xf %q > /dev/null 2>&1" %{archive_tmp,archive_tmp})
+ 		luci.sys.reboot()
+ 		return
+ 	end
