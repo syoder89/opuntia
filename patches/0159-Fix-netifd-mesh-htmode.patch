@@ -1,0 +1,12 @@
+--- a/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
++++ b/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
+@@ -480,6 +480,9 @@ mac80211_prepare_vif() {
+ 
+ 	case "$mode" in
+ 		monitor|mesh)
++			# Have to fixup htmode (+-) depending on the channel - Scott 12-15-15
++			mac80211_setup_adhoc_htmode
++			htmode=$ibss_htmode
+ 			[ "$auto_channel" -gt 0 ] || iw dev "$ifname" set channel "$channel" $htmode
+ 		;;
+ 	esac

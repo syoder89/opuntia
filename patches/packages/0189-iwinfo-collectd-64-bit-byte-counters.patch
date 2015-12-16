@@ -1,0 +1,162 @@
+--- /dev/null
++++ b/package/network/utils/iwinfo/patches/002-64-bit-stats.patch
+@@ -0,0 +1,74 @@
++--- a/include/iwinfo.h
+++++ b/include/iwinfo.h
++@@ -102,8 +102,8 @@ struct iwinfo_assoclist_entry {
++ 	uint32_t tx_packets;
++ 	struct iwinfo_rate_entry rx_rate;
++ 	struct iwinfo_rate_entry tx_rate;
++-	uint32_t rx_bytes;
++-	uint32_t tx_bytes;
+++	uint64_t rx_bytes;
+++	uint64_t tx_bytes;
++ 	uint32_t tx_retries;
++ 	uint32_t tx_failed;
++ 	uint64_t t_offset;
++--- a/iwinfo_cli.c
+++++ b/iwinfo_cli.c
++@@ -709,14 +709,14 @@ static void print_assoclist(const struct
++ 			(e->signal - e->noise),
++ 			e->inactive);
++ 
++-		printf("	RX: %-38s  %8d Pkts.\n",
+++		printf("	RX: %-38s  %8d Pkts, %13llu Bytes.\n",
++ 			format_assocrate(&e->rx_rate),
++-			e->rx_packets
+++			e->rx_packets, e->rx_bytes
++ 		);
++ 
++-		printf("	TX: %-38s  %8d Pkts.\n\n",
+++		printf("	TX: %-38s  %8d Pkts, %13llu Bytes.\n\n",
++ 			format_assocrate(&e->tx_rate),
++-			e->tx_packets
+++			e->tx_packets, e->tx_bytes
++ 		);
++ 	}
++ }
++--- a/iwinfo_nl80211.c
+++++ b/iwinfo_nl80211.c
++@@ -1231,8 +1231,8 @@ static int nl80211_fill_signal_cb(struct
++ 
++ 	static struct nla_policy stats_policy[NL80211_STA_INFO_MAX + 1] = {
++ 		[NL80211_STA_INFO_INACTIVE_TIME] = { .type = NLA_U32    },
++-		[NL80211_STA_INFO_RX_BYTES]      = { .type = NLA_U32    },
++-		[NL80211_STA_INFO_TX_BYTES]      = { .type = NLA_U32    },
+++		[NL80211_STA_INFO_RX_BYTES64]    = { .type = NLA_U64    },
+++		[NL80211_STA_INFO_TX_BYTES64]    = { .type = NLA_U64    },
++ 		[NL80211_STA_INFO_RX_PACKETS]    = { .type = NLA_U32    },
++ 		[NL80211_STA_INFO_TX_PACKETS]    = { .type = NLA_U32    },
++ 		[NL80211_STA_INFO_SIGNAL]        = { .type = NLA_U8     },
++@@ -1644,8 +1644,8 @@ static int nl80211_get_assoclist_cb(stru
++ 		[NL80211_STA_INFO_RX_BITRATE]    = { .type = NLA_NESTED },
++ 		[NL80211_STA_INFO_TX_BITRATE]    = { .type = NLA_NESTED },
++ 		[NL80211_STA_INFO_SIGNAL]        = { .type = NLA_U8     },
++-		[NL80211_STA_INFO_RX_BYTES]      = { .type = NLA_U32    },
++-		[NL80211_STA_INFO_TX_BYTES]      = { .type = NLA_U32    },
+++		[NL80211_STA_INFO_RX_BYTES64]    = { .type = NLA_U64    },
+++		[NL80211_STA_INFO_TX_BYTES64]    = { .type = NLA_U64    },
++ 		[NL80211_STA_INFO_TX_RETRIES]    = { .type = NLA_U32    },
++ 		[NL80211_STA_INFO_TX_FAILED]     = { .type = NLA_U32    },
++ 		[NL80211_STA_INFO_T_OFFSET]      = { .type = NLA_U64    },
++@@ -1756,11 +1756,11 @@ static int nl80211_get_assoclist_cb(stru
++ 				e->tx_rate.vht_nss = nla_get_u8(rinfo[NL80211_RATE_INFO_VHT_NSS]);
++ 		}
++ 
++-		if (sinfo[NL80211_STA_INFO_RX_BYTES])
++-			e->rx_bytes = nla_get_u32(sinfo[NL80211_STA_INFO_RX_BYTES]);
+++		if (sinfo[NL80211_STA_INFO_RX_BYTES64])
+++			e->rx_bytes = nla_get_u64(sinfo[NL80211_STA_INFO_RX_BYTES64]);
++ 
++-		if (sinfo[NL80211_STA_INFO_TX_BYTES])
++-			e->tx_bytes = nla_get_u32(sinfo[NL80211_STA_INFO_TX_BYTES]);
+++		if (sinfo[NL80211_STA_INFO_TX_BYTES64])
+++			e->tx_bytes = nla_get_u64(sinfo[NL80211_STA_INFO_TX_BYTES64]);
++ 
++ 		if (sinfo[NL80211_STA_INFO_TX_RETRIES])
++ 			e->tx_retries = nla_get_u32(sinfo[NL80211_STA_INFO_TX_RETRIES]);
+--- a/feeds/packages/utils/collectd/patches/999-scott-iwinfo-morestats.patch
++++ b/feeds/packages/utils/collectd/patches/999-scott-iwinfo-morestats.patch
+@@ -1,24 +1,48 @@
+ --- a/src/iwinfo.c
+ +++ b/src/iwinfo.c
+-@@ -52,12 +52,15 @@ static int iwinfo_config(const char *key
++@@ -52,12 +52,40 @@ static int iwinfo_config(const char *key
+  	return 0;
+  }
+  
+--static void iwinfo_submit(const char *ifname, const char *type, int value)
+ +static void new_iwinfo_submit(const char *ifname, const char *type, int derive, const char *type_instance, int value)
+++{
+++	value_t values[1];
+++	value_list_t vl = VALUE_LIST_INIT;
+++
+++	if (derive)
+++		values[0].derive = (unsigned int)value;
+++	else
+++		values[0].gauge = value;
+++
+++	vl.values = values;
+++	vl.values_len = 1;
+++
+++	sstrncpy(vl.host, hostname_g, sizeof(vl.host));
+++	sstrncpy(vl.plugin, "iwinfo", sizeof(vl.plugin));
+++	sstrncpy(vl.plugin_instance, ifname, sizeof(vl.plugin_instance));
+++	sstrncpy(vl.type, type, sizeof(vl.type));
+++	if (type_instance)
+++		sstrncpy(vl.type_instance, type_instance, sizeof(vl.type_instance));
+++
+++	plugin_dispatch_values(&vl);
+++}
+++
++ static void iwinfo_submit(const char *ifname, const char *type, int value)
+  {
+++	new_iwinfo_submit(ifname, type, 0, NULL, value);
+++}
+++
+++static void new_iwinfo_submit64(const char *ifname, const char *type, const char *type_instance, derive_t value)
+++{
+  	value_t values[1];
+  	value_list_t vl = VALUE_LIST_INIT;
+  
+ -	values[0].gauge = value;
+-+	if (derive)
+-+		values[0].derive = (unsigned int)value;
+-+	else
+-+		values[0].gauge = value;
+++	values[0].derive = value;
+  
+  	vl.values = values;
+  	vl.values_len = 1;
+-@@ -66,40 +69,117 @@ static void iwinfo_submit(const char *if
++@@ -66,7 +94,8 @@ static void iwinfo_submit(const char *if
+  	sstrncpy(vl.plugin, "iwinfo", sizeof(vl.plugin));
+  	sstrncpy(vl.plugin_instance, ifname, sizeof(vl.plugin_instance));
+  	sstrncpy(vl.type, type, sizeof(vl.type));
+@@ -28,14 +52,7 @@
+  
+  	plugin_dispatch_values(&vl);
+  }
+- 
+-+static void iwinfo_submit(const char *ifname, const char *type, int value)
+-+{
+-+	new_iwinfo_submit(ifname, type, 0, NULL, value);
+-+}
+-+
+- static void iwinfo_process(const char *ifname)
+- {
++@@ -76,30 +105,101 @@ static void iwinfo_process(const char *i
+  	int val;
+  	char buf[IWINFO_BUFSIZE];
+  	const struct iwinfo_ops *iw = iwinfo_backend(ifname);
+@@ -100,8 +117,8 @@
+ +			new_iwinfo_submit(instance, "assoc_station_inactive", 0, macstr,  e->inactive);
+ +			new_iwinfo_submit(instance, "assoc_station_rx_packets", 1, macstr,  e->rx_packets);
+ +			new_iwinfo_submit(instance, "assoc_station_tx_packets", 1, macstr,  e->tx_packets);
+-+			new_iwinfo_submit(instance, "assoc_station_rx_bytes", 1, macstr,  e->rx_bytes);
+-+			new_iwinfo_submit(instance, "assoc_station_tx_bytes", 1, macstr,  e->tx_bytes);
+++			new_iwinfo_submit64(instance, "assoc_station_rx_bytes", macstr,  e->rx_bytes);
+++			new_iwinfo_submit64(instance, "assoc_station_tx_bytes", macstr,  e->tx_bytes);
+ +			new_iwinfo_submit(instance, "assoc_station_rx_rate", 0, macstr,  e->rx_rate.rate);
+ +			new_iwinfo_submit(instance, "assoc_station_tx_rate", 0, macstr,  e->tx_rate.rate);
+ +

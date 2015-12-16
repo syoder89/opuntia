@@ -55,3 +55,5 @@ packages/0188-net-snmp-5.7.3.patch
 packages/0189-openssl-ftp-dir-change.patch
 packages/0191-ntpdate-missing-lib.patch
 0188-iproute2-bump-version-4.3.0.patch
+0159-Fix-netifd-mesh-htmode.patch
+packages/0189-iwinfo-collectd-64-bit-byte-counters.patch
