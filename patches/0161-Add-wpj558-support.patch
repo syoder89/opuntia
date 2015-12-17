@@ -1,6 +1,6 @@
 --- a/target/linux/ar71xx/base-files/etc/board.d/02_network
 +++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
-@@ -443,11 +443,12 @@ wpj531)
+@@ -442,11 +442,12 @@ wpj531)
  	;;
  
  wpj558)
@@ -18,3 +18,35 @@
  
  ap121 |\
  ap121-mini |\
+--- a/target/linux/ar71xx/image/Makefile
++++ b/target/linux/ar71xx/image/Makefile
+@@ -2300,6 +2300,7 @@ $(eval $(call SingleProfile,AthLzma,64k,
+ $(eval $(call SingleProfile,AthLzma,64k,TUBE2H16M,tube2h-16M,TUBE2H,ttyATH0,115200,$$(alfa_mtdlayout_16M),KRuImage,65536))
+ $(eval $(call SingleProfile,AthLzma,64k,WLR8100,wlr8100,WLR8100,ttyS0,115200,$$(wlr8100_mtdlayout),KRuImage))
+ $(eval $(call SingleProfile,Cpxwrt,64k,WPJ344_16M,wpj344-16M,WPJ344,ttyS0,115200,$$(wpj344_mtdlayout_16M),KRuImage,65536,0x1000000,1572864,14876672,WPJ344))
++$(eval $(call SingleProfile,Cpxwrt,64k,WPJ558_16M,wpj558-16M,WPJ558,ttyS0,115200,$$(wpj558_mtdlayout_16M),KRuImage,65536,0x1000000,1572864,14876672,WPJ558))
+ $(eval $(call SingleProfile,AthLzma,64k,YUN_8M,yun-8M,Yun,ttyATH0,250000,$$(yun_mtdlayout_8M),RKuImage))
+ $(eval $(call SingleProfile,AthLzma,64k,YUN_16M,yun-16M,Yun,ttyATH0,250000,$$(yun_mtdlayout_16M),RKuImage))
+ 
+--- a/tools/firmware-utils/src/mkmylofw.c
++++ b/tools/firmware-utils/src/mkmylofw.c
+@@ -161,6 +161,9 @@ struct cpx_board boards[] = {
+ 	CPX_BOARD_AR71XX(DEVID_COMPEX_WPJ344, 16,
+ 		"WPJ344", "Compex WPJ344",
+ 		"BareBoard"),
++	CPX_BOARD_AR71XX(DEVID_COMPEX_WPJ558, 16,
++		"WPJ558", "Compex WPJ558",
++		"BareBoard"),
+ 
+ 	CPX_BOARD_AR23XX(DEVID_COMPEX_NP25G, 4,
+ 		"NP25G", "Compex NetPassage 25G",
+--- a/tools/firmware-utils/src/myloader.h
++++ b/tools/firmware-utils/src/myloader.h
+@@ -64,6 +64,7 @@
+ #define DEVID_COMPEX_WP543	0x0640
+ #define DEVID_COMPEX_WPE72	0x0672
+ #define DEVID_COMPEX_WPJ344	0x0687
++#define DEVID_COMPEX_WPJ558	0x0688
+ 
+ /* Devices based on the IXP422 */
+ #define DEVID_COMPEX_WP18	0x047E
