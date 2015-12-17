@@ -53,7 +53,7 @@
  	option TTL '127'
  	option Interval '30'
 -	option Hosts '127.0.0.1'
-+	option Hosts '8.8.8.8 8.8.4.4 205.159.243.1'
++	option Hosts '8.8.8.8 8.8.4.4'
  
  config statistics 'collectd_processes'
 -	option enable '0'

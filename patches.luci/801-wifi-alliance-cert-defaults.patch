@@ -1,0 +1,10 @@
+--- a/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
++++ b/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
+@@ -989,6 +989,7 @@ if hwtype == "atheros" or hwtype == "mac
+ 	mfp:depends("encryption", "psk-mixed")
+ 	mfp:depends("encryption", "wpa")
+ 	mfp:depends("encryption", "wpa2")
++	mfp.default = 1
+ end
+ 
+ return m
