@@ -1299,3 +1299,22 @@
 -	(5250 - 5330 @ 80), (20), DFS, AUTO-BW
 -	(5490 - 5710 @ 160), (27), DFS
 -
+--- /dev/null
++++ b/package/network/utils/iwinfo/patches/003-scott-limit-regulatory-domains.patch
+@@ -0,0 +1,16 @@
++--- a/iwinfo_lib.c
+++++ b/iwinfo_lib.c
++@@ -73,6 +73,13 @@ const char *IWINFO_HTMODE_NAMES[] = {
++  */
++ 
++ const struct iwinfo_iso3166_label IWINFO_ISO3166_NAMES[] = {
+++	{ 0x434F /* CO */, "Colombia" },
+++	{ 0x4D58 /* MX */, "Mexico" },
+++	{ 0x5553 /* US */, "United States" },
+++	{ 0,               "" }
+++};
+++
+++const struct iwinfo_iso3166_label old_IWINFO_ISO3166_NAMES[] = {
++ 	{ 0x3030 /* 00 */, "World" },
++ 	{ 0x4144 /* AD */, "Andorra" },
++ 	{ 0x4145 /* AE */, "United Arab Emirates" },
