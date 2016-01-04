@@ -1,0 +1,27 @@
+--- a/package/base-files/files/etc/init.d/boot
++++ b/package/base-files/files/etc/init.d/boot
+@@ -24,6 +24,8 @@ restore_config() {
+ 		mv sysupgrade.tgz /tmp
+ 		tar xzf /tmp/sysupgrade.tgz
+ 		rm -f /tmp/sysupgrade.tgz
++		# Old iproute package has this file as a conffile! Need to remove it
++		rm -f /usr/bin/ip
+ 		sync
+ 	}
+ }
+--- a/package/network/utils/iproute2/Makefile
++++ b/package/network/utils/iproute2/Makefile
+@@ -39,9 +39,10 @@ endef
+ 
+ Package/ip-full=$(call Package/iproute2/Default,full,Full)
+ 
+-define Package/ip-$(BUILD_VARIANT)/conffiles
+-$(Package/ip/conffiles)
+-endef
++# Very broken - lists /usr/sbin/ip as a conf file! Scott
++#define Package/ip-$(BUILD_VARIANT)/conffiles
++#$(Package/ip/conffiles)
++#endef
+ 
+ define Package/tc
+ $(call Package/iproute2/Default)

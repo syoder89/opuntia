@@ -8,3 +8,18 @@
  end
  
  return m
+--- a/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
++++ b/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
+@@ -582,6 +582,12 @@
+                 <tr><td width="33%"><%:Firmware Version%></td><td>
+                         <%=pcdata(luci.version.distname)%> <%=pcdata(luci.version.distversion)%> <%=luci.sys.exec("grep REVISION /etc/opuntia_release | cut -d '\"' -f 2")%>
+                 </td></tr>
++                <tr><td width="33%"><%:Wireless Version%></td><td>
++                        <%=luci.sys.exec("opkg status kmod-mac80211 | grep Version: | awk '{print $2}'")%>
++                </td></tr>
++                <tr><td width="33%"><%:HostAPd Version%></td><td>
++                        <%=luci.sys.exec("opkg status hostapd-common | grep Version: | awk '{print $2}'")%>
++                </td></tr>
+ 		<tr><td width="33%"><%:Kernel Version%></td><td><%=unameinfo.release or "?"%></td></tr>
+ 		<tr><td width="33%"><%:Local Time%></td><td id="localtime">-</td></tr>
+ 		<tr><td width="33%"><%:Uptime%></td><td id="uptime">-</td></tr>

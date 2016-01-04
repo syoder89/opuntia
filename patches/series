@@ -58,3 +58,5 @@ packages/0191-ntpdate-missing-lib.patch
 0159-Fix-netifd-mesh-htmode.patch
 packages/0189-iwinfo-collectd-64-bit-byte-counters.patch
 801-wifi-alliance-cert-mods.patch
+packages/0192-iproute-wrong-path.patch
+packages/0193-bash-completion-conffile.patch

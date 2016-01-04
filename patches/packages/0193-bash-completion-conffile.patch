@@ -1,0 +1,15 @@
+--- a/feeds/oldpackages/utils/bash-completion/Makefile
++++ b/feeds/oldpackages/utils/bash-completion/Makefile
+@@ -46,8 +46,9 @@ define Package/bash-completion/install
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bash_completion $(1)/etc/
+ endef
+ 
+-define Package/bash-completion/conffiles
+-/etc/bash_completion
+-endef
++# Don't retain this file! Scott
++#define Package/bash-completion/conffiles
++#/etc/bash_completion
++#endef
+ 
+ $(eval $(call BuildPackage,bash-completion))
