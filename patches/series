@@ -60,3 +60,4 @@ packages/0189-iwinfo-collectd-64-bit-byte-counters.patch
 801-wifi-alliance-cert-mods.patch
 packages/0192-iproute-wrong-path.patch
 packages/0193-bash-completion-conffile.patch
+kernel/0060-wpj558-switch-cpu-port-6.patch
