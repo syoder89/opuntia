@@ -48,7 +48,6 @@ packages/0186-squid-reduce-size.patch
 0187-openvpn-iproute2-path-wrong.patch
 kernel/0059-wpj558-mac-fixes.patch
 0161-Add-wpj558-support.patch
-0162-Add-wpj531-support.patch
 package/0066-conntrack-tools-logging.patch
 package/0067-mrd6-disable-logging.patch
 packages/0187-collectd-iwinfo-morestats.patch
@@ -62,3 +61,4 @@ packages/0189-iwinfo-collectd-64-bit-byte-counters.patch
 packages/0192-iproute-wrong-path.patch
 packages/0193-bash-completion-conffile.patch
 kernel/0060-wpj558-switch-cpu-port-6.patch
+packages/0159-swconfig-support-port-aliases-cpu-wan-lan.patch

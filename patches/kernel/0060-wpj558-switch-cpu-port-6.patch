@@ -1,9 +1,9 @@
 --- /dev/null
-+++ b/target/linux/generic/patches-4.4/999-scott-wpj558-switch-cpu-port-6.patch
-@@ -0,0 +1,17 @@
++++ b/target/linux/generic/patches-4.1/999-scott-wpj558-switch-cpu-port-6.patch
+@@ -0,0 +1,18 @@
 +--- a/drivers/net/phy/ar8216.c
 ++++ b/drivers/net/phy/ar8216.c
-+@@ -1833,7 +1833,13 @@ ar8xxx_probe_switch(struct ar8xxx_priv *
++@@ -1833,7 +1833,14 @@ ar8xxx_probe_switch(struct ar8xxx_priv *
 + 	chip = priv->chip;
 + 
 + 	swdev = &priv->dev;
@@ -11,6 +11,28 @@
 ++	switch (priv->chip_ver) {
 ++		case AR8XXX_VER_AR8327: // WPJ558 uses port 6 for CPU port
 ++			swdev->cpu_port = 6;
+++		break;
+++		default:
+++			swdev->cpu_port = AR8216_PORT_CPU;
+++		break;
+++	}
++ 	swdev->name = chip->name;
++ 	swdev->vlans = chip->vlans;
++ 	swdev->ports = chip->ports;
+--- /dev/null
++++ b/target/linux/generic/patches-4.4/999-scott-wpj558-switch-cpu-port-6.patch
+@@ -0,0 +1,18 @@
++--- a/drivers/net/phy/ar8216.c
+++++ b/drivers/net/phy/ar8216.c
++@@ -1833,7 +1833,14 @@ ar8xxx_probe_switch(struct ar8xxx_priv *
++ 	chip = priv->chip;
++ 
++ 	swdev = &priv->dev;
++-	swdev->cpu_port = AR8216_PORT_CPU;
+++	switch (priv->chip_ver) {
+++		case AR8XXX_VER_AR8327: // WPJ558 uses port 6 for CPU port
+++			swdev->cpu_port = 6;
+++		break;
 ++		default:
 ++			swdev->cpu_port = AR8216_PORT_CPU;
 ++		break;

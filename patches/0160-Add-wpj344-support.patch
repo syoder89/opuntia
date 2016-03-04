@@ -1,6 +1,6 @@
 --- a/target/linux/ar71xx/base-files/etc/board.d/02_network
 +++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
-@@ -430,10 +430,11 @@ gl-ar300)
+@@ -430,10 +430,14 @@ gl-ar300)
  	;;
  
  wpj344)
@@ -10,9 +10,12 @@
 -		"0@eth0" "3:lan" "2:wan"
 +        ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
 +        ucidef_add_switch "switch0" "1" "1"
++	uci set network.@switch[-1].alias_cpu='0'
++	uci set network.@switch[-1].alias_wan='2'
++	uci set network.@switch[-1].alias_lan='3'
 +        ucidef_set_interfaces_vlans_lan_wan "4001" "4000"
-+        ucidef_add_switch_vlan "switch0" "4000" "2 0t"
-+        ucidef_add_switch_vlan "switch0" "4001" "3 0t"
++        ucidef_add_switch_vlan "switch0" "4000" "wan cput"
++        ucidef_add_switch_vlan "switch0" "4001" "lan cput"
  	;;
  
  wpj531)

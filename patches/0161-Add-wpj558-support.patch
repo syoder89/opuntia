@@ -1,6 +1,6 @@
 --- a/target/linux/ar71xx/base-files/etc/board.d/02_network
 +++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
-@@ -442,11 +442,12 @@ wpj531)
+@@ -445,11 +445,15 @@ wpj531)
  	;;
  
  wpj558)
@@ -11,9 +11,12 @@
 -	;;
 +        ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
 +        ucidef_add_switch "switch0" "1" "1"
++	uci set network.@switch[-1].alias_cpu='6'
++	uci set network.@switch[-1].alias_wan='5'
++	uci set network.@switch[-1].alias_lan='1'
 +        ucidef_set_interfaces_vlans_lan_wan "4001" "4000"
-+        ucidef_add_switch_vlan "switch0" "4000" "5 6t"
-+        ucidef_add_switch_vlan "switch0" "4001" "1 6t"
++        ucidef_add_switch_vlan "switch0" "4000" "wan cput"
++        ucidef_add_switch_vlan "switch0" "4001" "lan cput"
 + 	;;
  
  ap121 |\

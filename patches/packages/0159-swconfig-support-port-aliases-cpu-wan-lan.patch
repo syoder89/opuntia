@@ -1,0 +1,95 @@
+--- a/package/network/config/swconfig/src/swlib.c
++++ b/package/network/config/swconfig/src/swlib.c
+@@ -51,6 +51,32 @@ static struct nla_policy portmap_policy[
+ 	[SWITCH_PORTMAP_VIRT] = { .type = NLA_U32 },
+ };
+ 
++int alias_cpu = -1, alias_wan = -1, alias_lan = -1;
++
++void convert_alias(char *ptr)
++{
++	char tmp[4] = { "   " };
++	int found=0;
++
++	if (!strncasecmp(ptr, "cpu", 3) && alias_cpu != -1) {
++		snprintf(tmp, 3, "%d", alias_cpu);
++		found=1;
++	}
++	else if (!strncasecmp(ptr, "wan", 3) && alias_wan != -1) {
++		snprintf(tmp, 3, "%d", alias_wan);
++		found=1;
++	}
++	else if (!strncasecmp(ptr, "lan", 3) && alias_lan != -1) {
++		snprintf(tmp, 3, "%d", alias_lan);
++		found=1;
++	}
++	if (found) {
++		tmp[strlen(tmp)] = ptr[3];
++		memcpy(ptr, tmp, strlen(tmp));
++		ptr[3] = ' ';
++	}
++}
++
+ static inline void *
+ swlib_alloc(size_t size)
+ {
+@@ -378,6 +404,7 @@ int swlib_set_attr_string(struct switch_
+ 			if (!*ptr)
+ 				break;
+ 
++			convert_alias(ptr);
+ 			if (!isdigit(*ptr))
+ 				return -1;
+ 
+@@ -411,7 +438,6 @@ int swlib_set_attr_string(struct switch_
+ 	return swlib_set_attr(dev, a, &val);
+ }
+ 
+-
+ struct attrlist_arg {
+ 	int id;
+ 	int atype;
+--- a/package/network/config/swconfig/src/uci.c
++++ b/package/network/config/swconfig/src/uci.c
+@@ -53,6 +53,8 @@ struct swlib_setting early_settings[] =
+ static struct swlib_setting *settings;
+ static struct swlib_setting **head;
+ 
++extern int alias_cpu, alias_wan, alias_lan;
++
+ static bool swlib_match_name(struct switch_dev *dev, const char *name)
+ {
+ 	return (strcmp(name, dev->dev_name) == 0 ||
+@@ -214,6 +216,32 @@ found:
+ 				continue;
+ 
+ 			swlib_map_settings(dev, SWLIB_ATTR_GROUP_VLAN, vlan_n, s);
++		} else if (!strcmp(s->type, "switch")) {
++			char *alias, *alias_err = NULL;
++			int alias_n;
++
++			uci_foreach_element(&s->options, os) {
++				o = uci_to_option(os);
++				if (o->type != UCI_TYPE_STRING)
++					continue;
++
++				if (!strcmp(os->name, "alias_cpu")) {
++					alias = o->v.string;
++					alias_cpu = strtoul(alias, &alias_err, 0);
++					if (alias_err && alias_err[0])
++						alias_cpu = -1;
++				} else if (!strcmp(os->name, "alias_wan")) {
++					alias = o->v.string;
++					alias_wan = strtoul(alias, &alias_err, 0);
++					if (alias_err && alias_err[0])
++						alias_wan = -1;
++				} else if (!strcmp(os->name, "alias_lan")) {
++					alias = o->v.string;
++					alias_lan = strtoul(alias, &alias_err, 0);
++					if (alias_err && alias_err[0])
++						alias_lan = -1;
++				}
++			}
+ 		}
+ 	}
+ 
