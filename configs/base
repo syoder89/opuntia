@@ -2064,7 +2064,7 @@ CONFIG_PACKAGE_hardware-watchdog=y
 # CONFIG_PACKAGE_imagestream-envoy-installer is not set
 CONFIG_PACKAGE_imagestream-overrides=y
 CONFIG_PACKAGE_imagestream-snmp-mibs=y
-CONFIG_PACKAGE_imagestream-uqmi=y
+# CONFIG_PACKAGE_imagestream-uqmi is not set
 # CONFIG_PACKAGE_imagestream-utm-configs is not set
 CONFIG_PACKAGE_imagestream-wifi-ap-bootstrap=y
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs is not set
