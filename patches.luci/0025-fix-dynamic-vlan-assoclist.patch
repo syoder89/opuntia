@@ -1,0 +1,19 @@
+--- a/modules/luci-base/luasrc/model/network.lua
++++ b/modules/luci-base/luasrc/model/network.lua
+@@ -1536,7 +1536,15 @@ function wifinet.active_encryption(self)
+ end
+ 
+ function wifinet.assoclist(self)
+-	return self.iwinfo.assoclist or { }
++	local assoclist = { }
++	devlist=utl.exec("iw dev | grep -e '%s\.*' | cut -f 2 -d ' '" % self.ifname(self))
++	for dev in utl.imatch(devlist) do
++		iwinfo=sys.wifi.getiwinfo(dev)
++		for k,v in pairs(iwinfo.assoclist) do
++			assoclist[k]=v
++		end
++	end
++	return assoclist
+ end
+ 
+ function wifinet.frequency(self)
