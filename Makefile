@@ -26,7 +26,7 @@ PARALLEL_MAKE=-j $(shell echo $$(( $(NUM_CPU) * 2 )))
 CACHE_DIR?=$(shell pwd)/ccache
 BUILD_OPTS=
 
-build: prepare $(built)
+build: prepare setup_cache $(built)
 	@if [ ! -d $(CACHE_DIR) ] ; then \
 		mkdir $(CACHE_DIR); \
 	fi; \
@@ -56,6 +56,9 @@ install: $(built)
 		cp -f $${sysup} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-sysupgrade.bin; \
 	fi
 
+setup_cache:
+	[ ! -d dl.cache ] && mkdir dl.cache
+	[ -d $(BUILD_DIR)/dl ] && cp -an $(BUILD_DIR)/dl/* dl.cache
 
 #	packages=`find build_dir/bin/ -name 'packages' | head -n 1` && \
 #	cp -af $${packages} $(DESTDIR)/
