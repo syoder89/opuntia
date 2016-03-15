@@ -37,6 +37,7 @@ build: prepare setup_cache $(built)
 		done;) \
 		&& make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) world || make -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) world V=s)) \
 		&& touch $(built)
+	make setup_cache
 #	(make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= defconfig world || make -C $(BUILD_DIR) DESTDIR= world V=s) && touch $(built)
 
 install: $(built)
