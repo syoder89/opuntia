@@ -58,8 +58,12 @@ install: $(built)
 	fi
 
 setup_cache:
-	[ ! -d dl.cache ] && mkdir dl.cache
-	[ -d $(BUILD_DIR)/dl ] && cp -an $(BUILD_DIR)/dl/* dl.cache
+	@if [ ! -d dl.cache ] ; then \
+		mkdir dl.cache \
+	fi; \
+	if [ -d $(BUILD_DIR)/dl ] ; then \
+		cp -an $(BUILD_DIR)/dl/* dl.cache \
+	fi
 
 #	packages=`find build_dir/bin/ -name 'packages' | head -n 1` && \
 #	cp -af $${packages} $(DESTDIR)/
@@ -67,7 +71,7 @@ setup_cache:
 checkout_openwrt:
 	@if [ ! -d $(BUILD_DIR) ] ; then \
 		git clone --depth $(OPENWRT_DEPTH) $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
-		[ -d dl.cache ] && cp -a dl.cache $(BUILD_DIR)/dl ; \
+		cp -a dl.cache $(BUILD_DIR)/dl ; \
 	fi
 #		git clone $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
 #		git clone --depth $(OPENWRT_DEPTH) $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
@@ -125,7 +129,7 @@ distclean:
 .DEFAULT:
 	@if [ -f configs/$@ ] ; then \
 		echo "Configuring for $@" && \
-		make checkout_openwrt && \
+		make setup_cache checkout_openwrt && \
 		echo $@ > $(configured) && \
 		make configure prepare build; \
 	else \
