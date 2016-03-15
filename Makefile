@@ -59,10 +59,10 @@ install: $(built)
 
 setup_cache:
 	@if [ ! -d dl.cache ] ; then \
-		mkdir dl.cache \
+		mkdir dl.cache; \
 	fi; \
 	if [ -d $(BUILD_DIR)/dl ] ; then \
-		cp -an $(BUILD_DIR)/dl/* dl.cache \
+		cp -an $(BUILD_DIR)/dl/* dl.cache; \
 	fi
 
 #	packages=`find build_dir/bin/ -name 'packages' | head -n 1` && \
