@@ -67,7 +67,7 @@ setup_cache:
 checkout_openwrt:
 	@if [ ! -d $(BUILD_DIR) ] ; then \
 		git clone --depth $(OPENWRT_DEPTH) $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
-		cp -a dl.cache $(BUILD_DIR)/dl ; \
+		[ -d dl.cache ] && cp -a dl.cache $(BUILD_DIR)/dl ; \
 	fi
 #		git clone $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
 #		git clone --depth $(OPENWRT_DEPTH) $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
