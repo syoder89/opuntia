@@ -62,7 +62,7 @@ setup_cache:
 		mkdir dl.cache; \
 	fi; \
 	if [ -d $(BUILD_DIR)/dl ] ; then \
-		cp -an $(BUILD_DIR)/dl/* dl.cache; \
+		cp -afn $(BUILD_DIR)/dl/* dl.cache || true; \
 	fi
 
 #	packages=`find build_dir/bin/ -name 'packages' | head -n 1` && \
