@@ -1,0 +1,46 @@
+--- /dev/null
++++ b/package/network/services/hostapd/patches/999-scott-radius-reconnect-socket-on-fail.patch
+@@ -0,0 +1,43 @@
++--- a/src/radius/radius_client.c
+++++ b/src/radius/radius_client.c
++@@ -476,10 +476,10 @@ static void radius_client_timer(void *el
++ 			       (long int) (first - now.sec));
++ 	}
++ 
++-	if (auth_failover && conf->num_auth_servers > 1)
+++	if (auth_failover)
++ 		radius_client_auth_failover(radius);
++ 
++-	if (acct_failover && conf->num_acct_servers > 1)
+++	if (acct_failover)
++ 		radius_client_acct_failover(radius);
++ }
++ 
++@@ -1023,6 +1023,12 @@ radius_change_server(struct radius_clien
++ 		       hostapd_ip_txt(&nserv->addr, abuf, sizeof(abuf)),
++ 		       nserv->port);
++ 
+++	if (oserv && oserv == nserv) {
+++		/* Reconnect to same server, flush */
+++		if (auth)
+++			radius_client_flush(radius, 1);
+++	}
+++
++ 	if (oserv && oserv != nserv &&
++ 	    (nserv->shared_secret_len != oserv->shared_secret_len ||
++ 	     os_memcmp(nserv->shared_secret, oserv->shared_secret,
++@@ -1125,6 +1131,14 @@ radius_change_server(struct radius_clien
++ 		}
++ 	}
++ 
+++	/* Force a reconnect by disconnecting the socket first */
+++	struct sockaddr_in disconnect_addr = {
+++		.sin_family = AF_UNSPEC,
+++	};
+++	if (connect(sel_sock, &disconnect_addr, sizeof(disconnect_addr)) < 0) {
+++		wpa_printf(MSG_INFO, "disconnect[radius]: %s", strerror(errno));
+++	}
+++
++ 	if (connect(sel_sock, addr, addrlen) < 0) {
++ 		wpa_printf(MSG_INFO, "connect[radius]: %s", strerror(errno));
++ 		return -1;
