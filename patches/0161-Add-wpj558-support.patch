@@ -15,8 +15,8 @@
 +	uci set network.@switch[-1].alias_wan='5'
 +	uci set network.@switch[-1].alias_lan='1'
 +        ucidef_set_interfaces_vlans_lan_wan "4001" "4000"
-+        ucidef_add_switch_vlan "switch0" "4000" "wan cput"
-+        ucidef_add_switch_vlan "switch0" "4001" "lan cput"
++        ucidef_add_switch_vlan "switch0" "4000" "5 6t"
++        ucidef_add_switch_vlan "switch0" "4001" "1 6t"
 + 	;;
  
  ap121 |\
