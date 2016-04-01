@@ -11,11 +11,11 @@ Subject: [PATCH] Rename images to Opuntia
 
 --- a/include/image.mk
 +++ b/include/image.mk
-@@ -17,7 +17,7 @@ override NO_TRACE_MAKE:=$(_SINGLE)$(NO_T
- KDIR=$(KERNEL_BUILD_DIR)
- DTS_DIR:=$(LINUX_DIR)/arch/$(ARCH)/boot/dts/
+@@ -23,7 +23,7 @@ sanitize = $(call tolower,$(subst _,-,$(
+ DIST_SANITIZED:=$(call sanitize,$(VERSION_DIST))
+ EXTRA_NAME_SANITIZED=$(call sanitize,$(EXTRA_IMAGE_NAME))
  
--IMG_PREFIX:=openwrt-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET))
+-IMG_PREFIX:=$(DIST_SANITIZED)-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(if $(EXTRA_NAME_SANITIZED),$(EXTRA_NAME_SANITIZED)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET))
 +IMG_PREFIX:=opuntia-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET))
  
  MKFS_DEVTABLE_OPT := -D $(INCLUDE_DIR)/device_table.txt

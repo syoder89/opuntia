@@ -27,7 +27,6 @@ oldpackages/0066-Multiwan-work-with-qos-mark-mask-fixes.patch
 0001-Add-SAM-guest.patch
 0150-Fix-Linux-Pam-URL.patch
 0160-Add-wpj344-support.patch
-packages/0171-add-802.11ac-support.patch
 0172-change-ath9k-module-load-order.patch
 0172-add-delay-hostapd.patch
 packages/0172-remove-ip-tiny.patch
@@ -40,7 +39,6 @@ kernel/0046-Linux-3.18-updates.patch
 kernel/0010-Dummy-to-loopback.patch
 0002-combine-feed-versioning-to-release-number.patch
 0180-CCACHE-from-env.patch
-packages/0182-wolfcrypt-fix-missing-register.patch
 packages/0183-squid-minimal.patch
 packages/0184-squid-https-icap-sni-support.patch
 kernel/0058-wpj344-mac-fixes.patch
@@ -53,9 +51,7 @@ package/0066-conntrack-tools-logging.patch
 package/0067-mrd6-disable-logging.patch
 packages/0187-collectd-iwinfo-morestats.patch
 packages/0188-net-snmp-5.7.3.patch
-packages/0189-openssl-ftp-dir-change.patch
 packages/0191-ntpdate-missing-lib.patch
-0188-iproute2-bump-version-4.3.0.patch
 0159-Fix-netifd-mesh-htmode.patch
 packages/0189-iwinfo-collectd-64-bit-byte-counters.patch
 801-wifi-alliance-cert-mods.patch
@@ -64,5 +60,4 @@ packages/0193-bash-completion-conffile.patch
 kernel/0060-wpj558-switch-cpu-port-6.patch
 packages/0159-swconfig-support-port-aliases-cpu-wan-lan.patch
 packages/0173-hostapd-procd-respawn.patch
-packages/0174-collectd-procd-respawn.patch
 0195-hostapd-radius-reconnect-socket-on-fail.patch
