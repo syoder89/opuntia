@@ -66,3 +66,4 @@ packages/0159-swconfig-support-port-aliases-cpu-wan-lan.patch
 packages/0173-hostapd-procd-respawn.patch
 packages/0174-collectd-procd-respawn.patch
 0195-hostapd-radius-reconnect-socket-on-fail.patch
+packages/0174-netifd-support-hostapd-radius-extra-attrs.patch
