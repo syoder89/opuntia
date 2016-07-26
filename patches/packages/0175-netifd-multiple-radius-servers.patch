@@ -1,0 +1,96 @@
+--- a/package/network/services/hostapd/files/netifd.sh
++++ b/package/network/services/hostapd/files/netifd.sh
+@@ -124,10 +124,14 @@ hostapd_common_add_bss_config() {
+ 	config_add_int ieee80211w
+ 	config_add_int eapol_version
+ 
++	config_add_array auth_servers
++
+ 	config_add_string 'auth_server:host' 'server:host'
+ 	config_add_string auth_secret
+ 	config_add_int 'auth_port:port' 'port:port'
+ 
++	config_add_array acct_servers
++
+ 	config_add_string acct_server
+ 	config_add_string acct_secret
+ 	config_add_int acct_port
+@@ -251,6 +255,7 @@ hostapd_set_bss_options() {
+ 		;;
+ 		eap)
+ 			json_get_vars \
++				auth_servers acct_servers \
+ 				auth_server auth_secret auth_port \
+ 				acct_server acct_secret acct_port \
+ 				dae_client dae_secret dae_port \
+@@ -272,12 +277,37 @@ hostapd_set_bss_options() {
+ 
+ 			set_default vlan_naming 1
+ 
+-			append bss_conf "auth_server_addr=$auth_server" "$N"
+-			append bss_conf "auth_server_port=$auth_port" "$N"
+-			append bss_conf "auth_server_shared_secret=$auth_secret" "$N"
++                        # leave the default option for legacy compatibility
++                        [ -z "$auth_server" ] || append bss_conf "auth_server_addr=$auth_server" "$N"
++                        [ -z "$auth_server" ] || append bss_conf "auth_server_port=$auth_port" "$N"
++                        [ -z "$auth_secret" ] || append bss_conf "auth_server_shared_secret=$auth_secret" "$N"
++
++                        # List of fallback RADIUS servers, ip_add@secret[:port]
++			[ -n "$auth_servers" ] && {
++                        	json_select "auth_servers"
++                        	local Index="1"
++                        	while json_get_type Var $Index && [ "$Var" = string ]; do
++                                	json_get_var Var "$((Index++))"
++
++                                	ip_addr=$(echo "$Var" | cut -d"@" -f2 | cut -d":" -f1)
++                                	append bss_conf "auth_server_addr=$ip_addr" "$N"
++
++                                	port=$(echo "$Var" | cut -d"@" -f2 | cut -d":" -f2)
++                                	if ! echo "$port" | egrep -q '^[0-9]+$' ; then
++                                        	port=1812
++                                	fi
++                                	append bss_conf "auth_server_port=$port" "$N"
++
++                                	secret=$(echo "$Var" | cut -d"@" -f1)
++                                	append bss_conf "auth_server_shared_secret=$secret" "$N"
++                        	done
++                        	json_select ".."
++			}
++
+ 			[ -n "$radius_auth_req_attr" ] && append bss_conf "radius_auth_req_attr=$radius_auth_req_attr" "$N"
+ 			[ -n "$radius_acct_req_attr" ] && append bss_conf "radius_acct_req_attr=$radius_acct_req_attr" "$N"
+ 
++                        # leave the default option for legacy compatibility
+ 			[ -n "$acct_server" ] && {
+ 				append bss_conf "acct_server_addr=$acct_server" "$N"
+ 				append bss_conf "acct_server_port=$acct_port" "$N"
+@@ -285,6 +315,29 @@ hostapd_set_bss_options() {
+ 					append bss_conf "acct_server_shared_secret=$acct_secret" "$N"
+ 			}
+ 
++                        # List of fallback RADIUS servers, ip_add@secret[:port]
++			[ -n "$acct_servers" ] && {
++                        	json_select "acct_servers"
++                        	local Index="1"
++                        	while json_get_type Var $Index && [ "$Var" = string ]; do
++                                	json_get_var Var "$((Index++))"
++
++                                	ip_addr=$(echo "$Var" | cut -d"@" -f2 | cut -d":" -f1)
++                                	append bss_conf "acct_server_addr=$ip_addr" "$N"
++
++                                	port=$(echo "$Var" | cut -d"@" -f2 | cut -d":" -f2)
++                                	if ! echo "$port" | egrep -q '^[0-9]+$' ; then
++                                        	port=1813
++                                	fi
++                                	append bss_conf "acct_server_port=$port" "$N"
++
++                                	secret=$(echo "$Var" | cut -d"@" -f1)
++                                	append bss_conf "acct_server_shared_secret=$secret" "$N"
++                        	done
++                        	json_select ".."
++			}
++
++
+ 			[ -n "$eap_reauth_period" ] && append bss_conf "eap_reauth_period=$eap_reauth_period" "$N"
+ 
+ 			[ -n "$dae_client" -a -n "$dae_secret" ] && {
