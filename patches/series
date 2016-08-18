@@ -69,3 +69,7 @@ packages/0174-netifd-support-hostapd-radius-extra-attrs.patch
 packages/0175-netifd-multiple-radius-servers.patch
 packages/0176-Add-candela-tech-ath10k-firmware-10.1.patch
 packages/0194-procd-O_PATH.patch
+0176-hostapd-fix-no-vlan-define-from-wpa_supplicant-CONFIG_IBSS_RSN.patch
+0177-revert-firewall3-version-2015-07-27.patch
+0195-hostapd-radius-reconnect-socket-on-fail.patch
+0176-scott-fix-ath10k-dynamic-vlan-gtk-sw_crypto-disabled.patch

@@ -1,0 +1,15 @@
+--- /dev/null
++++ b/package/network/services/hostapd/patches/999-scott-fix-no-vlan-from-wpa_supplicant-CONFIG_IBSS_RSN.patch
+@@ -0,0 +1,12 @@
++--- a/wpa_supplicant/Makefile
+++++ b/wpa_supplicant/Makefile
++@@ -319,7 +319,9 @@ endif
++ ifdef CONFIG_IBSS_RSN
++ NEED_RSN_AUTHENTICATOR=y
++ CFLAGS += -DCONFIG_IBSS_RSN
+++ifndef MULTICALL
++ CFLAGS += -DCONFIG_NO_VLAN
+++endif
++ OBJS += ibss_rsn.o
++ endif
++ 
