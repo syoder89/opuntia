@@ -68,5 +68,4 @@ packages/0174-collectd-procd-respawn.patch
 packages/0174-netifd-support-hostapd-radius-extra-attrs.patch
 packages/0175-netifd-multiple-radius-servers.patch
 packages/0176-Add-candela-tech-ath10k-firmware-10.1.patch
-packages/0176-Add-scott-ath10k-candelatech-backports.patch
 packages/0194-procd-O_PATH.patch
