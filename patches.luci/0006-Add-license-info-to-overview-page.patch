@@ -10,7 +10,7 @@ Subject: [PATCH 06/14] Add license info to overview page. Change distro name
 
 --- a/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
 +++ b/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
-@@ -557,11 +557,13 @@
+@@ -652,11 +652,13 @@
  
  	<table width="100%" cellspacing="10">
  		<tr><td width="33%"><%:Hostname%></td><td><%=luci.sys.hostname() or "?"%></td></tr>
@@ -30,10 +30,10 @@ Subject: [PATCH 06/14] Add license info to overview page. Change distro name
  		<tr><td width="33%"><%:Uptime%></td><td id="uptime">-</td></tr>
 --- a/modules/luci-base/src/mkversion.sh
 +++ b/modules/luci-base/src/mkversion.sh
-@@ -31,9 +31,15 @@ module "luci.version"
- if pcall(dofile, "/etc/openwrt_release") and _G.DISTRIB_DESCRIPTION then
- 	distname    = ""
- 	distversion = _G.DISTRIB_DESCRIPTION
+@@ -14,9 +14,15 @@ if pcall(dofile, "/etc/openwrt_release")
+ 			distversion = distversion .. " " .. distrevision
+ 		end
+ 	end
 +	distproduct = _G.DISTRIB_PRODUCT
 +	distmanufacturer = _G.DISTRIB_MANUFACTURER
 +	disthwrev = _G.DISTRIB_HWREV
@@ -45,4 +45,4 @@ Subject: [PATCH 06/14] Add license info to overview page. Change distro name
 +	disthwrev = "Unknown"
  end
  
- luciname    = "$variant"
+ luciname    = "${3:-LuCI}"

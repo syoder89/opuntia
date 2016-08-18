@@ -10,7 +10,7 @@ Subject: [PATCH 02/14] Add remove table margin patch
 
 --- a/modules/luci-mod-admin-full/luasrc/view/admin_network/iface_overview.htm
 +++ b/modules/luci-mod-admin-full/luasrc/view/admin_network/iface_overview.htm
-@@ -216,7 +216,7 @@ You may obtain a copy of the License at
+@@ -207,7 +207,7 @@
  	<fieldset class="cbi-section">
  		<legend><%:Interface Overview%></legend>
  
@@ -21,7 +21,7 @@ Subject: [PATCH 02/14] Add remove table margin patch
  				<th class="cbi-section-table-cell" style="text-align:left"><%:Status%></th>
 --- a/modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm
 +++ b/modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm
-@@ -365,7 +365,7 @@ You may obtain a copy of the License at
+@@ -390,7 +390,7 @@
  	<% for _, dev in ipairs(devices) do local nets = dev:get_wifinets() %>
  	<!-- device <%=dev:name()%> -->
  	<fieldset class="cbi-section">
@@ -30,15 +30,12 @@ Subject: [PATCH 02/14] Add remove table margin patch
  			<!-- physical device -->
  			<tr>
  				<td style="width:34px"><img src="<%=resource%>/icons/wifi_big_disabled.png" style="float:left; margin-right:10px" id="<%=dev:name()%>-iw-upstate" /></td>
-@@ -417,7 +417,7 @@ You may obtain a copy of the License at
- 	<h2><a id="content" name="content"><%:Associated Stations%></a></h2>
+@@ -449,7 +449,7 @@
+ 	<h2><%:Associated Stations%></h2>
  
  	<fieldset class="cbi-section">
--		<table class="cbi-section-table" style="margin:10px" id="iw-assoclist">
-+		<table class="cbi-section-table" id="iw-assoclist">
+-		<table class="cbi-section-table valign-middle" style="margin:10px" id="iw-assoclist">
++		<table class="cbi-section-table valign-middle" id="iw-assoclist">
  			<tr class="cbi-section-table-titles">
  				<th class="cbi-section-table-cell"></th>
  				<th class="cbi-section-table-cell"><%:SSID%></th>
--- 
-2.0.0
-

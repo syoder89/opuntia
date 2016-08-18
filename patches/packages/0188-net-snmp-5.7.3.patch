@@ -13,7 +13,7 @@
  PKG_SOURCE_URL:=@SF/net-snmp
 -PKG_MD5SUM:=95aa054f3c99a1ce242807d7eaf98619
 +PKG_MD5SUM:=d4a3459e1577d0efa8d96ca70a885e53
- PKG_MAINTAINER:=Jo-Philipp Wich <jow@openwrt.org>
+ PKG_MAINTAINER:=Jo-Philipp Wich <jo@mein.io>
  PKG_LICENSE:=MIT BSD-3-Clause-Clear
  
 @@ -39,6 +39,7 @@ endef

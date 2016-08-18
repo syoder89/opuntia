@@ -1,6 +1,6 @@
 --- /dev/null
-+++ b/feeds/packages/utils/collectd/patches/990-scott-iwinfo-morestats.patch
-@@ -0,0 +1,176 @@
++++ b/feeds/packages/utils/collectd/patches/999-scott-iwinfo-morestats.patch
+@@ -0,0 +1,180 @@
 +--- a/src/iwinfo.c
 ++++ b/src/iwinfo.c
 +@@ -52,12 +52,15 @@ static int iwinfo_config(const char *key
@@ -21,7 +21,7 @@
 + 
 + 	vl.values = values;
 + 	vl.values_len = 1;
-+@@ -66,40 +69,115 @@ static void iwinfo_submit(const char *if
++@@ -66,40 +69,117 @@ static void iwinfo_submit(const char *if
 + 	sstrncpy(vl.plugin, "iwinfo", sizeof(vl.plugin));
 + 	sstrncpy(vl.plugin_instance, ifname, sizeof(vl.plugin_instance));
 + 	sstrncpy(vl.type, type, sizeof(vl.type));
@@ -107,37 +107,39 @@
 ++			new_iwinfo_submit(instance, "assoc_station_tx_bytes", 1, (const char *)macstr,  e->tx_bytes);
 ++			new_iwinfo_submit(instance, "assoc_station_rx_rate", 0, (const char *)macstr,  e->rx_rate.rate);
 ++			new_iwinfo_submit(instance, "assoc_station_tx_rate", 0, (const char *)macstr,  e->tx_rate.rate);
-++			new_iwinfo_submit(instance, "assoc_station_rx_mhz", 0, (const char *)macstr,  e->rx_rate.mhz);
-++			new_iwinfo_submit(instance, "assoc_station_tx_mhz", 0, (const char *)macstr,  e->tx_rate.mhz);
-++			new_iwinfo_submit(instance, "assoc_station_rx_ht", 0, (const char *)macstr,  e->rx_rate.is_ht);
-++			new_iwinfo_submit(instance, "assoc_station_tx_ht", 0, (const char *)macstr,  e->tx_rate.is_ht);
-++			new_iwinfo_submit(instance, "assoc_station_rx_vht", 0, (const char *)macstr,  e->rx_rate.is_vht);
-++			new_iwinfo_submit(instance, "assoc_station_tx_vht", 0, (const char *)macstr,  e->tx_rate.is_vht);
 ++
-++			if (e->rx_rate.is_ht)
+++			if (e->rx_rate.vht_mcs >= 0)
+++			{
+++				new_iwinfo_submit(instance, "assoc_station_rx_vht_mcs", 0, (const char *)macstr,  e->rx_rate.vht_mcs);
+++				new_iwinfo_submit(instance, "assoc_station_rx_40mhz", 0, (const char *)macstr,  e->rx_rate.is_40mhz);
+++				new_iwinfo_submit(instance, "assoc_station_rx_80mhz", 0, (const char *)macstr,  e->rx_rate.is_80mhz);
+++				new_iwinfo_submit(instance, "assoc_station_rx_80p80mhz", 0, (const char *)macstr,  e->rx_rate.is_80p80mhz);
+++				new_iwinfo_submit(instance, "assoc_station_rx_160mhz", 0, (const char *)macstr,  e->rx_rate.is_160mhz);
+++				new_iwinfo_submit(instance, "assoc_station_rx_short_gi", 0, (const char *)macstr,  e->rx_rate.is_short_gi);
+++				new_iwinfo_submit(instance, "assoc_station_rx_vht_nss", 0, (const char *)macstr,  e->rx_rate.vht_nss);
+++			}
+++			else if (e->rx_rate.mcs >= 0)
 ++			{
 ++				new_iwinfo_submit(instance, "assoc_station_rx_mcs", 0, (const char *)macstr,  e->rx_rate.mcs);
 ++				new_iwinfo_submit(instance, "assoc_station_rx_40mhz", 0, (const char *)macstr,  e->rx_rate.is_40mhz);
 ++				new_iwinfo_submit(instance, "assoc_station_rx_short_gi", 0, (const char *)macstr,  e->rx_rate.is_short_gi);
 ++			}
-++			else if (e->rx_rate.is_vht)
-++			{
-++				new_iwinfo_submit(instance, "assoc_station_rx_mcs", 0, (const char *)macstr,  e->rx_rate.mcs);
-++				new_iwinfo_submit(instance, "assoc_station_rx_short_gi", 0, (const char *)macstr,  e->rx_rate.is_short_gi);
-++				new_iwinfo_submit(instance, "assoc_station_rx_nss", 0, (const char *)macstr,  e->rx_rate.nss);
-++			}
 ++
-++			if (e->tx_rate.is_ht)
+++			if (e->tx_rate.vht_mcs >= 0)
+++			{
+++				new_iwinfo_submit(instance, "assoc_station_tx_vht_mcs", 0, (const char *)macstr,  e->tx_rate.vht_mcs);
+++				new_iwinfo_submit(instance, "assoc_station_tx_40mhz", 0, (const char *)macstr,  e->tx_rate.is_40mhz);
+++				new_iwinfo_submit(instance, "assoc_station_tx_80mhz", 0, (const char *)macstr,  e->tx_rate.is_80mhz);
+++				new_iwinfo_submit(instance, "assoc_station_tx_80p80mhz", 0, (const char *)macstr,  e->tx_rate.is_80p80mhz);
+++				new_iwinfo_submit(instance, "assoc_station_tx_160mhz", 0, (const char *)macstr,  e->tx_rate.is_160mhz);
+++				new_iwinfo_submit(instance, "assoc_station_tx_short_gi", 0, (const char *)macstr,  e->tx_rate.is_short_gi);
+++				new_iwinfo_submit(instance, "assoc_station_tx_vht_nss", 0, (const char *)macstr,  e->tx_rate.vht_nss);
+++			}
+++			else if (e->tx_rate.mcs >= 0)
 ++			{
 ++				new_iwinfo_submit(instance, "assoc_station_tx_mcs", 0, (const char *)macstr,  e->tx_rate.mcs);
 ++				new_iwinfo_submit(instance, "assoc_station_tx_40mhz", 0, (const char *)macstr,  e->tx_rate.is_40mhz);
 ++				new_iwinfo_submit(instance, "assoc_station_tx_short_gi", 0, (const char *)macstr,  e->tx_rate.is_short_gi);
-++			}
-++			else if (e->tx_rate.is_vht)
-++			{
-++				new_iwinfo_submit(instance, "assoc_station_tx_mcs", 0, (const char *)macstr,  e->tx_rate.mcs);
-++				new_iwinfo_submit(instance, "assoc_station_tx_short_gi", 0, (const char *)macstr,  e->tx_rate.is_short_gi);
-++				new_iwinfo_submit(instance, "assoc_station_tx_nss", 0, (const char *)macstr,  e->tx_rate.nss);
 ++			}
 ++		}
 + 	}
@@ -145,7 +147,7 @@
 + 	iwinfo_finish();
 +--- a/src/types.db
 ++++ b/src/types.db
-+@@ -229,6 +229,31 @@ vs_memory		value:GAUGE:0:922337203685477
++@@ -228,6 +228,33 @@ vs_memory		value:GAUGE:0:922337203685477
 + vs_processes		value:GAUGE:0:65535
 + vs_threads		value:GAUGE:0:65535
 + stations		value:GAUGE:0:256
@@ -160,20 +162,22 @@
 ++assoc_station_tx_bytes  value:DERIVE:0:U
 ++assoc_station_rx_rate   value:GAUGE:0:U
 ++assoc_station_tx_rate   value:GAUGE:0:U
+++assoc_station_rx_vht_mcs        value:GAUGE:0:256
 ++assoc_station_rx_40mhz  value:GAUGE:0:1
-++assoc_station_tx_40mhz  value:GAUGE:0:1
+++assoc_station_rx_80mhz  value:GAUGE:0:1
+++assoc_station_rx_80p80mhz       value:GAUGE:0:1
+++assoc_station_rx_160mhz value:GAUGE:0:1
 ++assoc_station_rx_short_gi       value:GAUGE:0:1
-++assoc_station_tx_short_gi       value:GAUGE:0:1
-++assoc_station_rx_ht		value:GAUGE:0:1
-++assoc_station_tx_ht		value:GAUGE:0:1
-++assoc_station_rx_vht		value:GAUGE:0:1
-++assoc_station_tx_vht		value:GAUGE:0:1
-++assoc_station_rx_nss        value:GAUGE:0:256
-++assoc_station_tx_nss        value:GAUGE:0:256
+++assoc_station_rx_vht_nss        value:GAUGE:0:256
 ++assoc_station_rx_mcs    value:GAUGE:0:256
-++assoc_station_tx_mcs        value:GAUGE:0:256
-++assoc_station_rx_mhz    value:GAUGE:0:256
-++assoc_station_tx_mhz        value:GAUGE:0:256
+++assoc_station_tx_vht_mcs        value:GAUGE:0:256
+++assoc_station_tx_40mhz  value:GAUGE:0:1
+++assoc_station_tx_80mhz  value:GAUGE:0:1
+++assoc_station_tx_80p80mhz       value:GAUGE:0:1
+++assoc_station_tx_160mhz value:GAUGE:0:1
+++assoc_station_tx_short_gi       value:GAUGE:0:1
+++assoc_station_tx_vht_nss        value:GAUGE:0:256
+++assoc_station_tx_mcs    value:GAUGE:0:256
 + 
 + #
 + # Legacy types

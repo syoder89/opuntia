@@ -27,6 +27,9 @@ oldpackages/0066-Multiwan-work-with-qos-mark-mask-fixes.patch
 0001-Add-SAM-guest.patch
 0150-Fix-Linux-Pam-URL.patch
 0160-Add-wpj344-support.patch
+packages/0171-add-802.11ac-support.patch
+packages/0172-iptraf-musl-libc-fixes.patch
+packages/0159-Update-authsae-06-2016.patch
 0172-change-ath9k-module-load-order.patch
 0172-add-delay-hostapd.patch
 packages/0172-remove-ip-tiny.patch
@@ -51,6 +54,7 @@ package/0066-conntrack-tools-logging.patch
 package/0067-mrd6-disable-logging.patch
 packages/0187-collectd-iwinfo-morestats.patch
 packages/0188-net-snmp-5.7.3.patch
+packages/0189-openssl-ftp-dir-change.patch
 packages/0191-ntpdate-missing-lib.patch
 0159-Fix-netifd-mesh-htmode.patch
 packages/0189-iwinfo-collectd-64-bit-byte-counters.patch
@@ -60,6 +64,9 @@ packages/0193-bash-completion-conffile.patch
 kernel/0060-wpj558-switch-cpu-port-6.patch
 packages/0159-swconfig-support-port-aliases-cpu-wan-lan.patch
 packages/0173-hostapd-procd-respawn.patch
-0195-hostapd-radius-reconnect-socket-on-fail.patch
-0196-add-uci-defaults-new.patch
+packages/0174-collectd-procd-respawn.patch
 packages/0174-netifd-support-hostapd-radius-extra-attrs.patch
+packages/0175-netifd-multiple-radius-servers.patch
+packages/0176-Add-candela-tech-ath10k-firmware-10.1.patch
+packages/0176-Add-scott-ath10k-candelatech-backports.patch
+packages/0194-procd-O_PATH.patch

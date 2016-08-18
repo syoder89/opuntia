@@ -1,0 +1,61 @@
+--- /dev/null
++++ b/package/kernel/mac80211/patches/999-scott-add-ath10k-candelatech-backports.patch
+@@ -0,0 +1,58 @@
++--- a/drivers/net/wireless/ath/ath10k/core.c
+++++ b/drivers/net/wireless/ath/ath10k/core.c
++@@ -1621,6 +1621,10 @@ int ath10k_core_start(struct ath10k *ar,
++ 		goto err_hif_stop;
++ 	}
++ 
+++	ar->free_vdev_map = (1LL << ar->max_num_vdevs) - 1;
+++
+++	INIT_LIST_HEAD(&ar->arvifs);
+++
++ 	/* we don't care about HTT in UTF mode */
++ 	if (mode == ATH10K_FIRMWARE_MODE_NORMAL) {
++ 		status = ath10k_htt_setup(&ar->htt);
++@@ -1634,10 +1638,6 @@ int ath10k_core_start(struct ath10k *ar,
++ 	if (status)
++ 		goto err_hif_stop;
++ 
++-	ar->free_vdev_map = (1LL << ar->max_num_vdevs) - 1;
++-
++-	INIT_LIST_HEAD(&ar->arvifs);
++-
++ 	return 0;
++ 
++ err_hif_stop:
++--- a/net/mac80211/tx.c
+++++ b/net/mac80211/tx.c
++@@ -1339,6 +1339,8 @@ static bool ieee80211_tx_frags(struct ie
++ 		}
++ #endif
++ 
+++		info->control.vif = vif;
+++
++ 		spin_lock_irqsave(&local->queue_stop_reason_lock, flags);
++ 		if (local->queue_stop_reasons[q] ||
++ 		    (!txpending && !skb_queue_empty(&local->pending[q]))) {
++@@ -1380,8 +1382,6 @@ static bool ieee80211_tx_frags(struct ie
++ 		}
++ 		spin_unlock_irqrestore(&local->queue_stop_reason_lock, flags);
++ 
++-		info->control.vif = vif;
++-
++ 		__skb_unlink(skb, skbs);
++ 		ieee80211_drv_tx(local, vif, sta, skb);
++ 	}
++--- a/drivers/net/wireless/ath/ath10k/mac.c
+++++ b/drivers/net/wireless/ath/ath10k/mac.c
++@@ -4430,7 +4430,10 @@ static int ath10k_add_interface(struct i
++ 		goto err_vdev_delete;
++ 	}
++ 
++-	if (ar->cfg_tx_chainmask) {
+++	/* Configuring number of spatial stream for monitor interface is causing
+++	 * target assert in qca9888 and qca6174.
+++	*/
+++	if (ar->cfg_tx_chainmask && (vif->type != NL80211_IFTYPE_MONITOR)) {
++ 		u16 nss = get_nss_from_chainmask(ar->cfg_tx_chainmask);
++ 
++ 		vdev_param = ar->wmi.vdev_param->nss;

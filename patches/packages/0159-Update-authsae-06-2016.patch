@@ -1,0 +1,110 @@
+--- a/package/network/services/authsae/Makefile
++++ b/package/network/services/authsae/Makefile
+@@ -8,13 +8,13 @@
+ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=authsae
+-PKG_VERSION:=2014-06-09
++PKG_VERSION:=2016-06-21
+ PKG_RELEASE=$(PKG_SOURCE_VERSION)
+ 
+ PKG_SOURCE_PROTO:=git
+ PKG_SOURCE_URL:=git://github.com/cozybit/authsae.git
+ PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
+-PKG_SOURCE_VERSION:=8531ab158910a525d4bcbb3ad02c08342f6987f2
++PKG_SOURCE_VERSION:=813ec0e9f568001790b3a20e83d8367de65d3ae1
+ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
+ 
+ PKG_BUILD_PARALLEL:=1
+--- a/package/network/services/authsae/patches/0001-Fix-bad-frees-in-commit-8531ab1.patch
++++ /dev/null
+@@ -1,48 +0,0 @@
+---- a/sae.c
+-+++ b/sae.c
+-@@ -1062,7 +1062,11 @@ assign_group_to_peer (struct candidate *
+-     primebitlen = BN_num_bits(grp->prime);
+- 
+-     if (!EC_GROUP_get_curve_GFp(grp->group, NULL, a, b, NULL)) {
+-+        sae_debug(SAE_DEBUG_ERR, "unable to get curve!\n");
+-         free(prfbuf);
+-+        BN_free(rnd);
+-+        BN_free(x_candidate);
+-+	goto fail;
+-     }
+- 
+-     BN_sub(pm1, grp->prime, BN_value_one());
+-@@ -1215,16 +1219,6 @@ assign_group_to_peer (struct candidate *
+-         peer->pwe = NULL;
+-     }
+- fail:
+--    if (prfbuf != NULL) {
+--        free(prfbuf);
+--    }
+--    if (primebuf != NULL) {
+--        free(primebuf);
+--    }
+--    if (found) {
+--        BN_free(x);
+--    }
+--
+-     if (sae_debug_mask & SAE_DEBUG_CRYPTO_VERB) {
+-         BIGNUM *px = NULL, *py = NULL;
+-         if (((px = BN_new()) != NULL) &&
+-@@ -1243,6 +1237,16 @@ fail:
+-         }
+-     }
+- 
+-+    if (prfbuf != NULL) {
+-+        free(prfbuf);
+-+    }
+-+    if (primebuf != NULL) {
+-+        free(primebuf);
+-+    }
+-+    if (found) {
+-+        BN_free(x);
+-+    }
+-+
+-     BN_free(x_candidate);
+-     BN_free(rnd);
+-     BN_free(pm1d2);
+--- a/package/network/services/authsae/patches/series
++++ /dev/null
+@@ -1 +0,0 @@
+-0001-Fix-bad-frees-in-commit-8531ab1.patch
+--- /dev/null
++++ b/package/network/services/authsae/patches/001-fix-__le16.patch
+@@ -0,0 +1,11 @@
++--- a/ampe.c
+++++ b/ampe.c
++@@ -240,7 +240,7 @@ static void peer_ampe_init(struct ampe_c
++ 
++ static void plink_timer(timerid id, void *data)
++ {
++-	__le16 reason;
+++	unsigned short reason;
++     struct candidate *cand;
++ 
++ 	cand = (struct candidate *)data;
+--- /dev/null
++++ b/package/network/services/authsae/patches/002-fix-sysctl.h.patch
+@@ -0,0 +1,20 @@
++--- a/linux/meshd.c
+++++ b/linux/meshd.c
++@@ -44,7 +44,6 @@
++ #include <signal.h>
++ #include <sys/ioctl.h>
++ #include <sys/socket.h>
++-#include <sys/sysctl.h>
++ #include <sys/queue.h>
++ #include <netinet/in.h>
++ #include <net/if.h>
++--- a/linux/mon.c
+++++ b/linux/mon.c
++@@ -44,7 +44,6 @@
++ #include <signal.h>
++ #include <sys/ioctl.h>
++ #include <sys/socket.h>
++-#include <sys/sysctl.h>
++ #include <sys/queue.h>
++ #include <netinet/in.h>
++ #include <net/if.h>

@@ -9,17 +9,6 @@ Subject: [PATCH] Rename images to Opuntia
  scripts/combined-image.sh | 2 +-
  3 files changed, 6 insertions(+), 6 deletions(-)
 
---- a/include/image.mk
-+++ b/include/image.mk
-@@ -23,7 +23,7 @@ sanitize = $(call tolower,$(subst _,-,$(
- DIST_SANITIZED:=$(call sanitize,$(VERSION_DIST))
- EXTRA_NAME_SANITIZED=$(call sanitize,$(EXTRA_IMAGE_NAME))
- 
--IMG_PREFIX:=$(DIST_SANITIZED)-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(if $(EXTRA_NAME_SANITIZED),$(EXTRA_NAME_SANITIZED)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET))
-+IMG_PREFIX:=opuntia-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET))
- 
- MKFS_DEVTABLE_OPT := -D $(INCLUDE_DIR)/device_table.txt
- 
 --- a/scripts/combined-image.sh
 +++ b/scripts/combined-image.sh
 @@ -7,7 +7,7 @@ BLKSZ=65536

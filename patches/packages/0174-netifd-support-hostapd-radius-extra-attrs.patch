@@ -3,7 +3,7 @@
 @@ -140,6 +140,8 @@ hostapd_common_add_bss_config() {
  	config_add_string ownip
  	config_add_string iapp_interface
- 	config_add_string eap_type ca_cert client_cert identity auth priv_key priv_key_pwd
+ 	config_add_string eap_type ca_cert client_cert identity anonymous_identity auth priv_key priv_key_pwd
 +	config_add_string radius_auth_req_attr
 +	config_add_string radius_acct_req_attr
  
