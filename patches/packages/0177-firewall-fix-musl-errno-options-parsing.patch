@@ -1,0 +1,50 @@
+--- /dev/null
++++ b/package/network/config/firewall/patches/001-scott-fix-musl-errno-options-parsing.patch
+@@ -0,0 +1,47 @@
++--- a/options.c
+++++ b/options.c
++@@ -182,6 +182,7 @@ fw3_parse_limit(void *ptr, const char *v
++ 		while (isspace(*++val));
++ 	}
++ 
+++	errno = 0;
++ 	n = strtol(val, &e, 10);
++ 
++ 	if (errno == ERANGE || errno == EINVAL)
++@@ -410,6 +411,7 @@ fw3_parse_port(void *ptr, const char *va
++ 		while (isspace(*++val));
++ 	}
++ 
+++	errno = 0;
++ 	n = strtoul(val, &p, 10);
++ 
++ 	if (errno == ERANGE || errno == EINVAL)
++@@ -420,6 +422,7 @@ fw3_parse_port(void *ptr, const char *va
++ 
++ 	if (*p)
++ 	{
+++		errno = 0;
++ 		m = strtoul(++p, NULL, 10);
++ 
++ 		if (errno == ERANGE || errno == EINVAL || m < n)
++@@ -535,7 +538,7 @@ fw3_parse_protocol(void *ptr, const char
++ {
++ 	struct fw3_protocol proto = { };
++ 	struct protoent *ent;
++-	char *e;
+++	char *e, *p;
++ 
++ 	if (*val == '!')
++ 	{
++@@ -565,7 +568,10 @@ fw3_parse_protocol(void *ptr, const char
++ 		return true;
++ 	}
++ 
++-	ent = getprotobyname(val);
+++	p = strdup(val);
+++	for (e=p; *e; ++e) *e = tolower(*e);
+++	ent = getprotobyname(p);
+++	free(p);
++ 
++ 	if (ent)
++ 	{
