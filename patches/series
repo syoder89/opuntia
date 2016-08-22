@@ -73,3 +73,6 @@ packages/0194-procd-O_PATH.patch
 0177-revert-firewall3-version-2015-07-27.patch
 0195-hostapd-radius-reconnect-socket-on-fail.patch
 0176-scott-fix-ath10k-dynamic-vlan-gtk-sw_crypto-disabled.patch
+packages/0175-quagga-rtadv-musl.patch
+packages/0176-dnsmasq-add-user-group-to-init.patch
+kernel/0071-hfsc-always-keep-backlog-updated.patch
