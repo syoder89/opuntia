@@ -12,46 +12,39 @@ Subject: [PATCH 13/14] Update AP config. Add inactive time to wifi status.
  .../openwrt-luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm  | 2 ++
  2 files changed, 4 insertions(+)
 
-diff --git a/modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm b/modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm
-index 556f394..fcc638a 100644
 --- a/modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm
 +++ b/modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm
-@@ -313,6 +313,7 @@ You may obtain a copy of the License at
- 							tr.insertCell(-1).innerHTML = arptable[assoclist[j].bssid]
- 								? arptable[assoclist[j].bssid] : '?';
+@@ -342,6 +342,7 @@
+ 							else
+ 								tr.insertCell(-1).innerHTML = '?';
  
 +							tr.insertCell(-1).innerHTML = nowrap(String.format('%.1f <%:s%>', assoclist[j].inactive / 1000));
- 							tr.insertCell(-1).innerHTML = nowrap(String.format('%d <%:dBm%>', assoclist[j].signal));
- 							tr.insertCell(-1).innerHTML = nowrap(String.format('%d <%:dBm%>', assoclist[j].noise));
- 
-@@ -423,6 +424,7 @@ You may obtain a copy of the License at
+ 							tr.insertCell(-1).innerHTML = String.format(
+ 								'<span class="ifacebadge" title="<%:Signal%>: %d <%:dBm%> / <%:Noise%>: %d <%:dBm%> / <%:SNR%>: %d"><img src="%s" /> %d / %d <%:dBm%></span>',
+ 								assoclist[j].signal, assoclist[j].noise, assoclist[j].signal - assoclist[j].noise,
+@@ -455,6 +456,7 @@
  				<th class="cbi-section-table-cell"><%:SSID%></th>
  				<th class="cbi-section-table-cell"><%:MAC-Address%></th>
- 				<th class="cbi-section-table-cell"><%:IPv4-Address%></th>
+ 				<th class="cbi-section-table-cell"><%:Host%></th>
 +				<th class="cbi-section-table-cell"><%:Inactive%></th>
- 				<th class="cbi-section-table-cell"><%:Signal%></th>
- 				<th class="cbi-section-table-cell"><%:Noise%></th>
- 				<th class="cbi-section-table-cell"><%:RX Rate%></th>
-diff --git a/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm b/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
-index 3067d1d..1b1e20c 100644
+ 				<th class="cbi-section-table-cell"><%:Signal%> / <%:Noise%></th>
+ 				<th class="cbi-section-table-cell"><%:RX Rate%> / <%:TX Rate%></th>
+ 			</tr>
 --- a/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
 +++ b/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
-@@ -441,6 +441,7 @@ You may obtain a copy of the License at
- 							'%h'.format(assoclist[i].name).nobr()
- 					);
+@@ -570,6 +570,7 @@
+ 					else
+ 						tr.insertCell(-1).innerHTML = '?';
  
 +					tr.insertCell(-1).innerHTML = String.format('%.1f <%:s%>', assoclist[i].inactive / 1000).nobr();
- 					tr.insertCell(-1).innerHTML = String.format('%d <%:dBm%>', assoclist[i].signal).nobr();
- 					tr.insertCell(-1).innerHTML = String.format('%d <%:dBm%>', assoclist[i].noise).nobr();
- 
-@@ -642,6 +643,7 @@ You may obtain a copy of the License at
- 			<th class="cbi-section-table-cell">&#160;</th>
- 			<th class="cbi-section-table-cell"><%:MAC-Address%></th>
+ 					tr.insertCell(-1).innerHTML = String.format(
+ 						'<span class="ifacebadge" title="<%:Signal%>: %d <%:dBm%> / <%:Noise%>: %d <%:dBm%> / <%:SNR%>: %d"><img src="%s" /> %d / %d <%:dBm%></span>',
+ 						assoclist[i].signal, assoclist[i].noise, assoclist[i].signal - assoclist[i].noise,
+@@ -775,6 +776,7 @@
  			<th class="cbi-section-table-cell"><%:Network%></th>
+ 			<th class="cbi-section-table-cell"><%:MAC-Address%></th>
+ 			<th class="cbi-section-table-cell"><%:Host%></th>
 +			<th class="cbi-section-table-cell"><%:Inactive%></th>
- 			<th class="cbi-section-table-cell"><%:Signal%></th>
- 			<th class="cbi-section-table-cell"><%:Noise%></th>
- 			<th class="cbi-section-table-cell"><%:RX Rate%></th>
--- 
-2.0.0
-
+ 			<th class="cbi-section-table-cell"><%:Signal%> / <%:Noise%></th>
+ 			<th class="cbi-section-table-cell"><%:RX Rate%> / <%:TX Rate%></th>
+ 		</tr>

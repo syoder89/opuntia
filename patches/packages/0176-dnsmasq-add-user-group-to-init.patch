@@ -1,0 +1,12 @@
+--- a/package/network/services/dnsmasq/files/dnsmasq.init
++++ b/package/network/services/dnsmasq/files/dnsmasq.init
+@@ -586,6 +586,9 @@ start_service() {
+ 
+ 	config_load dhcp
+ 
++	# Always check that the user/group exists for upgrades or old configs
++        add_group_and_user "dnsmasq"
++
+ 	# before we can call xappend
+ 	mkdir -p /var/run/dnsmasq/
+ 	mkdir -p $(dirname $CONFIGFILE)

@@ -1,0 +1,16 @@
+--- /dev/null
++++ b/package/kernel/mac80211/patches/999-scott-fix-ath10k-dynamic-vlan-gtk-sw_crypto-disabled.patch
+@@ -0,0 +1,13 @@
++--- a/drivers/net/wireless/ath/ath10k/mac.c
+++++ b/drivers/net/wireless/ath/ath10k/mac.c
++@@ -7769,8 +7769,8 @@ int ath10k_mac_register(struct ath10k *a
++ 	ieee80211_hw_set(ar->hw, CHANCTX_STA_CSA);
++ 	ieee80211_hw_set(ar->hw, QUEUE_CONTROL);
++ 
++-	if (!test_bit(ATH10K_FLAG_RAW_MODE, &ar->dev_flags))
++-		ieee80211_hw_set(ar->hw, SW_CRYPTO_CONTROL);
+++//	if (!test_bit(ATH10K_FLAG_RAW_MODE, &ar->dev_flags))
+++//		ieee80211_hw_set(ar->hw, SW_CRYPTO_CONTROL);
++ 
++ 	ar->hw->wiphy->features |= NL80211_FEATURE_STATIC_SMPS;
++ 	ar->hw->wiphy->flags |= WIPHY_FLAG_IBSS_RSN;

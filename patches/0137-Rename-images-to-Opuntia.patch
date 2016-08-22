@@ -9,17 +9,6 @@ Subject: [PATCH] Rename images to Opuntia
  scripts/combined-image.sh | 2 +-
  3 files changed, 6 insertions(+), 6 deletions(-)
 
---- a/include/image.mk
-+++ b/include/image.mk
-@@ -17,7 +17,7 @@ override NO_TRACE_MAKE:=$(_SINGLE)$(NO_T
- KDIR=$(KERNEL_BUILD_DIR)
- DTS_DIR:=$(LINUX_DIR)/arch/$(ARCH)/boot/dts/
- 
--IMG_PREFIX:=openwrt-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET))
-+IMG_PREFIX:=opuntia-$(if $(CONFIG_VERSION_FILENAMES),$(VERSION_NUMBER)-)$(BOARD)$(if $(SUBTARGET),-$(SUBTARGET))
- 
- MKFS_DEVTABLE_OPT := -D $(INCLUDE_DIR)/device_table.txt
- 
 --- a/scripts/combined-image.sh
 +++ b/scripts/combined-image.sh
 @@ -7,7 +7,7 @@ BLKSZ=65536

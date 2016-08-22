@@ -1,5 +1,9 @@
-OPENWRT_GIT:=git://git.openwrt.org/openwrt.git
-OPENWRT_COMMIT:=18ad89f4c0919ec5834b52459c211306c0e1d75a
+OPENWRT_GIT:=https://github.com/openwrt/openwrt.git
+OPENWRT_COMMIT:=d175c09bea24b0a52d15350f025ca418f5f066c5
+#OPENWRT_COMMIT:=cac971dad98c83fd25223286330e757218f19e1b
+#OPENWRT_COMMIT:=faa984a84d1bb72c262857a71ee14bccd1ae6d41
+#OPENWRT_COMMIT:=3b54f5cb9c4a5789f0eec4a3e0d1ac05236cd092
+#OPENWRT_COMMIT:=18ad89f4c0919ec5834b52459c211306c0e1d75a
 #OPENWRT_COMMIT:=d90f5dd729e2ec4963f5bf6a5103e9c9ee3d0206
 #OPENWRT_COMMIT:=14ad97cf60f9b50b1321c34c819063a9b9535635
 #OPENWRT_COMMIT:=bce56f0f97952b18d75a245a147d2e9915e93b2f
@@ -68,9 +72,10 @@ setup_cache:
 #	packages=`find build_dir/bin/ -name 'packages' | head -n 1` && \
 #	cp -af $${packages} $(DESTDIR)/
 	
+#		git clone --depth $(OPENWRT_DEPTH) $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
 checkout_openwrt:
 	@if [ ! -d $(BUILD_DIR) ] ; then \
-		git clone --depth $(OPENWRT_DEPTH) $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
+		git clone $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
 		cp -a dl.cache $(BUILD_DIR)/dl ; \
 	fi
 #		git clone $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \

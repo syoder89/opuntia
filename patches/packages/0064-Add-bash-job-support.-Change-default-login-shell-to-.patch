@@ -16,11 +16,9 @@ Subject: [PATCH] Add bash job support. Change default login shell to bash.
  target/linux/x86/base-files/etc/inittab            |  4 ++--
  6 files changed, 35 insertions(+), 21 deletions(-)
 
-diff --git a/feeds/packages/utils/bash/Makefile b/feeds/packages/utils/bash/Makefile
-index d877441..b73e468 100644
 --- a/feeds/packages/utils/bash/Makefile
 +++ b/feeds/packages/utils/bash/Makefile
-@@ -35,7 +35,12 @@ endef
+@@ -43,7 +43,12 @@ endef
  define Build/Configure
  	$(call Build/Configure/Default, \
  		--without-bash-malloc \
@@ -34,17 +32,3 @@ index d877441..b73e468 100644
  	)
  endef
  
-diff --git a/target/linux/x86/base-files/etc/inittab b/target/linux/x86/base-files/etc/inittab
-index ca90fd8..caf6b4a 100644
---- a/target/linux/x86/base-files/etc/inittab
-+++ b/target/linux/x86/base-files/etc/inittab
-@@ -1,4 +1,4 @@
- ::sysinit:/etc/init.d/rcS S boot
- ::shutdown:/etc/init.d/rcS K shutdown
--ttyS0::askfirst:/bin/ash --login
--tty1::askfirst:/bin/ash --login
-+ttyS0::askfirst:/bin/bash --login
-+tty1::askfirst:/bin/bash --login
--- 
-2.0.0
-

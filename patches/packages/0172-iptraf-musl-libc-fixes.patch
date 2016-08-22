@@ -1,0 +1,387 @@
+--- a/feeds/oldpackages/net/net-tools/Makefile
++++ b/feeds/oldpackages/net/net-tools/Makefile
+@@ -8,14 +8,14 @@
+ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=net-tools
+-PKG_VERSION:=1.60
+-PKG_RELEASE:=3
++PKG_VERSION:=git
++PKG_RELEASE:=$(PKG_SOURCE_VERSION)
+ 
+-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
+-PKG_SOURCE_URL:=http://www.tazenda.demon.co.uk/phil/net-tools/
+-PKG_MD5SUM:=888774accab40217dde927e21979c165
+-
+-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
++PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
++PKG_SOURCE_PROTO:=git
++PKG_SOURCE_URL:=http://git.code.sf.net/p/net-tools/code/
++PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
++PKG_SOURCE_VERSION:=69e64639de380cfb8298bb71919d871b8ab41903
+ 
+ include $(INCLUDE_DIR)/package.mk
+ 
+--- a/feeds/oldpackages/net/net-tools/patches/001-config.patch
++++ b/feeds/oldpackages/net/net-tools/patches/001-config.patch
+@@ -1,5 +1,5 @@
+---- /dev/null	2006-11-02 13:38:16.000000000 +0100
+-+++ net-tools-1.60.works/config.make	2007-01-14 04:43:34.000000000 +0100
++--- /dev/null
+++++ b/config.make
+ @@ -0,0 +1,35 @@
+ +# I18N=0
+ +HAVE_AFUNIX=1
+@@ -36,8 +36,8 @@
+ +HAVE_FW_MASQUERADE=1
+ +HAVE_IP_TOOLS=1
+ +HAVE_MII=1
+---- /dev/null	2006-11-02 13:38:16.000000000 +0100
+-+++ net-tools-1.60.works/config.status	2007-01-14 04:43:34.000000000 +0100
++--- /dev/null
+++++ b/config.status
+ @@ -0,0 +1,91 @@
+ +#
+ +# config.in	Configure.sh source for the net-tools.
+@@ -130,8 +130,8 @@
+ +bool 'IP Masquerading support' HAVE_FW_MASQUERADE y
+ +bool 'Build iptunnel and ipmaddr' HAVE_IP_TOOLS y
+ +bool 'Build mii-tool' HAVE_MII y
+---- /dev/null	2006-11-02 13:38:16.000000000 +0100
+-+++ net-tools-1.60.works/config.h	2007-01-14 04:43:34.000000000 +0100
++--- /dev/null
+++++ b/config.h
+ @@ -0,0 +1,74 @@
+ +/*
+ +* config.h	Automatically generated configuration includefile
+@@ -207,3 +207,83 @@
+ +#define HAVE_FW_MASQUERADE 1
+ +#define HAVE_IP_TOOLS 1
+ +#define HAVE_MII 1
++--- a/lib/inet6_gr.c
+++++ b/lib/inet6_gr.c
++@@ -23,7 +23,7 @@
++ #include <string.h>
++ #include <stdio.h>
++ #include <unistd.h>
++-#ifndef __GLIBC__
+++#ifdef HAVE_IPV6_ROUTE_H
++ #include <netinet6/ipv6_route.h>	/* glibc doesn't have this */
++ #endif
++ #include "version.h"
++--- a/lib/inet6_sr.c
+++++ b/lib/inet6_sr.c
++@@ -28,10 +28,10 @@
++ #include <string.h>
++ #include <stdio.h>
++ #include <unistd.h>
++-#ifdef __GLIBC__
++-#include <net/route.h>
++-#else
+++#ifdef HAVE_IPV6_ROUTE_H
++ #include <netinet6/ipv6_route.h>	/* glibc does not have this */
+++#else
+++#include <net/route.h>
++ #endif
++ #include "version.h"
++ #include "net-support.h"
++--- a/lib/inet_sr.c
+++++ b/lib/inet_sr.c
++@@ -28,6 +28,7 @@
++ #include <string.h>
++ #include <stdio.h>
++ #include <unistd.h>
+++#include <asm-generic/param.h>
++ #include "version.h"
++ #include "net-support.h"
++ #include "pathnames.h"
++--- a/lib/util-ank.c
+++++ b/lib/util-ank.c
++@@ -14,6 +14,7 @@
++  * Rani Assaf <rani@magic.metawire.com> 980929:	resolve addresses
++  */
++ 
+++#include <limits.h>
++ #include <stdio.h>
++ #include <stdlib.h>
++ #include <unistd.h>
++--- a/mii-tool.c
+++++ b/mii-tool.c
++@@ -46,10 +46,6 @@
++ #include <net/if.h>
++ #include <linux/sockios.h>
++ 
++-#ifndef __GLIBC__
++-#include <linux/if_arp.h>
++-#include <linux/if_ether.h>
++-#endif
++ #include <linux/mii.h>
++ #include <linux/sockios.h>
++ #include "version.h"
++--- a/netstat.c
+++++ b/netstat.c
++@@ -88,6 +88,7 @@
++ #include <sys/stat.h>
++ #include <net/if.h>
++ #include <dirent.h>
+++#include <asm-generic/param.h>
++ 
++ #include "net-support.h"
++ #include "pathnames.h"
++--- a/slattach.c
+++++ b/slattach.c
++@@ -44,6 +44,7 @@
++ #include <string.h>
++ #include <unistd.h>
++ #include <getopt.h>
+++#include <termios.h>
++ #include <linux/if_slip.h>
++ 
++ #if defined(__GLIBC__)
+--- a/feeds/oldpackages/net/net-tools/patches/002-compile-fixes.patch
++++ /dev/null
+@@ -1,74 +0,0 @@
+---- net-tools-1.60/lib/inet_sr.c	2000-02-20 22:46:45.000000000 +0100
+-+++ net-tools-1.60.works/lib/inet_sr.c	2007-01-14 04:44:40.000000000 +0100
+-@@ -105,6 +105,7 @@
+-     case 2:
+-        isnet = 0; break;
+-     default:
+-+       break;
+-     }
+- 
+-     /* Fill in the other fields. */
+---- net-tools-1.60/hostname.c	2001-04-08 19:04:23.000000000 +0200
+-+++ net-tools-1.60.works/hostname.c	2007-01-14 04:46:09.000000000 +0100
+-@@ -98,6 +98,7 @@
+- 	    fprintf(stderr, _("%s: name too long\n"), program_name);
+- 	    break;
+- 	default:
+-+            break;
+- 	}
+- 	exit(1);
+-     };
+-@@ -117,6 +118,7 @@
+- 	    fprintf(stderr, _("%s: name too long\n"), program_name);
+- 	    break;
+- 	default:
+-+            break;
+- 	}
+- 	exit(1);
+-     };
+-@@ -174,6 +176,7 @@
+- 	printf("%s\n", hp->h_name);
+- 	break;
+-     default:
+-+        break;
+-     }
+- }
+- 
+-@@ -330,7 +333,7 @@
+- 	case 'h':
+- 	default:
+- 	    usage();
+--
+-+            break;
+- 	};
+- 
+- 
+---- net-tools-1.60/mii-tool.c	2000-05-21 16:31:17.000000000 +0200
+-+++ net-tools-1.60.works/mii-tool.c	2007-01-14 04:47:42.000000000 +0100
+-@@ -379,16 +379,16 @@
+- /*--------------------------------------------------------------------*/
+- 
+- const char *usage =
+--"usage: %s [-VvRrwl] [-A media,... | -F media] [interface ...]
+--       -V, --version               display version information
+--       -v, --verbose               more verbose output
+--       -R, --reset                 reset MII to poweron state
+--       -r, --restart               restart autonegotiation
+--       -w, --watch                 monitor for link status changes
+--       -l, --log                   with -w, write events to syslog
+--       -A, --advertise=media,...   advertise only specified media
+--       -F, --force=media           force specified media technology
+--media: 100baseT4, 100baseTx-FD, 100baseTx-HD, 10baseT-FD, 10baseT-HD,
+-+"usage: %s [-VvRrwl] [-A media,... | -F media] [interface ...]\n\
+-+       -V, --version               display version information\n\
+-+       -v, --verbose               more verbose output\n\
+-+       -R, --reset                 reset MII to poweron state\n\
+-+       -r, --restart               restart autonegotiation\n\
+-+       -w, --watch                 monitor for link status changes\n\
+-+       -l, --log                   with -w, write events to syslog\n\
+-+       -A, --advertise=media,...   advertise only specified media\n\
+-+       -F, --force=media           force specified media technology\n\
+-+media: 100baseT4, 100baseTx-FD, 100baseTx-HD, 10baseT-FD, 10baseT-HD,\n\
+-        (to advertise both HD and FD) 100baseTx, 10baseT\n";
+- 
+- int main(int argc, char **argv)
+--- /dev/null
++++ b/feeds/oldpackages/net/iptraf/patches/006-scott-musl-libc-fixes.patch
+@@ -0,0 +1,167 @@
++--- a/src/packet.c
+++++ b/src/packet.c
++@@ -18,6 +18,7 @@ details.
++ 
++ ***/
++ 
+++#define _GNU_SOURCE
++ #include <asm/types.h>
++ #include <curses.h>
++ #include <panel.h>
++@@ -35,7 +36,7 @@ details.
++ #include <linux/if_packet.h>
++ #include <linux/if_ether.h>
++ #include <linux/netdevice.h>
++-#include <netinet/if_tr.h>
+++//#include <netinet/if_tr.h>
++ #include <linux/isdn.h>
++ #include <linux/sockios.h>
++ #include <msgboxes.h>
++@@ -50,7 +51,7 @@ details.
++ #include "packet.h"
++ #include "ipcsum.h"
++ #include "ipfrag.h"
++-#include "tr.h"
+++//#include "tr.h"
++ 
++ extern int daemonized;
++ extern int accept_unsupported_interfaces;
++@@ -135,10 +136,6 @@ unsigned short getlinktype(unsigned shor
++     case ARPHRD_PPP:
++         result = LINK_PPP;
++         break;
++-    case ARPHRD_IEEE802:
++-    case ARPHRD_IEEE802_TR:
++-        result = LINK_TR;
++-        break;
++     case ARPHRD_FRAD:
++         result = LINK_FRAD;
++         break;
++@@ -190,23 +187,6 @@ void adjustpacket(char *tpacket, unsigne
++         *packet = tpacket + 4;
++         *readlen -= 4;
++         break;
++-    case LINK_TR:
++-        /*
++-         * Token Ring patch supplied by Tomas Dvorak 
++-         */
++-
++-        /*
++-         * Get the start of the IP packet from the Token Ring frame.
++-         */
++-        dataoffset = get_tr_ip_offset(tpacket);
++-        *packet = tpacket + dataoffset;
++-        *readlen -= dataoffset;
++-        /*
++-         * Move IP datagram into an aligned buffer.
++-         */
++-        memmove(aligned_buf, *packet, min(SNAPSHOT_LEN, *readlen));
++-        *packet = aligned_buf;
++-        break;
++     case LINK_IPIP:
++         *packet = tpacket;
++         break;
++--- a/src/tcptable.c
+++++ b/src/tcptable.c
++@@ -600,8 +600,6 @@ void updateentry(struct tcptable *table,
++ 
++         if ((linkproto == LINK_ETHERNET) || (linkproto == LINK_PLIP)) {
++             convmacaddr(((struct ethhdr *) packet)->h_source, newmacaddr);
++-        } else if (linkproto == LINK_TR) {
++-            convmacaddr(((struct trh_hdr *) packet)->saddr, newmacaddr);
++         }
++ 
++         if (tableentry->smacaddr[0] != '\0') {
++--- a/src/tcptable.h
+++++ b/src/tcptable.h
++@@ -23,7 +23,7 @@
++ #include <linux/if_packet.h>
++ #include <linux/if_ether.h>
++ #include <linux/netdevice.h>
++-#include <netinet/if_tr.h>
+++//#include <netinet/if_tr.h>
++ // #include <net/if.h>
++ #include <netinet/ip.h>
++ #include <netinet/udp.h>
++--- a/src/othptab.c
+++++ b/src/othptab.c
++@@ -16,12 +16,13 @@ details.
++ 
++ ***/
++ 
+++#define _GNU_SOURCE
++ #include <stdlib.h>
++ #include <asm/types.h>
++ #include <sys/types.h>
++ #include <sys/socket.h>
++ #include <linux/if_ether.h>
++-#include <netinet/if_tr.h>
+++//#include <netinet/if_tr.h>
++ #include <linux/netdevice.h>
++ #include <winops.h>
++ #include "arphdr.h"
++@@ -142,11 +143,6 @@ struct othptabent *add_othp_entry(struct
++                         new_entry->smacaddr);
++             convmacaddr(((struct ethhdr *) packet)->h_dest,
++                         new_entry->dmacaddr);
++-        } else if (linkproto == LINK_TR) {
++-            convmacaddr(((struct trh_hdr *) packet)->saddr,
++-                        new_entry->smacaddr);
++-            convmacaddr(((struct trh_hdr *) packet)->daddr,
++-                        new_entry->dmacaddr);
++         }
++     }
++ 
++--- a/src/Makefile
+++++ b/src/Makefile
++@@ -98,7 +98,7 @@ LOCKDIR		= /var/run/iptraf
++ # Object file names
++ 
++ OBJS = iptraf.o itrafmon.o packet.o tcptable.o othptab.o ifstats.o deskman.o \
++-ipcsum.o hostmon.o fltedit.o tr.o cidr.o \
+++ipcsum.o hostmon.o fltedit.o cidr.o \
++ fltselect.o ipfilter.o fltmgr.o ipfrag.o serv.o servname.o instances.o \
++ timer.o revname.o pktsize.o landesc.o isdntab.o options.o promisc.o ifaces.o \
++ error.o log.o mode.o getpath.o bar.o parseproto.o
++@@ -114,7 +114,7 @@ textlib:
++ 	make -C ../support
++ 
++ %.o: %.c *.h version
++-	$(CC) $(CFLAGS) $(DIRS) $(INCLUDEDIR) $(VERSION) $(PLATFORM) $(PROF) $(DEBUG) $(EXECPERM) $(BSSETTING) -c -o $*.o $<
+++	$(CC) -D_GNU_SOURCE $(CFLAGS) $(DIRS) $(INCLUDEDIR) $(VERSION) $(PLATFORM) $(PROF) $(DEBUG) $(EXECPERM) $(BSSETTING) -c -o $*.o $<
++ 
++ rvnamed: rvnamed.o getpath.o
++ 	$(CC) $(LDOPTS) $(PROF) -o rvnamed rvnamed.o getpath.o
++--- a/src/hostmon.c
+++++ b/src/hostmon.c
++@@ -31,7 +31,7 @@ details.
++ #include <linux/if_packet.h>
++ #include <linux/if_ether.h>
++ #include <linux/netdevice.h>
++-#include <netinet/if_tr.h>
+++//#include <netinet/if_tr.h>
++ #include <net/if_arp.h>
++ #include <stdlib.h>
++ #include <time.h>
++@@ -897,7 +897,7 @@ void hostmon(const struct OPTIONS *optio
++             if (pkt_result != PACKET_OK)
++                 continue;
++ 
++-            if ((linktype == LINK_ETHERNET) || (linktype == LINK_PLIP) || (linktype == LINK_TR) || (linktype == LINK_VLAN)) {
+++            if ((linktype == LINK_ETHERNET) || (linktype == LINK_PLIP) || (linktype == LINK_VLAN)) {
++ 
++                 if (fromaddr.sll_protocol == htons(ETH_P_IP))
++                     is_ip = 1;
++@@ -915,12 +915,6 @@ void hostmon(const struct OPTIONS *optio
++                     memcpy(scratch_daddr, ((struct ethhdr *) buf)->h_dest,
++                            ETH_ALEN);
++                     list = &elist;
++-                } else if (linktype == LINK_TR) {
++-                    memcpy(scratch_saddr, ((struct trh_hdr *) buf)->saddr,
++-                           TR_ALEN);
++-                    memcpy(scratch_daddr, ((struct trh_hdr *) buf)->daddr,
++-                           TR_ALEN);
++-                    list = &flist;
++                 }
++ 
++                 entry = in_ethtable(&table, linktype, scratch_saddr);

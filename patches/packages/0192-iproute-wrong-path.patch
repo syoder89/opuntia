@@ -9,19 +9,3 @@
  		sync
  	}
  }
---- a/package/network/utils/iproute2/Makefile
-+++ b/package/network/utils/iproute2/Makefile
-@@ -39,9 +39,10 @@ endef
- 
- Package/ip-full=$(call Package/iproute2/Default,full,Full)
- 
--define Package/ip-$(BUILD_VARIANT)/conffiles
--$(Package/ip/conffiles)
--endef
-+# Very broken - lists /usr/sbin/ip as a conf file! Scott
-+#define Package/ip-$(BUILD_VARIANT)/conffiles
-+#$(Package/ip/conffiles)
-+#endef
- 
- define Package/tc
- $(call Package/iproute2/Default)
