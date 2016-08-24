@@ -23,23 +23,23 @@
  #define DEVID_COMPEX_WP18	0x047E
 --- a/target/linux/ar71xx/base-files/etc/board.d/02_network
 +++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
-@@ -417,8 +417,14 @@ wpj342)
+@@ -417,9 +417,13 @@ wpj342)
  	;;
  
  wpj344)
 -	ucidef_add_switch "switch0" \
 -		"0@eth0" "3:lan" "2:wan"
-+	ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
-+	ucidef_add_switch "switch0" "1" "1"
-+	uci set network.@switch[-1].alias_cpu='0'
-+	uci set network.@switch[-1].alias_wan='2'
-+	uci set network.@switch[-1].alias_lan='3'
-+	ucidef_set_interfaces_vlans_lan_wan "4001" "4000"
-+	ucidef_add_switch_vlan "switch0" "4000" "2 0t"
-+	ucidef_add_switch_vlan "switch0" "4001" "3 0t"
- 	;;
+-	;;
++        ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
++        ucidef_add_switch "switch0" \
++                "3:lan:1:4001" "2:wan:2:4000" "0@eth0"
++        ucidef_add_switch_extra_attr "switch0" "alias_cpu" "0"
++        ucidef_add_switch_extra_attr "switch0" "alias_wan" "2"
++        ucidef_add_switch_extra_attr "switch0" "alias_lan" "3"
++        ;;
  
  unifiac-pro)
+ 	ucidef_add_switch "switch0" \
 --- a/target/linux/ar71xx/image/legacy.mk
 +++ b/target/linux/ar71xx/image/legacy.mk
 @@ -732,6 +732,29 @@ Image/Build/CyberTANGZIP=$(call Image/Bu

@@ -1,0 +1,179 @@
+--- a/package/base-files/files/lib/functions/uci-defaults.sh
++++ b/package/base-files/files/lib/functions/uci-defaults.sh
+@@ -96,7 +96,7 @@ ucidef_set_interface_raw() {
+ }
+ 
+ _ucidef_add_switch_port() {
+-	# inherited: $num $device $need_tag $role $index $prev_role
++	# inherited: $num $device $need_tag $role $index $prev_role $vid
+ 	# inherited: $n_cpu $n_ports $n_vlan $cpu0 $cpu1 $cpu2 $cpu3 $cpu4 $cpu5
+ 
+ 	n_ports=$((n_ports + 1))
+@@ -108,6 +108,7 @@ _ucidef_add_switch_port() {
+ 			[ -n "$need_tag" ] && json_add_boolean need_tag "$need_tag"
+ 			[ -n "$role"     ] && json_add_string  role     "$role"
+ 			[ -n "$index"    ] && json_add_int     index    "$index"
++			[ -n "$vid"      ] && json_add_int     vid      "$vid"
+ 		json_close_object
+ 	json_select ..
+ 
+@@ -125,6 +126,7 @@ _ucidef_add_switch_port() {
+ 			json_add_object
+ 				json_add_string role "$role"
+ 				json_add_string ports "$num"
++				json_add_string vid "$vid"
+ 			json_close_object
+ 
+ 			prev_role="$role"
+@@ -133,6 +135,7 @@ _ucidef_add_switch_port() {
+ 			json_select_object "$n_vlan"
+ 				json_get_var port ports
+ 				json_add_string ports "$port $num"
++				json_add_string vid "$vid"
+ 			json_select ..
+ 		fi
+ 
+@@ -142,7 +145,7 @@ _ucidef_add_switch_port() {
+ 
+ _ucidef_finish_switch_roles() {
+ 	# inherited: $name $n_cpu $n_vlan $cpu0 $cpu1 $cpu2 $cpu3 $cpu4 $cpu5
+-	local index role roles num device need_tag port ports
++	local index role roles num device need_tag port ports vid
+ 
+ 	json_select switch
+ 		json_select "$name"
+@@ -161,16 +164,25 @@ _ucidef_finish_switch_roles() {
+ 					json_select ..
+ 				json_select ..
+ 
+-				if [ $n_vlan -gt $n_cpu -o ${need_tag:-0} -eq 1 ]; then
+-					num="${num}t"
+-					device="${device}.${index}"
+-				fi
+-
+ 				json_select roles
+ 					json_select "$index"
+ 						json_get_vars role ports
++						json_get_var vid vid
++
++						if [ $n_vlan -gt $n_cpu -o ${need_tag:-0} -eq 1 ]; then
++							num="${num}t"
++							if [ -n "$vid" ]; then
++								device="${device}.${vid}"
++							else
++								device="${device}.${index}"
++							fi
++						fi
++
+ 						json_add_string ports "$ports $num"
+ 						json_add_string device "$device"
++						if [ -n "$vid" ]; then
++							json_add_string vid "$vid"
++						fi
+ 					json_select ..
+ 				json_select ..
+ 			json_select ..
+@@ -194,7 +206,7 @@ _ucidef_finish_switch_roles() {
+ 
+ ucidef_add_switch() {
+ 	local name="$1"; shift
+-	local port num role device index need_tag prev_role
++	local port num role device index need_tag prev_role vid
+ 	local cpu0 cpu1 cpu2 cpu3 cpu4 cpu5
+ 	local n_cpu=0 n_vlan=0 n_ports=0
+ 
+@@ -214,6 +226,12 @@ ucidef_add_switch() {
+ 							need_tag=1
+ 						}
+ 					;;
++                                        [0-9]*:*:[0-9]*:[0-9]*)
++                                                num="${port%%:*}"
++                                                index="${port%:*}"; index="${index##*:}"
++                                                vid="${port##*:}"
++                                                role="${port#[0-9]*:}"; role="${role%%:*}"
++                                        ;;
+ 					[0-9]*:*:[0-9]*)
+ 						num="${port%%:*}"
+ 						index="${port##*:}"
+@@ -229,7 +247,7 @@ ucidef_add_switch() {
+ 					_ucidef_add_switch_port
+ 				fi
+ 
+-				unset num device role index need_tag
++				unset num device role index need_tag vid
+ 			done
+ 		json_select ..
+ 	json_select ..
+@@ -254,6 +272,26 @@ ucidef_add_switch_attr() {
+ 		json_select ..
+ 	json_select ..
+ }
++
++ucidef_add_switch_extra_attr() {
++	local name="$1"
++	local key="$2"
++	local val="$3"
++
++	json_select_object switch
++		json_select_object "$name"
++		json_select_object attr
++
++		case "$val" in
++			true|false) [ "$val" != "true" ]; json_add_boolean "$key" $? ;;
++			[0-9]) json_add_int "$key" "$val" ;;
++			*) json_add_string "$key" "$val" ;;
++		esac
++
++		json_select ..
++		json_select ..
++	json_select ..
++}
+ 
+ ucidef_add_switch_port_attr() {
+ 	local name="$1"
+--- a/package/base-files/files/bin/config_generate
++++ b/package/base-files/files/bin/config_generate
+@@ -137,7 +137,7 @@ generate_network() {
+ 
+ generate_switch_vlans_ports() {
+ 	local switch="$1"
+-	local port ports role roles num attr val
++	local port ports role roles num attr val vid
+ 
+ 	#
+ 	# autogenerate vlans
+@@ -149,6 +149,7 @@ generate_switch_vlans_ports() {
+ 	for role in $roles; do
+ 		json_select "$role"
+ 			json_get_vars ports
++			json_get_var vid vid
+ 		json_select ..
+ 
+ 		uci -q batch <<-EOF
+@@ -156,6 +157,9 @@ generate_switch_vlans_ports() {
+ 			set network.@switch_vlan[-1].device='$switch'
+ 			set network.@switch_vlan[-1].vlan='$role'
+ 			set network.@switch_vlan[-1].ports='$ports'
++			if [ -n "$vid" ]; then
++				set network.@switch_vlan[-1].vid='$vid'
++			fi
+ 		EOF
+ 	done
+ 
+@@ -210,6 +214,16 @@ generate_switch() {
+ 		set network.@switch[-1].blinkrate='$blinkrate'
+ 	EOF
+ 
++	if json_is_a attr object; then
++		json_get_keys attr attr
++		json_select attr
++		for attr in $attr; do
++			json_get_var val "$attr"
++			uci -q set network.@switch[-1].$attr="$val"
++		done
++		json_select ..
++	fi
++
+ 	generate_switch_vlans_ports "$1"
+ 
+ 	json_select ..

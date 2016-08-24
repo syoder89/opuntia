@@ -1,0 +1,11 @@
+--- a/modules/luci-mod-admin-full/luasrc/view/admin_network/switch_status.htm
++++ b/modules/luci-mod-admin-full/luasrc/view/admin_network/switch_status.htm
+@@ -17,6 +17,8 @@
+ 					{
+ 						var th = document.getElementById('portstatus-' + switches[i] + '-' + j);
+ 
++						if (!th)
++							continue;
+ 						if (ports[j].link)
+ 						{
+ 							th.innerHTML = String.format(

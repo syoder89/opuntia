@@ -1,22 +1,22 @@
 --- a/target/linux/ar71xx/base-files/etc/board.d/02_network
 +++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
-@@ -437,8 +437,14 @@ wpj531)
+@@ -437,9 +437,13 @@ wpj531)
  	;;
  
  wpj558)
 -	ucidef_add_switch "switch0" \
 -		"5:lan" "1:wan" "6@eth0"
+-	;;
 +        ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
-+        ucidef_add_switch "switch0" "1" "1"
-+	uci set network.@switch[-1].alias_cpu='6'
-+	uci set network.@switch[-1].alias_wan='5'
-+	uci set network.@switch[-1].alias_lan='1'
-+        ucidef_set_interfaces_vlans_lan_wan "4001" "4000"
-+        ucidef_add_switch_vlan "switch0" "4000" "5 6t"
-+        ucidef_add_switch_vlan "switch0" "4001" "1 6t"
- 	;;
++        ucidef_add_switch "switch0" \
++                "1:lan:1:4001" "5:wan:2:4000" "6@eth0"
++        ucidef_add_switch_extra_attr "switch0" "alias_cpu" "6"
++        ucidef_add_switch_extra_attr "switch0" "alias_wan" "5"
++        ucidef_add_switch_extra_attr "switch0" "alias_lan" "1"
++        ;;
  
  ap121 |\
+ ap121-mini |\
 --- a/tools/firmware-utils/src/mkmylofw.c
 +++ b/tools/firmware-utils/src/mkmylofw.c
 @@ -161,6 +161,9 @@ struct cpx_board boards[] = {

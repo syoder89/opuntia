@@ -20,3 +20,4 @@
 0024-allow-uncompressed-restore-archive.patch
 801-wifi-alliance-cert-defaults.patch
 0025-fix-dynamic-vlan-assoclist.patch
+0026-fix-switch-config-status-with-missing-ports.patch

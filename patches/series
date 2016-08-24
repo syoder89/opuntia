@@ -77,3 +77,4 @@ packages/0175-quagga-rtadv-musl.patch
 packages/0176-dnsmasq-add-user-group-to-init.patch
 kernel/0071-hfsc-always-keep-backlog-updated.patch
 packages/0177-firewall-fix-musl-errno-options-parsing.patch
+0150-Add-vid-option-to-switch-config.patch
