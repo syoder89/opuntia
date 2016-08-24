@@ -54,7 +54,7 @@ install: $(built)
 	ver=`grep CONFIG_VERSION_NUMBER $(BUILD_DIR)/.config | cut -d '"' -f 2` && \
 	rel=`cd build_dir && ./scripts/getver.sh` && \
 	factory=`find build_dir/bin/ -name '*factory*' | head -n 1` && \
-		cp -f $${factory} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-factory.img; \
+		[ ! -z $${factory} ] && cp -f $${factory} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-factory.img; \
 	if [ "$${combined}" != "" ] ; then \
 		cp -f $${combined} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-sysupgrade.bin; \
 	elif [ "$${sysup}" != "" ] ; then \
