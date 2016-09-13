@@ -1,0 +1,11 @@
+--- a/package/feeds/packages/procps-ng/Makefile
++++ b/package/feeds/packages/procps-ng/Makefile
+@@ -26,7 +26,7 @@ PKG_BUILD_DEPENDS:=gettext libiconv
+ 
+ include $(INCLUDE_DIR)/package.mk
+ 
+-CONFIGURE_ARGS += --enable-skill
++CONFIGURE_ARGS += --enable-skill --disable-modern-top
+ 
+ PROCPS_APPLETS := \
+     free kill pgrep pkill pmap ps pwdx skill slabtop \
