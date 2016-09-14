@@ -17,8 +17,7 @@
 +	option enable '1'
  
  config statistics 'collectd_cpu'
--	option enable '0'
-+	option enable '1'
+ 	option enable '1'
 +	option ValuesPercentage '1'
  
  config statistics 'collectd_df'
@@ -31,12 +30,8 @@
  	option FSTypes 'tmpfs'
  	option IgnoreSelected '0'
  
-@@ -113,10 +114,10 @@ config statistics 'collectd_load'
+@@ -116,7 +117,7 @@ config statistics 'collectd_memory'
  	option enable '1'
- 
- config statistics 'collectd_memory'
--	option enable '0'
-+	option enable '1'
  
  config statistics 'collectd_netlink'
 -	option enable '0'

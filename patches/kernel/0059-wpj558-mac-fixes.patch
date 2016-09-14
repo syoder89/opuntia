@@ -126,17 +126,17 @@
  MIPS_MACHINE(ATH79_MACH_WPJ558, "WPJ558", "Compex WPJ558", wpj558_setup);
 --- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
 +++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
-@@ -188,7 +188,6 @@ platform_check_image() {
+@@ -197,7 +197,6 @@ platform_check_image() {
  	hornet-ub | \
  	mr12 | \
  	mr16 | \
 -	wpj558 | \
+ 	zbt-we1526 | \
  	zcn-1523h-2 | \
  	zcn-1523h-5)
- 		[ "$magic_long" != "68737173" -a "$magic_long" != "19852003" ] && {
-@@ -245,6 +244,7 @@ platform_check_image() {
- 	wpj531 | \
+@@ -262,6 +261,7 @@ platform_check_image() {
  	wndap360 | \
+ 	wpj342 | \
  	wpj344 | \
 +	wpj558 | \
  	wzr-hp-g300nh2 | \

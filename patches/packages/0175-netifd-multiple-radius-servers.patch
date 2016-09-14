@@ -15,15 +15,15 @@
  	config_add_string acct_server
  	config_add_string acct_secret
  	config_add_int acct_port
-@@ -251,6 +255,7 @@ hostapd_set_bss_options() {
+@@ -259,6 +263,7 @@ hostapd_set_bss_options() {
  		;;
  		eap)
  			json_get_vars \
 +				auth_servers acct_servers \
  				auth_server auth_secret auth_port \
- 				acct_server acct_secret acct_port \
  				dae_client dae_secret dae_port \
-@@ -272,12 +277,37 @@ hostapd_set_bss_options() {
+ 				ownip \
+@@ -278,12 +283,59 @@ hostapd_set_bss_options() {
  
  			set_default vlan_naming 1
  
@@ -59,14 +59,6 @@
 +
  			[ -n "$radius_auth_req_attr" ] && append bss_conf "radius_auth_req_attr=$radius_auth_req_attr" "$N"
  			[ -n "$radius_acct_req_attr" ] && append bss_conf "radius_acct_req_attr=$radius_acct_req_attr" "$N"
- 
-+                        # leave the default option for legacy compatibility
- 			[ -n "$acct_server" ] && {
- 				append bss_conf "acct_server_addr=$acct_server" "$N"
- 				append bss_conf "acct_server_port=$acct_port" "$N"
-@@ -285,6 +315,29 @@ hostapd_set_bss_options() {
- 					append bss_conf "acct_server_shared_secret=$acct_secret" "$N"
- 			}
  
 +                        # List of fallback RADIUS servers, ip_add@secret[:port]
 +			[ -n "$acct_servers" ] && {

@@ -32,19 +32,20 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
 
 --- a/package/base-files/Makefile
 +++ b/package/base-files/Makefile
-@@ -137,10 +137,10 @@ define Package/base-files/install
+@@ -121,11 +121,11 @@ define Package/base-files/install
  
  	$(VERSION_SED) \
  		$(1)/etc/banner \
--		$(1)/etc/openwrt_version
-+		$(1)/etc/opuntia_version
+-		$(1)/etc/openwrt_version \
++		$(1)/etc/opuntia_version \
+ 		$(1)/usr/lib/os-release
  
  	$(VERSION_SED_SCRIPT) \
 -		$(1)/etc/openwrt_release \
 +		$(1)/etc/opuntia_release \
- 		$(1)/etc/device_info
+ 		$(1)/etc/device_info \
+ 		$(1)/usr/lib/os-release
  
- 	$(SED) "s#%PATH%#$(TARGET_INIT_PATH)#g" \
 --- a/package/base-files/files/etc/openwrt_version
 +++ /dev/null
 @@ -1 +0,0 @@
@@ -71,7 +72,7 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
  set timeout="@TIMEOUT@"
  set root='(cd)'
  
--menuentry "OpenWrt" {
+-menuentry "LEDE" {
 +menuentry "Opuntia" {
  	linux /boot/vmlinuz @CMDLINE@ noinitrd
  }
@@ -81,11 +82,11 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
  set timeout="@TIMEOUT@"
  set root='(hd0,msdos1)'
  
--menuentry "OpenWrt" {
+-menuentry "LEDE" {
 +menuentry "Opuntia" {
  	linux /boot/vmlinuz @CMDLINE@ noinitrd
  }
--menuentry "OpenWrt (failsafe)" {
+-menuentry "LEDE (failsafe)" {
 +menuentry "Opuntia (failsafe)" {
  	linux /boot/vmlinuz failsafe=true @CMDLINE@ noinitrd
  }

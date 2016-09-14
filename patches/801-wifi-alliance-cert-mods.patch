@@ -1,6 +1,6 @@
 --- a/package/network/services/hostapd/files/netifd.sh
 +++ b/package/network/services/hostapd/files/netifd.sh
-@@ -229,7 +229,7 @@ hostapd_set_bss_options() {
+@@ -237,7 +237,7 @@ hostapd_set_bss_options() {
  			wps_not_configured=1
  		;;
  		psk)
@@ -9,7 +9,7 @@
  			if [ ${#key} -lt 8 ]; then
  				wireless_setup_vif_failed INVALID_WPA_PSK
  				return 1
-@@ -245,7 +245,7 @@ hostapd_set_bss_options() {
+@@ -253,7 +253,7 @@ hostapd_set_bss_options() {
  			[ "$eapol_version" -ge "1" -a "$eapol_version" -le "2" ] && append bss_conf "eapol_version=$eapol_version" "$N"
  
  			wps_possible=1
@@ -18,7 +18,7 @@
  		;;
  		eap)
  			json_get_vars \
-@@ -255,7 +255,8 @@ hostapd_set_bss_options() {
+@@ -262,7 +262,8 @@ hostapd_set_bss_options() {
  				ownip \
  				eap_reauth_period dynamic_vlan \
  				vlan_naming vlan_tagged_interface \
@@ -28,7 +28,7 @@
  
  			# legacy compatibility
  			[ -n "$auth_server" ] || json_get_var auth_server server
-@@ -289,7 +290,7 @@ hostapd_set_bss_options() {
+@@ -288,7 +289,7 @@ hostapd_set_bss_options() {
  			[ -n "$ownip" ] && append bss_conf "own_ip_addr=$ownip" "$N"
  			append bss_conf "eapol_key_index_workaround=1" "$N"
  			append bss_conf "ieee8021x=1" "$N"
@@ -39,7 +39,7 @@
  				append bss_conf "dynamic_vlan=$dynamic_vlan" "$N"
 --- a/package/kernel/mac80211/files/regdb.txt
 +++ b/package/kernel/mac80211/files/regdb.txt
-@@ -1,823 +1,3 @@
+@@ -1,861 +1,10 @@
 -# This is the world regulatory domain
 -country 00:
 -	(2402 - 2472 @ 40), (20)
@@ -178,19 +178,35 @@
 -	(5490 - 5730 @ 160), (24), DFS
 -	(5735 - 5835 @ 80), (30)
 -
+-# Bulgarian rules as defined by the Communications Regulation Commission in the
+-# following documents:
+-#
+-# Rules for carrying out electronic communications through radio equipment using
+-# radio spectrum, which does not need to be individually assigned (the Rules):
+-# http://www.crc.bg/files/_bg/Pravila_09_06_2015.pdf
+-#
+-# List of radio equipment that uses harmonized within the European Union bands
+-# and electronic communications terminal equipment (the List):
+-# http://www.crc.bg/files/_bg/Spisak_2015.pdf
+-#
+-# Note: The transmit power limits in the 5250-5350 MHz and 5470-5725 MHz bands
+-# can be raised by 3 dBm if TPC is enabled. Refer to BDS EN 301 893 for details.
 -country BG: DFS-ETSI
+-	# Wideband data transmission systems (WDTS) in the 2.4GHz ISM band, ref:
+-	# I.22 of the List, BDS EN 300 328
 -	(2402 - 2482 @ 40), (20)
--	(5170 - 5250 @ 80), (20), AUTO-BW
+-	# 5 GHz Radio Local Area Networks (RLANs), ref:
+-	# II.H01 of the List, BDS EN 301 893
+-	(5170 - 5250 @ 80), (23), AUTO-BW
 -	(5250 - 5330 @ 80), (20), DFS, AUTO-BW
+-	# II.H01 of the List, I.54 from the List, BDS EN 301 893
 -	(5490 - 5710 @ 160), (27), DFS
--	# 5 GHz Short Range Devices, ref:
--	# Etsi EN 300 440-1
--	# Etsi EN 300 440-2
--	# http://crc.bg/files/_bg/Spisak_2015.pdf
--	# http://crc.bg/files/_bg/Pravila_2015_resh24.pdf
+-	# Short range devices (SRDs) in the 5725-5875 MHz frequency range, ref:
+-	# I.43 of the List, BDS EN 300 440-2, BDS EN 300 440-1
 -	(5725 - 5875 @ 80), (14)
--	# 60 GHz band channels 1-4, ref: Etsi En 302 567
--	(57000 - 66000 @ 2160), (40)
+-	# 60 GHz Multiple-Gigabit RLAN Systems, ref:
+-	# II.H03 of the List, BDS EN 302 567-2
+-	(57000 - 66000 @ 2160), (40), NO-OUTDOOR
 -
 -country BH: DFS-JP
 -	(2402 - 2482 @ 40), (20)
@@ -317,6 +333,12 @@
 -	(5490 - 5730 @ 20), (24), DFS
 -	(5735 - 5835 @ 20), (30)
 -
+-# http://www.mincom.gob.cu/?q=marcoregulatorio
+-# - Redes Informáticas
+-# Resolución 127, 2011 - Reglamento Banda 2,4 GHz.
+-country CU: DFS-FCC
+-	(2400 - 2483.5 @ 40), (200 mW)
+-
 -country CX: DFS-FCC
 -	(2402 - 2482 @ 40), (20)
 -	(5170 - 5250 @ 80), (24), AUTO-BW
@@ -344,28 +366,41 @@
 -	# 60 GHz band channels 1-4, ref: Etsi En 302 567
 -	(57000 - 66000 @ 2160), (40)
 -
--# Data from "Frequenznutzungsplan" (as published in April 2008), downloaded from
--# http://www.bundesnetzagentur.de/cae/servlet/contentblob/38448/publicationFile/2659/Frequenznutzungsplan2008_Id17448pdf.pdf
--# For the 5GHz range also see
--# http://www.bundesnetzagentur.de/cae/servlet/contentblob/38216/publicationFile/6579/WLAN5GHzVfg7_2010_28042010pdf.pdf
--# The values have been reduced by a factor of 2 (3db) for non TPC devices
--# (in other words: devices with TPC can use twice the tx power of this table).
--# Note that the docs do not require TPC for 5150--5250; the reduction to
--# 100mW thus is not strictly required -- however the conservative 100mW
+-# Allocation for the 2.4 GHz band (Vfg 10 / 2013, Allgemeinzuteilung von
+-# Frequenzen für die Nutzung in lokalen Netzwerken; Wireless Local Area
+-# Networks (WLAN-Funkanwendungen).
+-# https://www.bundesnetzagentur.de/SharedDocs/Downloads/DE/Sachgebiete/Telekommunikation/Unternehmen_Institutionen/Frequenzen/Allgemeinzuteilungen/2013_10_WLAN_2,4GHz_pdf.pdf
+-#
+-# Allocation for the 5 GHz band (Vfg. 7 / 2010, Allgemeinzuteilung von
+-# Frequenzen in den Bereichen 5150 MHz - 5350 MHz und 5470 MHz - 5725 MHz für
+-# Funkanwendungen zur breitbandigen Datenübertragung, WAS/WLAN („Wireless
+-# Access Systems including Wireless Local Area Networks“).
+-# https://www.bundesnetzagentur.de/SharedDocs/Downloads/DE/Sachgebiete/Telekommunikation/Unternehmen_Institutionen/Frequenzen/Allgemeinzuteilungen/2010_07_WLAN_5GHz_pdf.pdf
+-# The values for the 5 GHz have been reduced by a factor of 2 (3db) for non TPC
+-# devices (in other words: devices with TPC can use twice the tx power of this
+-# table). Note that the docs do not require TPC for 5150--5250; the reduction
+-# to 100mW thus is not strictly required -- however the conservative 100mW
 -# limit is used here as the non-interference with radar and satellite
 -# apps relies on the attenuation by the building walls only in the
 -# absence of DFS; the neighbour countries have 100mW limit here as well.
+-#
+-# The ETSI EN 300 440-1 standard for short range devices in the 5 GHz band has
+-# been implemented in Germany:
+-# https://www.bundesnetzagentur.de/SharedDocs/Downloads/DE/Sachgebiete/Telekommunikation/Unternehmen_Institutionen/Frequenzen/Allgemeinzuteilungen/2014_69_SRD_pdf.pdf
+-#
+-# Allocation for the 60 GHz band (Allgemeinzuteilung von Frequenzen im
+-# Bereich 57 GHz - 66 GHz für Funkanwendungen für weitbandige
+-# Datenübertragungssysteme; „Multiple Gigabit WAS/RLAN Systems (MGWS)“).
+-# https://www.bundesnetzagentur.de/SharedDocs/Downloads/DE/Sachgebiete/Telekommunikation/Unternehmen_Institutionen/Frequenzen/Allgemeinzuteilungen/2011_08_MGWS_pdf.pdf
 -
 -country DE: DFS-ETSI
--	# entries 279004 and 280006
 -	(2400 - 2483.5 @ 40), (100 mW)
--	# entry 303005
 -	(5150 - 5250 @ 80), (100 mW), NO-OUTDOOR, AUTO-BW
--	# entries 304002 and 305002
 -	(5250 - 5350 @ 80), (100 mW), NO-OUTDOOR, DFS, AUTO-BW
--	# entries 308002, 309001 and 310003
 -	(5470 - 5725 @ 160), (500 mW), DFS
--	# 60 GHz band channels 1-4, ref: Etsi En 302 567
+-	# short range devices (ETSI EN 300 440-1)
+-	(5725 - 5875 @ 80), (25 mW)
+-	# 60 GHz band channels 1-4 (ETSI EN 302 567)
 -	(57000 - 66000 @ 2160), (40)
 -
 -country DK: DFS-ETSI
@@ -671,6 +706,9 @@
 -	(5250 - 5330 @ 80), (20), DFS, AUTO-BW
 -	(5490 - 5710 @ 160), (30), DFS
 -	(5735 - 5835 @ 80), (30)
+-	# 60 GHz band channels 1-4,
+-	# ref: http://www.law.go.kr/%ED%96%89%EC%A0%95%EA%B7%9C%EC%B9%99/%EB%AC%B4%EC%84%A0%EC%84%A4%EB%B9%84%EA%B7%9C%EC%B9%99
+-	(57000 - 66000 @ 2160), (43)
 -
 -country KW: DFS-ETSI
 -	(2402 - 2482 @ 40), (20)
@@ -688,12 +726,13 @@
 -	(2402 - 2482 @ 40), (20)
 -
 -country LB: DFS-FCC
--	(2402 - 2482 @ 40), (20)
--	(5170 - 5250 @ 80), (17), AUTO-BW
--	(5250 - 5330 @ 80), (24), DFS, AUTO-BW
--	(5490 - 5730 @ 160), (24), DFS
--	(5735 - 5835 @ 80), (30)
--
++country CO: DFS-FCC
+ 	(2402 - 2482 @ 40), (20)
+ 	(5170 - 5250 @ 80), (17), AUTO-BW
+ 	(5250 - 5330 @ 80), (24), DFS, AUTO-BW
+ 	(5490 - 5730 @ 160), (24), DFS
+ 	(5735 - 5835 @ 80), (30)
+ 
 -# Source:
 -# http://www.ntrc.org.lc/operational_structures.htm
 -country LC: DFS-ETSI
@@ -863,7 +902,7 @@
  country MX: DFS-FCC
  	(2402 - 2482 @ 40), (20)
  	(5170 - 5250 @ 80), (17), AUTO-BW
-@@ -825,342 +5,13 @@ country MX: DFS-FCC
+@@ -863,349 +12,6 @@ country MX: DFS-FCC
  	(5490 - 5730 @ 160), (24), DFS
  	(5735 - 5835 @ 80), (30)
  
@@ -886,11 +925,18 @@
 -	(5490 - 5730 @ 160), (24), DFS
 -	(5735 - 5835 @ 80), (30)
 -
+-# Regulation on the use of frequency space without a license and
+-# without notification 2015
+-#
+-# http://wetten.overheid.nl/BWBR0036378/2015-03-05
+-
 -country NL: DFS-ETSI
 -	(2402 - 2482 @ 40), (20)
 -	(5170 - 5250 @ 80), (20), NO-OUTDOOR, AUTO-BW
 -	(5250 - 5330 @ 80), (20), NO-OUTDOOR, DFS, AUTO-BW
 -	(5490 - 5710 @ 160), (27), DFS
+-	# short range devices (ETSI EN 300 440-1)
+-	(5725 - 5875 @ 80), (25 mW)
 -	# 60 GHz band channels 1-4, ref: Etsi En 302 567
 -	(57000 - 66000 @ 2160), (40)
 -
@@ -1155,13 +1201,12 @@
 -	(57000 - 66000 @ 2160), (40)
 -
 -country TT: DFS-FCC
-+country CO: DFS-FCC
- 	(2402 - 2482 @ 40), (20)
- 	(5170 - 5250 @ 80), (17), AUTO-BW
- 	(5250 - 5330 @ 80), (24), DFS, AUTO-BW
- 	(5490 - 5730 @ 160), (24), DFS
- 	(5735 - 5835 @ 80), (30)
- 
+-	(2402 - 2482 @ 40), (20)
+-	(5170 - 5250 @ 80), (17), AUTO-BW
+-	(5250 - 5330 @ 80), (24), DFS, AUTO-BW
+-	(5490 - 5730 @ 160), (24), DFS
+-	(5735 - 5835 @ 80), (30)
+-
 -# Source:
 -# Table of Frequency Allocations of Republic of China (Taiwan) / Nov 2014:
 -#   http://www.motc.gov.tw/websitedowndoc?file=post/201411171137330.doc& \
@@ -1207,7 +1252,7 @@
  country US: DFS-FCC
  	(2402 - 2472 @ 40), (30)
  	# 5.15 ~ 5.25 GHz: 30 dBm for master mode, 23 dBm for clients
-@@ -1172,91 +23,3 @@ country US: DFS-FCC
+@@ -1217,91 +23,3 @@ country US: DFS-FCC
  	# reference: http://cfr.regstoday.com/47cfr15.aspx#47_CFR_15p255
  	# channels 1,2,3, EIRP=40dBm(43dBm peak)
  	(57240 - 63720 @ 2160), (40)

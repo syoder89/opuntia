@@ -1,5 +1,5 @@
---- a/package/feeds/packages/procps-ng/Makefile
-+++ b/package/feeds/packages/procps-ng/Makefile
+--- a/feeds/packages/utils/procps-ng/Makefile
++++ b/feeds/packages/utils/procps-ng/Makefile
 @@ -26,7 +26,7 @@ PKG_BUILD_DEPENDS:=gettext libiconv
  
  include $(INCLUDE_DIR)/package.mk

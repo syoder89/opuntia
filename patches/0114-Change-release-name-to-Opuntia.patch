@@ -1,10 +1,9 @@
 --- a/include/toplevel.mk
 +++ b/include/toplevel.mk
-@@ -6,7 +6,7 @@
+@@ -6,6 +6,7 @@
  # See /LICENSE for more information.
  #
  
--RELEASE:=Designated Driver
 +RELEASE:=Opuntia
  PREP_MK= OPENWRT_BUILD= QUIET=0
  
