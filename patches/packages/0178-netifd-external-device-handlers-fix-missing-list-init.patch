@@ -1,0 +1,44 @@
+--- /dev/null
++++ b/package/network/config/netifd/patches/0004-Scott-Fix-missing-list-init.patch
+@@ -0,0 +1,41 @@
++--- a/ubus.c
+++++ b/ubus.c
++@@ -1143,6 +1143,12 @@ netifd_ubusdev_invoke_async(struct ubus_
++ 	ubus_complete_handler_t complete_cb, void *data)
++ {
++ 	int ret;
+++
+++	if (!list_empty(&req->list)) {
+++		fprintf(stderr, "BUG: Found bug trying to invoke async (%s) when request already on list! (Request %d at 0x%x)\n", method, req->seq, (unsigned int)req);
+++		return -EBUSY;
+++	}
+++	req->priv = data;
++ 	req->priv = data;
++ 
++ 	ret = ubus_invoke_async(ubus_ctx, dest_ubus_id, method, msg, req);
++--- a/ubusdev.c
+++++ b/ubusdev.c
++@@ -677,6 +677,7 @@ ubusdev_bridge_create_member(struct ubus
++ 	if (!ubm)
++ 		return NULL;
++ 
+++        INIT_LIST_HEAD(&ubm->req.list);
++ 	ubm->parent_br = ubr;
++ 	ubm->name = name;
++ 	ubm->hotplug = hotplug;
++@@ -1113,6 +1114,7 @@ _ubusdev_create(const char *name, struct
++ 
++ 	udev->utype = utype;
++ 	udev->retry.cb = ubusdev_timeout_cb;
+++        INIT_LIST_HEAD(&udev->req.list);
++ 
++ 	// let the external device handler set up the device
++ 	ret = netifd_ubusdev_invoke_async(&udev->req, utype->ubus_peer_id,
++@@ -1159,6 +1161,7 @@ _ubusdev_bridge_create(const char *name,
++ 	ubr->udev.dev.config_pending = true;
++ 	ubr->udev.utype = container_of(devtype, struct ubusdev_type, handler);
++ 	ubr->udev.retry.cb = ubusdev_bridge_timeout_cb;
+++        INIT_LIST_HEAD(&ubr->udev.req.list);
++ 
++ 	// for bridge types, the default device state callback is replaced
++ 	// in the device struct but kept in the ubusdev_bridge wrapper struct

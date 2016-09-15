@@ -81,3 +81,5 @@ packages/0176-netifd-external-device-handlers-openvswitch.patch
 packages/0177-netifd-ovs-change-br_name-to_br.patch
 packages/0178-procps-ng-disable-modern-top.patch
 0150-Add-vid-option-to-switch-config.patch
+packages/0178-netifd-external-device-handlers-fix-missing-list-init.patch
+packages/0195-ovs-add-vxlan-module.patch

@@ -3953,8 +3953,8 @@ CONFIG_POSTFIX_CDB=y
 # CONFIG_PACKAGE_nocatsplash is not set
 # CONFIG_PACKAGE_nodogsplash is not set
 # CONFIG_PACKAGE_pepperspot is not set
-CONFIG_PACKAGE_wifidog=y
-CONFIG_PACKAGE_wifidog-tls=m
+# CONFIG_PACKAGE_wifidog is not set
+# CONFIG_PACKAGE_wifidog-tls is not set
 
 #
 # File Transfer
