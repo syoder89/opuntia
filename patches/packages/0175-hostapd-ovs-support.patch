@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/package/network/services/hostapd/patches/999-scott-ovs-support.patch
-@@ -0,0 +1,117 @@
+@@ -0,0 +1,139 @@
 +From c89daaeca4ee90c8bc158e37acb1b679c823d7ab Mon Sep 17 00:00:00 2001
 +From: Helmut Schaa <helmut.schaa@googlemail.com>
 +Date: Tue, 3 Dec 2013 14:51:43 +0100
@@ -118,3 +118,25 @@
 + 	return 0;
 + }
 ++
++--- a/src/ap/vlan_full.c
+++++ b/src/ap/vlan_full.c
++@@ -137,6 +137,9 @@ static int br_delif(const char *br_name,
++ 	int if_index;
++ 
++ 	wpa_printf(MSG_DEBUG, "VLAN: br_delif(%s, %s)", br_name, if_name);
+++        if (!ovs_br_del_if(br_name, if_name))
+++                return 0;
+++
++ 	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
++ 		wpa_printf(MSG_ERROR, "VLAN: %s: socket(AF_INET,SOCK_STREAM) "
++ 			   "failed: %s", __func__, strerror(errno));
++@@ -188,6 +191,9 @@ static int br_addif(const char *br_name,
++ 	int if_index;
++ 
++ 	wpa_printf(MSG_DEBUG, "VLAN: br_addif(%s, %s)", br_name, if_name);
+++        if (!ovs_br_add_if(br_name, if_name))
+++                return 0;
+++
++ 	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
++ 		wpa_printf(MSG_ERROR, "VLAN: %s: socket(AF_INET,SOCK_STREAM) "
++ 			   "failed: %s", __func__, strerror(errno));

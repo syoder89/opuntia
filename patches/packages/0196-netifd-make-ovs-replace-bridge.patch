@@ -1,0 +1,18 @@
+--- /dev/null
++++ b/package/network/config/netifd/patches/0005-Scott-replace-bridge-with-ovs.patch
+@@ -0,0 +1,10 @@
++--- a/device.c
+++++ b/device.c
++@@ -86,7 +86,6 @@ static void __init devtypes_init(void)
++ {
++ 	INIT_LIST_HEAD(&devtypes);
++ 	device_type_add(&simple_device_type);
++-	device_type_add(&bridge_device_type);
++ 	device_type_add(&tunnel_device_type);
++ 	device_type_add(&macvlan_device_type);
++ 	device_type_add(&vlandev_device_type);
+--- a/feeds/ovs/ovsd/files/lib/netifd/ubusdev-config/ovsd.json
++++ b/feeds/ovs/ovsd/files/lib/netifd/ubusdev-config/ovsd.json
+@@ -1 +1 @@
+-{ "name" : "Open vSwitch", "ubus_name" : "ovs", "bridge" : "1", "br-prefix" : "br",  "config" : [ ["name", 3], ["ifname", 1], ["empty", 7], ["parent", 3], ["vlan", 5], ["ofcontrollers", 1], ["controller_fail_mode", 3], ["ssl_private_key", 3], ["ssl_cert", 3], ["ssl_ca_cert", 3], ["ssl_bootstrap", 7] ], "info" : [ ["ofcontrollers", 1], ["fail_mode", 3], ["ports", 1], ["parent", 3], ["vlan", 5], ["ssl", 2] ] }
++{ "name" : "bridge", "ubus_name" : "ovs", "bridge" : "1", "br-prefix" : "br",  "config" : [ ["name", 3], ["ifname", 1], ["empty", 7], ["parent", 3], ["vlan", 5], ["ofcontrollers", 1], ["controller_fail_mode", 3], ["ssl_private_key", 3], ["ssl_cert", 3], ["ssl_ca_cert", 3], ["ssl_bootstrap", 7] ], "info" : [ ["ofcontrollers", 1], ["fail_mode", 3], ["ports", 1], ["parent", 3], ["vlan", 5], ["ssl", 2] ] }
