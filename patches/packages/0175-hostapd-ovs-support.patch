@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/package/network/services/hostapd/patches/999-scott-ovs-support.patch
-@@ -0,0 +1,139 @@
+@@ -0,0 +1,173 @@
 +From c89daaeca4ee90c8bc158e37acb1b679c823d7ab Mon Sep 17 00:00:00 2001
 +From: Helmut Schaa <helmut.schaa@googlemail.com>
 +Date: Tue, 3 Dec 2013 14:51:43 +0100
@@ -12,7 +12,7 @@
 +
 +--- a/src/drivers/linux_ioctl.c
 ++++ b/src/drivers/linux_ioctl.c
-+@@ -14,6 +14,62 @@
++@@ -14,6 +14,76 @@
 + #include "utils/common.h"
 + #include "linux_ioctl.h"
 + 
@@ -57,6 +57,20 @@
 ++	return -1;
 ++}
 ++
+++int ovs_br_add(const char *brname)
+++{
+++	if (run_prog("/usr/bin/ovs-vsctl", "add-br", brname))
+++		return -1;
+++	return 0;
+++}
+++
+++int ovs_br_del(const char *brname)
+++{
+++	if (run_prog("/usr/bin/ovs-vsctl", "del-br", brname))
+++		return -1;
+++	return 0;
+++}
+++
 ++int ovs_br_add_if(const char *brname, const char *ifname)
 ++{
 ++	if (run_prog("/usr/bin/ovs-vsctl", "add-port", brname, ifname))
@@ -75,7 +89,7 @@
 + 
 + int linux_set_iface_flags(int sock, const char *ifname, int dev_up)
 + {
-+@@ -118,7 +174,6 @@ int linux_set_ifhwaddr(int sock, const c
++@@ -118,7 +188,6 @@ int linux_set_ifhwaddr(int sock, const c
 + 	return 0;
 + }
 + 
@@ -83,7 +97,27 @@
 + #ifndef SIOCBRADDBR
 + #define SIOCBRADDBR 0x89a0
 + #endif
-+@@ -162,6 +217,9 @@ int linux_br_add_if(int sock, const char
++@@ -135,6 +204,9 @@ int linux_set_ifhwaddr(int sock, const c
++ 
++ int linux_br_add(int sock, const char *brname)
++ {
+++	if (!ovs_br_add(brname))
+++		return 0;
+++
++ 	if (ioctl(sock, SIOCBRADDBR, brname) < 0) {
++ 		wpa_printf(MSG_DEBUG, "Could not add bridge %s: %s",
++ 			   brname, strerror(errno));
++@@ -147,6 +219,9 @@ int linux_br_add(int sock, const char *b
++ 
++ int linux_br_del(int sock, const char *brname)
++ {
+++	if (!ovs_br_del(brname))
+++		return 0;
+++
++ 	if (ioctl(sock, SIOCBRDELBR, brname) < 0) {
++ 		wpa_printf(MSG_DEBUG, "Could not remove bridge %s: %s",
++ 			   brname, strerror(errno));
++@@ -162,6 +237,9 @@ int linux_br_add_if(int sock, const char
 + 	struct ifreq ifr;
 + 	int ifindex;
 + 
@@ -93,7 +127,7 @@
 + 	ifindex = if_nametoindex(ifname);
 + 	if (ifindex == 0)
 + 		return -1;
-+@@ -184,6 +242,9 @@ int linux_br_del_if(int sock, const char
++@@ -184,6 +262,9 @@ int linux_br_del_if(int sock, const char
 + 	struct ifreq ifr;
 + 	int ifindex;
 + 
@@ -103,7 +137,7 @@
 + 	ifindex = if_nametoindex(ifname);
 + 	if (ifindex == 0)
 + 		return -1;
-+@@ -206,6 +267,9 @@ int linux_br_get(char *brname, const cha
++@@ -206,6 +287,9 @@ int linux_br_get(char *brname, const cha
 + 	char path[128], brlink[128], *pos;
 + 	ssize_t res;
 + 
@@ -113,7 +147,7 @@
 + 	os_snprintf(path, sizeof(path), "/sys/class/net/%s/brport/bridge",
 + 		    ifname);
 + 	res = readlink(path, brlink, sizeof(brlink));
-+@@ -242,3 +306,4 @@ int linux_master_get(char *master_ifname
++@@ -242,3 +326,4 @@ int linux_master_get(char *master_ifname
 + 	os_strlcpy(master_ifname, pos, IFNAMSIZ);
 + 	return 0;
 + }

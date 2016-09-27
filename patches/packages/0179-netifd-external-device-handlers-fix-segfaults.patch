@@ -1,0 +1,56 @@
+--- /dev/null
++++ b/package/network/config/netifd/patches/0006-Scott-Fix-segfaults.patch
+@@ -0,0 +1,53 @@
++--- a/ubusdev.c
+++++ b/ubusdev.c
++@@ -507,6 +507,8 @@ ubusdev_bridge_set_up(struct ubusdev_bri
++ 		if (!ubr->force_active)
++ 			return -ENOENT;
++ 
+++	// Set the bridge up
+++	ubr->set_state(&ubr->udev.dev, true);
++ 	ubr->n_failed = 0;
++ 	vlist_for_each_element(&ubr->members, ubm, node)
++ 		ubusdev_bridge_enable_member(ubm);
++@@ -811,6 +813,7 @@ ubusdev_bridge_free_member(struct ubusde
++ 		device_set_present(dev, true);
++ 	}
++ 
+++	uloop_timeout_cancel(&ubm->retry);
++ 	free(ubm);
++ }
++ 
++@@ -829,6 +832,7 @@ ubusdev_bridge_member_update(struct vlis
++ 
++ 		// don't allow replacements
++ 		if (node_old) {
+++			uloop_timeout_cancel(&ubm->retry);
++ 			free(ubm);
++ 			return;
++ 		}
++@@ -1614,12 +1618,13 @@ ubusdev_handle_free_notification(const c
++ 		// Do not delete devices that are not marked for deletion.
++ 		// This means that bridges merely get 'disabled' while their
++ 		// devices and configs are still available.
++-		if (ubr->udev.sync == STATE_PENDING_DISABLE) {
+++		if (1 || ubr->udev.sync == STATE_PENDING_DISABLE) {
++ 			ubr->active = false;
++ 			ubusdev_set_sync(&ubr->udev, STATE_SYNCHRONIZED);
++ 			return 0;
++ 		}
++ 
+++// Don't do any of this - crashes will insue!!! Scott
++ 		ubr->active = false;
++ //		if (ubr->ifnames)
++ //			free(ubr->ifnames);
++--- a/wireless.c
+++++ b/wireless.c
++@@ -83,7 +83,7 @@ vif_config_add_bridge(struct blob_buf *b
++ 		if (!dev)
++ 			return;
++ 
++-		if (dev->type != &bridge_device_type)
+++		if (!dev->type->bridge_capability)
++ 			return;
++ 	}
++ 

@@ -1,6 +1,6 @@
 --- a/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
 +++ b/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-@@ -488,7 +488,7 @@ mac80211_prepare_vif() {
+@@ -486,7 +486,7 @@ mac80211_prepare_vif() {
  	esac
  
  	# Ensure the interface is down
@@ -9,7 +9,7 @@
  	if [ "$?" = "0" ] ; then
  		echo "Interface $ifname is up prematurely! Taking it back down..."
  		ip link set "$ifname" down
-@@ -604,7 +604,15 @@ mac80211_setup_vif() {
+@@ -608,7 +608,15 @@ mac80211_setup_vif() {
  	json_get_vars mode
  	json_get_var vif_txpower txpower
  
@@ -26,7 +26,7 @@
  		wireless_setup_vif_failed IFUP_ERROR
  		json_select ..
  		return
-@@ -670,7 +678,7 @@ mac80211_interface_cleanup() {
+@@ -674,7 +682,7 @@ mac80211_interface_cleanup() {
  
  	for wdev in $(list_phy_interfaces "$phy"); do
  		ip link set dev "$wdev" down 2>/dev/null
@@ -35,7 +35,7 @@
  	done
  }
  
-@@ -743,15 +751,15 @@ drv_mac80211_setup() {
+@@ -747,15 +755,15 @@ drv_mac80211_setup() {
  	for_each_interface "ap" mac80211_prepare_vif
  
  	[ -n "$hostapd_ctrl" ] && {
@@ -60,7 +60,7 @@
  	}
  
  	for_each_interface "ap sta adhoc mesh monitor" mac80211_setup_vif
-@@ -775,6 +783,8 @@ drv_mac80211_teardown() {
+@@ -779,6 +787,8 @@ drv_mac80211_teardown() {
  	json_get_vars phy
  	json_select ..
  
