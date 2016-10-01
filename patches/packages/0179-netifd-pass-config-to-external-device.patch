@@ -1,0 +1,38 @@
+--- /dev/null
++++ b/package/network/config/netifd/patches/0007-Scott-pass-config-to-external-device.patch
+@@ -0,0 +1,35 @@
++--- a/ubusdev.c
+++++ b/ubusdev.c
++@@ -77,6 +77,7 @@ struct ubusdev_device {
++ 	struct ubusdev_type *utype;
++ 
++ 	struct ubus_request req;
+++	struct blob_attr *config;
++ 
++ 	// synchronization fields
++ 	enum state_sync sync;
++@@ -1115,6 +1116,8 @@ _ubusdev_create(const char *name, struct
++ 	// Don't call config_init automatically but only after the external 
++ 	// device handler has notified us of successful device creation.
++ 	udev->dev.config_pending = false;
+++	config = blob_memdup(config);
+++	udev->config = config;
++ 
++ 	ubusdev_set_timeout(udev, STATE_PENDING_CREATE, UBUSDEV_TIMEOUT);
++ 
++@@ -1224,11 +1227,12 @@ ubusdev_free(struct device *dev)
++ 
++ 	udev = container_of(dev, struct ubusdev_device, dev);
++ 
++-	blob_buf_init(&blob_buffer, 0);
++-	blobmsg_add_string(&blob_buffer, "name", dev->ifname);
+++// Pass the saved config instead of just name. Some devices might need it.
+++//	blob_buf_init(&blob_buffer, 0);
+++//	blobmsg_add_string(&blob_buffer, "name", dev->ifname);
++ 
++ 	ret = netifd_ubusdev_invoke_sync(utype->ubus_peer_id,
++-		__ubusdev_methods[UBUSDEV_METHOD_FREE], blob_buffer.head,
+++		__ubusdev_methods[UBUSDEV_METHOD_FREE], udev->config,
++ 		ubusdev_req_data_cb, udev);
++ 
++ 	if (ret)

@@ -85,3 +85,5 @@ packages/0178-netifd-external-device-handlers-fix-missing-list-init.patch
 packages/0195-ovs-add-vxlan-module.patch
 packages/0196-netifd-make-ovs-replace-bridge.patch
 packages/0179-netifd-external-device-handlers-fix-segfaults.patch
+packages/0179-netifd-pass-config-to-external-device.patch
+packages/0181-ovsd-add-vxlan-tunnel-support.patch

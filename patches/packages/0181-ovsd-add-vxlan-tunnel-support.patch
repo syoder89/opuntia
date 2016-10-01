@@ -1,0 +1,656 @@
+--- /dev/null
++++ b/feeds/ovs/ovsd/patches/0001-add-vxlan-tunnel-support.patch
+@@ -0,0 +1,514 @@
++--- a/main.c
+++++ b/main.c
++@@ -120,6 +120,11 @@ int main(int argc, char **argv)
++ 		return 1;
++ 	}
++ 
+++	if (vxlan_ovsd_ubus_init(socket) < 0) {
+++		fprintf(stderr, "Failed to connect to vxlan ubus\n");
+++		return 1;
+++	}
+++
++ 	uloop_run();
++ 
++ 	if (use_syslog)
++--- a/ovs-shell.c
+++++ b/ovs-shell.c
++@@ -31,6 +31,7 @@ static char * const ovs_vsctl_cmd[__CMD_
++ 	[CMD_BR_EXISTS]			= "br-exists",
++ 	[CMD_BR_TO_VLAN]		= "br-to-vlan",
++ 	[CMD_BR_TO_PARENT]		= "br-to-parent",
+++	[CMD_PORT_TO_BR] 		= "port-to-br",
++ 
++ 	[CMD_SET_OFCTL] 		= "set-controller",
++ 	[CMD_DEL_OFCTL] 		= "del-controller",
++@@ -440,9 +441,34 @@ ovs_shell_add_port(char *bridge, char *p
++ 	return ovs_vsctl(argv);
++ }
++ 
+++size_t
+++ovs_shell_port_to_bridge(char *port, char *buf, size_t n)
+++{
+++	char out_buf[64];
+++	char *ret;
+++
+++	if (_ovs_shell_get_output(ovs_cmd(CMD_PORT_TO_BR), port, out_buf, 64))
+++		return 0;
+++
+++        // remove leading and trailing whitespace
+++        ret = _trim(out_buf);
+++
+++	strncpy(buf, ret, n);
+++	return strnlen(out_buf, 64);
+++}
+++
++ int
++ ovs_shell_remove_port(char *bridge, char *port)
++ {
+++	char out_buf[64];
+++
+++	/* Look up the port if the bridge is unspecified */
+++	if (!strlen(bridge)) {
+++		if (!(ovs_shell_port_to_bridge(port, out_buf, 64)))
+++			return OVSD_OK;
+++		bridge = out_buf;
+++	}
+++
++ 	if (!ovs_shell_br_exists(bridge))
++ 		return OVSD_OK;
++ 
++@@ -457,3 +483,39 @@ ovs_shell_remove_port(char *bridge, char
++ 
++ 	return ovs_vsctl(argv);
++ }
+++
+++int
+++ovs_shell_add_vxlan_port(char *bridge, char *port, char *remote_ip, char *key)
+++{
+++	char *ovs_vsctl_argv[15];
+++	int cur_arg = 0;
+++
+++	if (!ovs_shell_br_exists(bridge))
+++		return OVSD_ENOEXIST;
+++
+++	// program name
+++	ovs_vsctl_argv[cur_arg++] = OVS_VSCTL;
+++
+++	// create bridge command w/ may exist modifier
+++	ovs_vsctl_argv[cur_arg++] = ovs_cmd(MODIFIER_MAY_EXIST);
+++	ovs_vsctl_argv[cur_arg++] = ovs_cmd(CMD_ADD_PORT);
+++	ovs_vsctl_argv[cur_arg++] = bridge; 
+++	ovs_vsctl_argv[cur_arg++] = port; 
+++	ovs_vsctl_argv[cur_arg++] = ovs_cmd(ATOMIC_CMD_SEPARATOR);
+++	ovs_vsctl_argv[cur_arg++] = "set"; 
+++	ovs_vsctl_argv[cur_arg++] = "interface"; 
+++	ovs_vsctl_argv[cur_arg++] = port; 
+++	ovs_vsctl_argv[cur_arg++] = "type=vxlan"; 
+++	ovs_vsctl_argv[cur_arg] = alloca(strlen("options:remote_ip=")+strlen(remote_ip)+1);
+++	sprintf(ovs_vsctl_argv[cur_arg++],"options:remote_ip=%s", remote_ip); 
+++	if (key) {
+++		ovs_vsctl_argv[cur_arg] = alloca(strlen("options:key=")+strlen(key)+1);
+++		sprintf(ovs_vsctl_argv[cur_arg++],"options:key=%s", key); 
+++	}
+++
+++	// execv needs terminating NULL in argv
+++	ovs_vsctl_argv[cur_arg] = NULL;
+++
+++	return ovs_vsctl(ovs_vsctl_argv);
+++}
+++
++--- a/ovs-shell.h
+++++ b/ovs-shell.h
++@@ -30,6 +30,7 @@ enum ovs_vsctl_cmd {
++ 	CMD_BR_EXISTS,
++ 	CMD_BR_TO_VLAN,
++ 	CMD_BR_TO_PARENT,
+++	CMD_PORT_TO_BR,
++ 
++ 	CMD_GET_OFCTL,
++ 	CMD_SET_OFCTL,
++@@ -73,4 +74,7 @@ int ovs_shell_delete_bridge(char *bridge
++ int ovs_shell_add_port(char *bridge, char *port);
++ int ovs_shell_remove_port(char *bridge, char *port);
++ 
+++size_t ovs_shell_port_to_bridge(char *port, char *buf, size_t n);
+++int ovs_shell_add_vxlan_port(char *bridge, char *port, char *remote_ip, char *key);
+++
++ #endif //OVSD_OVS_SHELL_H
++--- a/ovs.c
+++++ b/ovs.c
++@@ -66,6 +66,17 @@ ovs_remove_port(char *bridge, char *port
++ }
++ 
++ int
+++ovs_add_vxlan_port(char *bridge, char *port, char *remote_ip, char *key)
+++{
+++	int ret = ovs_shell_add_vxlan_port(bridge, port, remote_ip, key);
+++	if (ret)
+++		fprintf(stderr, "Could not add VXLAN port '%s' (remote_ip=%s, key=%s) to bridge %s: %s\n",
+++			port, remote_ip, key ? key : "<none>", bridge, ovs_strerror(ret));
+++
+++	return ret;
+++}
+++
+++int
++ ovs_check_state(char *bridge)
++ {
++ 	if (!ovs_shell_br_exists(bridge))
++--- a/ovs.h
+++++ b/ovs.h
++@@ -26,6 +26,8 @@ int ovs_remove_port(char *bridge, char *
++ int ovs_check_state(char *bridge);
++ int ovs_dump_info(struct blob_buf *buf, char *bridge);
++ 
+++int ovs_add_vxlan_port(char *bridge, char *port, char *remote_ip, char *key);
+++
++ const char* ovs_strerror(int error);
++ 
++ #endif
++--- a/ubus.c
+++++ b/ubus.c
++@@ -17,10 +17,10 @@
++ #include "ovs.h"
++ #include "ubus.h"
++ 
++-struct ubus_context *ubus_ctx = NULL;
+++struct ubus_context *ubus_ctx = NULL, *vxlan_ubus_ctx = NULL;
++ static struct blob_buf bbuf;
++-static const char *ubus_path;
++-static struct ubus_object ovsd_obj;
+++static const char *ubus_path, *vxlan_ubus_path;
+++static struct ubus_object ovsd_obj, vxlan_ovsd_obj;
++ 
++ static int
++ _ovs_error_to_ubus_error(int s)
++@@ -53,6 +53,19 @@ ovsd_add_ubus_object(void)
++ 	return 0;
++ }
++ 
+++static int
+++vxlan_ovsd_add_ubus_object(void)
+++{
+++	int ret = ubus_add_object(vxlan_ubus_ctx, &vxlan_ovsd_obj);
+++
+++	if (ret) {
+++		fprintf(stderr, "Failed to register '%s' object with ubus: %s\n",
+++			vxlan_ovsd_obj.name, ubus_strerror(ret));
+++		return ret;
+++	}
+++	return 0;
+++}
+++
++ static void
++ ovsd_ubus_add_fd(void)
++ {
++@@ -60,6 +73,12 @@ ovsd_ubus_add_fd(void)
++ }
++ 
++ static void
+++vxlan_ovsd_ubus_add_fd(void)
+++{
+++	ubus_add_uloop(vxlan_ubus_ctx);
+++}
+++
+++static void
++ ovsd_timed_ubus_reconnect(struct uloop_timeout *to)
++ {
++ 	ovsd_log_msg(L_NOTICE, "ubus connection lost\n");
++@@ -86,6 +105,33 @@ ovsd_ubus_connection_lost_cb(struct ubus
++ 	ovsd_timed_ubus_reconnect(NULL);
++ }
++ 
+++static void
+++vxlan_ovsd_timed_ubus_reconnect(struct uloop_timeout *to)
+++{
+++	ovsd_log_msg(L_NOTICE, "ubus connection lost\n");
+++
+++	static struct uloop_timeout retry = {
+++		.cb = vxlan_ovsd_timed_ubus_reconnect,
+++	};
+++	int t = 2;
+++
+++	if (ubus_reconnect(vxlan_ubus_ctx, vxlan_ubus_path) != 0) {
+++		ovsd_log_msg(L_NOTICE, "ubus reconnect failed, retry in %ds\n", t);
+++		uloop_timeout_set(&retry, t * 1000);
+++		return;
+++	}
+++
+++	ovsd_log_msg(L_NOTICE, "reconnected to ubus, new id: %08x\n",
+++		vxlan_ubus_ctx->local_id);
+++	vxlan_ovsd_ubus_add_fd();
+++}
+++
+++static void
+++vxlan_ovsd_ubus_connection_lost_cb(struct ubus_context *ubus_ctx)
+++{
+++	vxlan_ovsd_timed_ubus_reconnect(NULL);
+++}
+++
++ int
++ ovsd_ubus_init(const char *path)
++ {
++@@ -106,6 +152,26 @@ ovsd_ubus_init(const char *path)
++ 	return 0;
++ }
++ 
+++int
+++vxlan_ovsd_ubus_init(const char *path)
+++{
+++	uloop_init();
+++	vxlan_ubus_path = path;
+++
+++	vxlan_ubus_ctx = ubus_connect(path);
+++	if (!vxlan_ubus_ctx)
+++		return -EIO;
+++
+++	ovsd_log_msg(L_NOTICE, "ubus vxlan connection established.\n",
+++		vxlan_ubus_ctx->local_id);
+++	vxlan_ubus_ctx->connection_lost = vxlan_ovsd_ubus_connection_lost_cb;
+++	vxlan_ovsd_ubus_add_fd();
+++
+++	vxlan_ovsd_add_ubus_object();
+++
+++	return 0;
+++}
+++
++ static char**
++ _parse_strarray(struct blob_attr *head, size_t len, int *n_entries)
++ {
++@@ -245,6 +311,41 @@ _notify_netifd(enum netifd_notification_
++ 	return ret;
++ }
++ 
+++static void
+++_vxlan_send_errormsg(struct ubus_request_data *req, const char *msg)
+++{
+++	blob_buf_init(&bbuf, 0);
+++	blobmsg_add_string(&bbuf, "message", msg);
+++
+++	ubus_send_reply(vxlan_ubus_ctx, req, bbuf.head);
+++}
+++
+++static int
+++_vxlan_notify_netifd(enum netifd_notification_type type, const char *name)
+++{
+++	int ret;
+++	struct ubus_notify_request *req;
+++
+++	req = calloc(1, sizeof(struct ubus_notify_request));
+++	if (!req)
+++		return -ENOMEM;
+++
+++	req->complete_cb = _notify_complete_cb;
+++
+++	blob_buf_init(&bbuf, 0);
+++
+++	blobmsg_add_string(&bbuf, "name", name);
+++
+++	ret = ubus_notify_async(vxlan_ubus_ctx, &vxlan_ovsd_obj, netifd_notification[type],
+++		bbuf.head, req);
+++	if (ret)
+++		fprintf(stderr, "%s notification failed: %s\n",
+++			netifd_notification[type], ubus_strerror(ret));
+++
+++	return ret;
+++}
+++
+++
++ static int
++ _parse_ofcontroller_opts(struct blob_attr **tb,
++ 	struct ovswitch_br_config *ovs_cfg)
++@@ -669,3 +770,204 @@ static struct ubus_object ovsd_obj = {
++ 	.methods = ubus_methods,
++ 	.n_methods = __METHODS_MAX,
++ };
+++
+++
+++/* VXLAN tunnel handler */
+++
+++enum {
+++	VXLAN_CREATPOL_PORT,
+++	VXLAN_CREATPOL_BRIDGE,
+++	VXLAN_CREATPOL_REMOTE_IP,
+++	VXLAN_CREATPOL_KEY,
+++	__VXLAN_CREATPOL_MAX
+++};
+++static const struct blobmsg_policy vxlan_create_policy[__VXLAN_CREATPOL_MAX] = {
+++	[VXLAN_CREATPOL_PORT] = {
+++		.name = "name",
+++		.type = BLOBMSG_TYPE_STRING,
+++	},
+++	[VXLAN_CREATPOL_BRIDGE] = {
+++		.name = "bridge",
+++		.type = BLOBMSG_TYPE_STRING,
+++	},
+++	[VXLAN_CREATPOL_REMOTE_IP] = {
+++		.name = "remote_ip",
+++		.type = BLOBMSG_TYPE_STRING,
+++	},
+++	[VXLAN_CREATPOL_KEY] = {
+++		.name = "key",
+++		.type = BLOBMSG_TYPE_STRING,
+++	},
+++};
+++
+++struct ovswitch_vxlan_config {
+++	char *port;
+++	char *bridge;
+++	char *remote_ip;
+++	char *key;
+++};
+++
+++static enum ovsd_status
+++_vxlan_parse_create_msg(struct blob_attr **tb, struct ovswitch_vxlan_config *cfg)
+++{
+++	// parse name
+++	if (!tb[VXLAN_CREATPOL_PORT])
+++		return OVSD_EINVALID_ARG;
+++	cfg->port = blobmsg_get_string(tb[VXLAN_CREATPOL_PORT]);
+++
+++	// parse bridge
+++	if (!tb[VXLAN_CREATPOL_BRIDGE])
+++		return OVSD_EINVALID_ARG;
+++	cfg->bridge = blobmsg_get_string(tb[VXLAN_CREATPOL_BRIDGE]);
+++
+++	// parse remote_ip 
+++	if (!tb[VXLAN_CREATPOL_REMOTE_IP])
+++		return OVSD_EINVALID_ARG;
+++	cfg->remote_ip = blobmsg_get_string(tb[VXLAN_CREATPOL_REMOTE_IP]);
+++
+++	// parse key
+++	if (tb[VXLAN_CREATPOL_KEY])
+++		cfg->key = blobmsg_get_string(tb[VXLAN_CREATPOL_KEY]);
+++	else
+++		cfg->key = NULL;
+++
+++	return OVSD_OK;
+++}
+++
+++static int
+++_vxlan_handle_create(struct ubus_context *ctx, struct ubus_object *obj,
+++	struct ubus_request_data *req, const char *method, struct blob_attr *msg)
+++{
+++	struct blob_attr *tb[__VXLAN_CREATPOL_MAX];
+++	struct ovswitch_vxlan_config vxlan_config;
+++	int ret;
+++
+++	blobmsg_parse(vxlan_create_policy, __VXLAN_CREATPOL_MAX, tb, blob_data(msg),
+++		blob_len(msg));
+++
+++	ret = _vxlan_parse_create_msg(tb, &vxlan_config);
+++	if (ret)
+++		return ret;
+++
+++	// create the device
+++	ret = ovs_add_vxlan_port(vxlan_config.bridge, vxlan_config.port, vxlan_config.remote_ip, vxlan_config.key);
+++
+++	if (ret)
+++		goto error;
+++
+++	return _vxlan_notify_netifd(NETIFD_NOTIFY_CREATE, vxlan_config.port);
+++
+++error:
+++	fprintf(stderr, "Failed to create '%s' on bridge %s: %s\n", vxlan_config.port, vxlan_config.bridge, 
+++		ovs_strerror(ret));
+++
+++	char errormsg[strlen("Failed to create : ") + strlen(vxlan_config.port) +
+++				  strlen(ovs_strerror(ret)) + 1];
+++
+++	sprintf(errormsg, "Failed to create %s: %s", vxlan_config.port,
+++		ovs_strerror(ret));
+++
+++	_vxlan_send_errormsg(req, errormsg);
+++
+++	return _ovs_error_to_ubus_error(ret);
+++}
+++
+++/* Reload a vxlan tunnel. The tunnel is deleted and re-created with the given config
+++ */
+++static int
+++_vxlan_handle_reload(struct ubus_context *ctx, struct ubus_object *obj,
+++	struct ubus_request_data *req, const char *method, struct blob_attr *msg)
+++{
+++	int ret;
+++	struct blob_attr *tb[__VXLAN_CREATPOL_MAX];
+++	struct ovswitch_vxlan_config vxlan_config;
+++
+++	blobmsg_parse(vxlan_create_policy, __VXLAN_CREATPOL_MAX, tb, blob_data(msg),
+++		blob_len(msg));
+++
+++	ret = _vxlan_parse_create_msg(tb, &vxlan_config);
+++	if (ret)
+++		return ret;
+++
+++	// delete and re-create the tunnel
+++	ovs_remove_port(vxlan_config.bridge, vxlan_config.port);
+++	// create the device
+++	ret = ovs_add_vxlan_port(vxlan_config.bridge, vxlan_config.port, vxlan_config.remote_ip, vxlan_config.key);
+++	if (ret)
+++		fprintf(stderr, "Failed to re-create '%s': %s\n", vxlan_config.port,
+++				ovs_strerror(ret));
+++
+++	return _vxlan_notify_netifd(NETIFD_NOTIFY_RELOAD, vxlan_config.port);
+++}
+++
+++enum {
+++	VXLAN_DELPOL_PORT,
+++	__VXLAN_DELPOL_MAX
+++};
+++
+++static const struct blobmsg_policy vxlan_delete_policy[__VXLAN_DELPOL_MAX] = {
+++	[VXLAN_DELPOL_PORT] = {
+++		.name = "name",
+++		.type = BLOBMSG_TYPE_STRING,
+++	},
+++};
+++static int
+++_vxlan_handle_free(struct ubus_context *ctx, struct ubus_object *obj,
+++	struct ubus_request_data *req, const char *method, struct blob_attr *msg)
+++{
+++	struct blob_attr *tb[__VXLAN_DELPOL_MAX];
+++	int ret;
+++
+++	blobmsg_parse(vxlan_delete_policy, __VXLAN_DELPOL_MAX, tb, blobmsg_data(msg),
+++		blobmsg_len(msg));
+++
+++	if (!tb[VXLAN_DELPOL_PORT])
+++		return UBUS_STATUS_INVALID_ARGUMENT;
+++
+++	ret = ovs_remove_port("", blobmsg_get_string(tb[VXLAN_DELPOL_PORT]));
+++
+++	if (ret)
+++		goto error;
+++
+++	return _vxlan_notify_netifd(NETIFD_NOTIFY_FREE,
+++		blobmsg_get_string(tb[VXLAN_DELPOL_PORT]));
+++
+++error:
+++	fprintf(stderr, "Failed to delete vxlan tunnel'%s': %s\n",
+++		blobmsg_get_string(tb[VXLAN_DELPOL_PORT]), ovs_strerror(ret));
+++
+++	return _ovs_error_to_ubus_error(ret);
+++}
+++
+++enum {
+++	// device handler interface
+++	VXLAN_METHOD_CREATE,
+++	VXLAN_METHOD_RELOAD,
+++//	VXLAN_METHOD_DUMP_INFO,
+++//	VXLAN_METHOD_DUMP_STATS,
+++//	VXLAN_METHOD_CHECK_STATE,
+++	VXLAN_METHOD_FREE,
+++	__VXLAN_METHODS_MAX
+++};
+++static struct ubus_method vxlan_ubus_methods[__VXLAN_METHODS_MAX] = {
+++	// device handler interface
+++	[VXLAN_METHOD_CREATE] = UBUS_METHOD("create", _vxlan_handle_create, vxlan_create_policy),
+++	[VXLAN_METHOD_RELOAD] = UBUS_METHOD("reload", _vxlan_handle_reload, vxlan_create_policy),
+++//	[VXLAN_METHOD_DUMP_INFO] = UBUS_METHOD("dump_info", _vxlan_handle_dump_info,
+++//		vxlan_dump_info_policy),
+++//	[VXLAN_METHOD_DUMP_STATS] = UBUS_METHOD_NOARG("dump_stats", _vxlan_handle_dump_stats),
+++//	[VXLAN_METHOD_CHECK_STATE] = UBUS_METHOD("check_state", _vxlan_handle_check_state,
+++//			vxlan_check_state_policy),
+++	[VXLAN_METHOD_FREE] = UBUS_METHOD("free", _vxlan_handle_free, vxlan_delete_policy),
+++};
+++
+++static struct ubus_object_type vxlan_ovsd_obj_type =
+++	UBUS_OBJECT_TYPE("ovs-vxlan", vxlan_ubus_methods);
+++
+++static struct ubus_object vxlan_ovsd_obj = {
+++	.name = "ovs-vxlan",
+++	.type = &vxlan_ovsd_obj_type,
+++	.methods = vxlan_ubus_methods,
+++	.n_methods = __VXLAN_METHODS_MAX,
+++};
+++
++--- a/ubus.h
+++++ b/ubus.h
++@@ -16,5 +16,6 @@
++ 
++ 
++ int ovsd_ubus_init(const char *path);
+++int vxlan_ovsd_ubus_init(const char *path);
++ 
++ #endif
+--- /dev/null
++++ b/feeds/ovs/ovsd/files/lib/netifd/ubusdev-config/ovsd-vxlan.json
+@@ -0,0 +1 @@
++{ "name" : "ovs-vxlan", "ubus_name" : "ovs-vxlan", "bridge" : "0", "config" : [ ["name", 3], ["bridge", 3], ["remote_ip", 3], ["key", 3] ], "info" : [ ["bridge", 3], [           "remote_ip", 3], ["key", 3] ] }
+--- /dev/null
++++ b/package/network/config/netifd/patches/0008-Scott-Dont-take-down-bridge-if-empty.patch
+@@ -0,0 +1,132 @@
++--- a/ubusdev.c
+++++ b/ubusdev.c
++@@ -77,7 +77,6 @@ struct ubusdev_device {
++ 	struct ubusdev_type *utype;
++ 
++ 	struct ubus_request req;
++-	struct blob_attr *config;
++ 
++ 	// synchronization fields
++ 	enum state_sync sync;
++@@ -554,7 +553,7 @@ ubusdev_bridge_remove_member(struct ubus
++ 	member->present = false;
++ 	ubr->n_present--;
++ 
++-	if (ubr->n_present == 0)
+++	if (!ubr->empty && ubr->n_present == 0)
++ 		device_set_present(&ubr->udev.dev, false);
++ }
++ 
++@@ -682,7 +681,6 @@ ubusdev_bridge_create_member(struct ubus
++ 	if (!ubm)
++ 		return NULL;
++ 
++-        INIT_LIST_HEAD(&ubm->req.list);
++ 	ubm->parent_br = ubr;
++ 	ubm->name = name;
++ 	ubm->hotplug = hotplug;
++@@ -1003,6 +1001,11 @@ ubusdev_timeout_cb(struct uloop_timeout
++ 			break;
++ 		case STATE_PENDING_FREE:
++ 			method = __ubusdev_methods[UBUSDEV_METHOD_FREE];
+++			// Pass the saved config instead of just name. Some devices might need it.
+++			//blob_buf_init(&blob_buffer, 0);
+++			//blobmsg_add_string(&blob_buffer, "name", udev->dev.ifname);
+++			//attr = blob_buffer.head;
+++
++ 			blob_buf_init(&blob_buffer, 0);
++ 			blobmsg_add_string(&blob_buffer, "name", udev->dev.ifname);
++ 			attr = blob_buffer.head;
++@@ -1104,28 +1107,27 @@ _ubusdev_create(const char *name, struct
++ 
++ 	udev->utype = utype;
++ 	udev->retry.cb = ubusdev_timeout_cb;
++-        INIT_LIST_HEAD(&udev->req.list);
+++	config = blob_memdup(config);
++ 
++ 	// let the external device handler set up the device
++ 	ret = netifd_ubusdev_invoke_sync(utype->ubus_peer_id,
++ 		__ubusdev_methods[UBUSDEV_METHOD_CREATE], config, ubusdev_req_data_cb,
++ 		udev);
++-	if (ret)
++-		goto inv_error;
++ 
++ 	// Don't call config_init automatically but only after the external 
++ 	// device handler has notified us of successful device creation.
++ 	udev->dev.config_pending = false;
++-	config = blob_memdup(config);
++-	udev->config = config;
++ 
++ 	ubusdev_set_timeout(udev, STATE_PENDING_CREATE, UBUSDEV_TIMEOUT);
++ 
+++//	if (ret)
+++//		goto inv_error;
+++
++ 	return &udev->dev;
++ 
++-inv_error:
++-	ubusdev_invocation_error(ret, __ubusdev_methods[UBUSDEV_METHOD_CREATE],
++-		name);
+++//inv_error:
+++//	ubusdev_invocation_error(ret, __ubusdev_methods[UBUSDEV_METHOD_CREATE],
+++//		name);
++ error:
++ 	device_free(&udev->dev);
++ 	fprintf(stderr, "Creating %s %s failed: %s\n", type->name, name,
++@@ -1153,7 +1155,9 @@ _ubusdev_bridge_create(const char *name,
++ 	ubr->udev.dev.config_pending = true;
++ 	ubr->udev.utype = container_of(devtype, struct ubusdev_type, handler);
++ 	ubr->udev.retry.cb = ubusdev_bridge_timeout_cb;
++-        INIT_LIST_HEAD(&ubr->udev.req.list);
+++	// Force empty bridges to exist so we can add tunnels without them
+++	// disappearing! Scott
+++	ubr->empty = true;
++ 
++ 	// for bridge types, the default device state callback is replaced
++ 	// in the device struct but kept in the ubusdev_bridge wrapper struct
++@@ -1227,18 +1231,18 @@ ubusdev_free(struct device *dev)
++ 
++ 	udev = container_of(dev, struct ubusdev_device, dev);
++ 
++-// Pass the saved config instead of just name. Some devices might need it.
++-//	blob_buf_init(&blob_buffer, 0);
++-//	blobmsg_add_string(&blob_buffer, "name", dev->ifname);
+++	blob_buf_init(&blob_buffer, 0);
+++	blobmsg_add_string(&blob_buffer, "name", dev->ifname);
++ 
++ 	ret = netifd_ubusdev_invoke_sync(utype->ubus_peer_id,
++-		__ubusdev_methods[UBUSDEV_METHOD_FREE], udev->config,
+++		__ubusdev_methods[UBUSDEV_METHOD_FREE], blob_buffer.head,
++ 		ubusdev_req_data_cb, udev);
++ 
++ 	if (ret)
++ 		goto error;
++ 
++ 	ubusdev_set_timeout(udev, STATE_PENDING_FREE, UBUSDEV_TIMEOUT);
+++	return;
++ 
++ error:
++ 	ubusdev_invocation_error(ret, __ubusdev_methods[UBUSDEV_METHOD_FREE],
++@@ -1622,13 +1626,12 @@ ubusdev_handle_free_notification(const c
++ 		// Do not delete devices that are not marked for deletion.
++ 		// This means that bridges merely get 'disabled' while their
++ 		// devices and configs are still available.
++-		if (1 || ubr->udev.sync == STATE_PENDING_DISABLE) {
+++		if (ubr->udev.sync == STATE_PENDING_DISABLE) {
++ 			ubr->active = false;
++ 			ubusdev_set_sync(&ubr->udev, STATE_SYNCHRONIZED);
++ 			return 0;
++ 		}
++ 
++-// Don't do any of this - crashes will insue!!! Scott
++ 		ubr->active = false;
++ //		if (ubr->ifnames)
++ //			free(ubr->ifnames);
++@@ -1637,6 +1640,7 @@ ubusdev_handle_free_notification(const c
++ 			free(ubr->config);
++ 
++ 		vlist_flush_all(&ubr->members);
+++		uloop_timeout_cancel(&ubr->udev.retry);
++ 		free(ubr);
++ 	}
++ 
