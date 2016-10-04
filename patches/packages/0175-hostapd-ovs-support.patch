@@ -59,28 +59,28 @@
 ++
 ++int ovs_br_add(const char *brname)
 ++{
-++	if (run_prog("/usr/bin/ovs-vsctl", "add-br", brname))
+++	if (run_prog("/usr/bin/ovs-vsctl", "--may-exist", "add-br", brname))
 ++		return -1;
 ++	return 0;
 ++}
 ++
 ++int ovs_br_del(const char *brname)
 ++{
-++	if (run_prog("/usr/bin/ovs-vsctl", "del-br", brname))
+++	if (run_prog("/usr/bin/ovs-vsctl", "--if-exists", "del-br", brname))
 ++		return -1;
 ++	return 0;
 ++}
 ++
 ++int ovs_br_add_if(const char *brname, const char *ifname)
 ++{
-++	if (run_prog("/usr/bin/ovs-vsctl", "add-port", brname, ifname))
+++	if (run_prog("/usr/bin/ovs-vsctl", "--may-exist", "add-port", brname, ifname))
 ++		return -1;
 ++	return 0;
 ++}
 ++
 ++int ovs_br_del_if(const char *brname, const char *ifname)
 ++{
-++	if (run_prog("/usr/bin/ovs-vsctl", "del-port", brname, ifname))
+++	if (run_prog("/usr/bin/ovs-vsctl", "--if-exists", "del-port", brname, ifname))
 ++		return -1;
 ++	return 0;
 ++}
