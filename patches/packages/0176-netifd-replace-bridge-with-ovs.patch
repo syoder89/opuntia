@@ -1,0 +1,353 @@
+--- /dev/null
++++ b/package/network/config/netifd/files/lib/netifd/proto/ovs_vxlan.sh
+@@ -0,0 +1,102 @@
++#!/bin/sh
++
++[ -n "$INCLUDE_ONLY" ] || {
++	. /lib/functions.sh
++	. /lib/functions/network.sh
++	. ../netifd-proto.sh
++	init_proto "$@"
++}
++
++ovs_vxlan_generic_setup() {
++	local cfg="$1"
++	local remote="$2"
++	local network="$3"
++	local link="$4"
++	local mtu zone key
++	json_get_vars mtu zone key
++
++	[ -z "$zone" ] && zone="wan"
++
++        proto_init_update "$link" 1
++
++	proto_add_tunnel
++	json_add_string mode "ovs_vxlan"
++	json_add_string remote "$remote"
++	json_add_string info "br-${network},${key:-0}"
++	proto_close_tunnel
++
++	proto_add_data
++	[ -n "$zone" ] && json_add_string zone "$zone"
++	proto_close_data
++
++	proto_send_update "$cfg"
++}
++
++ovs_vxlan_setup() {
++	local cfg="$1"
++
++	local peeraddr network
++	json_get_vars peeraddr network
++
++	[ -z "$peeraddr" ] && {
++		proto_notify_error "$cfg" "MISSING_ADDRESS"
++		proto_block_restart "$cfg"
++		exit
++	}
++
++	[ -z "$network" ] && {
++		proto_notify_error "$cfg" "MISSING_NETWORK"
++		proto_block_restart "$cfg"
++		exit
++	}
++
++	ovs_vxlan_generic_setup $cfg $peeraddr $network $cfg
++}
++
++proto_ovs_vxlan_setup() {
++	local cfg="$1"
++	local network
++	json_get_vars network
++
++	ovs_vxlan_setup $cfg
++
++	json_init
++	json_add_string name "$cfg"
++	json_add_boolean link-ext 0
++	json_close_object
++
++	for i in $network; do
++		ubus call network.interface."$i" add_device "$(json_dump)"
++	done
++}
++
++proto_ovs_vxlan_teardown() {
++	local cfg="$1"
++	local network
++	json_get_vars network
++
++	json_init
++	json_add_string name "$cfg"
++	json_add_boolean link-ext 0
++	json_close_object
++
++	for i in $network; do
++		ubus call network.interface."$i" remove_device "$(json_dump)"
++	done
++}
++
++proto_ovs_vxlan_init_config() {
++	no_device=1
++	available=1
++
++	proto_config_add_int "mtu"
++	proto_config_add_int "key"
++	proto_config_add_string "peeraddr"
++	proto_config_add_string "network"
++	proto_config_add_string "zone"
++}
++
++[ -n "$INCLUDE_ONLY" ] || {
++	[ -f /lib/modules/$(uname -r)/vport-vxlan.ko ] && add_protocol ovs_vxlan
++}
++
+--- /dev/null
++++ b/package/network/config/netifd/patches/003-replace-bridge-with-ovs.patch
+@@ -0,0 +1,235 @@
++--- a/system-linux.c
+++++ b/system-linux.c
++@@ -590,13 +590,136 @@ static int system_rtnl_call(struct nl_ms
++ 	return nl_wait_for_ack(sock_rtnl);
++ }
++ 
+++#define OPENVSWITCH
+++#ifdef OPENVSWITCH
+++#include <sys/wait.h>
+++
+++#define run_prog(p, ...) ({ \
+++        int rc = -1, status; \
+++        pid_t pid = fork(); \
+++        if (!pid) \
+++                exit(execl(p, p, ##__VA_ARGS__, NULL)); \
+++        if (pid < 0) {\
+++                rc = -1;\
+++        } else {\
+++                while ((rc = waitpid(pid, &status, 0)) == -1 && errno == EINTR); \
+++		rc = (rc == pid && WIFEXITED(status)) ? WEXITSTATUS(status) : -1; \
+++        }\
+++        rc;\
+++})
+++
+++static char *ovs_br_get(char *brname, const char *ifname, int len)
+++{
+++	FILE *f;
+++	char cmd[64];
+++	char *c;
+++
+++	brname[0] = '\0';
+++
+++	sprintf(cmd, "/usr/bin/ovs-vsctl iface-to-br %s", ifname);
+++	f = popen(cmd, "r");
+++	if (!f)
+++		return NULL;
+++	c = fgets(brname, len, f);
+++	pclose(f);
+++	if (c && strlen(brname)) {
+++		/* Ignore newline */
+++		if ((c = strchr(brname, '\n')))
+++			*c = '\0';
+++		return brname;
+++	}
+++	return NULL;
+++}
+++
+++static int ovs_br_exists(const char *brname)
+++{
+++	if (run_prog("/usr/bin/ovs-vsctl", "br-exists", brname))
+++		return false;
+++	return true;
+++}
+++
+++static int ovs_br_add(const char *brname)
+++{
+++	if (run_prog("/usr/bin/ovs-vsctl", "--may-exist", "add-br", brname))
+++		return -1;
+++	return 0;
+++}
+++
+++static int ovs_br_del(const char *brname)
+++{
+++	if (run_prog("/usr/bin/ovs-vsctl", "--if-exists", "del-br", brname))
+++		return -1;
+++	return 0;
+++}
+++
+++static int ovs_br_add_if(const char *brname, const char *ifname)
+++{
+++	if (run_prog("/usr/bin/ovs-vsctl", "--may-exist", "add-port", brname, ifname))
+++		return -1;
+++	return 0;
+++}
+++
+++static int ovs_br_del_if(const char *ifname)
+++{
+++	if (run_prog("/usr/bin/ovs-vsctl", "--if-exists", "del-port", ifname))
+++		return -1;
+++	return 0;
+++}
+++
+++static int ovs_br_add_vxlan_tunnel(const char *brname, const char *ifname, const char *remote_ip, int key)
+++{
+++	char remote_ip_opt[64];
+++	char key_opt[64];
+++	char port_name[64];
+++
+++        snprintf(remote_ip_opt, 64, "options:remote_ip=%s", remote_ip);
+++	remote_ip_opt[63] = '\0';
+++
+++	snprintf(key_opt, 64, "options:key=%d", key);
+++	key_opt[63] = '\0';
+++
+++	snprintf(port_name, 64, "p_%s", ifname);
+++	port_name[63] = '\0';
+++
+++	/* Add a fake bridge to allow our interface to be seen */
+++	if (run_prog("/usr/bin/ovs-vsctl", "--may-exist", "add-br", ifname, brname, "100"))
+++		return -1;
+++
+++	/* Use p_ifname for the port and interface name on the fake bridge */
+++	if (run_prog("/usr/bin/ovs-vsctl", "--may-exist", "add-port", ifname, port_name, "--", 
+++			"set", "interface", port_name, "type=vxlan", remote_ip_opt, key_opt))
+++		return -1;
+++	return 0;
+++}
+++#endif
+++
++ int system_bridge_delbr(struct device *bridge)
++ {
+++#ifdef OPENVSWITCH
+++	return ovs_br_del(bridge->ifname);
+++#endif
+++
++ 	return ioctl(sock_ioctl, SIOCBRDELBR, bridge->ifname);
++ }
++ 
++ static int system_bridge_if(const char *bridge, struct device *dev, int cmd, void *data)
++ {
+++#ifdef OPENVSWITCH
+++	if (dev) {
+++		/* Tunnels are handled natively by ovs */
+++		if (dev->type == &tunnel_device_type)
+++			return 0;
+++		switch(cmd) {
+++			case SIOCBRADDIF:
+++				return ovs_br_add_if(bridge, dev->ifname);
+++			break;
+++			case SIOCBRDELIF:
+++				return ovs_br_del_if(dev->ifname);
+++			break;
+++		}
+++	}
+++	return 0;
+++#endif
++ 	struct ifreq ifr;
++ 
++ 	memset(&ifr, 0, sizeof(ifr));
++@@ -610,6 +733,9 @@ static int system_bridge_if(const char *
++ 
++ static bool system_is_bridge(const char *name, char *buf, int buflen)
++ {
+++#ifdef OPENVSWITCH
+++	return ovs_br_exists(name);
+++#endif
++ 	struct stat st;
++ 
++ 	snprintf(buf, buflen, "/sys/devices/virtual/net/%s/bridge", name);
++@@ -621,6 +747,9 @@ static bool system_is_bridge(const char
++ 
++ static char *system_get_bridge(const char *name, char *buf, int buflen)
++ {
+++#ifdef OPENVSWITCH
+++	return ovs_br_get(buf, name, buflen);
+++#endif
++ 	char *path;
++ 	ssize_t len = -1;
++ 	glob_t gl;
++@@ -948,6 +1077,9 @@ static void system_bridge_conf_multicast
++ 					 char *buf,
++ 					 int buf_len)
++ {
+++#ifdef OPENVSWITCH
+++	return;
+++#endif
++ 	system_set_dev_sysctl("/sys/devices/virtual/net/%s/bridge/multicast_snooping",
++ 		bridge->ifname, cfg->igmp_snoop ? "1" : "0");
++ 
++@@ -988,6 +1120,9 @@ static void system_bridge_conf_multicast
++ 
++ int system_bridge_addbr(struct device *bridge, struct bridge_config *cfg)
++ {
+++#ifdef OPENVSWITCH
+++	return ovs_br_add(bridge->ifname);
+++#endif
++ 	char buf[64];
++ 	unsigned long args[4] = {};
++ 
++@@ -2107,6 +2242,35 @@ static int tunnel_ioctl(const char *name
++ 	return ioctl(sock_ioctl, cmd, &ifr);
++ }
++ 
+++#ifdef OPENVSWITCH
+++static int system_add_ovs_vxlan_tunnel(const char *name, struct blob_attr **tb)
+++{
+++	struct blob_attr *cur;
+++	int key = 0;
+++	char brname[64], *remote_ip;
+++
+++	if ((cur = tb[TUNNEL_ATTR_INFO]) && (blobmsg_type(cur) == BLOBMSG_TYPE_STRING)) {
+++		if (sscanf(blobmsg_get_string(cur), "%63[^,],%d", brname , &key) < 2)
+++			return -EINVAL;
+++	}
+++	else return -EINVAL;
+++
+++
+++	if ((cur = tb[TUNNEL_ATTR_REMOTE])) {
+++		remote_ip = blobmsg_data(cur);
+++	}
+++	else return -EINVAL;
+++
+++	return ovs_br_add_vxlan_tunnel(brname, name, remote_ip, key);
+++}
+++
+++static int system_del_ovs_vxlan_tunnel(const char *name)
+++{
+++	/* Delete the fake bridge */
+++	return ovs_br_del(name);
+++}
+++#endif
+++
++ #ifdef IFLA_IPTUN_MAX
++ #define IP6_FLOWINFO_TCLASS	htonl(0x0FF00000)
++ static int system_add_gre_tunnel(const char *name, const char *kind,
++@@ -2454,7 +2618,9 @@ static int __system_del_ip_tunnel(const
++ 		return -EINVAL;
++ 	str = blobmsg_data(cur);
++ 
++-	if (!strcmp(str, "greip") || !strcmp(str, "gretapip") ||
+++	if (!strcmp(str, "ovs_vxlan"))
+++		return system_del_ovs_vxlan_tunnel(name);
+++	else if (!strcmp(str, "greip") || !strcmp(str, "gretapip") ||
++ 	    !strcmp(str, "greip6") || !strcmp(str, "gretapip6") ||
++ 	    !strcmp(str, "vtiip") || !strcmp(str, "vtiip6"))
++ 		return system_link_del(name);
++@@ -2679,6 +2845,8 @@ failure:
++ #endif
++ 	} else if (!strcmp(str, "ipip")) {
++ 		return system_add_proto_tunnel(name, IPPROTO_IPIP, link, tb);
+++	} else if (!strcmp(str, "ovs_vxlan")) {
+++		return system_add_ovs_vxlan_tunnel(name, tb);
++ 	}
++ 	else
++ 		return -EINVAL;
+--- a/package/network/config/netifd/Makefile
++++ b/package/network/config/netifd/Makefile
+@@ -41,6 +41,7 @@ define Package/netifd/install
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/netifd $(1)/sbin/
+ 	$(CP) ./files/* $(1)/
+ 	$(CP) $(PKG_BUILD_DIR)/scripts/* $(1)/lib/netifd/
++	$(INSTALL_BIN) ./files/lib/netifd/proto/* $(1)/lib/netifd/proto/
+ endef
+ 
+ $(eval $(call BuildPackage,netifd))

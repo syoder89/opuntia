@@ -4898,7 +4898,7 @@ CONFIG_PACKAGE_odhcpd_ext_cer_id=0
 # CONFIG_PACKAGE_openrrcp is not set
 # CONFIG_PACKAGE_openslp is not set
 # CONFIG_PACKAGE_oping is not set
-CONFIG_PACKAGE_ovsd=y
+# CONFIG_PACKAGE_ovsd is not set
 # CONFIG_PACKAGE_paris-traceroute is not set
 # CONFIG_PACKAGE_pen is not set
 # CONFIG_PACKAGE_pimbd is not set
