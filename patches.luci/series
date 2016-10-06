@@ -11,7 +11,6 @@
 0013-Update-AP-config.-Add-inactive-time-to-wifi-status.-.patch
 0015-Add-mesh-plink-timeout-param.patch
 0016-Rework-QOS-Page.patch
-0018-disable-mesh-and_adhoc-for-ac.patch
 0019-use-iwinfo-not-iwdata.patch
 0020-add-wpm.patch
 0021-fix-process-list.patch

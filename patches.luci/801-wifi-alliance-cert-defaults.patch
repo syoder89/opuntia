@@ -4,7 +4,7 @@
  	mfp:depends("encryption", "psk-mixed")
  	mfp:depends("encryption", "wpa")
  	mfp:depends("encryption", "wpa2")
-+	mfp.default = 1
++	mfp.default = 0
  end
  
  return m
