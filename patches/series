@@ -81,3 +81,5 @@ packages/0178-procps-ng-disable-modern-top.patch
 0150-Add-vid-option-to-switch-config.patch
 packages/0195-ovs-add-vxlan-module.patch
 packages/0176-netifd-replace-bridge-with-ovs.patch
+packages/0177-ath10k-ct-change-modprobe-order.patch
+0176-scott-fix-ath10k-ct-dynamic-vlan-gtk-sw_crypto-disabled.patch
