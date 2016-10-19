@@ -1,0 +1,12 @@
+--- a/package/network/services/hostapd/files/hostapd-full.config
++++ b/package/network/services/hostapd/files/hostapd-full.config
+@@ -35,6 +35,9 @@ CONFIG_DRIVER_NL80211=y
+ # Driver interface for no driver (e.g., RADIUS server only)
+ #CONFIG_DRIVER_NONE=y
+ 
++# QCA vendor extensions to nl80211
++CONFIG_DRIVER_NL80211_QCA=y
++
+ # IEEE 802.11F/IAPP
+ CONFIG_IAPP=y
+ 

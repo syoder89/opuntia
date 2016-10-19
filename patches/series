@@ -83,3 +83,6 @@ packages/0195-ovs-add-vxlan-module.patch
 packages/0176-netifd-replace-bridge-with-ovs.patch
 packages/0177-ath10k-ct-change-modprobe-order.patch
 0176-scott-fix-ath10k-ct-dynamic-vlan-gtk-sw_crypto-disabled.patch
+packages/0178-ath10k-ct-update-driver.patch
+packages/0178-ath10k-ct-set-mac-address-from-wpj344-hack.patch
+packages/0178-hostapd-enable-qca-nl80211-extensions.patch
