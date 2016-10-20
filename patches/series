@@ -86,3 +86,4 @@ packages/0177-ath10k-ct-change-modprobe-order.patch
 packages/0178-ath10k-ct-update-driver.patch
 packages/0178-ath10k-ct-set-mac-address-from-wpj344-hack.patch
 packages/0178-hostapd-enable-qca-nl80211-extensions.patch
+packages/0178-ath10k-ct-remove-extra-debug.patch
