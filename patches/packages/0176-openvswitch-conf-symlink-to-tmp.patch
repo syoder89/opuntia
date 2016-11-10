@@ -1,0 +1,14 @@
+--- a/package/feeds/packages/openvswitch/files/etc/init.d/openvswitch.init
++++ b/package/feeds/packages/openvswitch/files/etc/init.d/openvswitch.init
+@@ -7,6 +7,11 @@ USE_PROCD=1
+ 
+ start_service() {
+ 	[ -x /var/run/openvswitch ] || mkdir -p /var/run/openvswitch
++        [ ! -h /etc/openvswitch -a -d /etc/openvswitch ] && {
++                rm -rf /etc/openvswitch
++                ln -s /tmp/openvswitch /etc/openvswitch
++        }
++        [ -d /tmp/openvswitch ] || mkdir /tmp/openvswitch
+ 	[ -e /etc/openvswitch/conf.db ] || {
+ 		/usr/bin/ovsdb-tool create /etc/openvswitch/conf.db /usr/share/openvswitch/vswitch.ovsschema
+ 	}

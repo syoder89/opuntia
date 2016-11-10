@@ -1,0 +1,20 @@
+--- a/package/firmware/ath10k-firmware/Makefile
++++ b/package/firmware/ath10k-firmware/Makefile
+@@ -67,7 +67,7 @@ $(Package/ath10k-firmware-default)
+ endef
+ 
+ QCA988X_FIRMWARE_FILE:=firmware-5.bin_10.2.4.97-1
+-QCA988X_FIRMWARE_FILE_CT:=firmware-2-ct-full-community-16.1.bin-lede
++QCA988X_FIRMWARE_FILE_CT:=firmware-2-ct-full-htt-mgt-community-17.bin
+ QCA99X0_FIRMWARE_FILE_CT:=firmware-5-ct-full-community-7.bin-lede.004
+ QCA9984_FIRMWARE_FILE_CT:=firmware-5-ct-full-community-7.bin-lede.004
+ 
+@@ -81,7 +81,7 @@ $(eval $(call Download,ath10k-firmware-q
+ define Download/ath10k-firmware-qca988x-ct
+   URL:=https://www.candelatech.com/downloads/
+   FILE:=$(QCA988X_FIRMWARE_FILE_CT)
+-  MD5SUM:=d7e081e9782936ed544b78994c9133fb
++  MD5SUM:=7c58a7a29d4994845929003afae68496
+ endef
+ $(eval $(call Download,ath10k-firmware-qca988x-ct))
+ 

@@ -1,0 +1,24 @@
+--- a/package/network/services/hostapd/files/netifd.sh
++++ b/package/network/services/hostapd/files/netifd.sh
+@@ -416,8 +416,10 @@ hostapd_set_bss_options() {
+ 	}
+ 
+ 	if [ "$wpa" -ge "1" ]; then
+-		json_get_vars nasid ieee80211r
+-		set_default ieee80211r 0
++                thisid=$(echo $macaddr | sed s/://g)
++                json_get_vars nasid ieee80211r
++                set_default ieee80211r 0
++                set_default nasid "$thisid"
+ 		[ -n "$nasid" ] && append bss_conf "nas_identifier=$nasid" "$N"
+ 
+ 		if [ "$ieee80211r" -gt "0" ]; then
+@@ -428,7 +430,7 @@ hostapd_set_bss_options() {
+ 
+ 			set_default mobility_domain "4f57"
+ 			set_default r0_key_lifetime 10000
+-			set_default r1_key_holder "00004f577274"
++                        set_default r1_key_holder "$thisid"
+ 			set_default reassociation_deadline 1000
+ 			set_default pmk_r1_push 0
+ 

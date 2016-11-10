@@ -1,0 +1,33 @@
+--- a/package/kernel/ath10k-ct/Makefile
++++ b/package/kernel/ath10k-ct/Makefile
+@@ -31,6 +31,19 @@ define KernelPackage/ath10k-ct
+   AUTOLOAD:=$(call AutoLoad,55,mac80211 ath ath10k_core ath10k_pci)
+ endef
+ 
++define KernelPackage/ath10k-ct/config
++  if PACKAGE_kmod-ath10k-ct
++        config PACKAGE_ATH10K_DFS_CERTIFIED
++                bool "The platform is DFS certified"
++                default n
++                help
++                  Dynamic frequency selection (DFS) is required for most of the 5 GHz band
++                  channels in Europe, US, and Japan.
++
++                  Select this option if your platform is DFS certified and you want to use such channels.
++  endif
++endef
++
+ NOSTDINC_FLAGS = \
+ 	-I$(PKG_BUILD_DIR) \
+ 	-I$(STAGING_DIR)/usr/include/mac80211-backport/uapi \
+@@ -60,6 +73,10 @@ ifdef CONFIG_PACKAGE_ATH_DEBUG
+   NOSTDINC_FLAGS += -DCONFIG_ATH10K_DEBUG
+ endif
+ 
++ifdef CONFIG_PACKAGE_ATH10K_DFS_CERTIFIED
++  NOSTDINC_FLAGS += -DCONFIG_ATH10K_DFS_CERTIFIED
++endif
++
+ define Build/Configure
+ 	cp $(STAGING_DIR)/usr/include/mac80211/ath/*.h $(PKG_BUILD_DIR)
+ endef
