@@ -1,5 +1,5 @@
---- a/package/feeds/packages/openvswitch/files/etc/init.d/openvswitch.init
-+++ b/package/feeds/packages/openvswitch/files/etc/init.d/openvswitch.init
+--- a/feeds/packages/net/openvswitch/files/etc/init.d/openvswitch.init
++++ b/feeds/packages/net/openvswitch/files/etc/init.d/openvswitch.init
 @@ -7,6 +7,11 @@ USE_PROCD=1
  
  start_service() {
