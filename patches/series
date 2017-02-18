@@ -92,3 +92,4 @@ packages/0178-ath10k-ct-firmware-update.patch
 packages/0175-hostapd-ft-wildcard-r0kh-r1kh.patch
 packages/0176-openvswitch-conf-symlink-to-tmp.patch
 packages/0179-hostapd-preset-r1kh-and-nasid-to-bssid.patch
+packages/0179-ath10k-ct-firmware-update-18.patch
