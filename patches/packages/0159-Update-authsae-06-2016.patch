@@ -1,19 +1,14 @@
 --- a/package/network/services/authsae/Makefile
 +++ b/package/network/services/authsae/Makefile
-@@ -8,13 +8,13 @@
- include $(TOPDIR)/rules.mk
- 
- PKG_NAME:=authsae
--PKG_VERSION:=2014-06-09
-+PKG_VERSION:=2016-06-21
- PKG_RELEASE=$(PKG_SOURCE_VERSION)
+@@ -12,8 +12,8 @@ PKG_RELEASE:=1
  
  PKG_SOURCE_PROTO:=git
  PKG_SOURCE_URL:=https://github.com/cozybit/authsae.git
- PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
+-PKG_SOURCE_DATE:=2014-06-09
 -PKG_SOURCE_VERSION:=8531ab158910a525d4bcbb3ad02c08342f6987f2
++PKG_SOURCE_DATE:=2016-06-21
 +PKG_SOURCE_VERSION:=813ec0e9f568001790b3a20e83d8367de65d3ae1
- PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
+ PKG_MIRROR_HASH:=a8fbed9eada17c552c70d834ee8f7c1e0987df59839bc113b3ec000500696715
  
  PKG_BUILD_PARALLEL:=1
 --- a/package/network/services/authsae/patches/0001-Fix-bad-frees-in-commit-8531ab1.patch

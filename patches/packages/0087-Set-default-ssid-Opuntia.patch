@@ -14,12 +14,12 @@ Subject: [PATCH] Set default configs for ap
 
 --- a/package/kernel/mac80211/files/lib/wifi/mac80211.sh
 +++ b/package/kernel/mac80211/files/lib/wifi/mac80211.sh
-@@ -123,7 +123,7 @@ config wifi-iface
- 	option device   radio$devidx
- 	option network  lan
- 	option mode     ap
--	option ssid     LEDE
-+	option ssid     Opuntia
- 	option encryption none
- 
+@@ -122,7 +122,7 @@ detect_mac80211() {
+ 			set wireless.default_radio${devidx}.device=radio${devidx}
+ 			set wireless.default_radio${devidx}.network=lan
+ 			set wireless.default_radio${devidx}.mode=ap
+-			set wireless.default_radio${devidx}.ssid=LEDE
++			set wireless.default_radio${devidx}.ssid=Opuntia
+ 			set wireless.default_radio${devidx}.encryption=none
  EOF
+ 		uci -q commit wireless

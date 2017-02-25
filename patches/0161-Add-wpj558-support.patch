@@ -1,22 +1,22 @@
 --- a/target/linux/ar71xx/base-files/etc/board.d/02_network
 +++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
-@@ -437,9 +437,13 @@ wpj531)
- 	;;
- 
- wpj558)
--	ucidef_add_switch "switch0" \
--		"5:lan" "1:wan" "6@eth0"
--	;;
-+        ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
-+        ucidef_add_switch "switch0" \
-+                "1:lan:1:4001" "5:wan:2:4000" "6@eth0"
-+        ucidef_add_switch_extra_attr "switch0" "alias_cpu" "6"
-+        ucidef_add_switch_extra_attr "switch0" "alias_wan" "5"
-+        ucidef_add_switch_extra_attr "switch0" "alias_lan" "1"
-+        ;;
- 
- ap121 |\
- ap121-mini |\
+@@ -461,9 +461,13 @@ ar71xx_setup_interfaces()
+         	ucidef_add_switch_extra_attr "switch0" "alias_lan" "3"
+         	;;
+ 	wpj558)
+-		ucidef_add_switch "switch0" \
+-			"5:lan" "1:wan" "6@eth0"
+-		;;
++	        ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
++        	ucidef_add_switch "switch0" \
++                	"1:lan:1:4001" "5:wan:2:4000" "6@eth0"
++        	ucidef_add_switch_extra_attr "switch0" "alias_cpu" "6"
++        	ucidef_add_switch_extra_attr "switch0" "alias_wan" "5"
++        	ucidef_add_switch_extra_attr "switch0" "alias_lan" "1"
++        	;;
+ 	wrt160nl)
+ 		ucidef_set_interfaces_lan_wan "eth0.1" "eth1"
+ 		ucidef_add_switch "switch0" \
 --- a/tools/firmware-utils/src/mkmylofw.c
 +++ b/tools/firmware-utils/src/mkmylofw.c
 @@ -161,6 +161,9 @@ struct cpx_board boards[] = {
@@ -41,7 +41,7 @@
  #define DEVID_COMPEX_WP18	0x047E
 --- a/target/linux/ar71xx/image/legacy.mk
 +++ b/target/linux/ar71xx/image/legacy.mk
-@@ -1032,7 +1032,7 @@ $(eval $(call SingleProfile,AthLzma,64k,
+@@ -936,7 +936,7 @@ $(eval $(call SingleProfile,AthLzma,64k,
  $(eval $(call SingleProfile,Cpxwrt,64k,WPJ344_16M,wpj344-16M,WPJ344,ttyS0,115200,$$(wpj344_mtdlayout_16M),KRuImage,65536,0x1000000,1572864,14876672,WPJ344))
  $(eval $(call SingleProfile,AthLzma,64k,DR344,dr344,DR344,ttyS0,115200,$$(dr344_mtdlayout),RKuImage))
  $(eval $(call SingleProfile,AthLzma,64k,WPJ531_16M,wpj531-16M,WPJ531,ttyS0,115200,$$(wpj531_mtdlayout_16M),KRuImage,65536))

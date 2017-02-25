@@ -1,6 +1,6 @@
---- a/package/network/services/hostapd/files/netifd.sh
-+++ b/package/network/services/hostapd/files/netifd.sh
-@@ -140,6 +140,8 @@ hostapd_common_add_bss_config() {
+--- a/package/network/services/hostapd/files/hostapd.sh
++++ b/package/network/services/hostapd/files/hostapd.sh
+@@ -148,6 +148,8 @@ hostapd_common_add_bss_config() {
  	config_add_string ownip
  	config_add_string iapp_interface
  	config_add_string eap_type ca_cert client_cert identity anonymous_identity auth priv_key priv_key_pwd
@@ -9,20 +9,20 @@
  
  	config_add_int dynamic_vlan vlan_naming
  	config_add_string vlan_tagged_interface vlan_bridge
-@@ -253,6 +255,7 @@ hostapd_set_bss_options() {
- 				acct_server acct_secret acct_port \
+@@ -271,6 +273,7 @@ hostapd_set_bss_options() {
+ 				auth_server auth_secret auth_port \
  				dae_client dae_secret dae_port \
  				ownip \
 +				radius_auth_req_attr radius_acct_req_attr \
- 				eap_reauth_period dynamic_vlan \
- 				vlan_naming vlan_tagged_interface \
- 				vlan_bridge vlan_file \
-@@ -272,6 +275,8 @@ hostapd_set_bss_options() {
+ 				eap_reauth_period
+ 
+ 			# radius can provide VLAN ID for clients
+@@ -288,6 +291,8 @@ hostapd_set_bss_options() {
  			append bss_conf "auth_server_addr=$auth_server" "$N"
  			append bss_conf "auth_server_port=$auth_port" "$N"
  			append bss_conf "auth_server_shared_secret=$auth_secret" "$N"
 +			[ -n "$radius_auth_req_attr" ] && append bss_conf "radius_auth_req_attr=$radius_auth_req_attr" "$N"
 +			[ -n "$radius_acct_req_attr" ] && append bss_conf "radius_acct_req_attr=$radius_acct_req_attr" "$N"
  
- 			[ -n "$acct_server" ] && {
- 				append bss_conf "acct_server_addr=$acct_server" "$N"
+ 			[ -n "$eap_reauth_period" ] && append bss_conf "eap_reauth_period=$eap_reauth_period" "$N"
+ 

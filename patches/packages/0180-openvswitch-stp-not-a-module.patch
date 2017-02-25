@@ -1,0 +1,11 @@
+--- a/feeds/packages/net/openvswitch/Makefile
++++ b/feeds/packages/net/openvswitch/Makefile
+@@ -132,7 +132,7 @@ define KernelPackage/openvswitch
+   SUBMENU:=Network Support
+   TITLE:=Open vSwitch Kernel Package
+   KCONFIG:=CONFIG_BRIDGE
+-  DEPENDS:=+kmod-stp @IPV6 +kmod-gre +kmod-lib-crc32c +kmod-vxlan +kmod-nf-conntrack +kmod-nf-conntrack6 @($(SUPPORTED_KERNELS))
++  DEPENDS:=@IPV6 +kmod-gre +kmod-lib-crc32c +kmod-vxlan +kmod-nf-conntrack +kmod-nf-conntrack6 @($(SUPPORTED_KERNELS))
+   FILES:= \
+ 	$(PKG_BUILD_DIR)/datapath/linux/openvswitch.$(LINUX_KMOD_SUFFIX) \
+ 	$(PKG_BUILD_DIR)/datapath/linux/vport-vxlan.$(LINUX_KMOD_SUFFIX) \

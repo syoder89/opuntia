@@ -1,5 +1,6 @@
 OPENWRT_GIT:=https://git.lede-project.org/source.git
-OPENWRT_COMMIT:=b964196c68d6727d14bfae868ff428d240e011c9
+OPENWRT_COMMIT:=19720a6f035107b596814dd0de6b402096809ab4
+#OPENWRT_COMMIT:=b964196c68d6727d14bfae868ff428d240e011c9  = 4.8.2 / 4.8.3
 #OPENWRT_COMMIT:=d175c09bea24b0a52d15350f025ca418f5f066c5
 #OPENWRT_COMMIT:=cac971dad98c83fd25223286330e757218f19e1b
 #OPENWRT_COMMIT:=faa984a84d1bb72c262857a71ee14bccd1ae6d41
@@ -78,13 +79,14 @@ checkout_openwrt:
 	@if [ ! -d $(BUILD_DIR) ] ; then \
 		git clone $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
 		cp -a dl.cache $(BUILD_DIR)/dl ; \
+		cp -a overlay $(BUILD_DIR); \
 	fi
 #		git clone $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
 #		git clone --depth $(OPENWRT_DEPTH) $(OPENWRT_GIT) $(BUILD_DIR) && cd $(BUILD_DIR) && git checkout -b commit_$(OPENWRT_COMMIT) $(OPENWRT_COMMIT) && cd - ; \
 
 $(pre_patches):
 	@cd $(BUILD_DIR); \
-	for patch in ../patches.pre_feed/* ; do \
+	for patch in $(find -type f ../patches.pre_feed/*) ; do \
 		patch -p1  < $$patch || (echo "$$patch failed to apply!" && exit 1); \
 	done; \
 	cd ..; \

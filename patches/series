@@ -24,7 +24,6 @@ packages/0164-Authsae-check-if-running.patch
 packages/0165-Mac80211-init-mesh_params-after-meshd.patch
 packages/0166-Bash-fix-parallel-build.patch
 oldpackages/0066-Multiwan-work-with-qos-mark-mask-fixes.patch
-0001-Add-SAM-guest.patch
 0150-Fix-Linux-Pam-URL.patch
 0160-Add-wpj344-support.patch
 packages/0171-add-802.11ac-support.patch
@@ -35,8 +34,6 @@ packages/0159-Update-authsae-06-2016.patch
 packages/0172-remove-ip-tiny.patch
 kernel/0020-3.14-Add-ifindex-reuse-patch-so-tunnels-will-reuse-their-.patch
 kernel/0045-Linux-3.14-updates.patch
-packages/0173-quagga-0.99.23.1-to-fix-readline.patch
-packages/0174-quagga-0.99.23.1-manet_patch.patch
 0177-bash-default-shell-ar71xx.patch
 kernel/0046-Linux-3.18-updates.patch
 kernel/0010-Dummy-to-loopback.patch
@@ -72,7 +69,6 @@ packages/0194-procd-O_PATH.patch
 0177-revert-firewall3-version-2015-07-27.patch
 0195-hostapd-radius-reconnect-socket-on-fail.patch
 0176-scott-fix-ath10k-dynamic-vlan-gtk-sw_crypto-disabled.patch
-packages/0175-quagga-rtadv-musl.patch
 packages/0176-dnsmasq-add-user-group-to-init.patch
 kernel/0071-hfsc-always-keep-backlog-updated.patch
 packages/0177-firewall-fix-musl-errno-options-parsing.patch
@@ -83,13 +79,12 @@ packages/0195-ovs-add-vxlan-module.patch
 packages/0176-netifd-replace-bridge-with-ovs.patch
 packages/0177-ath10k-ct-change-modprobe-order.patch
 0176-scott-fix-ath10k-ct-dynamic-vlan-gtk-sw_crypto-disabled.patch
-packages/0178-ath10k-ct-update-driver.patch
 packages/0178-ath10k-ct-set-mac-address-from-wpj344-hack.patch
 packages/0178-hostapd-enable-qca-nl80211-extensions.patch
 packages/0178-ath10k-ct-remove-extra-debug.patch
 packages/0178-ath10k-ct-add-dfs-certified-option.patch
-packages/0178-ath10k-ct-firmware-update.patch
 packages/0175-hostapd-ft-wildcard-r0kh-r1kh.patch
 packages/0176-openvswitch-conf-symlink-to-tmp.patch
 packages/0179-hostapd-preset-r1kh-and-nasid-to-bssid.patch
-packages/0179-ath10k-ct-firmware-update-18.patch
+0001-fix-getver.patch
+packages/0180-openvswitch-stp-not-a-module.patch

@@ -70,23 +70,3 @@ Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
  %>
  
  <script type="text/javascript" src="<%=resource%>/cbi.js"></script>
---- a/modules/luci-mod-admin-full/luasrc/view/admin_system/flashops.htm
-+++ b/modules/luci-mod-admin-full/luasrc/view/admin_system/flashops.htm
-@@ -63,7 +63,7 @@
- 		<% if upgrade_avail then %>
- 			<form method="post" action="<%=url('admin/system/flashops/sysupgrade')%>" enctype="multipart/form-data">
- 				<input type="hidden" name="token" value="<%=token%>" />
--				<div class="cbi-section-descr"><%:Upload a sysupgrade-compatible image here to replace the running firmware. Check "Keep settings" to retain the current configuration (requires an OpenWrt compatible firmware image).%></div>
-+				<div class="cbi-section-descr"><%:Upload a sysupgrade-compatible image here to replace the running firmware. Check "Keep settings" to retain the current configuration (requires an Opuntia compatible firmware image).%></div>
- 				<div class="cbi-section-node">
- 					<div class="cbi-value">
- 						<label class="cbi-value-title" for="keep"><%:Keep settings%>:</label>
-@@ -84,7 +84,7 @@
- 				<% end %>
- 			</form>
- 		<% else %>
--			<div class="cbi-section-descr"><%:Sorry, there is no sysupgrade support present; a new firmware image must be flashed manually. Please refer to the OpenWrt wiki for device specific install instructions.%></div>
-+			<div class="cbi-section-descr"><%:Sorry, there is no sysupgrade support present. A new firmware image must be flashed manually. Please refer to the ImageStream wiki for device specific install instructions.%></div>
- 		<% end %>
- 	</fieldset>
- 

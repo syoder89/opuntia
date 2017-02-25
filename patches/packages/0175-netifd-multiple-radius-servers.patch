@@ -1,5 +1,5 @@
---- a/package/network/services/hostapd/files/netifd.sh
-+++ b/package/network/services/hostapd/files/netifd.sh
+--- a/package/network/services/hostapd/files/hostapd.sh
++++ b/package/network/services/hostapd/files/hostapd.sh
 @@ -124,10 +124,14 @@ hostapd_common_add_bss_config() {
  	config_add_int ieee80211w
  	config_add_int eapol_version

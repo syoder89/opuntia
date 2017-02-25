@@ -23,26 +23,26 @@
  #define DEVID_COMPEX_WP18	0x047E
 --- a/target/linux/ar71xx/base-files/etc/board.d/02_network
 +++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
-@@ -417,9 +417,13 @@ wpj342)
- 	;;
- 
- wpj344)
--	ucidef_add_switch "switch0" \
--		"0@eth0" "3:lan" "2:wan"
--	;;
-+        ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
-+        ucidef_add_switch "switch0" \
-+                "3:lan:1:4001" "2:wan:2:4000" "0@eth0"
-+        ucidef_add_switch_extra_attr "switch0" "alias_cpu" "0"
-+        ucidef_add_switch_extra_attr "switch0" "alias_wan" "2"
-+        ucidef_add_switch_extra_attr "switch0" "alias_lan" "3"
-+        ;;
- 
- unifiac-pro)
- 	ucidef_add_switch "switch0" \
+@@ -453,9 +453,13 @@ ar71xx_setup_interfaces()
+ 		ucidef_add_switch_port_attr "switch0" 5 led 2
+ 		;;
+ 	wpj344)
+-		ucidef_add_switch "switch0" \
+-			"0@eth0" "3:lan" "2:wan"
+-		;;
++        	ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
++        	ucidef_add_switch "switch0" \
++                	"3:lan:1:4001" "2:wan:2:4000" "0@eth0"
++        	ucidef_add_switch_extra_attr "switch0" "alias_cpu" "0"
++        	ucidef_add_switch_extra_attr "switch0" "alias_wan" "2"
++        	ucidef_add_switch_extra_attr "switch0" "alias_lan" "3"
++        	;;
+ 	wpj558)
+ 		ucidef_add_switch "switch0" \
+ 			"5:lan" "1:wan" "6@eth0"
 --- a/target/linux/ar71xx/image/legacy.mk
 +++ b/target/linux/ar71xx/image/legacy.mk
-@@ -732,6 +732,29 @@ Image/Build/CyberTANGZIP=$(call Image/Bu
+@@ -652,6 +652,29 @@ Image/Build/CyberTANGZIP=$(call Image/Bu
  Image/Build/CyberTANLZMA/buildkernel=$(call MkuImageLzma,$(2),$(3) $(4))
  Image/Build/CyberTANLZMA=$(call Image/Build/CyberTAN,$(1),$(2),$(3),$(4),$(5))
  
@@ -72,7 +72,7 @@
  
  Image/Build/Netgear/initramfs=$(call MkuImageLzma/initramfs,$(2),$(3) $(4),,-M $(5))
  
-@@ -1006,7 +1029,7 @@ $(eval $(call SingleProfile,AthLzma,64k,
+@@ -910,7 +933,7 @@ $(eval $(call SingleProfile,AthLzma,64k,
  $(eval $(call SingleProfile,AthLzma,64k,TUBE2H16M,tube2h-16M,TUBE2H,ttyATH0,115200,$$(alfa_mtdlayout_16M),KRuImage,65536))
  $(eval $(call SingleProfile,AthLzma,64k,WLR8100,wlr8100,WLR8100,ttyS0,115200,$$(wlr8100_mtdlayout),KRuImage))
  $(eval $(call SingleProfile,AthLzma,64k,WPJ342_16M,wpj342-16M,WPJ342,ttyS0,115200,$$(wpj342_mtdlayout_16M),KRuImage,65536))

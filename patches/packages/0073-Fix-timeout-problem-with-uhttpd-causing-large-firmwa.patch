@@ -26,17 +26,17 @@ Subject: [PATCH] Fix timeout problem with uhttpd causing large firmware
 
 --- a/package/network/services/uhttpd/files/uhttpd.init
 +++ b/package/network/services/uhttpd/files/uhttpd.init
-@@ -46,7 +46,7 @@ generate_keys() {
- 	[ -x "$PX5G_BIN" ] && {
- 		$PX5G_BIN selfsigned -der \
+@@ -52,7 +52,7 @@ generate_keys() {
+ 	[ -n "$GENKEY_CMD" ] && {
+ 		$GENKEY_CMD \
  			-days ${days:-730} -newkey rsa:${bits:-2048} -keyout "${UHTTPD_KEY}.new" -out "${UHTTPD_CERT}.new" \
--			-subj /C="${country:-DE}"/ST="${state:-Saxony}"/L="${location:-Leipzig}"/CN="${commonname:-Lede}"
+-			-subj /C="${country:-DE}"/ST="${state:-Saxony}"/L="${location:-Leipzig}"/O="${commonname:-Lede}$UNIQUEID"/CN="${commonname:-Lede}"
 +			-subj /C="${country:-US}"/ST="${state:-Texas}"/L="${location:-Selma}"/CN="${commonname:-Opuntia}"
  		sync
  		mv "${UHTTPD_KEY}.new" "${UHTTPD_KEY}"
  		mv "${UHTTPD_CERT}.new" "${UHTTPD_CERT}"
-@@ -68,7 +68,7 @@ start_instance()
- 	procd_set_param command "$UHTTPD_BIN" -f
+@@ -101,7 +101,7 @@ start_instance()
+ 	fi
  
  	append_arg "$cfg" home "-h"
 -	append_arg "$cfg" realm "-r" "${realm:-OpenWrt}"

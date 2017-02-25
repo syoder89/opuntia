@@ -10,8 +10,9 @@ Subject: [PATCH] Fix bug with client variable in openvpn init script. Remove
  2 files changed, 2 insertions(+), 398 deletions(-)
 
 --- a/package/network/services/openvpn/files/openvpn.config
---- b/package/network/services/openvpn/files/openvpn.config
-@@ -2,399 +0,0 @@
++++ b/package/network/services/openvpn/files/openvpn.config
+@@ -1,407 +1 @@
+ package openvpn
 -
 -#################################################
 -# Sample to include a custom config file.       #
@@ -254,7 +255,11 @@ Subject: [PATCH] Fix bug with client variable in openvpn init script. Remove
 -	# Enable compression on the VPN link.
 -	# If you enable it here, you must also
 -	# enable it in the client config file.
--	option comp_lzo yes
+-	# LZ4 requires OpenVPN 2.4+ client and server
+-#	option compress lz4
+-	# LZO is compatible with most OpenVPN versions
+-	# (set "compress lzo" on 2.4+ clients, and "comp-lzo yes" on older clients)
+-	option compress lzo
 -
 -	# The maximum number of concurrently connected
 -	# clients we want to allow.
@@ -404,7 +409,10 @@ Subject: [PATCH] Fix bug with client variable in openvpn init script. Remove
 -	# Enable compression on the VPN link.
 -	# Don't enable this unless it is also
 -	# enabled in the server config file.
--	option comp_lzo yes
+-	# LZ4 requires OpenVPN 2.4+ on server and client
+-#	option compress lz4
+-	# LZO is compatible with most OpenVPN versions
+-	option compress lzo
 -
 -	# Set log file verbosity.
 -	option verb 3

@@ -1,27 +1,51 @@
 --- /dev/null
 +++ b/feeds/packages/utils/collectd/patches/999-scott-iwinfo-morestats.patch
-@@ -0,0 +1,180 @@
+@@ -0,0 +1,197 @@
 +--- a/src/iwinfo.c
 ++++ b/src/iwinfo.c
-+@@ -52,12 +52,15 @@ static int iwinfo_config(const char *key
++@@ -52,12 +52,40 @@ static int iwinfo_config(const char *key
 + 	return 0;
 + }
 + 
-+-static void iwinfo_submit(const char *ifname, const char *type, int value)
 ++static void new_iwinfo_submit(const char *ifname, const char *type, int derive, const char *type_instance, int value)
-+ {
-+ 	value_t values[1];
-+ 	value_list_t vl = VALUE_LIST_INIT;
-+ 
-+-	values[0].gauge = value;
+++{
+++	value_t values[1];
+++	value_list_t vl = VALUE_LIST_INIT;
+++
 ++	if (derive)
 ++		values[0].derive = (unsigned int)value;
 ++	else
 ++		values[0].gauge = value;
+++
+++	vl.values = values;
+++	vl.values_len = 1;
+++
+++	sstrncpy(vl.host, hostname_g, sizeof(vl.host));
+++	sstrncpy(vl.plugin, "iwinfo", sizeof(vl.plugin));
+++	sstrncpy(vl.plugin_instance, ifname, sizeof(vl.plugin_instance));
+++	sstrncpy(vl.type, type, sizeof(vl.type));
+++	if (type_instance)
+++		sstrncpy(vl.type_instance, type_instance, sizeof(vl.type_instance));
+++
+++	plugin_dispatch_values(&vl);
+++}
+++
++ static void iwinfo_submit(const char *ifname, const char *type, int value)
++ {
+++	new_iwinfo_submit(ifname, type, 0, NULL, value);
+++}
+++
+++static void new_iwinfo_submit64(const char *ifname, const char *type, const char *type_instance, derive_t value)
+++{
++ 	value_t values[1];
++ 	value_list_t vl = VALUE_LIST_INIT;
++ 
++-	values[0].gauge = value;
+++	values[0].derive = value;
 + 
 + 	vl.values = values;
 + 	vl.values_len = 1;
-+@@ -66,40 +69,117 @@ static void iwinfo_submit(const char *if
++@@ -66,7 +94,8 @@ static void iwinfo_submit(const char *if
 + 	sstrncpy(vl.plugin, "iwinfo", sizeof(vl.plugin));
 + 	sstrncpy(vl.plugin_instance, ifname, sizeof(vl.plugin_instance));
 + 	sstrncpy(vl.type, type, sizeof(vl.type));
@@ -31,14 +55,7 @@
 + 
 + 	plugin_dispatch_values(&vl);
 + }
-+ 
-++static void iwinfo_submit(const char *ifname, const char *type, int value)
-++{
-++	new_iwinfo_submit(ifname, type, 0, NULL, value);
-++}
-++
-+ static void iwinfo_process(const char *ifname)
-+ {
++@@ -76,30 +105,101 @@ static void iwinfo_process(const char *i
 + 	int val;
 + 	char buf[IWINFO_BUFSIZE];
 + 	const struct iwinfo_ops *iw = iwinfo_backend(ifname);
@@ -103,8 +120,8 @@
 ++			new_iwinfo_submit(instance, "assoc_station_inactive", 0, (const char *)macstr,  e->inactive);
 ++			new_iwinfo_submit(instance, "assoc_station_rx_packets", 1, (const char *)macstr,  e->rx_packets);
 ++			new_iwinfo_submit(instance, "assoc_station_tx_packets", 1, (const char *)macstr,  e->tx_packets);
-++			new_iwinfo_submit(instance, "assoc_station_rx_bytes", 1, (const char *)macstr,  e->rx_bytes);
-++			new_iwinfo_submit(instance, "assoc_station_tx_bytes", 1, (const char *)macstr,  e->tx_bytes);
+++			new_iwinfo_submit64(instance, "assoc_station_rx_bytes", (const char *)macstr,  e->rx_bytes);
+++			new_iwinfo_submit64(instance, "assoc_station_tx_bytes", (const char *)macstr,  e->tx_bytes);
 ++			new_iwinfo_submit(instance, "assoc_station_rx_rate", 0, (const char *)macstr,  e->rx_rate.rate);
 ++			new_iwinfo_submit(instance, "assoc_station_tx_rate", 0, (const char *)macstr,  e->tx_rate.rate);
 ++
@@ -147,11 +164,11 @@
 + 	iwinfo_finish();
 +--- a/src/types.db
 ++++ b/src/types.db
-+@@ -228,6 +228,33 @@ vs_memory		value:GAUGE:0:922337203685477
-+ vs_processes		value:GAUGE:0:65535
-+ vs_threads		value:GAUGE:0:65535
-+ stations		value:GAUGE:0:256
-++txpower		value:GAUGE:0:U
++@@ -261,6 +261,33 @@ vs_memory               value:GAUGE:0:92
++ vs_processes            value:GAUGE:0:65535
++ vs_threads              value:GAUGE:0:65535
++ stations                value:GAUGE:0:256
+++txpower			value:GAUGE:0:U
 ++channel			value:GAUGE:0:U
 ++assoc_station_signal    value:GAUGE:-200:200
 ++assoc_station_noise     value:GAUGE:-200:200

@@ -1,5 +1,5 @@
---- a/package/network/services/hostapd/files/netifd.sh
-+++ b/package/network/services/hostapd/files/netifd.sh
+--- a/package/network/services/hostapd/files/hostapd.sh
++++ b/package/network/services/hostapd/files/hostapd.sh
 @@ -416,8 +416,10 @@ hostapd_set_bss_options() {
  	}
  

@@ -27,7 +27,7 @@
  		wireless_setup_vif_failed IFUP_ERROR
  		json_select ..
  		return
-@@ -674,7 +683,7 @@ mac80211_interface_cleanup() {
+@@ -709,7 +718,7 @@ mac80211_interface_cleanup() {
  
  	for wdev in $(list_phy_interfaces "$phy"); do
  		ip link set dev "$wdev" down 2>/dev/null
@@ -36,7 +36,7 @@
  	done
  }
  
-@@ -693,6 +702,9 @@ drv_mac80211_setup() {
+@@ -728,6 +737,9 @@ drv_mac80211_setup() {
  	json_get_values basic_rate_list basic_rate
  	json_select ..
  
@@ -46,11 +46,11 @@
  	find_phy || {
  		echo "Could not find PHY for device '$1'"
  		wireless_set_retry 0
-@@ -747,15 +759,15 @@ drv_mac80211_setup() {
+@@ -782,15 +794,15 @@ drv_mac80211_setup() {
  	for_each_interface "ap" mac80211_prepare_vif
  
  	[ -n "$hostapd_ctrl" ] && {
--		/usr/sbin/hostapd -P /var/run/wifi-$phy.pid -B "$hostapd_conf_file"
+-		/usr/sbin/hostapd -s -P /var/run/wifi-$phy.pid -B "$hostapd_conf_file"
 -		ret="$?"
 -		# Scott added to fix a problem with auto channel selection
 -		sleep 5
@@ -71,7 +71,7 @@
  	}
  
  	for_each_interface "ap sta adhoc mesh monitor" mac80211_setup_vif
-@@ -779,6 +791,8 @@ drv_mac80211_teardown() {
+@@ -814,6 +826,8 @@ drv_mac80211_teardown() {
  	json_get_vars phy
  	json_select ..
  

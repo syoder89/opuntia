@@ -9,7 +9,7 @@
  
  config statistics 'collectd_unixsock'
  	option enable '0'
-@@ -50,15 +50,16 @@ config statistics 'collectd_unixsock'
+@@ -50,18 +50,19 @@ config statistics 'collectd_unixsock'
  # input plugins
  
  config statistics 'collectd_conntrack'
@@ -19,6 +19,9 @@
  config statistics 'collectd_cpu'
  	option enable '1'
 +	option ValuesPercentage '1'
+ 
+ config statistics 'collectd_cpufreq'
+ 	option enable '0'
  
  config statistics 'collectd_df'
 -	option enable '0'
@@ -30,7 +33,7 @@
  	option FSTypes 'tmpfs'
  	option IgnoreSelected '0'
  
-@@ -116,7 +117,7 @@ config statistics 'collectd_memory'
+@@ -119,7 +120,7 @@ config statistics 'collectd_memory'
  	option enable '1'
  
  config statistics 'collectd_netlink'
@@ -39,7 +42,7 @@
  	option IgnoreSelected '0'
  	option VerboseInterfaces 'br-lan'
  	option QDiscs 'br-lan'
-@@ -131,14 +132,14 @@ config statistics 'collectd_olsrd'
+@@ -134,14 +135,14 @@ config statistics 'collectd_olsrd'
  	option Host '127.0.0.1'
  
  config statistics 'collectd_ping'
@@ -58,7 +61,7 @@
  
  config statistics 'collectd_sensors'
  	option enable '0'
-@@ -147,10 +148,10 @@ config statistics 'collectd_splash_lease
+@@ -150,9 +151,9 @@ config statistics 'collectd_splash_lease
  	option enable '0'
  
  config statistics 'collectd_tcpconns'
@@ -67,6 +70,11 @@
  	option ListeningPorts '0'
 -	option LocalPorts '22 80'
 +	option LocalPorts '22 80 443'
+ 
+ config statistics 'collectd_thermal'
+ 	option enable '0'
+@@ -160,5 +161,5 @@ config statistics 'collectd_thermal'
+ 	option Device ''
  
  config statistics 'collectd_uptime'
 -	option enable '0'

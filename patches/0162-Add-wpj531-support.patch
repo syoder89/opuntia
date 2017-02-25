@@ -22,18 +22,19 @@
  #define DEVID_COMPEX_WP18	0x047E
 --- a/target/linux/ar71xx/base-files/etc/board.d/02_network
 +++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
-@@ -433,7 +433,7 @@ unifiac-pro)
- 	;;
- 
- wpj531)
--	ucidef_set_interfaces_lan_wan "eth0" "eth1"
-+	ucidef_set_interfaces_lan_wan "eth1" "eth0"
- 	;;
- 
- wpj558)
+@@ -460,6 +460,9 @@ ar71xx_setup_interfaces()
+         	ucidef_add_switch_extra_attr "switch0" "alias_wan" "2"
+         	ucidef_add_switch_extra_attr "switch0" "alias_lan" "3"
+         	;;
++	wpj531)
++		ucidef_set_interfaces_lan_wan "eth1" "eth0"
++ 		;;
+ 	wpj558)
+ 	        ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
+         	ucidef_add_switch "switch0" \
 --- a/target/linux/ar71xx/image/legacy.mk
 +++ b/target/linux/ar71xx/image/legacy.mk
-@@ -1031,7 +1031,7 @@ $(eval $(call SingleProfile,AthLzma,64k,
+@@ -935,7 +935,7 @@ $(eval $(call SingleProfile,AthLzma,64k,
  $(eval $(call SingleProfile,AthLzma,64k,WPJ342_16M,wpj342-16M,WPJ342,ttyS0,115200,$$(wpj342_mtdlayout_16M),KRuImage,65536))
  $(eval $(call SingleProfile,Cpxwrt,64k,WPJ344_16M,wpj344-16M,WPJ344,ttyS0,115200,$$(wpj344_mtdlayout_16M),KRuImage,65536,0x1000000,1572864,14876672,WPJ344))
  $(eval $(call SingleProfile,AthLzma,64k,DR344,dr344,DR344,ttyS0,115200,$$(dr344_mtdlayout),RKuImage))

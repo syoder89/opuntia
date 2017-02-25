@@ -1,6 +1,6 @@
---- a/package/network/services/hostapd/files/netifd.sh
-+++ b/package/network/services/hostapd/files/netifd.sh
-@@ -237,7 +237,7 @@ hostapd_set_bss_options() {
+--- a/package/network/services/hostapd/files/hostapd.sh
++++ b/package/network/services/hostapd/files/hostapd.sh
+@@ -249,7 +249,7 @@ hostapd_set_bss_options() {
  			wps_not_configured=1
  		;;
  		psk)
@@ -9,34 +9,6 @@
  			if [ ${#key} -lt 8 ]; then
  				wireless_setup_vif_failed INVALID_WPA_PSK
  				return 1
-@@ -253,7 +253,7 @@ hostapd_set_bss_options() {
- 			[ "$eapol_version" -ge "1" -a "$eapol_version" -le "2" ] && append bss_conf "eapol_version=$eapol_version" "$N"
- 
- 			wps_possible=1
--			append wpa_key_mgmt "WPA-PSK"
-+			[ "$ieee80211w" == "2" ] && append wpa_key_mgmt "WPA-PSK-SHA256" || append wpa_key_mgmt "WPA-PSK"
- 		;;
- 		eap)
- 			json_get_vars \
-@@ -262,7 +262,8 @@ hostapd_set_bss_options() {
- 				ownip \
- 				eap_reauth_period dynamic_vlan \
- 				vlan_naming vlan_tagged_interface \
--				vlan_bridge vlan_file
-+				vlan_bridge vlan_file \
-+				ieee80211w
- 
- 			# legacy compatibility
- 			[ -n "$auth_server" ] || json_get_var auth_server server
-@@ -288,7 +289,7 @@ hostapd_set_bss_options() {
- 			[ -n "$ownip" ] && append bss_conf "own_ip_addr=$ownip" "$N"
- 			append bss_conf "eapol_key_index_workaround=1" "$N"
- 			append bss_conf "ieee8021x=1" "$N"
--			append wpa_key_mgmt "WPA-EAP"
-+			[ "$ieee80211w" == "2" ] && append wpa_key_mgmt "WPA-EAP-SHA256" || append wpa_key_mgmt "WPA-EAP"
- 
- 			[ -n "$dynamic_vlan" ] && {
- 				append bss_conf "dynamic_vlan=$dynamic_vlan" "$N"
 --- a/package/kernel/mac80211/files/regdb.txt
 +++ b/package/kernel/mac80211/files/regdb.txt
 @@ -1,861 +1,10 @@
