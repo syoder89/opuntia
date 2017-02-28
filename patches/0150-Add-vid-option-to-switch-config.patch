@@ -42,7 +42,21 @@
  
  	json_select switch
  		json_select "$name"
-@@ -168,8 +171,22 @@ _ucidef_finish_switch_roles() {
+@@ -160,16 +163,32 @@ _ucidef_finish_switch_roles() {
+ 					json_select ..
+ 				json_select ..
+ 
+-				if [ ${need_tag:-0} -eq 1 -o ${want_untag:-0} -ne 1 ]; then
+-					num="${num}t"
+-					device="${device}.${index}"
+-				fi
++# No this doesn't work for us - Scott
++# We use high VLAN IDs by default (4000, 4001) and they are invalid switch vlan indicies
++#				if [ ${need_tag:-0} -eq 1 -o ${want_untag:-0} -ne 1 ]; then
++#					num="${num}t"
++#					device="${device}.${index}"
++#				fi
+ 
  				json_select roles
  					json_select "$index"
  						json_get_vars role ports
@@ -65,7 +79,7 @@
  					json_select ..
  				json_select ..
  			json_select ..
-@@ -193,7 +210,7 @@ _ucidef_finish_switch_roles() {
+@@ -193,7 +212,7 @@ _ucidef_finish_switch_roles() {
  
  ucidef_add_switch() {
  	local name="$1"; shift
@@ -74,7 +88,7 @@
  	local cpu0 cpu1 cpu2 cpu3 cpu4 cpu5
  	local n_cpu=0 n_vlan=0 n_ports=0
  
-@@ -218,6 +235,12 @@ ucidef_add_switch() {
+@@ -218,6 +237,12 @@ ucidef_add_switch() {
  							want_untag=1
  						}
  					;;
@@ -87,7 +101,7 @@
  					[0-9]*:*:[0-9]*)
  						num="${port%%:*}"
  						index="${port##*:}"
-@@ -233,7 +256,7 @@ ucidef_add_switch() {
+@@ -233,7 +258,7 @@ ucidef_add_switch() {
  					_ucidef_add_switch_port
  				fi
  
@@ -96,7 +110,7 @@
  			done
  		json_select ..
  	json_select ..
-@@ -258,6 +281,26 @@ ucidef_add_switch_attr() {
+@@ -258,6 +283,26 @@ ucidef_add_switch_attr() {
  		json_select ..
  	json_select ..
  }
