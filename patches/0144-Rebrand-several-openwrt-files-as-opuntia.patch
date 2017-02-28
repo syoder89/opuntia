@@ -54,7 +54,7 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
 +++ b/package/base-files/files/etc/opuntia_release
 @@ -0,0 +1,9 @@
 +DISTRIB_ID="%D"
-+DISTRIB_RELEASE="%C"
++DISTRIB_RELEASE="%V"
 +DISTRIB_REVISION="%R"
 +DISTRIB_CODENAME="%n"
 +DISTRIB_TARGET="%S"
