@@ -5,7 +5,6 @@ packages/0028-Add-etc-rc.d-to-sysupgrade-so-service-start-stop-are.patch
 kernel/0043-Fix-panic-in-ledtrig-netdev-due-to-a-netdev-callback.patch
 kernel/0044-Linux-3.13-updates.patch
 packages/0062-Set-root-password.patch
-packages/0063-Ipsec-init-script-modes.patch
 packages/0064-Add-bash-job-support.-Change-default-login-shell-to-.patch
 oldpackages/0065-Multiwan-fixes.patch
 packages/0073-Fix-timeout-problem-with-uhttpd-causing-large-firmwa.patch
@@ -89,3 +88,5 @@ packages/0179-hostapd-preset-r1kh-and-nasid-to-bssid.patch
 0001-fix-getver.patch
 packages/0180-openvswitch-stp-not-a-module.patch
 packages/0181-netifd-wireless-fix-isolate-parameter.patch
+kernel/0075-shortcut-fe.patch
+kernel/0076-ar8327-fix-init-bug.patch

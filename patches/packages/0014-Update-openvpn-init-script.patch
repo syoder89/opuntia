@@ -44,7 +44,7 @@ Subject: [PATCH] Update correct openvpn init script
  start_instance() {
  	local s="$1"
  
-@@ -93,10 +99,35 @@ start_instance() {
+@@ -93,6 +99,31 @@ start_instance() {
  	[ ! -d "/var/etc" ] && mkdir -p "/var/etc"
  	[ -f "/var/etc/openvpn-$s.conf" ] && rm "/var/etc/openvpn-$s.conf"
  
@@ -73,20 +73,24 @@ Subject: [PATCH] Update correct openvpn init script
 +		config_set "$s" proto "udp4"
 +	fi
 +
- 	# append flags
- 	append_bools "$s" \
- 		allow_recursive_routing auth_nocache auth_user_pass_optional bind ccd_exclusive client client_cert_not_required \
--		client_to_client comp_noadapt disable disable_occ down_pre duplicate_cn fast_io float http_proxy_retry \
-+		client_to_client comp_lzo comp_noadapt disable disable_occ down_pre duplicate_cn fast_io float http_proxy_retry \
- 		ifconfig_noexec ifconfig_nowarn ifconfig_pool_linear management_forget_disconnect management_hold \
- 		management_query_passwords management_signal mktun mlock mtu_test multihome mute_replay_warnings \
- 		ncp_disable nobind no_iv no_name_remapping no_replay opt_verify passtos persist_key persist_local_ip \
-@@ -107,7 +138,7 @@ start_instance() {
- 	# append params
- 	append_params "$s" \
- 		cd askpass auth auth_retry auth_user_pass auth_user_pass_verify bcast_buffers ca cert capath \
--		chroot cipher client_config_dir client_connect client_disconnect comp_lzo compress connect_freq \
-+		chroot cipher client_config_dir client_connect client_disconnect compress connect_freq \
- 		connect_retry connect_timeout connect_retry_max crl_verify dev dev_node dev_type dh \
- 		ecdh_curve echo engine explicit_exit_notify fragment group hand_window hash_size http_proxy \
- 		http_proxy_option http_proxy_timeout ifconfig ifconfig_pool ifconfig_pool_persist ifconfig_push \
+ 	append_bools "$s" $OPENVPN_BOOLS
+ 	append_params "$s" $OPENVPN_PARAMS
+ 
+--- a/package/network/services/openvpn/files/openvpn.options
++++ b/package/network/services/openvpn/files/openvpn.options
+@@ -14,7 +14,6 @@ cipher
+ client_config_dir
+ client_connect
+ client_disconnect
+-comp_lzo
+ compress
+ connect_freq
+ connect_retry
+@@ -144,6 +143,7 @@ ccd_exclusive
+ client
+ client_cert_not_required
+ client_to_client
++comp_lzo
+ comp_noadapt
+ disable
+ disable_occ

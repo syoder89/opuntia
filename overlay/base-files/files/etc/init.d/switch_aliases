@@ -1,0 +1,37 @@
+#!/bin/sh /etc/rc.common
+#
+#
+# ImageStream switch alias setup for WiFI APs
+
+START=15
+STOP=99
+
+get_board_name() {
+        local name
+
+        [ -f /tmp/sysinfo/board_name ] && name=$(cat /tmp/sysinfo/board_name)
+        [ -z "$name" ] && name="unknown"
+
+        echo "$name"
+}
+
+
+start() {
+        board=$(get_board_name)
+
+        case "$board" in
+        wpj344)
+                uci set network.@switch[0].alias_cpu='0'
+                uci set network.@switch[0].alias_wan='2'
+                uci set network.@switch[0].alias_lan='3'
+                uci commit network
+                ;;
+
+        wpj558)
+                uci set network.@switch[0].alias_cpu='6'
+                uci set network.@switch[0].alias_wan='5'
+                uci set network.@switch[0].alias_lan='1'
+                uci commit network
+                ;;
+        esac
+}

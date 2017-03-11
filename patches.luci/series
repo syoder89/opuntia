@@ -12,7 +12,6 @@
 0015-Add-mesh-plink-timeout-param.patch
 0016-Rework-QOS-Page.patch
 0019-use-iwinfo-not-iwdata.patch
-0020-add-wpm.patch
 0021-fix-process-list.patch
 0022-json-rpc-add-wifistatus.patch
 0023-add-collectd-defaults.patch

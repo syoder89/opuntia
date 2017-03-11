@@ -1,0 +1,16 @@
+#!/bin/sh /etc/rc.common
+#
+#
+# ImageStream simple renice ksoftirqd for decent performance
+
+START=5
+
+NICE_LEVEL=-10
+
+start() {
+	pid=$(pidof "ksoftirqd/0")
+	[ $((pid)) -gt 0 ] && {
+		logger "Changing priority of ksoftirqd to $NICE_LEVEL"
+		renice $NICE_LEVEL $pid
+	}
+}

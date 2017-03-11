@@ -2061,7 +2061,7 @@ CONFIG_PACKAGE_hardware-watchdog=y
 # CONFIG_PACKAGE_imagestream-envoy-3g-installer is not set
 # CONFIG_PACKAGE_imagestream-envoy-configs is not set
 # CONFIG_PACKAGE_imagestream-envoy-installer is not set
-CONFIG_PACKAGE_imagestream-overrides=y
+# CONFIG_PACKAGE_imagestream-overrides is not set
 CONFIG_PACKAGE_imagestream-snmp-mibs=y
 # CONFIG_PACKAGE_imagestream-uqmi is not set
 # CONFIG_PACKAGE_imagestream-utm-configs is not set
@@ -2075,7 +2075,7 @@ CONFIG_PACKAGE_imagestream-wifi-ap-configs-i.v3=y
 # CONFIG_PACKAGE_ktt30-graphics is not set
 # CONFIG_PACKAGE_luci-app-ISismesh is not set
 CONFIG_PACKAGE_luci-app-ipsec=y
-CONFIG_PACKAGE_luci-app-isis-license=y
+# CONFIG_PACKAGE_luci-app-isis-license is not set
 CONFIG_PACKAGE_luci-app-isis-openvpn=y
 CONFIG_PACKAGE_luci-app-snmp=y
 CONFIG_PACKAGE_luci-proto-gre=y
@@ -2435,6 +2435,8 @@ CONFIG_PACKAGE_kmod-bonding=y
 CONFIG_PACKAGE_kmod-bridge=y
 # CONFIG_PACKAGE_kmod-capi is not set
 # CONFIG_PACKAGE_kmod-dnsresolver is not set
+CONFIG_PACKAGE_kmod-fast-classifier=y
+# CONFIG_PACKAGE_kmod-fast-classifier-noload is not set
 CONFIG_PACKAGE_kmod-gre=y
 # CONFIG_PACKAGE_kmod-gre6 is not set
 CONFIG_PACKAGE_kmod-ip6-tunnel=y
@@ -2472,6 +2474,9 @@ CONFIG_PACKAGE_kmod-sched-connmark=y
 CONFIG_PACKAGE_kmod-sched-core=y
 CONFIG_PACKAGE_kmod-sched-esfq=y
 # CONFIG_PACKAGE_kmod-sctp is not set
+CONFIG_PACKAGE_kmod-shortcut-fe=y
+# CONFIG_PACKAGE_kmod-shortcut-fe-cm is not set
+# CONFIG_PACKAGE_kmod-shortcut-fe-drv is not set
 CONFIG_PACKAGE_kmod-sit=y
 CONFIG_PACKAGE_kmod-slhc=y
 # CONFIG_PACKAGE_kmod-slip is not set

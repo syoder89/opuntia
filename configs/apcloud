@@ -156,7 +156,8 @@ CONFIG_PACKAGE_hardware-watchdog=y
 # CONFIG_PACKAGE_imagestream-api is not set
 # CONFIG_PACKAGE_imagestream-envoy-configs is not set
 # CONFIG_PACKAGE_imagestream-envoy-installer is not set
-CONFIG_PACKAGE_imagestream-overrides=y
+# CONFIG_PACKAGE_imagestream-overrides is not set
+# CONFIG_PACKAGE_luci-app-isis-license is not set
 CONFIG_PACKAGE_imagestream-snmp-mibs=y
 # CONFIG_PACKAGE_imagestream-utm-configs is not set
 CONFIG_PACKAGE_imagestream-wifi-ap-configs=y
@@ -169,7 +170,6 @@ CONFIG_PACKAGE_imagestream-wifi-ap-bootstrap=y
 # CONFIG_PACKAGE_ktt30-graphics is not set
 # CONFIG_PACKAGE_luci-app-ISismesh is not set
 CONFIG_PACKAGE_luci-app-ipsec=y
-CONFIG_PACKAGE_luci-app-isis-license=y
 CONFIG_PACKAGE_luci-app-isis-openvpn=y
 CONFIG_PACKAGE_luci-app-snmp=y
 CONFIG_PACKAGE_luci-theme-opuntia=y

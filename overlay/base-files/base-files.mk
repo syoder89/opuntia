@@ -3,7 +3,7 @@ OVERLAY_DIR:=$(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 # Declare custom installation commands
 define custom_install_commands
-	$(INSTALL_DATA) $(OVERLAY_DIR)/banner $(1)/etc/banner
+	$(CP) -a $(OVERLAY_DIR)/files/* $(1)/ 2>/dev/null || true
 endef
 
 # Append custom commands to install recipe,

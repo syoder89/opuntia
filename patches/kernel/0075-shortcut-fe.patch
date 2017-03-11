@@ -1,0 +1,56 @@
+--- /dev/null
++++ b/target/linux/generic/patches-4.4/999-scott-shortcut-fe.patch
+@@ -0,0 +1,53 @@
++--- a/net/core/dev.c
+++++ b/net/core/dev.c
++@@ -3830,6 +3830,9 @@ static inline int nf_ingress(struct sk_b
++ 	return 0;
++ }
++ 
+++int (*athrs_fast_nat_recv)(struct sk_buff *skb) __rcu __read_mostly;
+++EXPORT_SYMBOL_GPL(athrs_fast_nat_recv);
+++
++ static int __netif_receive_skb_core(struct sk_buff *skb, bool pfmemalloc)
++ {
++ 	struct packet_type *ptype, *pt_prev;
++@@ -3838,6 +3841,7 @@ static int __netif_receive_skb_core(stru
++ 	bool deliver_exact = false;
++ 	int ret = NET_RX_DROP;
++ 	__be16 type;
+++	int (*fast_recv)(struct sk_buff *skb);
++ 
++ 	net_timestamp_check(!netdev_tstamp_prequeue, skb);
++ 
++@@ -3864,6 +3868,14 @@ another_round:
++ 			goto out;
++ 	}
++ 
+++	fast_recv = rcu_dereference(athrs_fast_nat_recv);
+++	if (fast_recv) {
+++		if (fast_recv(skb)) {
+++			ret = NET_RX_SUCCESS;
+++			goto out;
+++		}
+++	}
+++
++ #ifdef CONFIG_NET_CLS_ACT
++ 	if (skb->tc_verd & TC_NCLS) {
++ 		skb->tc_verd = CLR_TC_NCLS(skb->tc_verd);
++--- a/net/netfilter/nf_conntrack_proto_tcp.c
+++++ b/net/netfilter/nf_conntrack_proto_tcp.c
++@@ -34,12 +34,14 @@
++ #include <net/netfilter/ipv6/nf_conntrack_ipv6.h>
++ 
++ /* Do not check the TCP window for incoming packets  */
++-static int nf_ct_tcp_no_window_check __read_mostly = 1;
+++int nf_ct_tcp_no_window_check __read_mostly = 1;
+++EXPORT_SYMBOL_GPL(nf_ct_tcp_no_window_check);
++ 
++ /* "Be conservative in what you do,
++     be liberal in what you accept from others."
++     If it's non-zero, we mark only out of window RST segments as INVALID. */
++ static int nf_ct_tcp_be_liberal __read_mostly = 0;
+++EXPORT_SYMBOL_GPL(nf_ct_tcp_be_liberal);
++ 
++ /* If it is set to zero, we disable picking up already established
++    connections. */

@@ -10,7 +10,7 @@ Subject: [PATCH 08/14] Add 802.11s SAE authentication support in Luci and
 
 --- a/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
 +++ b/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
-@@ -363,6 +363,15 @@ s:tab("advanced", translate("Advanced Se
+@@ -349,6 +349,15 @@ s:tab("advanced", translate("Advanced Se
  
  ssid = s:taboption("general", Value, "ssid", translate("<abbr title=\"Extended Service Set Identifier\">ESSID</abbr>"))
  ssid.datatype = "maxlength(32)"
@@ -26,7 +26,7 @@ Subject: [PATCH 08/14] Add 802.11s SAE authentication support in Luci and
  
  mode = s:taboption("general", ListValue, "mode", translate("Mode"))
  mode.override_values = true
-@@ -415,7 +424,7 @@ end
+@@ -401,7 +410,7 @@ end
  
  if hwtype == "mac80211" then
  	if fs.access("/usr/sbin/iw") then
@@ -35,14 +35,11 @@ Subject: [PATCH 08/14] Add 802.11s SAE authentication support in Luci and
  	end
  
  	mode:value("ahdemo", translate("Pseudo Ad-Hoc (ahdemo)"))
-@@ -691,6 +700,10 @@ encr:value("none", "No Encryption")
- encr:value("wep-open",   translate("WEP Open System"), {mode="ap"}, {mode="sta"}, {mode="ap-wds"}, {mode="sta-wds"}, {mode="adhoc"}, {mode="ahdemo"}, {mode="wds"})
- encr:value("wep-shared", translate("WEP Shared Key"),  {mode="ap"}, {mode="sta"}, {mode="ap-wds"}, {mode="sta-wds"}, {mode="adhoc"}, {mode="ahdemo"}, {mode="wds"})
+@@ -746,7 +755,6 @@ for slot=1,4 do
+ 	end
+ end
  
-+encr:value("authsae", "SAE Authentication", {mode="mesh"})
-+key = s:taboption("encryption", Value, "key", translate("<abbr title=\"Key\">Key</abbr>"))
-+key:depends({encryption="authsae"})
-+
- if hwtype == "atheros" or hwtype == "mac80211" or hwtype == "prism2" then
- 	local supplicant = fs.access("/usr/sbin/wpa_supplicant")
- 	local hostapd = fs.access("/usr/sbin/hostapd")
+-
+ if hwtype == "mac80211" or hwtype == "prism2" then
+ 
+ 	-- Probe 802.11r support (and EAP support as a proxy for Openwrt)

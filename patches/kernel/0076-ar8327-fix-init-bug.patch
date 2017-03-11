@@ -1,0 +1,11 @@
+--- a/target/linux/generic/files/drivers/net/phy/ar8327.c
++++ b/target/linux/generic/files/drivers/net/phy/ar8327.c
+@@ -690,7 +690,7 @@ ar8327_init_port(struct ar8xxx_priv *pri
+ 		port MAC may work abnormal. Need disable lan&wan mac at fisrt*/
+ 		ar8xxx_write(priv, AR8327_REG_PORT_STATUS(port), 0);
+ 		msleep(100);
+-		t |= AR8216_PORT_STATUS_FLOW_CONTROL;
++//		t |= AR8216_PORT_STATUS_FLOW_CONTROL;
+ 		ar8xxx_write(priv, AR8327_REG_PORT_STATUS(port), t);
+ 	} else {
+ 		ar8xxx_write(priv, AR8327_REG_PORT_STATUS(port), t);
