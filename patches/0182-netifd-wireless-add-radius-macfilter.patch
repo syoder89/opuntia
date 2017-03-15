@@ -1,0 +1,200 @@
+--- a/package/network/services/hostapd/files/hostapd.sh
++++ b/package/network/services/hostapd/files/hostapd.sh
+@@ -152,8 +152,8 @@ hostapd_common_add_bss_config() {
+ 	config_add_string ownip
+ 	config_add_string iapp_interface
+ 	config_add_string eap_type ca_cert client_cert identity anonymous_identity auth priv_key priv_key_pwd
+-	config_add_string radius_auth_req_attr
+-	config_add_string radius_acct_req_attr
++	config_add_array radius_auth_req_attr
++	config_add_array radius_acct_req_attr
+ 
+ 	config_add_int dynamic_vlan vlan_naming
+ 	config_add_string vlan_tagged_interface vlan_bridge
+@@ -202,7 +202,9 @@ hostapd_set_bss_options() {
+ 		wps_independent wps_device_type wps_device_name wps_manufacturer wps_pin \
+ 		macfilter ssid wmm uapsd hidden short_preamble rsn_preauth \
+ 		iapp_interface eapol_version acct_server acct_secret acct_port \
+-		dynamic_vlan ieee80211w
++		dynamic_vlan ieee80211w auth_servers acct_servers auth_server auth_secret \
++		auth_port dae_client dae_secret dae_port ownip
++
+ 
+ 	set_default isolate 0
+ 	set_default maxassoc 0
+@@ -247,6 +249,75 @@ hostapd_set_bss_options() {
+ 
+ 	local vlan_possible=""
+ 
++	set_default auth_port 1812
++	set_default dae_port 3799
++
++	# leave the default option for legacy compatibility
++	[ -z "$auth_server" ] || append bss_conf "auth_server_addr=$auth_server" "$N"
++	[ -z "$auth_server" ] || append bss_conf "auth_server_port=$auth_port" "$N"
++	[ -z "$auth_secret" ] || append bss_conf "auth_server_shared_secret=$auth_secret" "$N"
++
++	# List of fallback RADIUS servers, ip_add@secret[:port]
++	[ -n "$auth_servers" ] && {
++		json_select "auth_servers"
++		local Index="1"
++		while json_get_type Var $Index && [ "$Var" = string ]; do
++			json_get_var Var "$((Index++))"
++
++			ip_addr=$(echo "$Var" | cut -d"@" -f2 | cut -d":" -f1)
++			append bss_conf "auth_server_addr=$ip_addr" "$N"
++
++			port=$(echo "$Var" | cut -d"@" -f2 | cut -d":" -f2)
++			if ! echo "$port" | egrep -q '^[0-9]+$' ; then
++				port=1812
++			fi
++			append bss_conf "auth_server_port=$port" "$N"
++
++			secret=$(echo "$Var" | cut -d"@" -f1)
++			append bss_conf "auth_server_shared_secret=$secret" "$N"
++		done
++		json_select ".."
++	}
++
++	json_get_values radius_auth_req_attr radius_auth_req_attr
++	json_get_values radius_acct_req_attr radius_acct_req_attr
++
++	for attr in $radius_auth_req_attr; do
++		append bss_conf "radius_auth_req_attr=$attr" "$N"
++	done
++	for attr in $radius_acct_req_attr; do
++		append bss_conf "radius_acct_req_attr=$attr" "$N"
++	done
++
++	# List of fallback RADIUS servers, ip_add@secret[:port]
++	[ -n "$acct_servers" ] && {
++		json_select "acct_servers"
++		local Index="1"
++		while json_get_type Var $Index && [ "$Var" = string ]; do
++			json_get_var Var "$((Index++))"
++
++			ip_addr=$(echo "$Var" | cut -d"@" -f2 | cut -d":" -f1)
++			append bss_conf "acct_server_addr=$ip_addr" "$N"
++
++			port=$(echo "$Var" | cut -d"@" -f2 | cut -d":" -f2)
++			if ! echo "$port" | egrep -q '^[0-9]+$' ; then
++				port=1813
++			fi
++			append bss_conf "acct_server_port=$port" "$N"
++
++			secret=$(echo "$Var" | cut -d"@" -f1)
++			append bss_conf "acct_server_shared_secret=$secret" "$N"
++		done
++		json_select ".."
++	}
++
++	[ -n "$dae_client" -a -n "$dae_secret" ] && {
++		append bss_conf "radius_das_port=$dae_port" "$N"
++		append bss_conf "radius_das_client=$dae_client $dae_secret" "$N"
++	}
++
++	[ -n "$ownip" ] && append bss_conf "own_ip_addr=$ownip" "$N"
++
+ 	case "$auth_type" in
+ 		none)
+ 			wps_possible=1
+@@ -273,87 +344,13 @@ hostapd_set_bss_options() {
+ 			wps_possible=1
+ 		;;
+ 		eap)
+-			json_get_vars \
+-				auth_servers acct_servers \
+-				auth_server auth_secret auth_port \
+-				dae_client dae_secret dae_port \
+-				ownip \
+-				radius_auth_req_attr radius_acct_req_attr \
+-				eap_reauth_period
++			json_get_vars eap_reauth_period
+ 
+ 			# radius can provide VLAN ID for clients
+ 			vlan_possible=1
+ 
+-			# legacy compatibility
+-			[ -n "$auth_server" ] || json_get_var auth_server server
+-			[ -n "$auth_port" ] || json_get_var auth_port port
+-			[ -n "$auth_secret" ] || json_get_var auth_secret key
+-
+-			set_default auth_port 1812
+-			set_default dae_port 3799
+-
+-
+-                        # leave the default option for legacy compatibility
+-                        [ -z "$auth_server" ] || append bss_conf "auth_server_addr=$auth_server" "$N"
+-                        [ -z "$auth_server" ] || append bss_conf "auth_server_port=$auth_port" "$N"
+-                        [ -z "$auth_secret" ] || append bss_conf "auth_server_shared_secret=$auth_secret" "$N"
+-
+-                        # List of fallback RADIUS servers, ip_add@secret[:port]
+-			[ -n "$auth_servers" ] && {
+-                        	json_select "auth_servers"
+-                        	local Index="1"
+-                        	while json_get_type Var $Index && [ "$Var" = string ]; do
+-                                	json_get_var Var "$((Index++))"
+-
+-                                	ip_addr=$(echo "$Var" | cut -d"@" -f2 | cut -d":" -f1)
+-                                	append bss_conf "auth_server_addr=$ip_addr" "$N"
+-
+-                                	port=$(echo "$Var" | cut -d"@" -f2 | cut -d":" -f2)
+-                                	if ! echo "$port" | egrep -q '^[0-9]+$' ; then
+-                                        	port=1812
+-                                	fi
+-                                	append bss_conf "auth_server_port=$port" "$N"
+-
+-                                	secret=$(echo "$Var" | cut -d"@" -f1)
+-                                	append bss_conf "auth_server_shared_secret=$secret" "$N"
+-                        	done
+-                        	json_select ".."
+-			}
+-
+-			[ -n "$radius_auth_req_attr" ] && append bss_conf "radius_auth_req_attr=$radius_auth_req_attr" "$N"
+-			[ -n "$radius_acct_req_attr" ] && append bss_conf "radius_acct_req_attr=$radius_acct_req_attr" "$N"
+-
+-                        # List of fallback RADIUS servers, ip_add@secret[:port]
+-			[ -n "$acct_servers" ] && {
+-                        	json_select "acct_servers"
+-                        	local Index="1"
+-                        	while json_get_type Var $Index && [ "$Var" = string ]; do
+-                                	json_get_var Var "$((Index++))"
+-
+-                                	ip_addr=$(echo "$Var" | cut -d"@" -f2 | cut -d":" -f1)
+-                                	append bss_conf "acct_server_addr=$ip_addr" "$N"
+-
+-                                	port=$(echo "$Var" | cut -d"@" -f2 | cut -d":" -f2)
+-                                	if ! echo "$port" | egrep -q '^[0-9]+$' ; then
+-                                        	port=1813
+-                                	fi
+-                                	append bss_conf "acct_server_port=$port" "$N"
+-
+-                                	secret=$(echo "$Var" | cut -d"@" -f1)
+-                                	append bss_conf "acct_server_shared_secret=$secret" "$N"
+-                        	done
+-                        	json_select ".."
+-			}
+-
+-
+ 			[ -n "$eap_reauth_period" ] && append bss_conf "eap_reauth_period=$eap_reauth_period" "$N"
+ 
+-			[ -n "$dae_client" -a -n "$dae_secret" ] && {
+-				append bss_conf "radius_das_port=$dae_port" "$N"
+-				append bss_conf "radius_das_client=$dae_client $dae_secret" "$N"
+-			}
+-
+-			[ -n "$ownip" ] && append bss_conf "own_ip_addr=$ownip" "$N"
+ 			append bss_conf "eapol_key_index_workaround=1" "$N"
+ 			append bss_conf "ieee8021x=1" "$N"
+ 
+@@ -489,6 +486,10 @@ hostapd_set_bss_options() {
+ 			append bss_conf "macaddr_acl=0" "$N"
+ 			append bss_conf "deny_mac_file=$_macfile" "$N"
+ 		;;
++		radius)
++			append bss_conf "macaddr_acl=2" "$N"
++			vlan_possible=1
++		;;
+ 		*)
+ 			_macfile=""
+ 		;;
