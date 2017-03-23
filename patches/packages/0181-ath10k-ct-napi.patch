@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/package/kernel/ath10k-ct/patches/999-scott-ath10k-napi.patch
-@@ -0,0 +1,669 @@
+@@ -0,0 +1,678 @@
 +--- a/ath10k/core.h
 ++++ b/ath10k/core.h
 +@@ -65,6 +65,10 @@
@@ -670,3 +670,12 @@
 + 
 + err_deinit_irq:
 + 	ath10k_pci_deinit_irq(ar);
++--- a/ath10k/htt.h
+++++ b/ath10k/htt.h
++@@ -1848,5 +1848,5 @@ int ath10k_htt_tx(struct ath10k_htt *htt
++ 		  struct sk_buff *msdu);
++ void ath10k_htt_rx_pktlog_completion_handler(struct ath10k *ar,
++ 					     struct sk_buff *skb);
++-
+++int ath10k_htt_txrx_compl_task(struct ath10k *ar, int budget);
++ #endif
