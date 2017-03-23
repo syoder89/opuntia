@@ -91,3 +91,6 @@ packages/0181-netifd-wireless-fix-isolate-parameter.patch
 kernel/0075-shortcut-fe.patch
 kernel/0076-ar8327-fix-init-bug.patch
 0182-netifd-wireless-add-radius-macfilter.patch
+packages/0179-ath10k-ct-alignment.patch
+packages/0180-ath10k-ct-tracing-fixes.patch
+packages/0181-ath10k-ct-napi.patch

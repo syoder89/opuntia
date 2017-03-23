@@ -1,0 +1,85 @@
+--- a/package/kernel/ath10k-ct/Makefile
++++ b/package/kernel/ath10k-ct/Makefile
+@@ -68,6 +68,11 @@ ifdef CONFIG_PACKAGE_MAC80211_DEBUGFS
+   NOSTDINC_FLAGS += -DCONFIG_ATH10K_DEBUGFS
+ endif
+ 
++ifdef CONFIG_PACKAGE_ATH10K_TRACING
++  CT_MAKEDEFS += CONFIG_ATH10K_TRACING=y
++  NOSTDINC_FLAGS += -DCONFIG_ATH10K_TRACING
++endif
++
+ ifdef CONFIG_PACKAGE_ATH_DEBUG
+   NOSTDINC_FLAGS += -DCONFIG_ATH10K_DEBUG
+ endif
+--- /dev/null
++++ b/package/kernel/ath10k-ct/patches/999-scott-ath10k-ct-tracing-fixes.patch
+@@ -0,0 +1,68 @@
++--- a/ath10k/Makefile
+++++ b/ath10k/Makefile
++@@ -28,4 +28,4 @@ ath10k_pci-y += pci.o \
++ ath10k_pci-$(CONFIG_ATH10K_AHB) += ahb.o
++ 
++ # for tracing framework to find trace.h
++-CFLAGS_trace.o := -I$(src)
+++CFLAGS_trace.o := -I$(src)/ath10k
++--- a/ath10k/trace.h
+++++ b/ath10k/trace.h
++@@ -15,12 +15,12 @@
++  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++  */
++ 
++-#if !defined(_TRACE_H_) || defined(TRACE_HEADER_MULTI_READ)
+++#if !defined(_TRACE_ATH10K_H_) || defined(TRACE_HEADER_MULTI_READ)
++ 
++ #include <linux/tracepoint.h>
++ #include "core.h"
++ 
++-#if !defined(_TRACE_H_)
+++#if !defined(_TRACE_ATH10K_H_)
++ static inline u32 ath10k_frm_hdr_len(const void *buf, size_t len)
++ {
++ 	const struct ieee80211_hdr *hdr = buf;
++@@ -34,7 +34,19 @@ static inline u32 ath10k_frm_hdr_len(con
++ }
++ #endif
++ 
++-#define _TRACE_H_
+++#define _TRACE_ATH10K_H_
+++
+++#undef TRACE_SYSTEM
+++#define TRACE_SYSTEM ath10k
+++
+++#undef TRACE_SYSTEM_VAR
+++#define TRACE_SYSTEM_VAR ath10k
+++
+++/* we don't want to use include/trace/events */
+++#undef TRACE_INCLUDE_PATH
+++#define TRACE_INCLUDE_PATH ath10k
+++#undef TRACE_INCLUDE_FILE
+++#define TRACE_INCLUDE_FILE trace
++ 
++ /* create empty functions when tracing is disabled */
++ #if !defined(CONFIG_ATH10K_TRACING)
++@@ -48,9 +60,6 @@ static inline void trace_ ## name(proto)
++ static inline void trace_ ## name(proto) {}
++ #endif /* !CONFIG_ATH10K_TRACING || __CHECKER__ */
++ 
++-#undef TRACE_SYSTEM
++-#define TRACE_SYSTEM ath10k
++-
++ #define ATH10K_MSG_MAX 400
++ 
++ DECLARE_EVENT_CLASS(ath10k_log_event,
++@@ -538,11 +547,5 @@ TRACE_EVENT(ath10k_wmi_diag,
++ 
++ #endif /* _TRACE_H_ || TRACE_HEADER_MULTI_READ*/
++ 
++-/* we don't want to use include/trace/events */
++-#undef TRACE_INCLUDE_PATH
++-#define TRACE_INCLUDE_PATH .
++-#undef TRACE_INCLUDE_FILE
++-#define TRACE_INCLUDE_FILE trace
++-
++ /* This part must be outside protection */
++ #include <trace/define_trace.h>

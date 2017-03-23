@@ -1,0 +1,434 @@
+--- /dev/null
++++ b/package/kernel/ath10k-ct/patches/999-scott-ath10k-alignment.patch
+@@ -0,0 +1,431 @@
++--- a/ath10k/core.h
+++++ b/ath10k/core.h
++@@ -169,11 +169,11 @@ struct ath10k_wmi {
++ struct ath10k_fw_stats_peer {
++ 	struct list_head list;
++ 
++-	u8 peer_macaddr[ETH_ALEN];
++ 	u32 peer_rssi;
++ 	u32 peer_tx_rate;
++ 	u32 peer_rx_rate; /* 10x only */
++ 	u32 rx_duration;
+++	u8 peer_macaddr[ETH_ALEN];
++ };
++ 
++ struct ath10k_fw_stats_vdev {
++@@ -340,8 +340,9 @@ struct ath10k_peer {
++ 	struct ieee80211_vif *vif;
++ 	struct ieee80211_sta *sta;
++ 
++-	bool removed;
++ 	int vdev_id;
+++	bool removed;
+++	u8 __pad;
++ 	u8 addr[ETH_ALEN];
++ 	DECLARE_BITMAP(peer_ids, ATH10K_MAX_NUM_PEER_IDS);
++ 
++@@ -363,10 +364,11 @@ struct ath10k_sta {
++ 	u32 bw;
++ 	u32 nss;
++ 	u32 smps;
++-	u16 peer_id;
++ 
++ 	struct work_struct update_wk;
++ 
+++	u16 peer_id;
+++
++ #ifdef CONFIG_MAC80211_DEBUGFS
++ 	/* protected by conf_mutex */
++ 	bool aggr_mode;
++@@ -387,6 +389,7 @@ struct ath10k_vif {
++ 
++ 	u32 vdev_id;
++ 	u16 peer_id;
+++	u16 __pad;
++ 	enum wmi_vdev_type vdev_type;
++ 	enum wmi_vdev_subtype vdev_subtype;
++ 	u32 beacon_interval;
++@@ -408,10 +411,13 @@ struct ath10k_vif {
++ 	u32 aid;
++ 	u8 bssid[ETH_ALEN];
++ 
++-	struct ieee80211_key_conf *wep_keys[WMI_MAX_KEY_INDEX + 1];
++ 	s8 def_wep_key_idx;
+++	u8 __pad2;
+++	struct ieee80211_key_conf *wep_keys[WMI_MAX_KEY_INDEX + 1];
++ 
++ 	u16 tx_seq_no;
+++	bool use_cts_prot;
+++	bool nohwcrypt; /* actual setting, based on firmware abilities, etc. */
++ 
++ 	union {
++ 		struct {
++@@ -430,8 +436,6 @@ struct ath10k_vif {
++ 		} ap;
++ 	} u;
++ 
++-	bool use_cts_prot;
++-	bool nohwcrypt; /* actual setting, based on firmware abilities, etc. */
++ 	int num_legacy_stations;
++ 	int txpower;
++ 	/* Firmware allows configuring rate of each of these traffic types.
++@@ -493,6 +497,7 @@ struct ath10k_debug {
++ 	struct ath10k_fw_stats fw_stats;
++ 	struct completion fw_stats_complete;
++ 	bool fw_stats_done;
+++	u8 __pad[3];
++ 
++ 	unsigned long htt_stats_mask;
++ 	struct delayed_work htt_stats_dwork;
++@@ -812,16 +817,17 @@ struct ath10k {
++ 	struct ieee80211_hw *hw;
++ 	struct device *dev;
++ 	u8 mac_addr[ETH_ALEN];
+++	u8 __pad[2];
++ 
++ 	struct ieee80211_iface_combination if_comb[8];
++ 
++ 	enum ath10k_hw_rev hw_rev;
++ 	u16 dev_id;
++ 	bool fw_powerup_failed; /* If true, might take reboot to recover. */
+++	u8 fw_version_major;
+++
++ 	u32 chip_id;
++ 	u32 target_version;
++-	u8 fw_version_major;
++-	bool use_swcrypt; /* Firmware (and driver) supports rx-sw-crypt? */
++ 	u32 fw_version_minor;
++ 	u16 fw_version_release;
++ 	u16 fw_version_build;
++@@ -833,6 +839,8 @@ struct ath10k {
++ 	u32 vht_cap_info;
++ 	u32 num_rf_chains;
++ 	u32 max_spatial_stream;
+++
+++	bool use_swcrypt; /* Firmware (and driver) supports rx-sw-crypt? */
++ 	/* protected by conf_mutex */
++ 	bool ani_enabled;
++ 
++@@ -848,6 +856,7 @@ struct ath10k {
++ 
++ 	const struct ath10k_hw_regs *regs;
++ 	const struct ath10k_hw_values *hw_values;
+++
++ 	struct ath10k_bmi bmi;
++ 	struct ath10k_wmi wmi;
++ 	struct ath10k_htc htc;
++@@ -855,12 +864,13 @@ struct ath10k {
++ 
++ 	struct ath10k_hw_params {
++ 		u32 id;
++-		u16 dev_id;
++ 		const char *name;
++ 		u32 patch_load_addr;
++ 		int uart_pin;
++ 		u32 otp_exe_param;
++ 
+++		u16 dev_id;
+++
++ 		/* This is true if given HW chip has a quirky Cycle Counter
++ 		 * wraparound which resets to 0x7fffffff instead of 0. All
++ 		 * other CC related counters (e.g. Rx Clear Count) are divided
++@@ -955,6 +965,7 @@ struct ath10k {
++ 		bool bmi_ids_valid;
++ 		u8 bmi_board_id;
++ 		u8 bmi_chip_id;
+++		u8 __pad3;
++ 	} id;
++ 
++ 	int fw_api;
++@@ -967,10 +978,11 @@ struct ath10k {
++ 		struct completion on_channel;
++ 		struct delayed_work timeout;
++ 		enum ath10k_scan_state state;
++-		bool is_roc;
++ 		int vdev_id;
++ 		int roc_freq;
+++		bool is_roc;
++ 		bool roc_notify;
+++		u16 __pad4;
++ 	} scan;
++ 
++ 	struct {
++@@ -991,14 +1003,15 @@ struct ath10k {
++ 
++ 	unsigned long long free_vdev_map;
++ 	struct ath10k_vif *monitor_arvif;
++-	bool monitor;
++ 	int monitor_vdev_id;
++-	bool monitor_started;
++ 	unsigned int filter_flags;
++ 	unsigned long dev_flags;
++-	bool dfs_block_radar_events;
++ 	int install_key_rv; /* Store error code from key-install */
++ 
+++	bool monitor;
+++	bool monitor_started;
+++	bool dfs_block_radar_events;
+++
++ 	/* protected by conf_mutex */
++ 	bool radar_enabled;
++ 	int num_started_vdevs;
++@@ -1008,6 +1021,9 @@ struct ath10k {
++ 	u8 cfg_tx_chainmask;
++ 	u8 cfg_rx_chainmask;
++ 
+++	bool request_nohwcrypt; /* desired setting */
+++	u8 __pad5;
+++
++ 	struct completion install_key_done;
++ 
++ 	struct completion vdev_setup_done;
++@@ -1040,7 +1056,6 @@ struct ath10k {
++ 	int max_num_tdls_vdevs;
++ 	int num_active_peers;
++ 	int num_tids;
++-	bool request_nohwcrypt; /* desired setting */
++ 	u32 num_ratectrl_objs;
++ 	u32 skid_limit;
++ 	u32 bmiss_offload_max_vdev;
++@@ -1075,6 +1090,7 @@ struct ath10k {
++ 	 * avoid reporting garbage data.
++ 	 */
++ 	bool ch_info_can_report_survey;
+++	u8 __pad6[3];
++ 	struct completion bss_survey_done;
++ 
++ 	struct dfs_pattern_detector *dfs_detector;
++@@ -1128,7 +1144,9 @@ struct ath10k {
++ 		u8 rc_rate_max_per_thr; /* Firmware rate-ctrl alg. tuning. */
++ 		u8 tx_sta_bw_mask; /* 0:  all, 0x1: 20Mhz, 0x2 40Mhz, 0x4 80Mhz */
++ 		bool allow_ibss_amsdu;
+++
++ 		bool rifs_enable_override;
+++		u8 __pad7[3];
++ 		u16 max_txpower;
++ 		u16 pdev_xretry_th; /* Max failed retries before wifi chip is reset, 10.1 firmware default is 0x40 */
++ 		u32 wmi_wd_keepalive_ms; /* 0xFFFFFFFF means disable, otherwise, FW will assert after X ms of not receiving
++--- a/ath10k/hif.h
+++++ b/ath10k/hif.h
++@@ -24,10 +24,10 @@
++ 
++ struct ath10k_hif_sg_item {
++ 	u16 transfer_id;
+++	u16 len;
++ 	void *transfer_context; /* NULL = tx completion callback not called */
++-	void *vaddr; /* for debugging mostly */
++ 	u32 paddr;
++-	u16 len;
+++	void *vaddr; /* for debugging mostly */
++ };
++ 
++ struct ath10k_hif_ops {
++--- a/ath10k/htc.h
+++++ b/ath10k/htc.h
++@@ -281,6 +281,7 @@ struct ath10k_htc_ep_ops {
++ /* service connection information */
++ struct ath10k_htc_svc_conn_req {
++ 	u16 service_id;
+++	u16 __pad;
++ 	struct ath10k_htc_ep_ops ep_ops;
++ 	int max_send_queue_depth;
++ };
++@@ -289,9 +290,10 @@ struct ath10k_htc_svc_conn_req {
++ struct ath10k_htc_svc_conn_resp {
++ 	u8 buffer_len;
++ 	u8 actual_len;
+++	u8 connect_resp_code;
+++	u8 __pad;
++ 	enum ath10k_htc_ep_id eid;
++ 	unsigned int max_msg_len;
++-	u8 connect_resp_code;
++ };
++ 
++ #define ATH10K_NUM_CONTROL_TX_BUFFERS 2
++@@ -314,15 +316,16 @@ struct ath10k_htc_ep {
++ 	u8 dl_pipe_id;
++ 
++ 	u8 seq_no; /* for debugging */
+++	bool tx_credit_flow_enabled;
++ 	int tx_credits;
++ 	int tx_credit_size;
++ 	int tx_credits_per_max_message;
++-	bool tx_credit_flow_enabled;
++ };
++ 
++ struct ath10k_htc_svc_tx_credits {
++ 	u16 service_id;
++ 	u8  credit_allocation;
+++	u8 __pad;
++ };
++ 
++ struct ath10k_htc {
++--- a/ath10k/htt.h
+++++ b/ath10k/htt.h
++@@ -1587,10 +1587,12 @@ struct htt_peer_map_event {
++ 	u8 vdev_id;
++ 	u16 peer_id;
++ 	u8 addr[ETH_ALEN];
+++	u8 __pad[3];
++ };
++ 
++ struct htt_peer_unmap_event {
++ 	u16 peer_id;
+++	u16 __pad;
++ };
++ 
++ struct ath10k_htt_txbuf {
++@@ -1606,9 +1608,9 @@ struct ath10k_htt {
++ 
++ 	u8 target_version_major;
++ 	u8 target_version_minor;
++-	struct completion target_version_received;
++ 	u8 max_num_amsdu;
++ 	u8 max_num_ampdu;
+++	struct completion target_version_received;
++ 
++ 	const enum htt_t2h_msg_type *t2h_msg_types;
++ 	u32 t2h_msg_types_max;
++@@ -1636,6 +1638,7 @@ struct ath10k_htt {
++ 		 * of hash collisions for sk_buffs.
++ 		 */
++ 		bool in_ord_rx;
+++		u8 __pad[3];
++ 		DECLARE_HASHTABLE(skb_table, 4);
++ 
++ 		/*
++@@ -1706,6 +1709,7 @@ struct ath10k_htt {
++ 	/* set if host-fw communication goes haywire
++ 	 * used to avoid further failures */
++ 	bool rx_confused;
+++	u8 __pad2[3];
++ 	atomic_t num_mpdus_ready;
++ 
++ 	/* This is used to group tx/rx completions separately and process them
++@@ -1729,9 +1733,10 @@ struct ath10k_htt {
++ 	} txbuf;
++ 
++ 	struct {
++-		bool enabled;
++ 		struct htt_q_state *vaddr;
++ 		dma_addr_t paddr;
+++		bool enabled;
+++		u8 __pad3;
++ 		u16 num_push_allowed;
++ 		u16 num_peers;
++ 		u16 num_tids;
++--- a/ath10k/pci.h
+++++ b/ath10k/pci.h
++@@ -39,6 +39,7 @@ struct bmi_xfer {
++ 	bool tx_done;
++ 	bool rx_done;
++ 	bool wait_for_resp;
+++	bool __pad;
++ 	u32 resp_len;
++ };
++ 
++@@ -138,9 +139,6 @@ struct ath10k_pci_pipe {
++ 	/* Handle of underlying Copy Engine */
++ 	struct ath10k_ce_pipe *ce_hdl;
++ 
++-	/* Our pipe number; facilitiates use of pipe_info ptrs. */
++-	u8 pipe_num;
++-
++ 	/* Convenience back pointer to hif_ce_state. */
++ 	struct ath10k *hif_ce_state;
++ 
++@@ -148,6 +146,10 @@ struct ath10k_pci_pipe {
++ 
++ 	/* protects compl_free and num_send_allowed */
++ 	spinlock_t pipe_lock;
+++
+++	/* Our pipe number; facilitiates use of pipe_info ptrs. */
+++	u8 pipe_num;
+++	u8 __pad[3];
++ };
++ 
++ struct ath10k_pci_supp_chip {
++@@ -174,29 +176,43 @@ struct ath10k_pci {
++ 	void __iomem *mem;
++ 	size_t mem_len;
++ 
+++	/* pci power save, disable for QCA988X and QCA99X0.
+++	 * Writing 'false' to this variable avoids frequent locking
+++	 * on MMIO read/write.
+++	 */
+++	bool pci_ps;
+++
+++	/* MMIO registers are used to communicate with the device. With
+++	 * intensive traffic accessing powersave register would be a bit
+++	 * wasteful overhead and would needlessly stall CPU. It is far more
+++	 * efficient to rely on a variable in RAM and update it only upon
+++	 * powersave register state changes.
+++	 */
+++	bool ps_awake;
+++
+++	/* Due to HW quirks it is recommended to disable ASPM during device
+++	 * bootup. To do that the original PCI-E Link Control is stored before
+++	 * device bootup is executed and re-programmed later.
+++	 */
+++	u16 link_ctl;
+++
++ 	/* Operating interrupt mode */
++ 	enum ath10k_pci_irq_mode oper_irq_mode;
++ 
++ 	struct tasklet_struct intr_tq;
++ 
+++	/* FIXME: document what this really protects */
+++	spinlock_t ce_lock;
+++
++ 	struct ath10k_pci_pipe pipe_info[CE_COUNT_MAX];
++ 
++ 	/* Copy Engine used for Diagnostic Accesses */
++ 	struct ath10k_ce_pipe *ce_diag;
++ 
++-	/* FIXME: document what this really protects */
++-	spinlock_t ce_lock;
++-
++ 	/* Map CE id to ce_state */
++ 	struct ath10k_ce_pipe ce_states[CE_COUNT_MAX];
++ 	struct timer_list rx_post_retry;
++ 
++-	/* Due to HW quirks it is recommended to disable ASPM during device
++-	 * bootup. To do that the original PCI-E Link Control is stored before
++-	 * device bootup is executed and re-programmed later.
++-	 */
++-	u16 link_ctl;
++-
++ 	/* Protects ps_awake and ps_wake_refcount */
++ 	spinlock_t ps_lock;
++ 
++@@ -218,20 +234,6 @@ struct ath10k_pci {
++ 	 */
++ 	struct timer_list ps_timer;
++ 
++-	/* MMIO registers are used to communicate with the device. With
++-	 * intensive traffic accessing powersave register would be a bit
++-	 * wasteful overhead and would needlessly stall CPU. It is far more
++-	 * efficient to rely on a variable in RAM and update it only upon
++-	 * powersave register state changes.
++-	 */
++-	bool ps_awake;
++-
++-	/* pci power save, disable for QCA988X and QCA99X0.
++-	 * Writing 'false' to this variable avoids frequent locking
++-	 * on MMIO read/write.
++-	 */
++-	bool pci_ps;
++-
++ 	const struct ath10k_bus_ops *bus_ops;
++ 
++ 	/* Chip specific pci reset routine used to do a safe reset */
++--- a/ath10k/wmi.h
+++++ b/ath10k/wmi.h
++@@ -1868,6 +1868,7 @@ struct wmi_channel_arg {
++ 	bool allow_vht;
++ 	bool ht40plus;
++ 	bool chan_radar;
+++	u8 __pad[2];
++ 	/* note: power unit is 0.5 dBm */
++ 	u32 min_power;
++ 	u32 max_power;
