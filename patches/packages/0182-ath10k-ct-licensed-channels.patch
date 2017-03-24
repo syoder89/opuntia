@@ -1,0 +1,198 @@
+--- /dev/null
++++ b/package/kernel/ath10k-ct/patches/600-scott-licensed-channels.patch
+@@ -0,0 +1,127 @@
++--- a/ath10k/Kconfig
+++++ b/ath10k/Kconfig
++@@ -52,3 +52,23 @@ config ATH10K_DFS_CERTIFIED
++ 	---help---
++ 	This option enables DFS support for initiating radiation on
++ 	ath10k.
+++
+++config ATH10K_LICENSED_CHAN
+++	bool "Support channels in licensed bands"
+++	depends on ATH10K && CFG80211_CERTIFICATION_ONUS
+++	default n
+++	---help---
+++	  This option enables support for licensed channels on such as
+++          4.9 GHz (public safety).
+++
+++	  These are PUBLIC SAFETY CHANNELS and MUST NOT BE USED in most
+++	  regulatory domains UNLESS YOU HAVE A FULL LICENSE for their use from
+++	  your local radio regulator, e.g. the FCC or equivalent. Using these
+++	  channels without proper authorisation may result in serious legal
+++	  consequences.
+++
+++	  You will also have to build a regulatory database with these channels
+++	  enabled to actually use them.
+++
+++	  If you are a distro kernel builder or have any doubt whatsoever about
+++	  your legal ability to use these channels, say N.
++--- a/ath10k/core.h
+++++ b/ath10k/core.h
++@@ -46,7 +46,11 @@
++ #define WMI_READY_TIMEOUT (5 * HZ)
++ #define ATH10K_FLUSH_TIMEOUT_HZ (5 * HZ)
++ #define ATH10K_CONNECTION_LOSS_HZ (3 * HZ)
+++#ifdef CONFIG_ATH10K_LICENSED_CHAN
+++#define ATH10K_NUM_CHANS 46
+++#else
++ #define ATH10K_NUM_CHANS 39
+++#endif
++ 
++ /* Antenna noise floor */
++ #define ATH10K_DEFAULT_NOISE_FLOOR -95
++--- a/ath10k/mac.c
+++++ b/ath10k/mac.c
++@@ -8265,6 +8265,15 @@ static const struct ieee80211_channel at
++ 	CHAN5G(157, 5785, 0),
++ 	CHAN5G(161, 5805, 0),
++ 	CHAN5G(165, 5825, 0),
+++#ifdef CONFIG_ATH10K_LICENSED_CHAN
+++	CHAN5G(184, 4920, 0),
+++	CHAN5G(188, 4940, 0),
+++	CHAN5G(192, 4960, 0),
+++	CHAN5G(196, 4980, 0),
+++	CHAN5G(8,   5040, 0),
+++	CHAN5G(12,  5060, 0),
+++	CHAN5G(16,  5080, 0),
+++#endif
++ };
++ 
++ struct ath10k *ath10k_mac_create(size_t priv_size)
++--- a/ath10k/wmi.c
+++++ b/ath10k/wmi.c
++@@ -2309,6 +2309,41 @@ static int ath10k_wmi_10_4_op_pull_mgmt_
++ 	return 0;
++ }
++ 
+++static inline enum nl80211_band phy_mode_to_band(u32 phy_mode, u32 channel)
+++{
+++	enum nl80211_band band;
+++
+++	switch (phy_mode) {
+++	case MODE_11A:
+++	case MODE_11NA_HT20:
+++	case MODE_11NA_HT40:
+++	case MODE_11AC_VHT20:
+++	case MODE_11AC_VHT40:
+++	case MODE_11AC_VHT80:
+++		band = NL80211_BAND_5GHZ;
+++	break;
+++	case MODE_11B:
+++	case MODE_11G:
+++		/* Hardware can Rx CCK rates on 5GHz. In that case phy_mode is
+++		 * set to MODE_11B:or MODE_11G.
+++		 */
+++		if (channel < 1 || channel > 14) {
+++			band = NL80211_BAND_5GHZ;
+++			break;
+++		}
+++	case MODE_11GONLY:
+++	case MODE_11NG_HT20:
+++	case MODE_11NG_HT40:
+++	case MODE_11AC_VHT20_2G:
+++	case MODE_11AC_VHT40_2G:
+++	case MODE_11AC_VHT80_2G:
+++	default:
+++		band = NL80211_BAND_2GHZ;
+++	}
+++
+++	return band;
+++}
+++
++ int ath10k_wmi_event_mgmt_rx(struct ath10k *ar, struct sk_buff *skb)
++ {
++ 	struct wmi_mgmt_rx_ev_arg arg = {};
++@@ -2358,22 +2393,8 @@ int ath10k_wmi_event_mgmt_rx(struct ath1
++ 			__le64_to_cpu(arg.ext_info.rx_mac_timestamp);
++ 		status->flag |= RX_FLAG_MACTIME_END;
++ 	}
++-	/* Hardware can Rx CCK rates on 5GHz. In that case phy_mode is set to
++-	 * MODE_11B. This means phy_mode is not a reliable source for the band
++-	 * of mgmt rx.
++-	 */
++-	if (channel >= 1 && channel <= 14) {
++-		status->band = NL80211_BAND_2GHZ;
++-	} else if (channel >= 36 && channel <= 165) {
++-		status->band = NL80211_BAND_5GHZ;
++-	} else {
++-		/* Shouldn't happen unless list of advertised channels to
++-		 * mac80211 has been changed.
++-		 */
++-		WARN_ON_ONCE(1);
++-		dev_kfree_skb(skb);
++-		return 0;
++-	}
+++
+++	status->band = phy_mode_to_band(phy_mode, channel);
++ 
++ 	if (phy_mode == MODE_11B && status->band == NL80211_BAND_5GHZ)
++ 		ath10k_dbg(ar, ATH10K_DBG_MGMT, "wmi mgmt rx 11b (CCK) on 5GHz\n");
+--- a/package/kernel/ath10k-ct/Makefile
++++ b/package/kernel/ath10k-ct/Makefile
+@@ -85,6 +85,10 @@ ifdef CONFIG_PACKAGE_ATH10K_DFS_CERTIFIE
+   NOSTDINC_FLAGS += -DCONFIG_ATH10K_DFS_CERTIFIED
+ endif
+ 
++ifdef CONFIG_PACKAGE_ATH_LICENSED_CHAN
++  NOSTDINC_FLAGS += -DCONFIG_ATH10K_LICENSED_CHAN
++endif
++
+ define Build/Configure
+ 	cp $(STAGING_DIR)/usr/include/mac80211/ath/*.h $(PKG_BUILD_DIR)
+ endef
+--- a/package/kernel/mac80211/Makefile
++++ b/package/kernel/mac80211/Makefile
+@@ -186,6 +186,24 @@ define KernelPackage/ath/config
+ 
+ 		  Select this option if you want to use such channels.
+ 
++	config PACKAGE_ATH_LICENSED_CHAN
++		bool "Support channels in licensed bands"
++		default n
++		help
++		  This option enables support for licensed channels on such as
++	          4.9 GHz (public safety).
++
++		  These are PUBLIC SAFETY CHANNELS and MUST NOT BE USED in most
++		  regulatory domains UNLESS YOU HAVE A FULL LICENSE for their use from
++		  your local radio regulator, e.g. the FCC or equivalent. Using these
++		  channels without proper authorisation may result in serious legal
++		  consequences.
++
++		  You will also have to build a regulatory database with these channels
++		  enabled to actually use them.
++
++		  If you are a distro kernel builder or have any doubt whatsoever about
++		  your legal ability to use these channels, say N.
+   endif
+ endef
+ 
+--- a/package/kernel/mac80211/files/regdb.txt
++++ b/package/kernel/mac80211/files/regdb.txt
+@@ -1,5 +1,7 @@
+ country CO: DFS-FCC
+ 	(2402 - 2482 @ 40), (20)
++	# 4.9Ghz band
++	(4910 - 5170 @ 20), (30)
+ 	(5170 - 5250 @ 80), (17), AUTO-BW
+ 	(5250 - 5330 @ 80), (24), DFS, AUTO-BW
+ 	(5490 - 5730 @ 160), (24), DFS
+@@ -7,6 +9,8 @@ country CO: DFS-FCC
+ 
+ country MX: DFS-FCC
+ 	(2402 - 2482 @ 40), (20)
++	# 4.9Ghz band
++	(4910 - 5170 @ 20), (30)
+ 	(5170 - 5250 @ 80), (17), AUTO-BW
+ 	(5250 - 5330 @ 80), (24), DFS, AUTO-BW
+ 	(5490 - 5730 @ 160), (24), DFS
+@@ -14,6 +18,8 @@ country MX: DFS-FCC
+ 
+ country US: DFS-FCC
+ 	(2402 - 2472 @ 40), (30)
++	# 4.9Ghz band
++	(4910 - 5170 @ 20), (30)
+ 	# 5.15 ~ 5.25 GHz: 30 dBm for master mode, 23 dBm for clients
+ 	(5170 - 5250 @ 80), (23), AUTO-BW
+ 	(5250 - 5330 @ 80), (23), DFS, AUTO-BW

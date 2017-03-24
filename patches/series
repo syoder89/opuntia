@@ -94,3 +94,4 @@ kernel/0076-ar8327-fix-init-bug.patch
 packages/0179-ath10k-ct-alignment.patch
 packages/0180-ath10k-ct-tracing-fixes.patch
 packages/0181-ath10k-ct-napi.patch
+packages/0182-ath10k-ct-licensed-channels.patch
