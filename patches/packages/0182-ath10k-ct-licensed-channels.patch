@@ -130,7 +130,7 @@
 + 		ath10k_dbg(ar, ATH10K_DBG_MGMT, "wmi mgmt rx 11b (CCK) on 5GHz\n");
 --- a/package/kernel/ath10k-ct/Makefile
 +++ b/package/kernel/ath10k-ct/Makefile
-@@ -85,6 +85,10 @@ ifdef CONFIG_PACKAGE_ATH10K_DFS_CERTIFIE
+@@ -68,6 +68,10 @@ ifdef CONFIG_PACKAGE_ATH_DFS
    NOSTDINC_FLAGS += -DCONFIG_ATH10K_DFS_CERTIFIED
  endif
  
