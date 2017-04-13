@@ -75,12 +75,14 @@
  	u8 *art = (u8 *) KSEG1ADDR(0x1fff0000);
  
  	ath79_register_m25p80(NULL);
-@@ -144,8 +157,16 @@ static void __init wpj558_setup(void)
+@@ -144,17 +157,23 @@ static void __init wpj558_setup(void)
  					wpj558_gpio_keys);
  
  	ath79_register_usb();
 -
 -	ath79_register_wmac(art + WPJ558_WMAC_CALDATA_OFFSET, NULL);
+-
+-	ath79_register_pci();
 +	/* Reserve one for LAN */
 +        ath79_init_mac(mac, (u8 *) KSEG1ADDR(0x1f02e010) + WPJ558_MAC_OFFSET, 3);
 +        ath79_register_wmac(art + WPJ558_WMAC_CALDATA_OFFSET, mac);
@@ -92,9 +94,7 @@
 +        	pdata->use_eeprom = true;
 +	}
  
- 	ath79_register_pci();
- 
-@@ -153,8 +174,8 @@ static void __init wpj558_setup(void)
+ 	mdiobus_register_board_info(wpj558_mdio0_info,
  					ARRAY_SIZE(wpj558_mdio0_info));
  	ath79_register_mdio(0, 0x0);
  
@@ -105,7 +105,7 @@
  
  	ath79_setup_qca955x_eth_cfg(QCA955X_ETH_CFG_RGMII_EN);
  
-@@ -163,15 +184,16 @@ static void __init wpj558_setup(void)
+@@ -163,15 +182,16 @@ static void __init wpj558_setup(void)
  	ath79_eth0_data.phy_mask = BIT(0);
  	ath79_eth0_data.mii_bus_dev = &ath79_mdio0_device.dev;
  	ath79_eth0_pll_data.pll_1000 = 0x56000000;
@@ -126,15 +126,15 @@
  MIPS_MACHINE(ATH79_MACH_WPJ558, "WPJ558", "Compex WPJ558", wpj558_setup);
 --- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
 +++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
-@@ -280,6 +280,7 @@ platform_check_image() {
+@@ -283,6 +283,7 @@ platform_check_image() {
  	wpj342|\
  	wpj344|\
  	wpj531|\
 +	wpj558|\
+ 	wpj563|\
  	wrt400n|\
  	wrtnode2q|\
- 	wzr-450hp2|\
-@@ -315,7 +316,6 @@ platform_check_image() {
+@@ -319,7 +320,6 @@ platform_check_image() {
  	hornet-ub|\
  	mr12|\
  	mr16|\

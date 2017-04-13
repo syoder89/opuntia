@@ -22,7 +22,7 @@
  #define DEVID_COMPEX_WP18	0x047E
 --- a/target/linux/ar71xx/base-files/etc/board.d/02_network
 +++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
-@@ -460,6 +460,9 @@ ar71xx_setup_interfaces()
+@@ -467,6 +467,9 @@ ar71xx_setup_interfaces()
          	ucidef_add_switch_extra_attr "switch0" "alias_wan" "2"
          	ucidef_add_switch_extra_attr "switch0" "alias_lan" "3"
          	;;
@@ -32,14 +32,21 @@
  	wpj558)
  	        ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
          	ucidef_add_switch "switch0" \
---- a/target/linux/ar71xx/image/legacy.mk
-+++ b/target/linux/ar71xx/image/legacy.mk
-@@ -935,7 +935,7 @@ $(eval $(call SingleProfile,AthLzma,64k,
- $(eval $(call SingleProfile,AthLzma,64k,WPJ342_16M,wpj342-16M,WPJ342,ttyS0,115200,$$(wpj342_mtdlayout_16M),KRuImage,65536))
- $(eval $(call SingleProfile,Cpxwrt,64k,WPJ344_16M,wpj344-16M,WPJ344,ttyS0,115200,$$(wpj344_mtdlayout_16M),KRuImage,65536,0x1000000,1572864,14876672,WPJ344))
- $(eval $(call SingleProfile,AthLzma,64k,DR344,dr344,DR344,ttyS0,115200,$$(dr344_mtdlayout),RKuImage))
--$(eval $(call SingleProfile,AthLzma,64k,WPJ531_16M,wpj531-16M,WPJ531,ttyS0,115200,$$(wpj531_mtdlayout_16M),KRuImage,65536))
-+$(eval $(call SingleProfile,Cpxwrt,64k,WPJ531_16M,wpj531-16M,WPJ531,ttyS0,115200,$$(wpj531_mtdlayout_16M),KRuImage,65536,0x1000000,1572864,14876672,WPJ531))
- $(eval $(call SingleProfile,Cpxwrt,64k,WPJ558_16M,wpj558-16M,WPJ558,ttyS0,115200,$$(wpj558_mtdlayout_16M),KRuImage,65536,0x1000000,1572864,14876672,WPJ558))
- $(eval $(call SingleProfile,AthLzma,64k,WRTNODE2Q,wrtnode2q,WRTNODE2Q,ttyS0,115200,$$(wrtnode2q_mtdlayout),KRuImage))
- $(eval $(call SingleProfile,AthLzma,64k,YUN_8M,yun-8M,Yun,ttyATH0,250000,$$(yun_mtdlayout_8M),RKuImage))
+--- a/target/linux/ar71xx/image/generic.mk
++++ b/target/linux/ar71xx/image/generic.mk
+@@ -832,11 +832,15 @@ endef
+ TARGET_DEVICES += wpj344
+ 
+ define Device/wpj531
++  $(Device/CpxImageParams16M)
+   DEVICE_TITLE := Compex WPJ531 (16MB flash)
+   DEVICE_PACKAGES := kmod-usb-core kmod-usb-ohci kmod-usb2 kmod-usb-ledtrig-usbport
+   BOARDNAME := WPJ531
+   MTDPARTS := spi0.0:192k(u-boot)ro,16128k(firmware),64k(art)ro
+   IMAGE_SIZE := 16128k
++  IMAGES := sysupgrade.bin factory.img
++  IMAGE/sysupgrade.bin = append-kernel | pad-to $$$$(BLOCKSIZE) | append-rootfs | pad-rootfs | check-size $$$$(IMAGE_SIZE)
++  IMAGE/factory.img = Cpxfactory16M
+ endef
+ TARGET_DEVICES += wpj531
+ 

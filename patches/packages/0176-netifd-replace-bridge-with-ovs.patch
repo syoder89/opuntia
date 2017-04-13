@@ -105,10 +105,10 @@
 +
 --- /dev/null
 +++ b/package/network/config/netifd/patches/003-replace-bridge-with-ovs.patch
-@@ -0,0 +1,279 @@
+@@ -0,0 +1,334 @@
 +--- a/system-linux.c
 ++++ b/system-linux.c
-+@@ -590,13 +590,181 @@ static int system_rtnl_call(struct nl_ms
++@@ -619,13 +619,181 @@ static int system_rtnl_call(struct nl_ms
 + 	return nl_wait_for_ack(sock_rtnl);
 + }
 + 
@@ -290,7 +290,7 @@
 + 	struct ifreq ifr;
 + 
 + 	memset(&ifr, 0, sizeof(ifr));
-+@@ -610,6 +778,9 @@ static int system_bridge_if(const char *
++@@ -639,6 +807,9 @@ static int system_bridge_if(const char *
 + 
 + static bool system_is_bridge(const char *name, char *buf, int buflen)
 + {
@@ -300,7 +300,7 @@
 + 	struct stat st;
 + 
 + 	snprintf(buf, buflen, "/sys/devices/virtual/net/%s/bridge", name);
-+@@ -621,6 +792,9 @@ static bool system_is_bridge(const char
++@@ -650,6 +821,9 @@ static bool system_is_bridge(const char
 + 
 + static char *system_get_bridge(const char *name, char *buf, int buflen)
 + {
@@ -310,7 +310,7 @@
 + 	char *path;
 + 	ssize_t len = -1;
 + 	glob_t gl;
-+@@ -948,6 +1122,9 @@ static void system_bridge_conf_multicast
++@@ -981,6 +1155,9 @@ static void system_bridge_conf_multicast
 + 					 char *buf,
 + 					 int buf_len)
 + {
@@ -320,7 +320,7 @@
 + 	system_set_dev_sysctl("/sys/devices/virtual/net/%s/bridge/multicast_snooping",
 + 		bridge->ifname, cfg->igmp_snoop ? "1" : "0");
 + 
-+@@ -988,6 +1165,9 @@ static void system_bridge_conf_multicast
++@@ -1021,6 +1198,9 @@ static void system_bridge_conf_multicast
 + 
 + int system_bridge_addbr(struct device *bridge, struct bridge_config *cfg)
 + {
@@ -330,7 +330,7 @@
 + 	char buf[64];
 + 	unsigned long args[4] = {};
 + 
-+@@ -2107,6 +2287,34 @@ static int tunnel_ioctl(const char *name
++@@ -2255,6 +2435,47 @@ static int tunnel_ioctl(const char *name
 + 	return ioctl(sock_ioctl, cmd, &ifr);
 + }
 + 
@@ -340,13 +340,26 @@
 ++	struct blob_attr *cur;
 ++	int key = 0;
 ++	char brname[64], *remote_ip;
+++	struct blob_attr *tb_data[__OVS_VXLAN_DATA_ATTR_MAX];
 ++
-++	if ((cur = tb[TUNNEL_ATTR_INFO]) && (blobmsg_type(cur) == BLOBMSG_TYPE_STRING)) {
-++		if (sscanf(blobmsg_get_string(cur), "%63[^,],%d", brname , &key) < 2)
+++	if ((cur = tb[TUNNEL_ATTR_DATA]))
+++		blobmsg_parse(ovs_vxlan_data_attr_list.params, __OVS_VXLAN_DATA_ATTR_MAX, tb_data,
+++			blobmsg_data(cur), blobmsg_len(cur));
+++	else
+++		return -EINVAL;
+++
+++	if ((cur = tb_data[OVS_VXLAN_DATA_ATTR_KEY])) {
+++		key = blobmsg_get_u32(cur);
+++		if (key >= (1u << 24) - 1)
 ++			return -EINVAL;
 ++	}
 ++	else return -EINVAL;
 ++
+++	if ((cur = tb_data[OVS_VXLAN_DATA_ATTR_NETWORK])) {
+++		memset(brname, 0, sizeof(brname));
+++		strncpy(brname, blobmsg_get_string(cur), sizeof(brname)-1);
+++	}
+++	else return -EINVAL;
 ++
 ++	if ((cur = tb[TUNNEL_ATTR_REMOTE])) {
 ++		remote_ip = blobmsg_data(cur);
@@ -365,7 +378,7 @@
 + #ifdef IFLA_IPTUN_MAX
 + #define IP6_FLOWINFO_TCLASS	htonl(0x0FF00000)
 + static int system_add_gre_tunnel(const char *name, const char *kind,
-+@@ -2454,7 +2662,9 @@ static int __system_del_ip_tunnel(const
++@@ -2771,7 +2992,9 @@ static int __system_del_ip_tunnel(const
 + 		return -EINVAL;
 + 	str = blobmsg_data(cur);
 + 
@@ -374,9 +387,9 @@
 ++		return system_del_ovs_vxlan_tunnel(name);
 ++	else if (!strcmp(str, "greip") || !strcmp(str, "gretapip") ||
 + 	    !strcmp(str, "greip6") || !strcmp(str, "gretapip6") ||
-+ 	    !strcmp(str, "vtiip") || !strcmp(str, "vtiip6"))
-+ 		return system_link_del(name);
-+@@ -2679,6 +2889,8 @@ failure:
++ 	    !strcmp(str, "vtiip") || !strcmp(str, "vtiip6") ||
++ 	    !strcmp(str, "vxlan") || !strcmp(str, "vxlan6"))
++@@ -3007,6 +3230,8 @@ failure:
 + #endif
 + 	} else if (!strcmp(str, "ipip")) {
 + 		return system_add_proto_tunnel(name, IPPROTO_IPIP, link, tb);
@@ -385,9 +398,51 @@
 + 	}
 + 	else
 + 		return -EINVAL;
++--- a/system.c
+++++ b/system.c
++@@ -35,6 +35,16 @@ const struct uci_blob_param_list tunnel_
++ 	.params = tunnel_attrs,
++ };
++ 
+++static const struct blobmsg_policy ovs_vxlan_data_attrs[__OVS_VXLAN_DATA_ATTR_MAX] = {
+++	[OVS_VXLAN_DATA_ATTR_KEY] = { .name = "key", .type = BLOBMSG_TYPE_INT32 },
+++	[OVS_VXLAN_DATA_ATTR_NETWORK] = { .name = "network", .type = BLOBMSG_TYPE_STRING},
+++};
+++
+++const struct uci_blob_param_list ovs_vxlan_data_attr_list = {
+++	.n_params = __OVS_VXLAN_DATA_ATTR_MAX,
+++	.params = ovs_vxlan_data_attrs,
+++};
+++
++ static const struct blobmsg_policy vxlan_data_attrs[__VXLAN_DATA_ATTR_MAX] = {
++ 	[VXLAN_DATA_ATTR_ID] = { .name = "id", .type = BLOBMSG_TYPE_INT32 },
++ 	[VXLAN_DATA_ATTR_PORT] = { .name = "port", .type = BLOBMSG_TYPE_INT32 },
++--- a/system.h
+++++ b/system.h
++@@ -40,6 +40,12 @@ enum tunnel_param {
++ 
++ extern const struct uci_blob_param_list tunnel_attr_list;
++ 
+++enum ovs_vxlan_data {
+++	OVS_VXLAN_DATA_ATTR_NETWORK,
+++	OVS_VXLAN_DATA_ATTR_KEY,
+++	__OVS_VXLAN_DATA_ATTR_MAX
+++};
+++
++ enum vxlan_data {
++ 	VXLAN_DATA_ATTR_ID,
++ 	VXLAN_DATA_ATTR_PORT,
++@@ -63,6 +69,7 @@ enum vti_data {
++ 	__VTI_DATA_ATTR_MAX
++ };
++ 
+++extern const struct uci_blob_param_list ovs_vxlan_data_attr_list;
++ extern const struct uci_blob_param_list vxlan_data_attr_list;
++ extern const struct uci_blob_param_list gre_data_attr_list;
++ extern const struct uci_blob_param_list vti_data_attr_list;
 --- a/package/network/config/netifd/Makefile
 +++ b/package/network/config/netifd/Makefile
-@@ -41,6 +41,7 @@ define Package/netifd/install
+@@ -38,6 +38,7 @@ define Package/netifd/install
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/netifd $(1)/sbin/
  	$(CP) ./files/* $(1)/
  	$(CP) $(PKG_BUILD_DIR)/scripts/* $(1)/lib/netifd/

@@ -23,7 +23,7 @@
  #define DEVID_COMPEX_WP18	0x047E
 --- a/target/linux/ar71xx/base-files/etc/board.d/02_network
 +++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
-@@ -453,9 +453,13 @@ ar71xx_setup_interfaces()
+@@ -460,9 +460,13 @@ ar71xx_setup_interfaces()
  		ucidef_add_switch_port_attr "switch0" 5 led 2
  		;;
  	wpj344)
@@ -42,42 +42,55 @@
  			"5:lan" "1:wan" "6@eth0"
 --- a/target/linux/ar71xx/image/legacy.mk
 +++ b/target/linux/ar71xx/image/legacy.mk
-@@ -652,6 +652,29 @@ Image/Build/CyberTANGZIP=$(call Image/Bu
+@@ -648,7 +648,6 @@ Image/Build/CyberTANGZIP=$(call Image/Bu
  Image/Build/CyberTANLZMA/buildkernel=$(call MkuImageLzma,$(2),$(3) $(4))
  Image/Build/CyberTANLZMA=$(call Image/Build/CyberTAN,$(1),$(2),$(3),$(4),$(5))
  
-+define CpxwrtImageParams
-+	FSIZE=1000000
-+	IVER=16M
-+	KSTART=30000
-+	RSTART=1b0000
-+	P1START=fe0000
-+	P2START=ff0000
-+endef
-+
-+Image/Build/Cpxwrt/buildkernel=$(call MkuImageLzma,$(2),$(3) $(4))
-+Image/Build/Cpxwrt/initramfs=$(call MkuImageLzma/initramfs,$(2),$(3) $(4))
-+
-+define Image/Build/Cpxwrt
-+	$(call Image/Build/Ath,$(1),$(2),$(3),$(4),$(5),$(6))
-+        $(eval $(call CpxwrtImageParams,$(7)))
-+
-+	$(STAGING_DIR_HOST)/bin/mkmylofw -B $(10) -s $(7) \
-+                -p0x$(KSTART):$(8):al:0x80060000:"$(2)":$(KDIR_TMP)/vmlinux-$(2).uImage \
-+                -p0x$(RSTART):$(9):::rootfs:$(KDIR)/root.$(1) \
-+                -p0x$(P1START):0x010000 \
-+                -p0x$(P2START):0x010000 \
-+                $(call imgname,$(1),$(2))-factory.img
-+endef
- 
+-
  Image/Build/Netgear/initramfs=$(call MkuImageLzma/initramfs,$(2),$(3) $(4),,-M $(5))
  
-@@ -910,7 +933,7 @@ $(eval $(call SingleProfile,AthLzma,64k,
- $(eval $(call SingleProfile,AthLzma,64k,TUBE2H16M,tube2h-16M,TUBE2H,ttyATH0,115200,$$(alfa_mtdlayout_16M),KRuImage,65536))
- $(eval $(call SingleProfile,AthLzma,64k,WLR8100,wlr8100,WLR8100,ttyS0,115200,$$(wlr8100_mtdlayout),KRuImage))
- $(eval $(call SingleProfile,AthLzma,64k,WPJ342_16M,wpj342-16M,WPJ342,ttyS0,115200,$$(wpj342_mtdlayout_16M),KRuImage,65536))
--$(eval $(call SingleProfile,AthLzma,64k,WPJ344_16M,wpj344-16M,WPJ344,ttyS0,115200,$$(wpj344_mtdlayout_16M),KRuImage,65536))
-+$(eval $(call SingleProfile,Cpxwrt,64k,WPJ344_16M,wpj344-16M,WPJ344,ttyS0,115200,$$(wpj344_mtdlayout_16M),KRuImage,65536,0x1000000,1572864,14876672,WPJ344))
- $(eval $(call SingleProfile,AthLzma,64k,DR344,dr344,DR344,ttyS0,115200,$$(dr344_mtdlayout),RKuImage))
- $(eval $(call SingleProfile,AthLzma,64k,WPJ531_16M,wpj531-16M,WPJ531,ttyS0,115200,$$(wpj531_mtdlayout_16M),KRuImage,65536))
- $(eval $(call SingleProfile,AthLzma,64k,WPJ558_16M,wpj558-16M,WPJ558,ttyS0,115200,$$(wpj558_mtdlayout_16M),KRuImage,65536))
+ define Image/Build/Netgear/buildkernel
+--- a/target/linux/ar71xx/image/generic.mk
++++ b/target/linux/ar71xx/image/generic.mk
+@@ -790,6 +790,25 @@ define Device/bhr-4grv2
+ endef
+ TARGET_DEVICES += bhr-4grv2
+ 
++define Device/CpxImageParams16M
++  KSTART := 30000
++  RSTART := 1b0000
++  P1START := fe0000
++  P2START := ff0000
++  FIRMWARE_SIZE := 0x1000000
++  KERNEL_SIZE := 1572864
++  ROOTFS_SIZE := 14876672
++endef
++
++define Build/Cpxfactory16M
++        $(STAGING_DIR_HOST)/bin/mkmylofw -B $(BOARDNAME) -s $(FIRMWARE_SIZE) \
++                -p0x$(KSTART):$(KERNEL_SIZE):al:0x80060000:$(BOARDNAME):$(IMAGE_KERNEL) \
++                -p0x$(RSTART):$(ROOTFS_SIZE):::rootfs:$(IMAGE_ROOTFS) \
++                -p0x$(P1START):0x010000 \
++                -p0x$(P2START):0x010000 \
++                $@
++endef
++
+ define Device/wpj342
+   DEVICE_TITLE := Compex WPJ342 (16MB flash)
+   DEVICE_PACKAGES := kmod-usb-core kmod-usb-ohci kmod-usb2 kmod-usb-ledtrig-usbport
+@@ -800,11 +819,15 @@ endef
+ TARGET_DEVICES += wpj342
+ 
+ define Device/wpj344
++  $(Device/CpxImageParams16M)
+   DEVICE_TITLE := Compex WPJ344 (16MB flash)
+   DEVICE_PACKAGES := kmod-usb-core kmod-usb-ohci kmod-usb2 kmod-usb-ledtrig-usbport
+   BOARDNAME := WPJ344
+   MTDPARTS := spi0.0:192k(u-boot)ro,16128k(firmware),64k(art)ro
+   IMAGE_SIZE := 16128k
++  IMAGES := sysupgrade.bin factory.img
++  IMAGE/sysupgrade.bin = append-kernel | pad-to $$$$(BLOCKSIZE) | append-rootfs | pad-rootfs | check-size $$$$(IMAGE_SIZE)
++  IMAGE/factory.img = Cpxfactory16M
+ endef
+ TARGET_DEVICES += wpj344
+ 

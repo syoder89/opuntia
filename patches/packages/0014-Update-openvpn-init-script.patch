@@ -18,7 +18,7 @@ Subject: [PATCH] Update correct openvpn init script
  STOP=10
  
  USE_PROCD=1
-@@ -60,17 +60,23 @@ openvpn_add_instance() {
+@@ -60,20 +60,23 @@ openvpn_add_instance() {
  	local dir="$2"
  	local conf="$3"
  
@@ -31,6 +31,9 @@ Subject: [PATCH] Update correct openvpn init script
  		--config "$conf"
  	procd_set_param file "$dir/$conf"
 -	procd_set_param respawn
+-	procd_append_param respawn 3600
+-	procd_append_param respawn 5
+-	procd_append_param respawn -1
 +	procd_set_param respawn 3600 10 0
  	procd_close_instance
  }
@@ -44,7 +47,7 @@ Subject: [PATCH] Update correct openvpn init script
  start_instance() {
  	local s="$1"
  
-@@ -93,6 +99,31 @@ start_instance() {
+@@ -96,6 +99,31 @@ start_instance() {
  	[ ! -d "/var/etc" ] && mkdir -p "/var/etc"
  	[ -f "/var/etc/openvpn-$s.conf" ] && rm "/var/etc/openvpn-$s.conf"
  

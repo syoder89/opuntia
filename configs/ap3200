@@ -96,7 +96,8 @@ CONFIG_TARGET_ar71xx_generic=y
 # CONFIG_TARGET_ar71xx_generic_WLAEAG300N is not set
 # CONFIG_TARGET_ar71xx_generic_WP543 is not set
 # CONFIG_TARGET_ar71xx_generic_WPE72 is not set
-CONFIG_TARGET_ar71xx_generic_WPJ344=y
+CONFIG_TARGET_ar71xx_generic_wpj344=y
+CONFIG_TARGET_PROFILE="DEVICE_wpj344"
 # CONFIG_TARGET_ar71xx_generic_DHP1565A1 is not set
 # CONFIG_TARGET_ar71xx_generic_DIR505A1 is not set
 # CONFIG_TARGET_ar71xx_generic_DIR600A1 is not set

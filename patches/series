@@ -25,6 +25,8 @@ packages/0166-Bash-fix-parallel-build.patch
 oldpackages/0066-Multiwan-work-with-qos-mark-mask-fixes.patch
 0150-Fix-Linux-Pam-URL.patch
 0160-Add-wpj344-support.patch
+0161-Add-wpj558-support.patch
+0162-Add-wpj531-support.patch
 packages/0171-add-802.11ac-support.patch
 packages/0172-iptraf-musl-libc-fixes.patch
 packages/0159-Update-authsae-06-2016.patch
@@ -44,8 +46,6 @@ kernel/0058-wpj344-mac-fixes.patch
 packages/0186-squid-reduce-size.patch
 0187-openvpn-iproute2-path-wrong.patch
 kernel/0059-wpj558-mac-fixes.patch
-0161-Add-wpj558-support.patch
-0162-Add-wpj531-support.patch
 packages/0066-conntrack-tools-logging.patch
 packages/0067-mrd6-disable-logging.patch
 packages/0187-collectd-iwinfo-morestats.patch
