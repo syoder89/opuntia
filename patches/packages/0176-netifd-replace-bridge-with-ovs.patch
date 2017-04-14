@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/package/network/config/netifd/files/lib/netifd/proto/ovs_vxlan.sh
-@@ -0,0 +1,102 @@
+@@ -0,0 +1,105 @@
 +#!/bin/sh
 +
 +[ -n "$INCLUDE_ONLY" ] || {
@@ -25,7 +25,10 @@
 +	proto_add_tunnel
 +	json_add_string mode "ovs_vxlan"
 +	json_add_string remote "$remote"
-+	json_add_string info "br-${network},${key:-0}"
++	json_add_object 'data'
++	json_add_string network "br-${network}"
++	json_add_int key "${key:-0}"
++	json_close_object
 +	proto_close_tunnel
 +
 +	proto_add_data
@@ -105,10 +108,10 @@
 +
 --- /dev/null
 +++ b/package/network/config/netifd/patches/003-replace-bridge-with-ovs.patch
-@@ -0,0 +1,334 @@
+@@ -0,0 +1,338 @@
 +--- a/system-linux.c
 ++++ b/system-linux.c
-+@@ -619,13 +619,181 @@ static int system_rtnl_call(struct nl_ms
++@@ -619,13 +619,185 @@ static int system_rtnl_call(struct nl_ms
 + 	return nl_wait_for_ack(sock_rtnl);
 + }
 + 
@@ -215,6 +218,10 @@
 ++        snprintf(peer2_opt, 64, "options:peer=%s", patch1);
 ++	peer2_opt[63] = '\0';
 ++
+++	/* Add the master bridge if it doesn't exist */
+++	if (run_prog("/usr/bin/ovs-vsctl", "--may-exist", "add-br", brname))
+++		return -1;
+++
 ++	/* Add a bridge to allow our interface to be seen */
 ++	if (run_prog("/usr/bin/ovs-vsctl", "--may-exist", "add-br", ifname))
 ++		return -1;
@@ -290,7 +297,7 @@
 + 	struct ifreq ifr;
 + 
 + 	memset(&ifr, 0, sizeof(ifr));
-+@@ -639,6 +807,9 @@ static int system_bridge_if(const char *
++@@ -639,6 +811,9 @@ static int system_bridge_if(const char *
 + 
 + static bool system_is_bridge(const char *name, char *buf, int buflen)
 + {
@@ -300,7 +307,7 @@
 + 	struct stat st;
 + 
 + 	snprintf(buf, buflen, "/sys/devices/virtual/net/%s/bridge", name);
-+@@ -650,6 +821,9 @@ static bool system_is_bridge(const char
++@@ -650,6 +825,9 @@ static bool system_is_bridge(const char
 + 
 + static char *system_get_bridge(const char *name, char *buf, int buflen)
 + {
@@ -310,7 +317,7 @@
 + 	char *path;
 + 	ssize_t len = -1;
 + 	glob_t gl;
-+@@ -981,6 +1155,9 @@ static void system_bridge_conf_multicast
++@@ -981,6 +1159,9 @@ static void system_bridge_conf_multicast
 + 					 char *buf,
 + 					 int buf_len)
 + {
@@ -320,7 +327,7 @@
 + 	system_set_dev_sysctl("/sys/devices/virtual/net/%s/bridge/multicast_snooping",
 + 		bridge->ifname, cfg->igmp_snoop ? "1" : "0");
 + 
-+@@ -1021,6 +1198,9 @@ static void system_bridge_conf_multicast
++@@ -1021,6 +1202,9 @@ static void system_bridge_conf_multicast
 + 
 + int system_bridge_addbr(struct device *bridge, struct bridge_config *cfg)
 + {
@@ -330,7 +337,7 @@
 + 	char buf[64];
 + 	unsigned long args[4] = {};
 + 
-+@@ -2255,6 +2435,47 @@ static int tunnel_ioctl(const char *name
++@@ -2255,6 +2439,47 @@ static int tunnel_ioctl(const char *name
 + 	return ioctl(sock_ioctl, cmd, &ifr);
 + }
 + 
@@ -378,7 +385,7 @@
 + #ifdef IFLA_IPTUN_MAX
 + #define IP6_FLOWINFO_TCLASS	htonl(0x0FF00000)
 + static int system_add_gre_tunnel(const char *name, const char *kind,
-+@@ -2771,7 +2992,9 @@ static int __system_del_ip_tunnel(const
++@@ -2771,7 +2996,9 @@ static int __system_del_ip_tunnel(const
 + 		return -EINVAL;
 + 	str = blobmsg_data(cur);
 + 
@@ -389,7 +396,7 @@
 + 	    !strcmp(str, "greip6") || !strcmp(str, "gretapip6") ||
 + 	    !strcmp(str, "vtiip") || !strcmp(str, "vtiip6") ||
 + 	    !strcmp(str, "vxlan") || !strcmp(str, "vxlan6"))
-+@@ -3007,6 +3230,8 @@ failure:
++@@ -3007,6 +3234,8 @@ failure:
 + #endif
 + 	} else if (!strcmp(str, "ipip")) {
 + 		return system_add_proto_tunnel(name, IPPROTO_IPIP, link, tb);

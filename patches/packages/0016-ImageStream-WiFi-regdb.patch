@@ -1,0 +1,45 @@
+--- a/package/kernel/mac80211/Makefile
++++ b/package/kernel/mac80211/Makefile
+@@ -1706,7 +1706,7 @@ define Build/Prepare
+ 		$(PKG_BUILD_DIR)/backport-include/linux/bcm47xx_nvram.h
+ 
+ 	echo 'compat-wireless-$(PKG_VERSION)-$(PKG_RELEASE)-$(REVISION)' > $(PKG_BUILD_DIR)/compat_version
+-	$(CP) ./files/regdb.txt $(PKG_BUILD_DIR)/net/wireless/db.txt
++	$(CP) ./files/regdb-is.txt $(PKG_BUILD_DIR)/net/wireless/db.txt
+ endef
+ 
+ ifneq ($(CONFIG_PACKAGE_kmod-cfg80211)$(CONFIG_PACKAGE_kmod-lib80211),)
+--- /dev/null
++++ b/package/kernel/mac80211/files/regdb-is.txt
+@@ -0,0 +1,31 @@
++country CO: DFS-FCC
++	(2402 - 2482 @ 40), (20)
++	# 4.9Ghz band
++	(4910 - 5170 @ 20), (30)
++	(5170 - 5250 @ 80), (17), AUTO-BW
++	(5250 - 5330 @ 80), (24), DFS, AUTO-BW
++	(5490 - 5730 @ 160), (24), DFS
++	(5735 - 5835 @ 80), (30)
++
++country MX: DFS-FCC
++	(2402 - 2482 @ 40), (20)
++	# 4.9Ghz band
++	(4910 - 5170 @ 20), (30)
++	(5170 - 5250 @ 80), (17), AUTO-BW
++	(5250 - 5330 @ 80), (24), DFS, AUTO-BW
++	(5490 - 5730 @ 160), (24), DFS
++	(5735 - 5835 @ 80), (30)
++
++country US: DFS-FCC
++	(2402 - 2472 @ 40), (30)
++	# 4.9Ghz band
++	(4910 - 5170 @ 20), (30)
++	# 5.15 ~ 5.25 GHz: 30 dBm for master mode, 23 dBm for clients
++	(5170 - 5250 @ 80), (23), AUTO-BW
++	(5250 - 5330 @ 80), (23), DFS, AUTO-BW
++	(5490 - 5730 @ 160), (23), DFS
++	(5735 - 5835 @ 80), (30)
++	# 60g band
++	# reference: http://cfr.regstoday.com/47cfr15.aspx#47_CFR_15p255
++	# channels 1,2,3, EIRP=40dBm(43dBm peak)
++	(57240 - 63720 @ 2160), (40)

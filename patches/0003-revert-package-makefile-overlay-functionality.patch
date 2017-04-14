@@ -1,0 +1,43 @@
+From b044bd5921e9644c9df9655bef10cee0af730724 Mon Sep 17 00:00:00 2001
+From: Felix Fietkau <nbd@nbd.name>
+Date: Mon, 3 Apr 2017 12:36:35 +0200
+Subject: [PATCH] build: remove package makefile overlay functionality
+
+Recent attempts to use it have shown that it does not work properly
+except for a few undocumented cases. It's better to remove this now to
+avoid having more people fall into the same trap
+
+Signed-off-by: Felix Fietkau <nbd@nbd.name>
+---
+ include/package.mk  | 7 -------
+ include/toplevel.mk | 2 +-
+ 2 files changed, 1 insertion(+), 8 deletions(-)
+
+--- a/include/package.mk
++++ b/include/package.mk
+@@ -232,7 +232,14 @@ define Build/DefaultTargets
+   endef
+ endef
+ 
++define Build/IncludeOverlay
++  $(eval -include $(wildcard $(TOPDIR)/overlay/*/$(PKG_DIR_NAME).mk))
++  define Build/IncludeOverlay
++  endef
++endef
++
+ define BuildPackage
++  $(Build/IncludeOverlay)
+   $(eval $(Package/Default))
+   $(eval $(Package/$(1)))
+ 
+--- a/include/toplevel.mk
++++ b/include/toplevel.mk
+@@ -82,7 +82,7 @@ _ignore = $(foreach p,$(IGNORE_PACKAGES)
+ prepare-tmpinfo: FORCE
+ 	@+$(MAKE) -r -s staging_dir/host/.prereq-build $(PREP_MK)
+ 	mkdir -p tmp/info
+-	$(_SINGLE)$(NO_TRACE_MAKE) -j1 -r -s -f include/scan.mk SCAN_TARGET="packageinfo" SCAN_DIR="package" SCAN_NAME="package" SCAN_DEPS="$(TOPDIR)/include/package*.mk" SCAN_DEPTH=5 SCAN_EXTRA=""
++	$(_SINGLE)$(NO_TRACE_MAKE) -j1 -r -s -f include/scan.mk SCAN_TARGET="packageinfo" SCAN_DIR="package" SCAN_NAME="package" SCAN_DEPS="$(TOPDIR)/include/package*.mk $(TOPDIR)/overlay/*/*.mk" SCAN_DEPTH=5 SCAN_EXTRA=""
+ 	$(_SINGLE)$(NO_TRACE_MAKE) -j1 -r -s -f include/scan.mk SCAN_TARGET="targetinfo" SCAN_DIR="target/linux" SCAN_NAME="target" SCAN_DEPS="image/Makefile profiles/*.mk $(TOPDIR)/include/kernel*.mk $(TOPDIR)/include/target.mk" SCAN_DEPTH=2 SCAN_EXTRA="" SCAN_MAKEOPTS="TARGET_BUILD=1"
+ 	for type in package target; do \
+ 		f=tmp/.$${type}info; t=tmp/.config-$${type}.in; \

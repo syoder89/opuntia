@@ -94,3 +94,5 @@ packages/0179-ath10k-ct-alignment.patch
 packages/0180-ath10k-ct-tracing-fixes.patch
 packages/0181-ath10k-ct-napi.patch
 packages/0182-ath10k-ct-licensed-channels.patch
+0003-revert-package-makefile-overlay-functionality.patch
+packages/0016-ImageStream-WiFi-regdb.patch
