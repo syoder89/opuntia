@@ -1,0 +1,48 @@
+--- a/feeds/routing/quagga/Makefile
++++ b/feeds/routing/quagga/Makefile
+@@ -8,9 +8,9 @@
+ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=quagga
+-PKG_VERSION:=1.1.0
++PKG_VERSION:=1.2.1
+ PKG_RELEASE:=1
+-PKG_MD5SUM:=daa303871e07ea5856aae6fd79e89722
++PKG_MD5SUM:=b1546de89062f7070d56e780b30be4b1
+ 
+ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+ PKG_SOURCE_URL:=http://download.savannah.gnu.org/releases/quagga/
+@@ -37,7 +37,7 @@ define Package/quagga/Default
+   SECTION:=net
+   CATEGORY:=Network
+   SUBMENU:=Routing and Redirection
+-  DEPENDS:=quagga
++  DEPENDS:=quagga +libcares
+   TITLE:=The Quagga Software Routing Suite
+   URL:=http://www.quagga.net
+   MAINTAINER:=Vasilis Tsiligiannis <acinonyx@openwrt.gr>
+--- a/feeds/routing/quagga/patches/140-holdtimer-set.patch
++++ /dev/null
+@@ -1,22 +0,0 @@
+---- a/bgpd/bgp_network.c
+-+++ b/bgpd/bgp_network.c
+-@@ -257,8 +257,7 @@ bgp_accept (struct thread *thread)
+-     peer->fd = bgp_sock;
+-     peer->status = Active;
+-     peer->local_id = peer1->local_id;
+--    peer->v_holdtime = peer1->v_holdtime;
+--    peer->v_keepalive = peer1->v_keepalive;
+-+    peer->v_holdtime = BGP_LARGE_HOLDTIME;
+- 
+-     /* Make peer's address string. */
+-     sockunion2str (&su, buf, SU_ADDRSTRLEN);
+---- a/bgpd/bgpd.h
+-+++ b/bgpd/bgpd.h
+-@@ -752,6 +752,7 @@ struct bgp_nlri
+- 
+- /* BGP timers default value.  */
+- #define BGP_INIT_START_TIMER                     1
+-+#define BGP_LARGE_HOLDTIME                     240
+- #define BGP_DEFAULT_HOLDTIME                   180
+- #define BGP_DEFAULT_KEEPALIVE                   60 
+- #define BGP_DEFAULT_EBGP_ROUTEADV               30

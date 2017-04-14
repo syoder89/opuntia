@@ -1,0 +1,5 @@
+#!/bin/sh
+
+mv /etc/quagga /etc/quagga.bak
+cp -a /etc/quagga.bak /etc/quagga
+rm -rf /etc/quagga.bak

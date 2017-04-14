@@ -96,3 +96,4 @@ packages/0181-ath10k-ct-napi.patch
 packages/0182-ath10k-ct-licensed-channels.patch
 0003-revert-package-makefile-overlay-functionality.patch
 packages/0016-ImageStream-WiFi-regdb.patch
+packages/0197-quagga-version-1.2.1.patch
