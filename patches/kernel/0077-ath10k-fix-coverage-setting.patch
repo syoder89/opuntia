@@ -1,0 +1,53 @@
+--- /dev/null
++++ b/package/kernel/mac80211/patches/999-scott-ath10k-fix-coverage-setting.patch
+@@ -0,0 +1,50 @@
++--- a/drivers/net/wireless/ath/ath10k/hw.c
+++++ b/drivers/net/wireless/ath/ath10k/hw.c
++@@ -247,7 +247,7 @@ static void ath10k_hw_qca988x_set_covera
++ 	/* Only modify registers if the core is started. */
++ 	if ((ar->state != ATH10K_STATE_ON) &&
++ 	    (ar->state != ATH10K_STATE_RESTARTED))
++-		goto unlock;
+++		goto store_regs;
++ 
++ 	/* Retrieve the current values of the two registers that need to be
++ 	 * adjusted.
++--- a/drivers/net/wireless/ath/ath10k/mac.c
+++++ b/drivers/net/wireless/ath/ath10k/mac.c
++@@ -4504,6 +4504,24 @@ static int ath10k_set_antenna(struct iee
++ 	return ret;
++ }
++ 
+++static inline void ath10k_mac_queue_set_coverage_class_work(struct ath10k *ar)
+++{
+++	if (ar->hw_params.hw_ops->set_coverage_class) {
+++		spin_lock_bh(&ar->data_lock);
+++
+++		/* This call only ensures that the modified coverage class
+++		 * persists in case the firmware sets the registers back to
+++		 * their default value. So calling it is only necessary if the
+++		 * coverage class has a non-zero value.
+++		 */
+++		if (ar->fw_coverage.coverage_class)
+++			queue_work(ar->workqueue, &ar->set_coverage_class_work);
+++
+++		spin_unlock_bh(&ar->data_lock);
+++	}
+++}
+++
+++
++ static int ath10k_start(struct ieee80211_hw *hw)
++ {
++ 	struct ath10k *ar = hw->priv;
++@@ -4522,9 +4540,11 @@ static int ath10k_start(struct ieee80211
++ 	switch (ar->state) {
++ 	case ATH10K_STATE_OFF:
++ 		ar->state = ATH10K_STATE_ON;
+++		ath10k_mac_queue_set_coverage_class_work(ar);
++ 		break;
++ 	case ATH10K_STATE_RESTARTING:
++ 		ar->state = ATH10K_STATE_RESTARTED;
+++		ath10k_mac_queue_set_coverage_class_work(ar);
++ 		break;
++ 	case ATH10K_STATE_ON:
++ 	case ATH10K_STATE_RESTARTED:

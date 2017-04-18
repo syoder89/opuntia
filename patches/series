@@ -4,6 +4,7 @@ kernel/0019-Add-ifindex-reuse-patch-so-tunnels-will-reuse-their-.patch
 packages/0028-Add-etc-rc.d-to-sysupgrade-so-service-start-stop-are.patch
 kernel/0043-Fix-panic-in-ledtrig-netdev-due-to-a-netdev-callback.patch
 kernel/0044-Linux-3.13-updates.patch
+packages/0061-Change-root-shell-to-bash.patch
 packages/0062-Set-root-password.patch
 packages/0064-Add-bash-job-support.-Change-default-login-shell-to-.patch
 oldpackages/0065-Multiwan-fixes.patch
@@ -97,3 +98,5 @@ packages/0182-ath10k-ct-licensed-channels.patch
 0003-revert-package-makefile-overlay-functionality.patch
 packages/0016-ImageStream-WiFi-regdb.patch
 packages/0197-quagga-version-1.2.1.patch
+packages/0197-quagga-run-as-root-to-write-conf-to-overlay.patch
+kernel/0077-ath10k-fix-coverage-setting.patch

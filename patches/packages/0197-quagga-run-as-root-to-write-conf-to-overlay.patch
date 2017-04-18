@@ -1,0 +1,13 @@
+--- a/feeds/routing/quagga/Makefile
++++ b/feeds/routing/quagga/Makefile
+@@ -168,8 +168,8 @@ CONFIGURE_ARGS+= \
+ 	--sysconfdir=/etc/quagga/ \
+ 	--enable-shared \
+ 	--disable-static \
+-	--enable-user=network \
+-	--enable-group=network \
++	--enable-user=root \
++	--enable-group=root \
+ 	--enable-multipath=8 \
+ 	--disable-ospfclient \
+ 	--disable-capabilities \
