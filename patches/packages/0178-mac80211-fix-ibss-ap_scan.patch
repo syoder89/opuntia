@@ -1,0 +1,11 @@
+--- a/package/network/services/hostapd/files/hostapd.sh
++++ b/package/network/services/hostapd/files/hostapd.sh
+@@ -603,7 +603,7 @@ wpa_supplicant_prepare_interface() {
+ 	_w_modestr=
+ 
+ 	[[ "$mode" = adhoc ]] && {
+-		ap_scan="ap_scan=2"
++		ap_scan="ap_scan=1"
+ 
+ 		_w_modestr="mode=1"
+ 	}

@@ -1,0 +1,15 @@
+tftpboot 0x42000000 opuntia-4.8.5-r31774-ipq806x-AP148-squashfs-nand-factory.ubi
+Nope this doesn't work.
+#nand device 0
+#nand erase 0x00000000 0x04000000
+#nand write $fileaddr 0x00000000 $filesize
+
+Must flash a nand image from Compex, then move the jumper to JP13. Without flashing a nand image
+the board will not see anything on the serial console when the jumper is on JP13.
+Once both these things have been done then you can flash the device as follows:
+
+tftpboot 0x42000000 opuntia-4.8.5-r31774-ipq806x-AP148-squashfs-nand-factory.ubi
+ipq_nand linux
+nand erase 0x1340000 0x4000000
+nand write $fileaddr 0x1340000 $filesize
+

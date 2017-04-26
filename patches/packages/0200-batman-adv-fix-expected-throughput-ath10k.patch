@@ -1,0 +1,32 @@
+--- /dev/null
++++ b/feeds/routing/batman-adv/patches/0100-scott-ath10k-fix-expected-throughput.patch
+@@ -0,0 +1,29 @@
++--- a/net/batman-adv/bat_v_elp.c
+++++ b/net/batman-adv/bat_v_elp.c
++@@ -99,6 +99,7 @@ static u32 batadv_v_elp_get_throughput(s
++ 		if (!real_netdev)
++ 			goto default_throughput;
++ 
+++		memset(&sinfo, 0, sizeof(sinfo));
++ 		ret = cfg80211_get_station(real_netdev, neigh->addr, &sinfo);
++ 
++ 		dev_put(real_netdev);
++@@ -109,8 +110,16 @@ static u32 batadv_v_elp_get_throughput(s
++ 			 */
++ 			return 0;
++ 		}
++-		if (!ret)
++-			return sinfo.expected_throughput / 100;
+++		if (!ret) {
+++			throughput = sinfo.expected_throughput / 100;
+++
+++			if (throughput == 0 && (sinfo.filled & BIT(NL80211_STA_INFO_TX_BITRATE))) {
+++				/* cfg80211_calculate_bitrate will return 0 for mcs >= 32 */
+++				throughput = cfg80211_calculate_bitrate(&sinfo.txrate);
+++			}
+++
+++			return throughput;
+++		}
++ 	}
++ 
++ 	/* if not a wifi interface, check if this device provides data via
