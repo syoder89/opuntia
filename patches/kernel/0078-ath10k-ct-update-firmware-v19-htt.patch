@@ -1,0 +1,22 @@
+--- a/package/firmware/ath10k-firmware/Makefile
++++ b/package/firmware/ath10k-firmware/Makefile
+@@ -76,10 +76,16 @@ define Download/ct-firmware
+   URL_FILE:=$($(1)_FIRMWARE_FILE_CT)
+ endef
+ 
+-QCA988X_FIRMWARE_FILE_CT:=firmware-2-ct-full-community.bin-19-rc3-lede
++define Download/ct-firmware-beta
++  URL:=https://www.candelatech.com/downloads/ath10k-fw-beta/$(2)
++  FILE:=$(call CT_FIRMWARE_FILE,$(1))
++  URL_FILE:=$($(1)_FIRMWARE_FILE_CT)
++endef
++
++QCA988X_FIRMWARE_FILE_CT:=firmware-2-ct-full-htt-mgt-community.bin
+ define Download/ath10k-firmware-qca988x-ct
+-  $(call Download/ct-firmware,QCA988X,)
+-  HASH:=4112d78161a2c20e7a9490ea8d04e9f919508bafb097d88761dcce026c26f93f
++  $(call Download/ct-firmware-beta,QCA988X,)
++  HASH:=2083a4c6f3247b963d2aecc95fafb26af89e0abc66cd4c79815266e2830da384
+ endef
+ $(eval $(call Download,ath10k-firmware-qca988x-ct))
+ 

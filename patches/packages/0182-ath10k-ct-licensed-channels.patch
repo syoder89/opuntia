@@ -1,5 +1,5 @@
 --- /dev/null
-+++ b/package/kernel/ath10k-ct/patches/600-scott-licensed-channels.patch
++++ b/package/kernel/ath10k-ct/patches/1007-scott-licensed-channels.patch
 @@ -0,0 +1,127 @@
 +--- a/ath10k/Kconfig
 ++++ b/ath10k/Kconfig

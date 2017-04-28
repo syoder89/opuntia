@@ -13,7 +13,7 @@
    NOSTDINC_FLAGS += -DCONFIG_ATH10K_DEBUG
  endif
 --- /dev/null
-+++ b/package/kernel/ath10k-ct/patches/999-scott-ath10k-ct-tracing-fixes.patch
++++ b/package/kernel/ath10k-ct/patches/1005-scott-ath10k-ct-tracing-fixes.patch
 @@ -0,0 +1,68 @@
 +--- a/ath10k/Makefile
 ++++ b/ath10k/Makefile

@@ -1,5 +1,5 @@
 --- /dev/null
-+++ b/package/kernel/ath10k-ct/patches/999-scott-ath10k-alignment.patch
++++ b/package/kernel/ath10k-ct/patches/1003-scott-ath10k-alignment.patch
 @@ -0,0 +1,431 @@
 +--- a/ath10k/core.h
 ++++ b/ath10k/core.h

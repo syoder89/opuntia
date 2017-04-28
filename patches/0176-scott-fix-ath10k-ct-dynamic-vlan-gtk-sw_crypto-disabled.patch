@@ -1,5 +1,5 @@
 --- /dev/null
-+++ b/package/kernel/ath10k-ct/patches/999-scott-fix-ath10k-dynamic-vlan-gtk-sw_crypto-disabled.patch
++++ b/package/kernel/ath10k-ct/patches/1004-scott-fix-ath10k-dynamic-vlan-gtk-sw_crypto-disabled.patch
 @@ -0,0 +1,13 @@
 +--- a/ath10k/mac.c
 ++++ b/ath10k/mac.c

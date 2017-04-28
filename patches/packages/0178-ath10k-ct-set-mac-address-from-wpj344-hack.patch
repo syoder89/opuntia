@@ -1,5 +1,5 @@
 --- /dev/null
-+++ b/package/kernel/ath10k-ct/patches/999-scott-ath10k-set-mac-address-from-wpj344-hack.patch
++++ b/package/kernel/ath10k-ct/patches/1002-scott-ath10k-set-mac-address-from-wpj344-hack.patch
 @@ -0,0 +1,21 @@
 +--- a/ath10k/mac.c
 ++++ b/ath10k/mac.c

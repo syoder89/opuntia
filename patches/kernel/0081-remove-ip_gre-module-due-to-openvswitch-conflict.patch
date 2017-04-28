@@ -1,0 +1,12 @@
+--- a/package/kernel/linux/modules/netsupport.mk
++++ b/package/kernel/linux/modules/netsupport.mk
+@@ -454,7 +454,8 @@ define KernelPackage/gre
+   DEPENDS:=+kmod-iptunnel
+   KCONFIG:=CONFIG_NET_IPGRE CONFIG_NET_IPGRE_DEMUX
+   FILES:=$(LINUX_DIR)/net/ipv4/ip_gre.ko $(LINUX_DIR)/net/ipv4/gre.ko
+-  AUTOLOAD:=$(call AutoLoad,39,gre ip_gre)
++  AUTOLOAD:=$(call AutoLoad,39,gre)
++#  AUTOLOAD:=$(call AutoLoad,39,gre ip_gre)
+ endef
+ 
+ define KernelPackage/gre/description

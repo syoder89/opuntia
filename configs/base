@@ -2078,7 +2078,7 @@ CONFIG_PACKAGE_luci-app-ipsec=y
 # CONFIG_PACKAGE_luci-app-isis-license is not set
 CONFIG_PACKAGE_luci-app-isis-openvpn=y
 CONFIG_PACKAGE_luci-app-snmp=y
-CONFIG_PACKAGE_luci-proto-gre=y
+# CONFIG_PACKAGE_luci-proto-gre is not set
 CONFIG_PACKAGE_luci-theme-opuntia=y
 CONFIG_PACKAGE_stats=y
 
@@ -2473,7 +2473,7 @@ CONFIG_PACKAGE_kmod-mppe=y
 CONFIG_PACKAGE_kmod-pppoe=y
 CONFIG_PACKAGE_kmod-pppol2tp=y
 CONFIG_PACKAGE_kmod-pppox=y
-CONFIG_PACKAGE_kmod-pptp=y
+# CONFIG_PACKAGE_kmod-pptp is not set
 # CONFIG_PACKAGE_kmod-rxrpc is not set
 CONFIG_PACKAGE_kmod-sched=y
 CONFIG_PACKAGE_kmod-sched-connmark=y
@@ -2623,7 +2623,7 @@ CONFIG_PACKAGE_kmod-ath9k=y
 CONFIG_PACKAGE_kmod-ath10k-ct=y
 # CONFIG_PACKAGE_ath10k-firmware-qca988x is not set
 CONFIG_PACKAGE_ath10k-firmware-qca988x-ct=y
-CONFIG_PACKAGE_ath10k-firmware-qca9984-ct=y
+# CONFIG_PACKAGE_ath10k-firmware-qca9984-ct is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca99x0 is not set
 # CONFIG_PACKAGE_ATH_LICENSED_CHAN is not set
 # CONFIG_ATH9K_SUPPORT_PCOEM is not set
@@ -4528,7 +4528,7 @@ CONFIG_OPENVPN_openssl_ENABLE_IPROUTE2=y
 CONFIG_OPENVPN_openssl_ENABLE_SMALL=y
 # CONFIG_PACKAGE_openvpn-polarssl is not set
 # CONFIG_PACKAGE_peervpn is not set
-CONFIG_PACKAGE_pptpd=y
+# CONFIG_PACKAGE_pptpd is not set
 # CONFIG_PACKAGE_quicktun is not set
 # CONFIG_PACKAGE_ssltunnel is not set
 CONFIG_PACKAGE_strongswan=y
@@ -4798,7 +4798,7 @@ CONFIG_PACKAGE_ethtool=y
 # CONFIG_PACKAGE_gnunet is not set
 # CONFIG_PACKAGE_gpsd is not set
 # CONFIG_PACKAGE_gpsd-clients is not set
-CONFIG_PACKAGE_gre=y
+# CONFIG_PACKAGE_gre is not set
 # CONFIG_PACKAGE_grev4 is not set
 # CONFIG_PACKAGE_grev6 is not set
 # CONFIG_PACKAGE_gw6c is not set
@@ -4929,7 +4929,7 @@ CONFIG_PACKAGE_ppp=y
 # CONFIG_PACKAGE_ppp-mod-pppoa is not set
 CONFIG_PACKAGE_ppp-mod-pppoe=y
 CONFIG_PACKAGE_ppp-mod-pppol2tp=y
-CONFIG_PACKAGE_ppp-mod-pptp=y
+# CONFIG_PACKAGE_ppp-mod-pptp is not set
 CONFIG_PACKAGE_ppp-mod-radius=y
 # CONFIG_PACKAGE_ppp-multilink is not set
 CONFIG_PACKAGE_pppdump=y

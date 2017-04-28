@@ -1,0 +1,27 @@
+--- /dev/null
++++ b/package/kernel/ath10k-ct/patches/1009-scott-ath10k-ct-no-pci-read32-for-irq.patch
+@@ -0,0 +1,24 @@
++--- a/ath10k/pci.c
+++++ b/ath10k/pci.c
++@@ -728,8 +728,8 @@ void ath10k_pci_disable_and_clear_legacy
++ 
++ 	/* IMPORTANT: this extra read transaction is required to
++ 	 * flush the posted write buffer. */
++-	(void)ath10k_pci_read32(ar, SOC_CORE_BASE_ADDRESS +
++-				PCIE_INTR_ENABLE_ADDRESS);
+++//	(void)ath10k_pci_read32(ar, SOC_CORE_BASE_ADDRESS +
+++//				PCIE_INTR_ENABLE_ADDRESS);
++ }
++ 
++ void ath10k_pci_enable_legacy_irq(struct ath10k *ar)
++@@ -740,8 +740,8 @@ void ath10k_pci_enable_legacy_irq(struct
++ 
++ 	/* IMPORTANT: this extra read transaction is required to
++ 	 * flush the posted write buffer. */
++-	(void)ath10k_pci_read32(ar, SOC_CORE_BASE_ADDRESS +
++-				PCIE_INTR_ENABLE_ADDRESS);
+++//	(void)ath10k_pci_read32(ar, SOC_CORE_BASE_ADDRESS +
+++//				PCIE_INTR_ENABLE_ADDRESS);
++ }
++ 
++ static inline const char *ath10k_pci_get_irq_method(struct ath10k *ar)

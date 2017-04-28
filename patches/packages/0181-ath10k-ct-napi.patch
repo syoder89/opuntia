@@ -1,5 +1,5 @@
 --- /dev/null
-+++ b/package/kernel/ath10k-ct/patches/999-scott-ath10k-napi.patch
++++ b/package/kernel/ath10k-ct/patches/1006-scott-ath10k-napi.patch
 @@ -0,0 +1,678 @@
 +--- a/ath10k/core.h
 ++++ b/ath10k/core.h
@@ -384,8 +384,8 @@
 ++	 *  case if it processes the entire TX ring then it should count that
 ++	 *  work as the rest of the budget.
 ++	 */
-++//	if ((quota < budget) && !kfifo_is_empty(&htt->txdone_fifo))
-++//		quota = budget;
+++	if ((quota < budget) && !kfifo_is_empty(&htt->txdone_fifo))
+++		quota = budget;
 + 
 + 	/* kfifo_get: called only within txrx_tasklet so it's neatly serialized.
 + 	 * From kfifo_get() documentation:

@@ -1,5 +1,5 @@
 --- /dev/null
-+++ b/package/kernel/ath10k-ct/patches/999-scott-ath10k-ct-remove-extra-debug.patch
++++ b/package/kernel/ath10k-ct/patches/1001-scott-ath10k-ct-remove-extra-debug.patch
 @@ -0,0 +1,17 @@
 +--- a/ath10k/wmi.c
 ++++ b/ath10k/wmi.c
