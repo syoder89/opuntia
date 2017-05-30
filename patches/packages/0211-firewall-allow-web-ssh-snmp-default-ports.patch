@@ -1,0 +1,37 @@
+--- a/package/network/config/firewall/files/firewall.config
++++ b/package/network/config/firewall/files/firewall.config
+@@ -129,6 +129,34 @@ config rule
+ 	option proto		udp
+ 	option target		ACCEPT
+ 
++config rule
++	option name		Allow-SSH-Admin
++	option src		wan
++	option proto		tcp
++	option dest_port	22
++	option target		ACCEPT
++
++config rule
++	option name		Allow-Web-Admin
++	option src		wan
++	option proto		tcp
++	option dest_port	80
++	option target		ACCEPT
++
++config rule
++	option name		Allow-Web-Admin-SSL
++	option src		wan
++	option proto		tcp
++	option dest_port	443
++	option target		ACCEPT
++
++config rule
++	option name		Allow-SNMP
++	option src		wan
++	option proto		udp
++	option dest_port	161
++	option target		ACCEPT
++
+ # include a file with users custom iptables rules
+ config include
+ 	option path /etc/firewall.user

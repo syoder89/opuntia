@@ -101,3 +101,36 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
 -DISTRIB_ARCH='%A'
 -DISTRIB_DESCRIPTION='%D %N %V %C'
 -DISTRIB_TAINTS='%t'
+--- a/package/base-files/files/bin/config_generate
++++ b/package/base-files/files/bin/config_generate
+@@ -55,7 +55,7 @@ generate_static_network() {
+ 	fi
+ }
+ 
+-addr_offset=2
++addr_offset=200
+ generate_network() {
+ 	local ifname macaddr protocol type ipaddr netmask
+ 
+@@ -91,8 +91,8 @@ generate_network() {
+ 		static)
+ 			local ipad
+ 			case "$1" in
+-				lan) ipad=${ipaddr:-"192.168.1.1"} ;;
+-				*) ipad=${ipaddr:-"192.168.$((addr_offset++)).1"} ;;
++				lan) ipad=${ipaddr:-"10.10.199.1"} ;;
++				*) ipad=${ipaddr:-"10.10.$((addr_offset++)).1"} ;;
+ 			esac
+ 
+ 			netm=${netmask:-"255.255.255.0"}
+@@ -226,8 +226,8 @@ generate_static_system() {
+ 	uci -q batch <<-EOF
+ 		delete system.@system[0]
+ 		add system system
+-		set system.@system[-1].hostname='LEDE'
+-		set system.@system[-1].timezone='UTC'
++		set system.@system[-1].hostname='Opuntia'
++		set system.@system[-1].timezone='America/Chicago'
+ 		set system.@system[-1].ttylogin='0'
+ 		set system.@system[-1].log_size='64'
+ 		set system.@system[-1].urandom_seed='0'
