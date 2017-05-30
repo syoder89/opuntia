@@ -24,7 +24,7 @@
 + 	SET_IEEE80211_DEV(ar->hw, ar->dev);
 --- a/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj344.c
 +++ b/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj344.c
-@@ -128,8 +128,13 @@ static struct mdio_board_info wpj344_mdi
+@@ -129,8 +129,13 @@ static struct mdio_board_info wpj344_mdi
  	},
  };
  
@@ -38,12 +38,14 @@
  	u8 *art = (u8 *) KSEG1ADDR(0x1fff0000);
  
  	ath79_register_m25p80(NULL);
-@@ -140,8 +145,16 @@ static void __init wpj344_setup(void)
+@@ -141,10 +146,16 @@ static void __init wpj344_setup(void)
  					wpj344_gpio_keys);
  
  	ath79_register_usb();
 -
 -	ath79_register_wmac(art + WPJ344_WMAC_CALDATA_OFFSET, NULL);
+-
+-	ath79_register_pci();
 +	/* Reserve one for LAN */
 +	ath79_init_mac(mac, (u8 *) KSEG1ADDR(0x1f02e010) + WPJ344_MAC0_OFFSET, 3);
 +	ath79_register_wmac(art + WPJ344_WMAC_CALDATA_OFFSET, mac);
@@ -55,9 +57,9 @@
 +        	pdata->use_eeprom = true;
 +	}
  
- 	ath79_register_pci();
- 
-@@ -151,8 +164,8 @@ static void __init wpj344_setup(void)
+ 	mdiobus_register_board_info(wpj344_mdio0_info,
+ 					ARRAY_SIZE(wpj344_mdio0_info));
+@@ -152,8 +163,8 @@ static void __init wpj344_setup(void)
  	ath79_register_mdio(1, 0x0);
  	ath79_register_mdio(0, 0x0);
  
@@ -68,7 +70,7 @@
  
  	ath79_setup_ar934x_eth_cfg(AR934X_ETH_CFG_RGMII_GMAC0 |
  				   AR934X_ETH_CFG_SW_ONLY_MODE);
-@@ -163,13 +176,15 @@ static void __init wpj344_setup(void)
+@@ -164,13 +175,15 @@ static void __init wpj344_setup(void)
  	ath79_eth0_data.mii_bus_dev = &ath79_mdio0_device.dev;
  	ath79_eth0_pll_data.pll_1000 = 0x06000000;
  
