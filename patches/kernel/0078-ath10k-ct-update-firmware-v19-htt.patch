@@ -16,7 +16,7 @@
 -  $(call Download/ct-firmware,QCA988X,)
 -  HASH:=4112d78161a2c20e7a9490ea8d04e9f919508bafb097d88761dcce026c26f93f
 +  $(call Download/ct-firmware-beta,QCA988X,)
-+  HASH:=2083a4c6f3247b963d2aecc95fafb26af89e0abc66cd4c79815266e2830da384
++  HASH:=ad29c08ae85e7b1be9452713f81b365e36751827c44aeec8862671b1d6f64da9
  endef
  $(eval $(call Download,ath10k-firmware-qca988x-ct))
  
