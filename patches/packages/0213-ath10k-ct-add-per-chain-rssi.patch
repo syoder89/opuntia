@@ -1,0 +1,23 @@
+--- /dev/null
++++ b/package/kernel/ath10k-ct/patches/1011-scott-ath10k-ct-add-per-chain-rssi.patch
+@@ -0,0 +1,20 @@
++--- a/ath10k/htt_rx.c
+++++ b/ath10k/htt_rx.c
++@@ -828,10 +828,17 @@ static void ath10k_htt_rx_h_signal(struc
++ 				   struct ieee80211_rx_status *status,
++ 				   struct htt_rx_desc *rxd)
++ {
+++	int chain;
++ 	/* FIXME: Get real NF */
++ 	status->signal = ATH10K_DEFAULT_NOISE_FLOOR +
++ 			 rxd->ppdu_start.rssi_comb;
++ 	status->flag &= ~RX_FLAG_NO_SIGNAL_VAL;
+++	for (chain=0;chain<4;chain++) {
+++		if (rxd->ppdu_start.rssi_chains[chain].pri20_mhz != 128) {
+++                   	status->chains |= BIT(chain);
+++                   	status->chain_signal[chain] = ATH10K_DEFAULT_NOISE_FLOOR + rxd->ppdu_start.rssi_chains[chain].pri20_mhz;
+++		}
+++	}
++ }
++ 
++ static void ath10k_htt_rx_h_mactime(struct ath10k *ar,

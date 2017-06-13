@@ -110,3 +110,4 @@ kernel/0081-remove-ip_gre-module-due-to-openvswitch-conflict.patch
 kernel/0082-ar71xx-enable-preempt.patch
 packages/0211-firewall-allow-web-ssh-snmp-default-ports.patch
 packages/0212-ath10k-ct-update-version.patch
+packages/0213-ath10k-ct-add-per-chain-rssi.patch
