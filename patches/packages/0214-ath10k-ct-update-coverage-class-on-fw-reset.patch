@@ -1,0 +1,64 @@
+--- /dev/null
++++ b/package/kernel/ath10k-ct/patches/1012-scott-ath10k-ct-coverage-setting-on-fw-reset.patch
+@@ -0,0 +1,61 @@
++--- a/ath10k/hw.c
+++++ b/ath10k/hw.c
++@@ -302,7 +302,11 @@ static void ath10k_hw_qca988x_set_covera
++ 
++ 	timeout_reg = ack_timeout | cts_timeout;
++ 
++-	printk("Changing coverage class to %d\n", value);
+++	if (ar->fw_coverage.coverage_class == value)
+++		printk("Firmware reset, updating coverage class to %d...\n", value);
+++	else
+++		printk("Changing coverage class from %d to %d\n", ar->fw_coverage.coverage_class, value);
+++
++ 	ath10k_hif_write32(ar,
++ 			   WLAN_MAC_BASE_ADDRESS + WAVE1_PCU_GBL_IFS_SLOT,
++ 			   slottime_reg);
++@@ -314,16 +318,17 @@ static void ath10k_hw_qca988x_set_covera
++ 					     WAVE1_PCU_GBL_IFS_SLOT);
++ 	t_timeout_reg = ath10k_hif_read32(ar, WLAN_MAC_BASE_ADDRESS +
++ 					    WAVE1_PCU_ACK_CTS_TIMEOUT);
+++#if 0
++ 	if (t_slottime_reg != slottime_reg)
++ 		printk("Slottime register is not correct! 0x%x but s/b 0x%x\n", t_slottime_reg, slottime_reg);
++ 	else
++-		printk("Slottime register is correct at 0x%x\n", t_slottime_reg);
+++		printk("Slottime register is now 0x%x, was 0x%x.\n", t_slottime_reg, ar->fw_coverage.reg_slottime_orig);
++ 	if (t_timeout_reg != timeout_reg)
++ 		printk("Timeout register is not correct! 0x%x but s/b 0x%x\n", t_timeout_reg, timeout_reg);
++ 	else
++-		printk("Timeout register is correct at 0x%x\n", t_timeout_reg);
+++		printk("Timeout register is now 0x%x, was 0x%x.\n", t_timeout_reg, ar->fw_coverage.reg_ack_cts_timeout_orig);
+++#endif
++ 
++-#if 0 /* Shouldn't need this -- Scott */
++ 	/* Ensure we have a debug level of WARN set for the case that the
++ 	 * coverage class is larger than 0. This is important as we need to
++ 	 * set the registers again if the firmware does an internal reset and
++@@ -339,17 +344,19 @@ static void ath10k_hw_qca988x_set_covera
++ 	}
++ 
++ 	ath10k_wmi_dbglog_cfg(ar, fw_dbglog_mask, fw_dbglog_level);
++-#endif
++ 
++ store_regs:
++ 	/* After an error we will not retry setting the coverage class. */
+++	if (value < 0)
+++		printk("NOT changing coverage_class from %d to %d!!!\n", ar->fw_coverage.coverage_class, value);
++ 	spin_lock_bh(&ar->data_lock);
++-	ar->fw_coverage.coverage_class = value;
+++	if (value >= 0) {
+++		ar->fw_coverage.coverage_class = value;
+++		ar->fw_coverage.reg_slottime_conf = slottime_reg;
+++		ar->fw_coverage.reg_ack_cts_timeout_conf = timeout_reg;
+++	}
++ 	spin_unlock_bh(&ar->data_lock);
++ 
++-	ar->fw_coverage.reg_slottime_conf = slottime_reg;
++-	ar->fw_coverage.reg_ack_cts_timeout_conf = timeout_reg;
++-
++ unlock:
++ 	mutex_unlock(&ar->conf_mutex);
++ }
