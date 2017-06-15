@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/package/kernel/ath10k-ct/patches/1012-scott-ath10k-ct-coverage-setting-on-fw-reset.patch
-@@ -0,0 +1,61 @@
+@@ -0,0 +1,71 @@
 +--- a/ath10k/hw.c
 ++++ b/ath10k/hw.c
 +@@ -302,7 +302,11 @@ static void ath10k_hw_qca988x_set_covera
@@ -62,3 +62,13 @@
 + unlock:
 + 	mutex_unlock(&ar->conf_mutex);
 + }
++--- a/ath10k/mac.c
+++++ b/ath10k/mac.c
++@@ -6051,6 +6051,7 @@ static void ath10k_bss_info_changed(stru
++ 				    arvif->vdev_id, ret);
++ 	}
++ 
+++	ath10k_mac_queue_set_coverage_class_work(ar);
++ 	mutex_unlock(&ar->conf_mutex);
++ }
++ 
