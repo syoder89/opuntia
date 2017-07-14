@@ -83,7 +83,6 @@ packages/0175-hostapd-ft-wildcard-r0kh-r1kh.patch
 packages/0176-openvswitch-conf-symlink-to-tmp.patch
 packages/0179-hostapd-preset-r1kh-and-nasid-to-bssid.patch
 0001-fix-getver.patch
-packages/0180-openvswitch-stp-not-a-module.patch
 packages/0181-netifd-wireless-fix-isolate-parameter.patch
 kernel/0075-shortcut-fe.patch
 kernel/0076-ar8327-fix-init-bug.patch

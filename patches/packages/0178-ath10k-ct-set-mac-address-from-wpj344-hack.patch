@@ -1,23 +1,27 @@
 --- /dev/null
 +++ b/package/kernel/ath10k-ct/patches/1002-scott-ath10k-set-mac-address-from-wpj344-hack.patch
-@@ -0,0 +1,21 @@
+@@ -0,0 +1,25 @@
 +--- a/ath10k/mac.c
 ++++ b/ath10k/mac.c
-+@@ -8507,6 +8507,8 @@ static const struct ieee80211_tpt_blink
++@@ -8507,6 +8507,10 @@ static const struct ieee80211_tpt_blink
 + };
 + #endif
 + 
-++extern u8 ath10k_macaddr[ETH_ALEN];
+++#if defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj344) || defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj558)
+++extern u8 *ath10k_macaddr;
+++#endif
 ++
 + int ath10k_mac_register(struct ath10k *ar)
 + {
 + 	static const u32 cipher_suites[] = {
-+@@ -8520,6 +8522,9 @@ int ath10k_mac_register(struct ath10k *a
++@@ -8520,6 +8522,11 @@ int ath10k_mac_register(struct ath10k *a
 + 	void *channels;
 + 	int ret;
 + 
+++#if defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj344) || defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj558)
 ++        if (ath10k_macaddr)
 ++                memcpy(ar->mac_addr, ath10k_macaddr, ETH_ALEN);
+++#endif
 ++
 + 	SET_IEEE80211_PERM_ADDR(ar->hw, ar->mac_addr);
 + 

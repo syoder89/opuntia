@@ -66,7 +66,7 @@
  	},
  };
  
-+extern u8 ath10k_macaddr[ETH_ALEN];
++extern u8 *ath10k_macaddr;
 +
  static void __init wpj558_setup(void)
  {
@@ -75,7 +75,7 @@
  	u8 *art = (u8 *) KSEG1ADDR(0x1fff0000);
  
  	ath79_register_m25p80(NULL);
-@@ -144,17 +157,23 @@ static void __init wpj558_setup(void)
+@@ -144,17 +157,24 @@ static void __init wpj558_setup(void)
  					wpj558_gpio_keys);
  
  	ath79_register_usb();
@@ -87,6 +87,7 @@
 +        ath79_init_mac(mac, (u8 *) KSEG1ADDR(0x1f02e010) + WPJ558_MAC_OFFSET, 3);
 +        ath79_register_wmac(art + WPJ558_WMAC_CALDATA_OFFSET, mac);
 +        ath79_init_mac(mac, (u8 *) KSEG1ADDR(0x1f02e010) + WPJ558_MAC_OFFSET, 2);
++	ath10k_macaddr = kmalloc(ETH_ALEN, GFP_KERNEL);
 +	memcpy(ath10k_macaddr, mac, ETH_ALEN);
 +	ap91_pci_init(NULL, mac);
 +        pdata = ap9x_pci_get_wmac_data(0);
@@ -105,40 +106,19 @@
  
  	ath79_setup_qca955x_eth_cfg(QCA955X_ETH_CFG_RGMII_EN);
  
-@@ -163,15 +182,16 @@ static void __init wpj558_setup(void)
+@@ -163,15 +183,7 @@ static void __init wpj558_setup(void)
  	ath79_eth0_data.phy_mask = BIT(0);
  	ath79_eth0_data.mii_bus_dev = &ath79_mdio0_device.dev;
  	ath79_eth0_pll_data.pll_1000 = 0x56000000;
-+	ath79_register_eth(0);
- 
-+#if 0
- 	/* GMAC1 is connected to the SGMII interface */
- 	ath79_eth1_data.phy_if_mode = PHY_INTERFACE_MODE_SGMII;
- 	ath79_eth1_data.speed = SPEED_1000;
- 	ath79_eth1_data.duplex = DUPLEX_FULL;
- 	ath79_eth1_pll_data.pll_1000 = 0x03000101;
 -
--	ath79_register_eth(0);
- 	ath79_register_eth(1);
-+#endif
+-	/* GMAC1 is connected to the SGMII interface */
+-	ath79_eth1_data.phy_if_mode = PHY_INTERFACE_MODE_SGMII;
+-	ath79_eth1_data.speed = SPEED_1000;
+-	ath79_eth1_data.duplex = DUPLEX_FULL;
+-	ath79_eth1_pll_data.pll_1000 = 0x03000101;
+-
+ 	ath79_register_eth(0);
+-	ath79_register_eth(1);
  }
  
  MIPS_MACHINE(ATH79_MACH_WPJ558, "WPJ558", "Compex WPJ558", wpj558_setup);
---- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
-+++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
-@@ -283,6 +283,7 @@ platform_check_image() {
- 	wpj342|\
- 	wpj344|\
- 	wpj531|\
-+	wpj558|\
- 	wpj563|\
- 	wrt400n|\
- 	wrtnode2q|\
-@@ -319,7 +320,6 @@ platform_check_image() {
- 	hornet-ub|\
- 	mr12|\
- 	mr16|\
--	wpj558|\
- 	zbt-we1526|\
- 	zcn-1523h-2|\
- 	zcn-1523h-5)

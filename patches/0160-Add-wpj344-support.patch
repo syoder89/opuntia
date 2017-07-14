@@ -23,7 +23,7 @@
  #define DEVID_COMPEX_WP18	0x047E
 --- a/target/linux/ar71xx/base-files/etc/board.d/02_network
 +++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
-@@ -460,9 +460,13 @@ ar71xx_setup_interfaces()
+@@ -473,9 +473,13 @@ ar71xx_setup_interfaces()
  		ucidef_add_switch_port_attr "switch0" 5 led 2
  		;;
  	wpj344)
@@ -42,7 +42,7 @@
  			"5:lan" "1:wan" "6@eth0"
 --- a/target/linux/ar71xx/image/legacy.mk
 +++ b/target/linux/ar71xx/image/legacy.mk
-@@ -648,7 +648,6 @@ Image/Build/CyberTANGZIP=$(call Image/Bu
+@@ -646,7 +646,6 @@ Image/Build/CyberTANGZIP=$(call Image/Bu
  Image/Build/CyberTANLZMA/buildkernel=$(call MkuImageLzma,$(2),$(3) $(4))
  Image/Build/CyberTANLZMA=$(call Image/Build/CyberTAN,$(1),$(2),$(3),$(4),$(5))
  
@@ -52,10 +52,19 @@
  define Image/Build/Netgear/buildkernel
 --- a/target/linux/ar71xx/image/generic.mk
 +++ b/target/linux/ar71xx/image/generic.mk
-@@ -790,6 +790,25 @@ define Device/bhr-4grv2
- endef
+@@ -824,9 +824,32 @@ endef
  TARGET_DEVICES += bhr-4grv2
  
+ define Device/wpj-16m
++  $(Device/CpxImageParams16M)
+   DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-usb-ledtrig-usbport
+   MTDPARTS := spi0.0:192k(u-boot)ro,16128k(firmware),64k(art)ro
+   IMAGE_SIZE := 16128k
++  IMAGES := sysupgrade.bin factory.img
++  IMAGE/sysupgrade.bin = append-kernel | pad-to $$$$(BLOCKSIZE) | append-rootfs | pad-rootfs | check-size $$$$(IMAGE_SIZE)
++  IMAGE/factory.img = Cpxfactory16M
++endef
++
 +define Device/CpxImageParams16M
 +  KSTART := 30000
 +  RSTART := 1b0000
@@ -73,24 +82,6 @@
 +                -p0x$(P1START):0x010000 \
 +                -p0x$(P2START):0x010000 \
 +                $@
-+endef
-+
- define Device/wpj342
-   DEVICE_TITLE := Compex WPJ342 (16MB flash)
-   DEVICE_PACKAGES := kmod-usb-core kmod-usb-ohci kmod-usb2 kmod-usb-ledtrig-usbport
-@@ -800,11 +819,15 @@ endef
- TARGET_DEVICES += wpj342
- 
- define Device/wpj344
-+  $(Device/CpxImageParams16M)
-   DEVICE_TITLE := Compex WPJ344 (16MB flash)
-   DEVICE_PACKAGES := kmod-usb-core kmod-usb-ohci kmod-usb2 kmod-usb-ledtrig-usbport
-   BOARDNAME := WPJ344
-   MTDPARTS := spi0.0:192k(u-boot)ro,16128k(firmware),64k(art)ro
-   IMAGE_SIZE := 16128k
-+  IMAGES := sysupgrade.bin factory.img
-+  IMAGE/sysupgrade.bin = append-kernel | pad-to $$$$(BLOCKSIZE) | append-rootfs | pad-rootfs | check-size $$$$(IMAGE_SIZE)
-+  IMAGE/factory.img = Cpxfactory16M
  endef
- TARGET_DEVICES += wpj344
  
+ define Device/wpj342

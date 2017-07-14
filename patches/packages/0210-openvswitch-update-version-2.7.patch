@@ -1,68 +1,121 @@
 --- a/feeds/packages/net/openvswitch/Makefile
 +++ b/feeds/packages/net/openvswitch/Makefile
-@@ -12,8 +12,8 @@ include $(INCLUDE_DIR)/kernel.mk
+@@ -12,25 +12,44 @@ include $(INCLUDE_DIR)/kernel.mk
  
  PKG_NAME:=openvswitch
  
--PKG_RELEASE:=7
--PKG_VERSION:=2.5.0
+-PKG_RELEASE:=2
 +PKG_RELEASE:=1
-+PKG_VERSION:=2.7.0
+ PKG_VERSION:=2.7.0
  PKG_RELEASE=$(PKG_SOURCE_VERSION)
  PKG_LICENSE:=Apache-2.0
  PKG_LICENSE_FILES:=COPYING
-@@ -22,7 +22,7 @@ PKG_USE_MIPS16:=0
- PKG_SOURCE_PROTO:=git
- PKG_SOURCE_URL:=https://github.com/openvswitch/ovs
- PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
--PKG_SOURCE_VERSION:=22d4614ddf83988a3771fb379ea029e663b4455a
+ PKG_USE_MIPS16:=0
+ 
+-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+-PKG_SOURCE_URL:=http://openvswitch.org/releases/
+-PKG_HASH:=e492cf08a929b4a2178b7f9b01dc4ff562f44138b547b4e942078187b2445d2e
+-
+-PKG_BUILD_DEPENDS:=python/host python-six/host CONFIG_PACKAGE_openvswitch-python
++PKG_SOURCE_PROTO:=git
++PKG_SOURCE_URL:=https://github.com/openvswitch/ovs
++PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 +PKG_SOURCE_VERSION:=a03263a416fee837afebf0471a5e76b47d2161cc
- PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
++PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
  
  PKG_BUILD_PARALLEL:=1
-@@ -33,7 +33,7 @@ PKG_INSTALL:=1
- # see https://github.com/openvswitch/ovs/blob/master/FAQ.md
- # This list is pruned to only those kernels used in OpenWRT
- # Support for kernel 4.4 is backported
--SUPPORTED_KERNELS:=LINUX_3_18||LINUX_4_1||LINUX_4_3||LINUX_4_4
-+SUPPORTED_KERNELS:=LINUX_3_18||LINUX_4_1||LINUX_4_3||LINUX_4_4||LINUX_4_9
+ PKG_FIXUP:=autoreconf
+ PKG_INSTALL:=1
  
- # If only kmod-openvswitch is enabled, then override default make path to only
- # build and install the datapath/linux subdirectory which cuts down compilation
-@@ -104,16 +104,6 @@ define Package/openvswitch-ipsec/descrip
-   IPsec.
++# Upstream package supports kernels between 2.6.32 and 4.3 
++# see https://github.com/openvswitch/ovs/blob/master/FAQ.md
++# This list is pruned to only those kernels used in OpenWRT
++# Support for kernel 4.4 is backported
+ SUPPORTED_KERNELS:=LINUX_3_18||LINUX_4_1||LINUX_4_3||LINUX_4_4||LINUX_4_9
+ 
++# If only kmod-openvswitch is enabled, then override default make path to only
++# build and install the datapath/linux subdirectory which cuts down compilation
++# time dramatically.
++ifeq ($(CONFIG_PACKAGE_openvswitch-base),)
++ ifneq ($(CONFIG_PACKAGE_kmod-openvswitch),)
++  MAKE_PATH := datapath/linux
++ endif
++endif
++
++# Additionally register PKG_CONFIG_DEPENDS to trigger a rebuild of the code
++# base if the package selection changes.
++PKG_CONFIG_DEPENDS := \
++	CONFIG_PACKAGE_openvswitch-base \
++	CONFIG_PACKAGE_kmod-openvswitch
++
+ include $(INCLUDE_DIR)/package.mk
+ $(call include_mk, python-package.mk)
+ 
+@@ -67,13 +86,24 @@ endef
+ define Package/openvswitch-python
+   $(call Package/openvswitch/Default)
+   TITLE:=Open vSwitch Python Support
+-  DEPENDS:=+openvswitch +PACKAGE_openvswitch-python:python +PACKAGE_openvswitch-python:python-six
++  DEPENDS:=+openvswitch +PACKAGE_openvswitch-python:python
  endef
  
--define Package/openvswitch-benchmark
--  $(call Package/openvswitch/Default)
--  TITLE:=Open vSwitch flow setup benchmark utility
--  DEPENDS:=+openvswitch
--endef
--
--define Package/openvswitch-benchmark/description
--  Utility for running OpenVSwitch benchmarking
--endef
--
+ define Package/openvswitch-python/description
+   Provides bindings and libraries for using Python to manipulate/work with Open vSwitch.
+ endef
+ 
++define Package/openvswitch-ipsec
++  $(call Package/openvswitch/Default)
++  TITLE:=Open vSwitch GRE through IPsec tool
++  DEPENDS:=+openvswitch-python
++endef
++
++define Package/openvswitch-ipsec/description
++  The ovs-monitor-ipsec script provides support for encrypting GRE tunnels with 
++  IPsec.
++endef
++
  OVS_BIN_TOOLS:=ovs-appctl ovs-ofctl ovs-dpctl ovs-vsctl ovsdb-client
  define Package/openvswitch
    $(call Package/openvswitch/Default)
-@@ -132,7 +122,7 @@ define KernelPackage/openvswitch
+@@ -91,16 +121,8 @@ define KernelPackage/openvswitch
+   CATEGORY:=Kernel modules
    SUBMENU:=Network Support
    TITLE:=Open vSwitch Kernel Package
-   KCONFIG:=CONFIG_BRIDGE
--  DEPENDS:=@IPV6 +kmod-gre +kmod-lib-crc32c +kmod-vxlan +kmod-nf-conntrack +kmod-nf-conntrack6 @($(SUPPORTED_KERNELS))
+-  KCONFIG:= \
+-	CONFIG_BRIDGE \
+-	CONFIG_OPENVSWITCH \
+-	CONFIG_OPENVSWITCH_GRE=y \
+-	CONFIG_OPENVSWITCH_VXLAN=y \
+-	CONFIG_OPENVSWITCH_GENEVE=y
+-  DEPENDS:= \
+-	@IPV6 +kmod-gre +kmod-lib-crc32c +kmod-mpls \
+-	+kmod-vxlan +kmod-nf-nat +kmod-nf-nat6  \
+-	@($(SUPPORTED_KERNELS))
++  KCONFIG:=CONFIG_BRIDGE
 +  DEPENDS:=@IPV6 +kmod-gre +kmod-lib-crc32c +kmod-vxlan +kmod-nf-conntrack +kmod-nf-conntrack6 +kmod-nf-nat @($(SUPPORTED_KERNELS))
    FILES:= \
  	$(PKG_BUILD_DIR)/datapath/linux/openvswitch.$(LINUX_KMOD_SUFFIX) \
  	$(PKG_BUILD_DIR)/datapath/linux/vport-vxlan.$(LINUX_KMOD_SUFFIX) \
-@@ -179,10 +169,10 @@ define Package/openvswitch-base/install
+@@ -121,10 +143,7 @@ CONFIGURE_ARGS += --enable-shared
+ TARGET_CFLAGS += -flto -std=gnu99
+ 
+ CONFIGURE_VARS += KARCH=$(LINUX_KARCH)
+-MAKE_FLAGS += \
+-	ARCH="$(LINUX_KARCH)" \
+-	PYTHONPATH="$(HOST_PYTHONPATH)" \
+-	PYTHON="$(HOST_PYTHON_BIN)"
++MAKE_FLAGS += ARCH="$(LINUX_KARCH)"
+ 
+ define OvsBinUtility
+   define Package/openvswitch-$(1)
+@@ -150,10 +169,10 @@ define Package/openvswitch-base/install
  	$(INSTALL_BIN) ./files/etc/init.d/openvswitch.init $(1)/etc/init.d/openvswitch
  
  	$(INSTALL_DIR) $(1)/usr/lib/
--	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libofproto.so*  $(1)/usr/lib/
--	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libopenvswitch.so*  $(1)/usr/lib/
--	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libovsdb.so*  $(1)/usr/lib/
--	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libsflow.so*  $(1)/usr/lib/
+-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libofproto*.so*  $(1)/usr/lib/
+-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libopenvswitch*.so*  $(1)/usr/lib/
+-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libovsdb*.so*  $(1)/usr/lib/
+-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libsflow*.so*  $(1)/usr/lib/
 +	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libofproto-2.so*  $(1)/usr/lib/
 +	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libopenvswitch-2.so*  $(1)/usr/lib/
 +	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libovsdb-2.so*  $(1)/usr/lib/
@@ -70,383 +123,102 @@
  
  	$(INSTALL_DIR) $(1)/usr/bin/
  	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/ovsdb-tool $(1)/usr/bin/
-@@ -205,11 +195,6 @@ define Package/openvswitch-ipsec/install
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/debian/ovs-monitor-ipsec $(1)/usr/sbin/
+@@ -171,6 +190,11 @@ define Package/openvswitch-python/instal
+ 	$(CP) $(PKG_INSTALL_DIR)/usr/share/openvswitch/python/ovs/* $(1)/usr/lib/python$(PYTHON_VERSION)/ovs
  endef
  
--define Package/openvswitch-benchmark/install
--	$(INSTALL_DIR) $(1)/usr/bin/
--	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/ovs-benchmark $(1)/usr/bin/
--endef
--
++define Package/openvswitch-ipsec/install
++	$(INSTALL_DIR) $(1)/usr/sbin/
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/debian/ovs-monitor-ipsec $(1)/usr/sbin/
++endef
++
  define Package/openvswitch/install
  	:
  endef
-@@ -225,7 +210,6 @@ $(foreach t,$(OVS_BIN_TOOLS),$(eval $(ca
+@@ -185,6 +209,7 @@ $(foreach t,$(OVS_BIN_TOOLS),$(eval $(ca
+ 
  $(eval $(call BuildPackage,openvswitch-base))
  $(eval $(call BuildPackage,openvswitch-python))
- $(eval $(call BuildPackage,openvswitch-ipsec))
--$(eval $(call BuildPackage,openvswitch-benchmark))
++$(eval $(call BuildPackage,openvswitch-ipsec))
  $(eval $(call BuildPackage,openvswitch))
  $(eval $(call KernelPackage,openvswitch))
  
---- a/feeds/packages/net/openvswitch/patches/0010-lib-ovs-thread-Ensure-that-thread-stacks-are-always-.patch
+--- a/feeds/packages/net/openvswitch/patches/0003-override-pythonpath-via-make-vars.patch
 +++ /dev/null
-@@ -1,75 +0,0 @@
--From 8147cec9ee8feea9440cf79365709ddc32ff57d5 Mon Sep 17 00:00:00 2001
--From: Alexandru Ardelean <ardeleanalex@gmail.com>
--Date: Thu, 4 Feb 2016 09:20:34 +0200
--Subject: [PATCH] lib/ovs-thread: Ensure that thread stacks are always at least
-- 512 kB.
+@@ -1,26 +0,0 @@
+-diff --git a/Makefile.am b/Makefile.am
+-index a4dd7b8..099a3c1 100644
+---- a/Makefile.am
+-+++ b/Makefile.am
+-@@ -53,7 +53,7 @@ endif
+- # foo/__init__.py into an (older) version with plain foo.py, since
+- # foo/__init__.pyc will cause Python to ignore foo.py.
+- run_python = \
+--	PYTHONPATH=$(top_srcdir)/python$(psep)$$PYTHONPATH \
+-+	PYTHONPATH=$(top_srcdir)/python$(psep)$(PYTHONPATH) \
+- 	PYTHONDONTWRITEBYTECODE=yes $(PYTHON)
+- 
+- ALL_LOCAL =
+-diff --git a/Makefile.in b/Makefile.in
+-index 8df66e2..98b54bf 100644
+---- a/Makefile.in
+-+++ b/Makefile.in
+-@@ -1654,7 +1654,7 @@ AM_CFLAGS = -Wstrict-prototypes $(WARNING_FLAGS) $(OVS_CFLAGS) \
+- # foo/__init__.py into an (older) version with plain foo.py, since
+- # foo/__init__.pyc will cause Python to ignore foo.py.
+- run_python = \
+--	PYTHONPATH=$(top_srcdir)/python$(psep)$$PYTHONPATH \
+-+	PYTHONPATH=$(top_srcdir)/python$(psep)$(PYTHONPATH) \
+- 	PYTHONDONTWRITEBYTECODE=yes $(PYTHON)
+- 
+- 
+--- a/feeds/packages/net/openvswitch/patches/0005-disable-module-build.patch
++++ /dev/null
+@@ -1,25 +0,0 @@
+-From 7cf69704374e363fdda227803be3849233ba96f3 Mon Sep 17 00:00:00 2001
+-From: Dario Ernst <Dario.Ernst@riverbed.com>
+-Date: Fri, 25 Nov 2016 15:33:48 +0100
+-Subject: [PATCH 4/4] disable-module-build
 -
--This makes a difference for libc implementations (such as musl libc) that
--have a really small default pthread stack size.
--
--Will reference this discussion:
--http://patchwork.ozlabs.org/patch/572340/
--
--Reported-by: Robert McKay <robert@mckay.com>
--Signed-off-by: Alexandru Ardelean <ardeleanalex@gmail.com>
--[blp@ovn.org made style changes]
--Signed-off-by: Ben Pfaff <blp@ovn.org>
 ----
-- lib/ovs-thread.c | 29 +++++++++++++++++++++++++++++
-- 1 file changed, 29 insertions(+)
+- datapath/linux/Makefile.main.in | 2 +-
+- 1 file changed, 1 insertion(+), 1 deletion(-)
 -
--diff --git a/lib/ovs-thread.c b/lib/ovs-thread.c
--index 6ebda07..b0e10ee 100644
----- a/lib/ovs-thread.c
--+++ b/lib/ovs-thread.c
--@@ -340,6 +340,25 @@ ovsthread_wrapper(void *aux_)
--     return aux.start(aux.arg);
-- }
+-diff --git a/datapath/linux/Makefile.main.in b/datapath/linux/Makefile.main.in
+-index 7d18253..e5555a7 100644
+---- a/datapath/linux/Makefile.main.in
+-+++ b/datapath/linux/Makefile.main.in
+-@@ -68,7 +68,7 @@ ifeq (,$(wildcard $(CONFIG_FILE)))
+- endif
 - 
--+static void
--+set_min_stack_size(pthread_attr_t *attr, size_t min_stacksize)
--+{
--+    size_t stacksize;
--+    int error;
--+
--+    error = pthread_attr_getstacksize(attr, &stacksize);
--+    if (error) {
--+        ovs_abort(error, "pthread_attr_getstacksize failed");
--+    }
--+
--+    if (stacksize < min_stacksize) {
--+        error = pthread_attr_setstacksize(attr, min_stacksize);
--+        if (error) {
--+            ovs_abort(error, "pthread_attr_setstacksize failed");
--+        }
--+    }
--+}
--+
-- /* Starts a thread that calls 'start(arg)'.  Sets the thread's name to 'name'
--  * (suffixed by its ovsthread_id()).  Returns the new thread's pthread_t. */
-- pthread_t
--@@ -358,10 +377,20 @@ ovs_thread_create(const char *name, void *(*start)(void *), void *arg)
--     aux->arg = arg;
--     ovs_strlcpy(aux->name, name, sizeof aux->name);
--
---    error = pthread_create(&thread, NULL, ovsthread_wrapper, aux);
--+    /* Some small systems use a default stack size as small as 80 kB, but OVS
--+     * requires approximately 384 kB according to the following analysis:
--+     * http://openvswitch.org/pipermail/dev/2016-January/065049.html
--+     *
--+     * We use 512 kB to give us some margin of error. */
--+    pthread_attr_t attr;
--+    pthread_attr_init(&attr);
--+    set_min_stack_size(&attr, 512 * 1024);
--+
--+    error = pthread_create(&thread, &attr, ovsthread_wrapper, aux);
--     if (error) {
--         ovs_abort(error, "pthread_create failed");
--     }
--+    pthread_attr_destroy(&attr);
--     return thread;
-- }
-- 
+- default:
+--	$(MAKE) -C $(KSRC) M=$(builddir) modules
+-+	@echo skipping module build
+- 
+- modules_install:
+- 	$(MAKE) -C $(KSRC) M=$(builddir) modules_install
 --- 
--2.1.4
+-2.9.3
 -
---- a/feeds/packages/net/openvswitch/patches/0011-kernel-4-4-support.patch
-+++ /dev/null
-@@ -1,279 +0,0 @@
--diff --git a/acinclude.m4 b/acinclude.m4
--index 11c7787..07dd647 100644
----- a/acinclude.m4
--+++ b/acinclude.m4
--@@ -134,10 +134,10 @@ AC_DEFUN([OVS_CHECK_LINUX], [
--     AC_MSG_RESULT([$kversion])
-- 
--     if test "$version" -ge 4; then
---       if test "$version" = 4 && test "$patchlevel" -le 3; then
--+       if test "$version" = 4 && test "$patchlevel" -le 4; then
--           : # Linux 4.x
--        else
---          AC_ERROR([Linux kernel in $KBUILD is version $kversion, but version newer than 4.3.x is not supported (please refer to the FAQ for advice)])
--+          AC_ERROR([Linux kernel in $KBUILD is version $kversion, but version newer than 4.4.x is not supported (please refer to the FAQ for advice)])
--        fi
--     elif test "$version" = 3; then
--        : # Linux 3.x
--diff --git a/datapath/actions.c b/datapath/actions.c
--index 20413c9..719c43d 100644
----- a/datapath/actions.c
--+++ b/datapath/actions.c
--@@ -706,7 +706,8 @@ static void ovs_fragment(struct vport *vport, struct sk_buff *skb, u16 mru,
-- 		skb_dst_set_noref(skb, &ovs_dst);
-- 		IPCB(skb)->frag_max_size = mru;
-- 
---		ip_do_fragment(skb->sk, skb, ovs_vport_output);
--+		ip_do_fragment(NET_ARG(dev_net(ovs_dst.dev))
--+			skb->sk, skb, ovs_vport_output);
-- 		refdst_drop(orig_dst);
-- 	} else if (ethertype == htons(ETH_P_IPV6)) {
-- 		const struct nf_ipv6_ops *v6ops = nf_get_ipv6_ops();
--@@ -727,7 +728,8 @@ static void ovs_fragment(struct vport *vport, struct sk_buff *skb, u16 mru,
-- 		skb_dst_set_noref(skb, &ovs_rt.dst);
-- 		IP6CB(skb)->frag_max_size = mru;
-- 
---		v6ops->fragment(skb->sk, skb, ovs_vport_output);
--+		v6ops->fragment(NET_ARG(dev_net(ovs_rt.dst.dev))
--+			skb->sk, skb, ovs_vport_output);
-- 		refdst_drop(orig_dst);
-- 	} else {
-- 		WARN_ONCE(1, "Failed fragment ->%s: eth=%04x, MRU=%d, MTU=%d.",
--diff --git a/datapath/conntrack.c b/datapath/conntrack.c
--index 795ed91..3b9bfba 100644
----- a/datapath/conntrack.c
--+++ b/datapath/conntrack.c
--@@ -323,7 +323,7 @@ static int handle_fragments(struct net *net, struct sw_flow_key *key,
-- 		int err;
-- 
-- 		memset(IPCB(skb), 0, sizeof(struct inet_skb_parm));
---		err = ip_defrag(skb, user);
--+		err = ip_defrag(NET_ARG(net) skb, user);
-- 		if (err)
-- 			return err;
-- 
--@@ -374,7 +374,7 @@ ovs_ct_expect_find(struct net *net, const struct nf_conntrack_zone *zone,
-- {
-- 	struct nf_conntrack_tuple tuple;
-- 
---	if (!nf_ct_get_tuplepr(skb, skb_network_offset(skb), proto, &tuple))
--+	if (!nf_ct_get_tuplepr(skb, skb_network_offset(skb), proto, NET_ARG(net) &tuple))
-- 		return NULL;
-- 	return __nf_ct_expect_find(net, zone, &tuple);
-- }
--diff --git a/datapath/datapath.c b/datapath/datapath.c
--index e3d3c8c..a4157f4 100644
----- a/datapath/datapath.c
--+++ b/datapath/datapath.c
--@@ -96,8 +96,12 @@ static bool ovs_must_notify(struct genl_family *family, struct genl_info *info,
-- static void ovs_notify(struct genl_family *family, struct genl_multicast_group *grp,
-- 		       struct sk_buff *skb, struct genl_info *info)
-- {
---	genl_notify(family, skb, genl_info_net(info),
--+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,0)
--+    genl_notify(family, skb, info, GROUP_ID(grp), GFP_KERNEL);
--+#else
--+    genl_notify(family, skb, genl_info_net(info),
-- 		    info->snd_portid, GROUP_ID(grp), info->nlhdr, GFP_KERNEL);
--+#endif
-- }
-- 
-- /**
--diff --git a/datapath/linux/compat/include/linux/netfilter_ipv6.h b/datapath/linux/compat/include/linux/netfilter_ipv6.h
--index 3939e14..b724623 100644
----- a/datapath/linux/compat/include/linux/netfilter_ipv6.h
--+++ b/datapath/linux/compat/include/linux/netfilter_ipv6.h
--@@ -13,7 +13,7 @@
--  * the callback parameter needs to be in the form that older kernels accept.
--  * We don't backport the other ipv6_ops as they're currently unused by OVS. */
-- struct ovs_nf_ipv6_ops {
---	int (*fragment)(struct sock *sk, struct sk_buff *skb,
--+	int (*fragment)(NET_ARG(net) struct sock *sk, struct sk_buff *skb,
-- 			int (*output)(OVS_VPORT_OUTPUT_PARAMS));
-- };
-- #define nf_ipv6_ops ovs_nf_ipv6_ops
--diff --git a/datapath/linux/compat/include/net/ip.h b/datapath/linux/compat/include/net/ip.h
--index cd87bcc..b749301 100644
----- a/datapath/linux/compat/include/net/ip.h
--+++ b/datapath/linux/compat/include/net/ip.h
--@@ -66,8 +66,20 @@ static inline unsigned int rpl_ip_skb_dst_mtu(const struct sk_buff *skb)
-- #define ip_skb_dst_mtu rpl_ip_skb_dst_mtu
-- #endif /* HAVE_IP_SKB_DST_MTU */
-- 
--+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,0)
--+#define NET_PARAM(x) struct net *x,
--+#define NET_ARG(x) x,
--+#define NET_DEV_NET(x) dev_net(x)
--+#define NET_DECLARE_INIT(x,y)
--+#else
--+#define NET_PARAM(x)
--+#define NET_ARG(x)
--+#define NET_DEV_NET(x)
--+#define NET_DECLARE_INIT(x,y) struct net *x = y;
--+#endif
--+
-- #ifdef HAVE_IP_FRAGMENT_TAKES_SOCK
---#define OVS_VPORT_OUTPUT_PARAMS struct sock *sock, struct sk_buff *skb
--+#define OVS_VPORT_OUTPUT_PARAMS NET_PARAM(net) struct sock *sock, struct sk_buff *skb
-- #else
-- #define OVS_VPORT_OUTPUT_PARAMS struct sk_buff *skb
-- #endif
--@@ -89,12 +101,13 @@ static inline bool ip_defrag_user_in_between(u32 user,
-- #endif /* < v4.2 */
-- 
-- #ifndef HAVE_IP_DO_FRAGMENT
---static inline int rpl_ip_do_fragment(struct sock *sk, struct sk_buff *skb,
--+static inline int rpl_ip_do_fragment(NET_PARAM(net) struct sock *sk, struct sk_buff *skb,
-- 				     int (*output)(OVS_VPORT_OUTPUT_PARAMS))
-- {
-- 	unsigned int mtu = ip_skb_dst_mtu(skb);
-- 	struct iphdr *iph = ip_hdr(skb);
-- 	struct rtable *rt = skb_rtable(skb);
-- 	struct net_device *dev = rt->dst.dev;
--+	NET_DECLARE_INIT(net, dev_net(dev));
-- 
-- 	if (unlikely(((iph->frag_off & htons(IP_DF)) && !skb->ignore_df) ||
--@@ -102,7 +115,7 @@ static inline int rpl_ip_do_fragment(struct sock *sk, struct sk_buff *skb,
-- 		      IPCB(skb)->frag_max_size > mtu))) {
-- 
-- 		pr_warn("Dropping packet in ip_do_fragment()\n");
---		IP_INC_STATS(dev_net(dev), IPSTATS_MIB_FRAGFAILS);
--+		IP_INC_STATS(net, IPSTATS_MIB_FRAGFAILS);
-- 		kfree_skb(skb);
-- 		return -EMSGSIZE;
-- 	}
--@@ -116,8 +129,7 @@ static inline int rpl_ip_do_fragment(struct sock *sk, struct sk_buff *skb,
-- #define ip_do_fragment rpl_ip_do_fragment
-- #endif /* IP_DO_FRAGMENT */
-- 
---int rpl_ip_defrag(struct sk_buff *skb, u32 user);
---#define ip_defrag rpl_ip_defrag
--+int rpl_ip_defrag(NET_PARAM(net) struct sk_buff *skb, u32 user);
-- 
-- int __init rpl_ipfrag_init(void);
-- void rpl_ipfrag_fini(void);
--@@ -127,14 +139,15 @@ void rpl_ipfrag_fini(void);
--  * ("inet: frag: Always orphan skbs inside ip_defrag()"), but it should be
--  * always included in kernels 4.5+. */
-- #if LINUX_VERSION_CODE < KERNEL_VERSION(4,5,0)
---static inline int rpl_ip_defrag(struct sk_buff *skb, u32 user)
--+static inline int rpl_ip_defrag(NET_PARAM(net) struct sk_buff *skb, u32 user)
-- {
-- 	skb_orphan(skb);
---	return ip_defrag(skb, user);
--+	return ip_defrag(NET_ARG(net) skb, user);
-- }
---#define ip_defrag rpl_ip_defrag
-- #endif
-- 
--+#define ip_defrag rpl_ip_defrag
--+
-- static inline int rpl_ipfrag_init(void) { return 0; }
-- static inline void rpl_ipfrag_fini(void) { }
-- #endif /* HAVE_CORRECT_MRU_HANDLING && OVS_FRAGMENT_BACKPORT */
--diff --git a/datapath/linux/compat/include/net/ip6_tunnel.h b/datapath/linux/compat/include/net/ip6_tunnel.h
--index ce65087..eacf9ca 100644
----- a/datapath/linux/compat/include/net/ip6_tunnel.h
--+++ b/datapath/linux/compat/include/net/ip6_tunnel.h
--@@ -17,11 +17,15 @@ static inline void ip6tunnel_xmit(struct sock *sk, struct sk_buff *skb,
-- 
-- 	pkt_len = skb->len - skb_inner_network_offset(skb);
-- 	/* TODO: Fix GSO for ipv6 */
--+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,0)
--+	err = ip6_local_out(dev_net(dev), sk, skb);
--+#else
-- #ifdef HAVE_IP6_LOCAL_OUT_SK
-- 	err = ip6_local_out_sk(sk, skb);
-- #else
-- 	err = ip6_local_out(skb);
-- #endif
--+#endif /* >= kernel 4.4 */
-- 	if (net_xmit_eval(err) != 0)
-- 		pkt_len = net_xmit_eval(err);
-- 	else
--diff --git a/datapath/linux/compat/include/net/vxlan.h b/datapath/linux/compat/include/net/vxlan.h
--index b50cd17..230f3ad 100644
----- a/datapath/linux/compat/include/net/vxlan.h
--+++ b/datapath/linux/compat/include/net/vxlan.h
--@@ -218,10 +218,20 @@ struct vxlan_dev {
-- struct net_device *rpl_vxlan_dev_create(struct net *net, const char *name,
-- 				    u8 name_assign_type, struct vxlan_config *conf);
-- 
--+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,0)
--+static inline __be16 vxlan_dev_dst_port(struct vxlan_dev *vxlan,
--+					unsigned short family)
--+{
--+	if (family == AF_INET6)
--+		return inet_sk(vxlan->vn6_sock->sock->sk)->inet_sport;
--+	return inet_sk(vxlan->vn4_sock->sock->sk)->inet_sport;
--+}
--+#else
-- static inline __be16 vxlan_dev_dst_port(struct vxlan_dev *vxlan)
-- {
-- 	return inet_sport(vxlan->vn_sock->sock->sk);
-- }
--+#endif
-- 
-- static inline netdev_features_t vxlan_features_check(struct sk_buff *skb,
-- 						     netdev_features_t features)
--diff --git a/datapath/linux/compat/ip_fragment.c b/datapath/linux/compat/ip_fragment.c
--index cf2daaa..e168196 100644
----- a/datapath/linux/compat/ip_fragment.c
--+++ b/datapath/linux/compat/ip_fragment.c
--@@ -674,11 +674,11 @@ out_fail:
-- }
-- 
-- /* Process an incoming IP datagram fragment. */
---int rpl_ip_defrag(struct sk_buff *skb, u32 user)
--+int rpl_ip_defrag(NET_ARG(net) struct sk_buff *skb, u32 user)
-- {
-- 	struct net_device *dev = skb->dev ? : skb_dst(skb)->dev;
-- 	int vif = vrf_master_ifindex_rcu(dev);
---	struct net *net = dev_net(dev);
--+	NET_DECLARE_INIT(net, dev_net(dev));
-- 	struct ipq *qp;
-- 
-- 	IP_INC_STATS_BH(net, IPSTATS_MIB_REASMREQDS);
--diff --git a/datapath/linux/compat/stt.c b/datapath/linux/compat/stt.c
--index eb397e8..5ea3c52 100644
----- a/datapath/linux/compat/stt.c
--+++ b/datapath/linux/compat/stt.c
--@@ -1450,7 +1450,11 @@ static void clean_percpu(struct work_struct *work)
-- }
-- 
-- #ifdef HAVE_NF_HOOKFN_ARG_OPS
--+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,0)
--+#define FIRST_PARAM void *priv
--+#else
-- #define FIRST_PARAM const struct nf_hook_ops *ops
--+#endif /* >= kernel 4.4 */
-- #else
-- #define FIRST_PARAM unsigned int hooknum
-- #endif
--@@ -1498,7 +1502,9 @@ static unsigned int nf_ip_hook(FIRST_PARAM, struct sk_buff *skb, LAST_PARAM)
-- 
-- static struct nf_hook_ops nf_hook_ops __read_mostly = {
-- 	.hook           = nf_ip_hook,
--+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,4,0)
-- 	.owner          = THIS_MODULE,
--+#endif
-- 	.pf             = NFPROTO_IPV4,
-- 	.hooknum        = NF_INET_LOCAL_IN,
-- 	.priority       = INT_MAX,
--diff --git a/datapath/vport-vxlan.c b/datapath/vport-vxlan.c
--index c05f5d4..3cbb568 100644
----- a/datapath/vport-vxlan.c
--+++ b/datapath/vport-vxlan.c
--@@ -153,7 +153,12 @@ static int vxlan_get_egress_tun_info(struct vport *vport, struct sk_buff *skb,
-- {
-- 	struct vxlan_dev *vxlan = netdev_priv(vport->dev);
-- 	struct net *net = ovs_dp_get_net(vport->dp);
--+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,4,0)
--+	unsigned short family = ip_tunnel_info_af(upcall->egress_tun_info);
--+	__be16 dst_port = vxlan_dev_dst_port(vxlan, family);
--+#else
-- 	__be16 dst_port = vxlan_dev_dst_port(vxlan);
--+#endif
-- 	__be16 src_port;
-- 	int port_min;
-- 	int port_max;
+--- /dev/null
++++ b/feeds/packages/net/openvswitch/patches/0008-add-back-old-gfp-this-node-define.patch
+@@ -0,0 +1,19 @@
++diff --git a/datapath/flow.c b/datapath/flow.c
++index a7a2063..8db8041 100644
++--- a/datapath/flow.c
+++++ b/datapath/flow.c
++@@ -51,6 +51,14 @@
++ 
++ #include "vlan.h"
++ 
+++#ifndef GFP_THISNODE
+++#ifdef CONFIG_NUMA  
+++#define GFP_THISNODE    (__GFP_THISNODE | __GFP_NOWARN | __GFP_NORETRY)
+++#else                             
+++#define GFP_THISNODE    ((__force gfp_t)0)
+++#endif 
+++#endif
+++
++ u64 ovs_flow_used_time(unsigned long flow_jiffies)
++ {
++ 	struct timespec cur_ts;

@@ -9,19 +9,23 @@
  
  config statistics 'collectd_unixsock'
  	option enable '0'
-@@ -50,18 +50,19 @@ config statistics 'collectd_unixsock'
- # input plugins
+@@ -55,21 +55,22 @@ config statistics 'collectd_apcups'
+ 	option Port '3551'
  
  config statistics 'collectd_conntrack'
 -	option enable '0'
 +	option enable '1'
+ 
+ config statistics 'collectd_contextswitch'
+ 	option enable '0'
  
  config statistics 'collectd_cpu'
  	option enable '1'
 +	option ValuesPercentage '1'
  
  config statistics 'collectd_cpufreq'
- 	option enable '0'
+-	option enable '0'
++	option enable '1'
  
  config statistics 'collectd_df'
 -	option enable '0'
@@ -33,7 +37,7 @@
  	option FSTypes 'tmpfs'
  	option IgnoreSelected '0'
  
-@@ -119,7 +120,7 @@ config statistics 'collectd_memory'
+@@ -127,7 +128,7 @@ config statistics 'collectd_memory'
  	option enable '1'
  
  config statistics 'collectd_netlink'
@@ -42,7 +46,7 @@
  	option IgnoreSelected '0'
  	option VerboseInterfaces 'br-lan'
  	option QDiscs 'br-lan'
-@@ -134,14 +135,14 @@ config statistics 'collectd_olsrd'
+@@ -142,14 +143,14 @@ config statistics 'collectd_olsrd'
  	option Host '127.0.0.1'
  
  config statistics 'collectd_ping'
@@ -61,7 +65,7 @@
  
  config statistics 'collectd_sensors'
  	option enable '0'
-@@ -150,9 +151,9 @@ config statistics 'collectd_splash_lease
+@@ -158,9 +159,9 @@ config statistics 'collectd_splash_lease
  	option enable '0'
  
  config statistics 'collectd_tcpconns'
@@ -73,7 +77,7 @@
  
  config statistics 'collectd_thermal'
  	option enable '0'
-@@ -160,5 +161,5 @@ config statistics 'collectd_thermal'
+@@ -168,5 +169,5 @@ config statistics 'collectd_thermal'
  	option Device ''
  
  config statistics 'collectd_uptime'
@@ -82,7 +86,7 @@
  
 --- a/applications/luci-app-statistics/root/usr/bin/stat-genconfig
 +++ b/applications/luci-app-statistics/root/usr/bin/stat-genconfig
-@@ -269,7 +269,7 @@ plugins = {
+@@ -275,7 +275,7 @@ plugins = {
  
  	cpu	= {
  		{ },

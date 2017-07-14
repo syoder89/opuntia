@@ -1,22 +1,30 @@
 --- a/package/firmware/ath10k-firmware/Makefile
 +++ b/package/firmware/ath10k-firmware/Makefile
-@@ -76,10 +76,16 @@ define Download/ct-firmware
+@@ -81,10 +81,10 @@ define Download/ct-firmware
    URL_FILE:=$($(1)_FIRMWARE_FILE_CT)
  endef
  
--QCA988X_FIRMWARE_FILE_CT:=firmware-2-ct-full-community.bin-19-rc3-lede
-+define Download/ct-firmware-beta
-+  URL:=https://www.candelatech.com/downloads/ath10k-fw-beta/$(2)
-+  FILE:=$(call CT_FIRMWARE_FILE,$(1))
-+  URL_FILE:=$($(1)_FIRMWARE_FILE_CT)
-+endef
-+
+-QCA988X_FIRMWARE_FILE_CT:=firmware-2-ct-full-community.bin-19-rc5-lede
 +QCA988X_FIRMWARE_FILE_CT:=firmware-2-ct-full-htt-mgt-community.bin
  define Download/ath10k-firmware-qca988x-ct
 -  $(call Download/ct-firmware,QCA988X,)
--  HASH:=4112d78161a2c20e7a9490ea8d04e9f919508bafb097d88761dcce026c26f93f
-+  $(call Download/ct-firmware-beta,QCA988X,)
+-  HASH:=556d6a4df50cd94a229a240d6d1d108ed5910069902f1e0cbb57b02ede27690f
++  $(call Download/ct-firmware,QCA988X,ath10k-fw-beta)
 +  HASH:=ad29c08ae85e7b1be9452713f81b365e36751827c44aeec8862671b1d6f64da9
  endef
  $(eval $(call Download,ath10k-firmware-qca988x-ct))
+ 
+@@ -109,10 +109,10 @@ define Download/ath10k-firmware-qca9984-
+ endef
+ $(eval $(call Download,ath10k-firmware-qca9984-ct))
+ 
+-QCA9888_FIRMWARE_FILE_CT:=firmware-5-ct-full-community-9.bin-lede.002
++QCA9888_FIRMWARE_FILE_CT:=firmware-5-ct-full-htt-mgt-community.bin
+ define Download/ath10k-firmware-qca9888-ct
+-  $(call Download/ct-firmware,QCA9888,ath10k-9888-10-4)
+-  HASH:=f92e7d7968698af7c6f2d76b31b3645589e03839e15838010ce457c635e5aae6
++  $(call Download/ct-firmware,QCA9888,ath10k-9888-10-4/ath10k-fw-beta)
++  HASH:=56f730803231031afbc1cfc95f15eece7ab71f7bfd65a7f6f769e708496f29a2
+ endef
+ $(eval $(call Download,ath10k-firmware-qca9888-ct))
  

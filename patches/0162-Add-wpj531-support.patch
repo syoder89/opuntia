@@ -22,7 +22,7 @@
  #define DEVID_COMPEX_WP18	0x047E
 --- a/target/linux/ar71xx/base-files/etc/board.d/02_network
 +++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
-@@ -467,6 +467,9 @@ ar71xx_setup_interfaces()
+@@ -480,6 +480,9 @@ ar71xx_setup_interfaces()
          	ucidef_add_switch_extra_attr "switch0" "alias_wan" "2"
          	ucidef_add_switch_extra_attr "switch0" "alias_lan" "3"
          	;;
@@ -32,21 +32,3 @@
  	wpj558)
  	        ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
          	ucidef_add_switch "switch0" \
---- a/target/linux/ar71xx/image/generic.mk
-+++ b/target/linux/ar71xx/image/generic.mk
-@@ -832,11 +832,15 @@ endef
- TARGET_DEVICES += wpj344
- 
- define Device/wpj531
-+  $(Device/CpxImageParams16M)
-   DEVICE_TITLE := Compex WPJ531 (16MB flash)
-   DEVICE_PACKAGES := kmod-usb-core kmod-usb-ohci kmod-usb2 kmod-usb-ledtrig-usbport
-   BOARDNAME := WPJ531
-   MTDPARTS := spi0.0:192k(u-boot)ro,16128k(firmware),64k(art)ro
-   IMAGE_SIZE := 16128k
-+  IMAGES := sysupgrade.bin factory.img
-+  IMAGE/sysupgrade.bin = append-kernel | pad-to $$$$(BLOCKSIZE) | append-rootfs | pad-rootfs | check-size $$$$(IMAGE_SIZE)
-+  IMAGE/factory.img = Cpxfactory16M
- endef
- TARGET_DEVICES += wpj531
- 

@@ -1,6 +1,6 @@
 --- a/package/network/services/hostapd/files/hostapd.sh
 +++ b/package/network/services/hostapd/files/hostapd.sh
-@@ -152,8 +152,8 @@ hostapd_common_add_bss_config() {
+@@ -169,8 +169,8 @@ hostapd_common_add_bss_config() {
  	config_add_string ownip
  	config_add_string iapp_interface
  	config_add_string eap_type ca_cert client_cert identity anonymous_identity auth priv_key priv_key_pwd
@@ -11,18 +11,18 @@
  
  	config_add_int dynamic_vlan vlan_naming
  	config_add_string vlan_tagged_interface vlan_bridge
-@@ -202,7 +202,9 @@ hostapd_set_bss_options() {
+@@ -219,7 +219,9 @@ hostapd_set_bss_options() {
  		wps_independent wps_device_type wps_device_name wps_manufacturer wps_pin \
  		macfilter ssid wmm uapsd hidden short_preamble rsn_preauth \
- 		iapp_interface eapol_version acct_server acct_secret acct_port \
--		dynamic_vlan ieee80211w
-+		dynamic_vlan ieee80211w auth_servers acct_servers auth_server auth_secret \
+ 		iapp_interface eapol_version dynamic_vlan ieee80211w nasid \
+-		acct_server acct_secret acct_port acct_interval
++		acct_server acct_secret acct_port acct_interval \
++		ieee80211w auth_servers acct_servers auth_server auth_secret \
 +		auth_port dae_client dae_secret dae_port ownip
-+
  
  	set_default isolate 0
  	set_default maxassoc 0
-@@ -247,6 +249,75 @@ hostapd_set_bss_options() {
+@@ -267,6 +269,75 @@ hostapd_set_bss_options() {
  
  	local vlan_possible=""
  
@@ -98,7 +98,7 @@
  	case "$auth_type" in
  		none)
  			wps_possible=1
-@@ -273,87 +344,13 @@ hostapd_set_bss_options() {
+@@ -293,87 +364,13 @@ hostapd_set_bss_options() {
  			wps_possible=1
  		;;
  		eap)
@@ -187,7 +187,7 @@
  			append bss_conf "eapol_key_index_workaround=1" "$N"
  			append bss_conf "ieee8021x=1" "$N"
  
-@@ -489,6 +486,10 @@ hostapd_set_bss_options() {
+@@ -506,6 +503,10 @@ hostapd_set_bss_options() {
  			append bss_conf "macaddr_acl=0" "$N"
  			append bss_conf "deny_mac_file=$_macfile" "$N"
  		;;
