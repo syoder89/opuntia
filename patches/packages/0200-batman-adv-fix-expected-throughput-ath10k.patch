@@ -1,9 +1,9 @@
 --- /dev/null
 +++ b/feeds/routing/batman-adv/patches/0100-scott-ath10k-fix-expected-throughput.patch
-@@ -0,0 +1,29 @@
+@@ -0,0 +1,32 @@
 +--- a/net/batman-adv/bat_v_elp.c
 ++++ b/net/batman-adv/bat_v_elp.c
-+@@ -99,6 +99,7 @@ static u32 batadv_v_elp_get_throughput(s
++@@ -101,6 +101,7 @@ static u32 batadv_v_elp_get_throughput(s
 + 		if (!real_netdev)
 + 			goto default_throughput;
 + 
@@ -11,22 +11,25 @@
 + 		ret = cfg80211_get_station(real_netdev, neigh->addr, &sinfo);
 + 
 + 		dev_put(real_netdev);
-+@@ -109,8 +110,16 @@ static u32 batadv_v_elp_get_throughput(s
-+ 			 */
-+ 			return 0;
++@@ -113,10 +114,18 @@ static u32 batadv_v_elp_get_throughput(s
 + 		}
-+-		if (!ret)
-+-			return sinfo.expected_throughput / 100;
-++		if (!ret) {
-++			throughput = sinfo.expected_throughput / 100;
-++
-++			if (throughput == 0 && (sinfo.filled & BIT(NL80211_STA_INFO_TX_BITRATE))) {
++ 		if (ret)
++ 			goto default_throughput;
++-		if (!(sinfo.filled & BIT(NL80211_STA_INFO_EXPECTED_THROUGHPUT)))
++-			goto default_throughput;
+++		if (!(sinfo.filled & BIT(NL80211_STA_INFO_EXPECTED_THROUGHPUT))) {
+++			if (sinfo.filled & BIT(NL80211_STA_INFO_TX_BITRATE)) {
 ++				/* cfg80211_calculate_bitrate will return 0 for mcs >= 32 */
 ++				throughput = cfg80211_calculate_bitrate(&sinfo.txrate);
 ++			}
-++
-++			return throughput;
+++			else
+++				goto default_throughput;
 ++		}
+++		else
+++			throughput = sinfo.expected_throughput / 100;
++ 
++-		return sinfo.expected_throughput / 100;
+++		return throughput;
 + 	}
 + 
 + 	/* if not a wifi interface, check if this device provides data via
