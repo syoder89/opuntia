@@ -115,3 +115,4 @@ packages/0215-batman-adv-lower-node-timeout.patch
 packages/0216-wireless-fix-adhoc-scan-and-respawn.patch
 packages/0217-wireless-adhoc-workaround-race.patch
 0164-Add-wpj563-support.patch
+packages/0218-ath10k-9888-firmware-update.patch

@@ -1,5 +1,14 @@
 --- a/package/firmware/ath10k-firmware/Makefile
 +++ b/package/firmware/ath10k-firmware/Makefile
+@@ -8,7 +8,7 @@
+ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=ath10k-firmware
+-PKG_SOURCE_DATE:=2017-03-29
++PKG_SOURCE_DATE:=2017-07-27
+ PKG_SOURCE_VERSION:=956e2609b7e42c8c710bba10ef925a5be1be5137
+ PKG_MIRROR_HASH:=25f724ff38c830281b3efba4a4ddffaae0c4bd8fea0f4c1061591229ff05535b
+ PKG_RELEASE:=1
 @@ -81,10 +81,10 @@ define Download/ct-firmware
    URL_FILE:=$($(1)_FIRMWARE_FILE_CT)
  endef
@@ -24,7 +33,7 @@
 -  $(call Download/ct-firmware,QCA9888,ath10k-9888-10-4)
 -  HASH:=f92e7d7968698af7c6f2d76b31b3645589e03839e15838010ce457c635e5aae6
 +  $(call Download/ct-firmware,QCA9888,ath10k-9888-10-4/ath10k-fw-beta)
-+  HASH:=56f730803231031afbc1cfc95f15eece7ab71f7bfd65a7f6f769e708496f29a2
++  HASH:=53759db8de67a4df98b7ebca1d4d910e4d00baff41b62b4557aec13eeb5f88d2
  endef
  $(eval $(call Download,ath10k-firmware-qca9888-ct))
  
