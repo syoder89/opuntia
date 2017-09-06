@@ -1,6 +1,16 @@
 --- a/target/linux/generic/files/drivers/net/phy/ar8327.c
 +++ b/target/linux/generic/files/drivers/net/phy/ar8327.c
-@@ -690,7 +690,7 @@ ar8327_init_port(struct ar8xxx_priv *pri
+@@ -512,7 +512,8 @@ ar8327_hw_config_pdata(struct ar8xxx_pri
+ 		 * always specified for AR8337 to avoid port 5
+ 		 * RX hang on high traffic / flood conditions
+ 		 */
+-		t |= AR8327_PAD_RGMII_RXCLK_DELAY_EN;
++// Except this causes massive packet loss - Scott 09-06-2017
++//		t |= AR8327_PAD_RGMII_RXCLK_DELAY_EN;
+ 	}
+ 	ar8xxx_write(priv, AR8327_REG_PAD5_MODE, t);
+ 	t = ar8327_get_pad_cfg(pdata->pad6_cfg);
+@@ -731,7 +732,7 @@ ar8327_init_port(struct ar8xxx_priv *pri
  		port MAC may work abnormal. Need disable lan&wan mac at fisrt*/
  		ar8xxx_write(priv, AR8327_REG_PORT_STATUS(port), 0);
  		msleep(100);
