@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/package/kernel/ath10k-ct/patches/1003-scott-ath10k-alignment.patch
-@@ -0,0 +1,431 @@
+@@ -0,0 +1,429 @@
 +--- a/ath10k/core.h
 ++++ b/ath10k/core.h
 +@@ -169,11 +169,11 @@ struct ath10k_wmi {
@@ -80,7 +80,7 @@
 + 
 + 	unsigned long htt_stats_mask;
 + 	struct delayed_work htt_stats_dwork;
-+@@ -826,6 +831,7 @@ struct ath10k {
++@@ -831,6 +836,7 @@ struct ath10k {
 + 	struct ieee80211_hw *hw;
 + 	struct device *dev;
 + 	u8 mac_addr[ETH_ALEN];
@@ -88,7 +88,7 @@
 + 
 + #if defined CONFIG_DMAR_TABLE && !defined STANDALONE_CT
 + 	unsigned int next_dma_dbg_idx;
-+@@ -837,10 +843,9 @@ struct ath10k {
++@@ -842,10 +848,9 @@ struct ath10k {
 + 	enum ath10k_hw_rev hw_rev;
 + 	u16 dev_id;
 + 	bool fw_powerup_failed; /* If true, might take reboot to recover. */
@@ -100,7 +100,7 @@
 + 	u32 fw_version_minor;
 + 	u16 fw_version_release;
 + 	u16 fw_version_build;
-+@@ -852,6 +857,8 @@ struct ath10k {
++@@ -857,6 +862,8 @@ struct ath10k {
 + 	u32 vht_cap_info;
 + 	u32 num_rf_chains;
 + 	u32 max_spatial_stream;
@@ -109,7 +109,7 @@
 + 	/* protected by conf_mutex */
 + 	bool ani_enabled;
 + 
-+@@ -867,6 +874,7 @@ struct ath10k {
++@@ -872,6 +879,7 @@ struct ath10k {
 + 
 + 	const struct ath10k_hw_regs *regs;
 + 	const struct ath10k_hw_values *hw_values;
@@ -117,7 +117,7 @@
 + 	struct ath10k_bmi bmi;
 + 	struct ath10k_wmi wmi;
 + 	struct ath10k_htc htc;
-+@@ -874,12 +882,13 @@ struct ath10k {
++@@ -879,12 +887,13 @@ struct ath10k {
 + 
 + 	struct ath10k_hw_params {
 + 		u32 id;
@@ -132,7 +132,7 @@
 + 		/* This is true if given HW chip has a quirky Cycle Counter
 + 		 * wraparound which resets to 0x7fffffff instead of 0. All
 + 		 * other CC related counters (e.g. Rx Clear Count) are divided
-+@@ -977,6 +986,7 @@ struct ath10k {
++@@ -982,6 +991,7 @@ struct ath10k {
 + 		bool bmi_ids_valid;
 + 		u8 bmi_board_id;
 + 		u8 bmi_chip_id;
@@ -140,7 +140,7 @@
 + 	} id;
 + 
 + 	int fw_api;
-+@@ -989,10 +999,11 @@ struct ath10k {
++@@ -994,10 +1004,11 @@ struct ath10k {
 + 		struct completion on_channel;
 + 		struct delayed_work timeout;
 + 		enum ath10k_scan_state state;
@@ -153,7 +153,7 @@
 + 	} scan;
 + 
 + 	struct {
-+@@ -1013,14 +1024,15 @@ struct ath10k {
++@@ -1018,14 +1029,15 @@ struct ath10k {
 + 
 + 	unsigned long long free_vdev_map;
 + 	struct ath10k_vif *monitor_arvif;
@@ -172,7 +172,7 @@
 + 	/* protected by conf_mutex */
 + 	bool radar_enabled;
 + 	int num_started_vdevs;
-+@@ -1030,6 +1042,9 @@ struct ath10k {
++@@ -1035,6 +1047,9 @@ struct ath10k {
 + 	u8 cfg_tx_chainmask;
 + 	u8 cfg_rx_chainmask;
 + 
@@ -182,7 +182,7 @@
 + 	struct completion install_key_done;
 + 
 + 	struct completion vdev_setup_done;
-+@@ -1062,7 +1077,6 @@ struct ath10k {
++@@ -1067,7 +1082,6 @@ struct ath10k {
 + 	int max_num_tdls_vdevs;
 + 	int num_active_peers;
 + 	int num_tids;
@@ -190,7 +190,7 @@
 + 	u32 num_ratectrl_objs;
 + 	u32 skid_limit;
 + 	u32 bmiss_offload_max_vdev;
-+@@ -1097,6 +1111,7 @@ struct ath10k {
++@@ -1102,6 +1116,7 @@ struct ath10k {
 + 	 * avoid reporting garbage data.
 + 	 */
 + 	bool ch_info_can_report_survey;
@@ -198,13 +198,11 @@
 + 	struct completion bss_survey_done;
 + 
 + 	struct dfs_pattern_detector *dfs_detector;
-+@@ -1150,7 +1165,9 @@ struct ath10k {
-+ 		u8 rc_rate_max_per_thr; /* Firmware rate-ctrl alg. tuning. */
-+ 		u8 tx_sta_bw_mask; /* 0:  all, 0x1: 20Mhz, 0x2 40Mhz, 0x4 80Mhz */
-+ 		bool allow_ibss_amsdu;
-++
-+ 		bool rifs_enable_override;
-++		u8 __pad7[3];
++@@ -1161,6 +1176,7 @@ struct ath10k {
++ #define CT_DISABLE_80MHZ  0x4
++ #define CT_DISABLE_160MHZ 0x8
++ 		u16 rate_bw_disable_mask;
+++		u8 __pad7[2];
 + 		u16 max_txpower;
 + 		u16 pdev_xretry_th; /* Max failed retries before wifi chip is reset, 10.1 firmware default is 0x40 */
 + 		u32 wmi_wd_keepalive_ms; /* 0xFFFFFFFF means disable, otherwise, FW will assert after X ms of not receiving
@@ -424,7 +422,7 @@
 + 	/* Chip specific pci reset routine used to do a safe reset */
 +--- a/ath10k/wmi.h
 ++++ b/ath10k/wmi.h
-+@@ -1869,6 +1869,7 @@ struct wmi_channel_arg {
++@@ -1871,6 +1871,7 @@ struct wmi_channel_arg {
 + 	bool allow_vht;
 + 	bool ht40plus;
 + 	bool chan_radar;

@@ -1,5 +1,5 @@
 --- /dev/null
-+++ b/target/linux/generic/patches-4.4/999-scott-shortcut-fe.patch
++++ b/target/linux/generic/pending-4.4/999-scott-shortcut-fe.patch
 @@ -0,0 +1,122 @@
 +--- a/net/core/dev.c
 ++++ b/net/core/dev.c
@@ -124,7 +124,7 @@
 ++}
 ++EXPORT_SYMBOL_GPL(br_dev_update_stats);
 --- /dev/null
-+++ b/target/linux/generic/patches-4.4/999-scott-shortcut-fe-driver.patch
++++ b/target/linux/generic/pending-4.4/999-scott-shortcut-fe-driver.patch
 @@ -0,0 +1,10769 @@
 +From bb25c4b460aac428fb58cc7eec403a3169683e92 Mon Sep 17 00:00:00 2001
 +From: Xiaoping Fan <xfan@codeaurora.org>
@@ -10920,7 +10920,7 @@
 +
 +$(eval $(call KernelPackage,shortcut_fe))
 --- /dev/null
-+++ b/target/linux/generic/patches-4.4/999-scott-shortcut-fe-fixes.patch
++++ b/target/linux/generic/pending-4.4/999-scott-shortcut-fe-fixes.patch
 @@ -0,0 +1,242 @@
 +--- a/drivers/net/ethernet/qualcomm/sfe/fast-classifier/fast-classifier.c
 ++++ b/drivers/net/ethernet/qualcomm/sfe/fast-classifier/fast-classifier.c

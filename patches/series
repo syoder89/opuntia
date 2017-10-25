@@ -79,7 +79,6 @@ packages/0177-ath10k-ct-change-modprobe-order.patch
 packages/0178-ath10k-ct-set-mac-address-from-wpj344-hack.patch
 packages/0178-hostapd-enable-qca-nl80211-extensions.patch
 packages/0178-ath10k-ct-remove-extra-debug.patch
-packages/0175-hostapd-ft-wildcard-r0kh-r1kh.patch
 packages/0176-openvswitch-conf-symlink-to-tmp.patch
 packages/0179-hostapd-preset-r1kh-and-nasid-to-bssid.patch
 0001-fix-getver.patch
@@ -109,7 +108,6 @@ kernel/0081-remove-ip_gre-module-due-to-openvswitch-conflict.patch
 kernel/0082-ar71xx-enable-preempt.patch
 packages/0211-firewall-allow-web-ssh-snmp-default-ports.patch
 packages/0212-ath10k-ct-update-version.patch
-packages/0213-ath10k-ct-add-per-chain-rssi.patch
 packages/0214-ath10k-ct-update-coverage-class-on-fw-reset.patch
 packages/0215-batman-adv-lower-node-timeout.patch
 packages/0216-wireless-fix-adhoc-scan-and-respawn.patch
