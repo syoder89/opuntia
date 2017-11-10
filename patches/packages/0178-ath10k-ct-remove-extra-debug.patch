@@ -1,8 +1,8 @@
 --- /dev/null
 +++ b/package/kernel/ath10k-ct/patches/1001-scott-ath10k-ct-remove-extra-debug.patch
 @@ -0,0 +1,17 @@
-+--- a/ath10k/wmi.c
-++++ b/ath10k/wmi.c
++--- a/ath10k-4.13/wmi.c
+++++ b/ath10k-4.13/wmi.c
 +@@ -2598,10 +2598,10 @@ int ath10k_wmi_event_debug_mesg(struct a
 + 		ath10k_dbg_print_fw_dbg_buffer(ar, ev->messages,
 + 					       (skb->len - 4)/sizeof(__le32),

@@ -1,0 +1,10 @@
+--- a/feeds/packages/net/openvswitch/Makefile
++++ b/feeds/packages/net/openvswitch/Makefile
+@@ -139,6 +139,7 @@ CONFIGURE_ARGS += --with-linux=$(LINUX_D
+ CONFIGURE_ARGS += --enable-ndebug
+ CONFIGURE_ARGS += --disable-ssl
+ CONFIGURE_ARGS += --enable-shared
++CONFIGURE_ARGS += PYTHON=/usr/bin/python
+ 
+ TARGET_CFLAGS += -flto -std=gnu99
+ 

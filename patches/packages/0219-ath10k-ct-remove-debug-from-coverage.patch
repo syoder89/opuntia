@@ -1,0 +1,43 @@
+--- /dev/null
++++ b/package/kernel/ath10k-ct/patches/140-scott-remove-debug-from-coverage-setting.patch
+@@ -0,0 +1,40 @@
++--- a/ath10k-4.13/hw.c
+++++ b/ath10k-4.13/hw.c
++@@ -569,23 +569,24 @@ static void ath10k_hw_qca988x_set_covera
++ 		ath10k_wmi_pdev_set_special(ar, SET_SPECIAL_ID_SLOT, ar->eeprom_overrides.reg_ifs_slot);
++ 		ar->eeprom_overrides.coverage_already_set = true;
++ 	}
+++	else {
+++		/* Ensure we have a debug level of WARN set for the case that the
+++	 	 * coverage class is larger than 0. This is important as we need to
+++	 	 * set the registers again if the firmware does an internal reset and
+++	 	 * this way we will be notified of the event.
+++	 	 */
+++		fw_dbglog_mask = ath10k_debug_get_fw_dbglog_mask(ar);
+++		fw_dbglog_level = ath10k_debug_get_fw_dbglog_level(ar);
++ 
++-	/* Ensure we have a debug level of WARN set for the case that the
++-	 * coverage class is larger than 0. This is important as we need to
++-	 * set the registers again if the firmware does an internal reset and
++-	 * this way we will be notified of the event.
++-	 */
++-	fw_dbglog_mask = ath10k_debug_get_fw_dbglog_mask(ar);
++-	fw_dbglog_level = ath10k_debug_get_fw_dbglog_level(ar);
+++		if (value > 0) {
+++			if (fw_dbglog_level > ATH10K_DBGLOG_LEVEL_WARN)
+++				fw_dbglog_level = ATH10K_DBGLOG_LEVEL_WARN;
+++			fw_dbglog_mask = ~0;
+++		}
++ 
++-	if (value > 0) {
++-		if (fw_dbglog_level > ATH10K_DBGLOG_LEVEL_WARN)
++-			fw_dbglog_level = ATH10K_DBGLOG_LEVEL_WARN;
++-		fw_dbglog_mask = ~0;
+++		ath10k_wmi_dbglog_cfg(ar, fw_dbglog_mask, fw_dbglog_level);
++ 	}
++ 
++-	ath10k_wmi_dbglog_cfg(ar, fw_dbglog_mask, fw_dbglog_level);
++-
++ store_regs:
++ 	/* After an error we will not retry setting the coverage class. */
++ 	spin_lock_bh(&ar->data_lock);
