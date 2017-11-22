@@ -130,7 +130,7 @@
 + 		ath10k_dbg(ar, ATH10K_DBG_MGMT, "wmi mgmt rx 11b (CCK) on 5GHz\n");
 --- a/package/kernel/ath10k-ct/Makefile
 +++ b/package/kernel/ath10k-ct/Makefile
-@@ -68,6 +68,10 @@ ifdef CONFIG_PACKAGE_ATH_DFS
+@@ -74,6 +74,10 @@ ifdef CONFIG_PACKAGE_ATH_DFS
    NOSTDINC_FLAGS += -DCONFIG_ATH10K_DFS_CERTIFIED
  endif
  
@@ -143,7 +143,7 @@
  endef
 --- a/package/kernel/mac80211/Makefile
 +++ b/package/kernel/mac80211/Makefile
-@@ -186,6 +186,24 @@ define KernelPackage/ath/config
+@@ -188,6 +188,24 @@ define KernelPackage/ath/config
  
  		  Select this option if you want to use such channels.
  
@@ -168,31 +168,3 @@
    endif
  endef
  
---- a/package/kernel/mac80211/files/regdb.txt
-+++ b/package/kernel/mac80211/files/regdb.txt
-@@ -1,5 +1,7 @@
- country CO: DFS-FCC
- 	(2402 - 2482 @ 40), (20)
-+	# 4.9Ghz band
-+	(4910 - 5170 @ 20), (30)
- 	(5170 - 5250 @ 80), (17), AUTO-BW
- 	(5250 - 5330 @ 80), (24), DFS, AUTO-BW
- 	(5490 - 5730 @ 160), (24), DFS
-@@ -7,6 +9,8 @@ country CO: DFS-FCC
- 
- country MX: DFS-FCC
- 	(2402 - 2482 @ 40), (20)
-+	# 4.9Ghz band
-+	(4910 - 5170 @ 20), (30)
- 	(5170 - 5250 @ 80), (17), AUTO-BW
- 	(5250 - 5330 @ 80), (24), DFS, AUTO-BW
- 	(5490 - 5730 @ 160), (24), DFS
-@@ -14,6 +18,8 @@ country MX: DFS-FCC
- 
- country US: DFS-FCC
- 	(2402 - 2472 @ 40), (30)
-+	# 4.9Ghz band
-+	(4910 - 5170 @ 20), (30)
- 	# 5.15 ~ 5.25 GHz: 30 dBm for master mode, 23 dBm for clients
- 	(5170 - 5250 @ 80), (23), AUTO-BW
- 	(5250 - 5330 @ 80), (23), DFS, AUTO-BW

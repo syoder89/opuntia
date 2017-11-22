@@ -1,8 +1,8 @@
 --- a/target/linux/ipq806x/base-files/etc/board.d/02_network
 +++ b/target/linux/ipq806x/base-files/etc/board.d/02_network
-@@ -48,6 +48,14 @@ nbg6817)
- 	ucidef_set_interface_macaddr "lan" "$hw_mac_addr"
- 	ucidef_set_interface_macaddr "wan" "$(macaddr_add $hw_mac_addr 1)"
+@@ -50,6 +50,14 @@ nbg6817)
+ 	ucidef_set_interface_macaddr "lan" "$(macaddr_add $hw_mac_addr 2)"
+ 	ucidef_set_interface_macaddr "wan" "$(macaddr_add $hw_mac_addr 3)"
  	;;
 +wpq864)
 +	lan_mac_addr=$(mtd_get_mac_ascii 0:APPSBLENV ethaddr)
@@ -17,7 +17,7 @@
  	;;
 --- a/target/linux/ipq806x/base-files/lib/ipq806x.sh
 +++ b/target/linux/ipq806x/base-files/lib/ipq806x.sh
-@@ -47,6 +47,9 @@ ipq806x_board_detect() {
+@@ -50,6 +50,9 @@ ipq806x_board_detect() {
  	*"VR2600v")
  		name="vr2600v"
  		;;
@@ -412,12 +412,12 @@
  define Device/C2600
  	$(call Device/TpSafeImage)
  	DEVICE_DTS := qcom-ipq8064-c2600
-@@ -265,6 +276,6 @@ define Device/AP-DK04.1-C1
+@@ -281,6 +292,6 @@ define Device/AP-DK04.1-C1
  endef
  
  TARGET_DEVICES += AP148 AP148-legacy C2600 D7800 DB149 EA8500 FRITZ4040 R7500 \
--		  R7500v2 R7800 NBG6817 VR2600v AP-DK04.1-C1
-+		  R7500v2 R7800 NBG6817 VR2600v AP-DK04.1-C1 WPQ864
+-		  R7500v2 R7800 NBG6817 VR2600v AP-DK01.1-C1 AP-DK04.1-C1
++		  R7500v2 R7800 NBG6817 VR2600v AP-DK01.1-C1 AP-DK04.1-C1 WPQ8064
  
  $(eval $(call BuildImage))
 --- a/target/linux/ipq806x/patches-4.9/0069-arm-boot-add-dts-files.patch

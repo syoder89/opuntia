@@ -1,6 +1,6 @@
 --- a/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
 +++ b/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-@@ -853,6 +853,7 @@ drv_mac80211_teardown() {
+@@ -861,6 +861,7 @@ drv_mac80211_teardown() {
  
          . $IPKG_INSTROOT/lib/functions/procd.sh > /dev/null 2>&1
  	procd_kill hostapd-$phy $phy
@@ -10,11 +10,11 @@
  
 --- a/package/network/services/hostapd/files/hostapd.sh
 +++ b/package/network/services/hostapd/files/hostapd.sh
-@@ -831,21 +831,29 @@ wpa_supplicant_run() {
+@@ -843,21 +843,29 @@ wpa_supplicant_run() {
  
  	_wpa_supplicant_common "$ifname"
  
--	/usr/sbin/wpa_supplicant -B -s \
+-	/usr/sbin/wpa_supplicant -B \
 -		${network_bridge:+-b $network_bridge} \
 -		-P "/var/run/wpa_supplicant-${ifname}.pid" \
 -		-D ${_w_driver:-wext} \

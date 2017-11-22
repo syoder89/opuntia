@@ -1,16 +1,18 @@
---- a/package/kernel/mac80211/Makefile
-+++ b/package/kernel/mac80211/Makefile
-@@ -1706,7 +1706,7 @@ define Build/Prepare
- 		$(PKG_BUILD_DIR)/backport-include/linux/bcm47xx_nvram.h
- 
- 	echo 'compat-wireless-$(PKG_VERSION)-$(PKG_RELEASE)-$(REVISION)' > $(PKG_BUILD_DIR)/compat_version
--	$(CP) ./files/regdb.txt $(PKG_BUILD_DIR)/net/wireless/db.txt
-+	$(CP) ./files/regdb-is.txt $(PKG_BUILD_DIR)/net/wireless/db.txt
+--- a/package/firmware/wireless-regdb/Makefile
++++ b/package/firmware/wireless-regdb/Makefile
+@@ -19,6 +19,10 @@ define Package/wireless-regdb
+   TITLE:=Wireless Regulatory Database
  endef
  
- ifneq ($(CONFIG_PACKAGE_kmod-cfg80211)$(CONFIG_PACKAGE_kmod-lib80211),)
++define Build/Configure
++	$(CP) ./files/regdb-is.txt $(PKG_BUILD_DIR)/db.txt
++endef
++
+ define Build/Compile
+ 	python $(PKG_BUILD_DIR)/db2fw.py $(PKG_BUILD_DIR)/regulatory.db $(PKG_BUILD_DIR)/db.txt
+ endef
 --- /dev/null
-+++ b/package/kernel/mac80211/files/regdb-is.txt
++++ b/package/firmware/wireless-regdb/files/regdb-is.txt
 @@ -0,0 +1,31 @@
 +country CO: DFS-FCC
 +	(2402 - 2482 @ 40), (20)

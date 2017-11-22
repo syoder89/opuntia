@@ -50,3 +50,28 @@
 - 	ath10k_dbg(ar, ATH10K_DBG_BOOT, "boot fw request '%s': %d\n",
 - 		   filename, ret);
 - 
+--- a/package/firmware/ath10k-firmware/Makefile
++++ b/package/firmware/ath10k-firmware/Makefile
+@@ -57,10 +57,10 @@ define Download/ct-firmware
+   URL_FILE:=$($(1)_FIRMWARE_FILE_CT)
+ endef
+ 
+-QCA988X_FIRMWARE_FILE_CT:=firmware-2-ct-full-community-19.bin.lede
++QCA988X_FIRMWARE_FILE_CT:=firmware-2-ct-nrcc-community.bin
+ define Download/ath10k-firmware-qca988x-ct
+-  $(call Download/ct-firmware,QCA988X,)
+-  HASH:=bff98f028062dae9fc638c7596aec3c79bf9eddaff65cfacba067f6d72f217cd
++  $(call Download/ct-firmware,QCA988X,ath10k-fw-beta)
++  HASH:=2af74e974bbb44205bc27a6ec69e0bce5303b289c209d5c5ce7127c0b3e12710
+ endef
+ $(eval $(call Download,ath10k-firmware-qca988x-ct))
+ 
+@@ -275,6 +275,8 @@ define Package/ath10k-firmware-qca988x-c
+ 	$(INSTALL_DATA) \
+ 		$(DL_DIR)/$(call CT_FIRMWARE_FILE,QCA988X) \
+ 		$(1)/lib/firmware/ath10k/QCA988X/hw2.0/firmware-2.bin
++	echo "vdevs = 4" > $(1)/lib/firmware/ath10k/fwcfg-pci-0000:00:00.0.txt
++	echo "peers = 80" >> $(1)/lib/firmware/ath10k/fwcfg-pci-0000:00:00.0.txt
+ endef
+ 
+ define Package/ath10k-firmware-qca6174/install

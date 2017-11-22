@@ -94,7 +94,6 @@ packages/0182-ath10k-ct-licensed-channels.patch
 packages/0016-ImageStream-WiFi-regdb.patch
 packages/0197-quagga-version-1.2.1.patch
 packages/0197-quagga-run-as-root-to-write-conf-to-overlay.patch
-kernel/0077-ath10k-fix-coverage-setting.patch
 packages/0200-batman-adv-fix-expected-throughput-ath10k.patch
 0163-Add-wpq864-support.patch
 packages/0210-openvswitch-update-version-2.7.patch
