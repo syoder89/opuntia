@@ -66,12 +66,16 @@
  endef
  $(eval $(call Download,ath10k-firmware-qca988x-ct))
  
-@@ -275,6 +275,8 @@ define Package/ath10k-firmware-qca988x-c
+@@ -275,6 +275,12 @@ define Package/ath10k-firmware-qca988x-c
  	$(INSTALL_DATA) \
  		$(DL_DIR)/$(call CT_FIRMWARE_FILE,QCA988X) \
  		$(1)/lib/firmware/ath10k/QCA988X/hw2.0/firmware-2.bin
 +	echo "vdevs = 4" > $(1)/lib/firmware/ath10k/fwcfg-pci-0000:00:00.0.txt
 +	echo "peers = 80" >> $(1)/lib/firmware/ath10k/fwcfg-pci-0000:00:00.0.txt
++	echo "vdevs = 4" > $(1)/lib/firmware/ath10k/fwcfg-pci-0000:01:00.0.txt
++	echo "peers = 80" >> $(1)/lib/firmware/ath10k/fwcfg-pci-0000:01:00.0.txt
++	echo "vdevs = 4" > $(1)/lib/firmware/ath10k/fwcfg-pci-0001:01:00.0.txt
++	echo "peers = 80" >> $(1)/lib/firmware/ath10k/fwcfg-pci-0001:01:00.0.txt
  endef
  
  define Package/ath10k-firmware-qca6174/install
