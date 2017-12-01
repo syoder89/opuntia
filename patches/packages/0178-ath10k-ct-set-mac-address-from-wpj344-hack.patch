@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/package/kernel/ath10k-ct/patches/1002-scott-ath10k-set-mac-address-from-wpj344-hack.patch
-@@ -0,0 +1,54 @@
+@@ -0,0 +1,52 @@
 +--- a/ath10k/mac.c
 ++++ b/ath10k/mac.c
 +@@ -8681,6 +8681,11 @@ static const struct ieee80211_tpt_blink
@@ -30,24 +30,22 @@
 + 	SET_IEEE80211_DEV(ar->hw, ar->dev);
 +--- a/ath10k-4.13/mac.c
 ++++ b/ath10k-4.13/mac.c
-+@@ -9007,6 +9007,11 @@ static const struct ieee80211_tpt_blink
++@@ -9007,6 +9007,10 @@ static const struct ieee80211_tpt_blink
 + };
 + #endif
 + 
-++#if defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj344) || defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj558) || \
-++	defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj563)
+++#ifdef CONFIG_ATH10K_MAC_OVERRIDE
 ++extern u8 *ath10k_macaddr;
 ++#endif
 ++
 + int ath10k_mac_register(struct ath10k *ar)
 + {
 + 	static const u32 cipher_suites[] = {
-+@@ -9020,6 +9025,12 @@ int ath10k_mac_register(struct ath10k *a
++@@ -9020,6 +9025,11 @@ int ath10k_mac_register(struct ath10k *a
 + 	void *channels;
 + 	int ret;
 + 
-++#if defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj344) || defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj558) || \
-++	defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj563)
+++#ifdef CONFIG_ATH10K_MAC_OVERRIDE
 ++        if (ath10k_macaddr)
 ++                memcpy(ar->mac_addr, ath10k_macaddr, ETH_ALEN);
 ++#endif
@@ -55,3 +53,16 @@
 + 	SET_IEEE80211_PERM_ADDR(ar->hw, ar->mac_addr);
 + 
 + 	SET_IEEE80211_DEV(ar->hw, ar->dev);
+--- a/package/kernel/ath10k-ct/Makefile
++++ b/package/kernel/ath10k-ct/Makefile
+@@ -69,6 +69,10 @@ ifdef CONFIG_PACKAGE_ATH_DFS
+   NOSTDINC_FLAGS += -DCONFIG_ATH10K_DFS_CERTIFIED
+ endif
+ 
++ifdef CONFIG_ATH10K_MAC_OVERRIDE
++  NOSTDINC_FLAGS += -DCONFIG_ATH10K_MAC_OVERRIDE
++endif
++
+ define Build/Configure
+ 	cp $(STAGING_DIR)/usr/include/mac80211/ath/*.h $(PKG_BUILD_DIR)
+ endef
