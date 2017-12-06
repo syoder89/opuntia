@@ -55,7 +55,25 @@
 + 	SET_IEEE80211_DEV(ar->hw, ar->dev);
 --- a/package/kernel/ath10k-ct/Makefile
 +++ b/package/kernel/ath10k-ct/Makefile
-@@ -69,6 +69,10 @@ ifdef CONFIG_PACKAGE_ATH_DFS
+@@ -36,6 +36,17 @@ define KernelPackage/ath10k-ct
+   AUTOLOAD:=$(call AutoProbe,ath10k_pci)
+ endef
+ 
++define KernelPackage/ath10k-ct/config
++  if PACKAGE_kmod-ath10k-ct
++       config ATH10K_MAC_OVERRIDE
++		bool "Override ath10k MAC address from board"
++                default n
++                help
++                  Override the ath10k card's MAC address with one pre-allocated by the motherboard
++  endif
++endef
++
++
+ NOSTDINC_FLAGS = \
+ 	-I$(PKG_BUILD_DIR) \
+ 	-I$(STAGING_DIR)/usr/include/mac80211-backport/uapi \
+@@ -69,6 +80,10 @@ ifdef CONFIG_PACKAGE_ATH_DFS
    NOSTDINC_FLAGS += -DCONFIG_ATH10K_DFS_CERTIFIED
  endif
  
