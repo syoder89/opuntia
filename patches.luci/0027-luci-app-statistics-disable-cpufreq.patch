@@ -1,0 +1,11 @@
+--- a/applications/luci-app-statistics/root/etc/config/luci_statistics
++++ b/applications/luci-app-statistics/root/etc/config/luci_statistics
+@@ -65,7 +65,7 @@ config statistics 'collectd_cpu'
+ 	option ValuesPercentage '1'
+ 
+ config statistics 'collectd_cpufreq'
+-	option enable '1'
++	option enable '0'
+ 
+ config statistics 'collectd_df'
+ 	option enable '1'

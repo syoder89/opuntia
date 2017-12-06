@@ -19,3 +19,4 @@
 801-wifi-alliance-cert-defaults.patch
 0025-fix-dynamic-vlan-assoclist.patch
 0026-fix-switch-config-status-with-missing-ports.patch
+0027-luci-app-statistics-disable-cpufreq.patch
