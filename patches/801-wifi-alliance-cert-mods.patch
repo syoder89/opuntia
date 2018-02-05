@@ -11,16 +11,17 @@
  				return 1
 --- /dev/null
 +++ b/package/network/utils/iwinfo/patches/003-scott-limit-regulatory-domains.patch
-@@ -0,0 +1,16 @@
+@@ -0,0 +1,17 @@
 +--- a/iwinfo_lib.c
 ++++ b/iwinfo_lib.c
-+@@ -73,6 +73,13 @@ const char *IWINFO_HTMODE_NAMES[] = {
++@@ -73,6 +73,14 @@ const char *IWINFO_HTMODE_NAMES[] = {
 +  */
 + 
 + const struct iwinfo_iso3166_label IWINFO_ISO3166_NAMES[] = {
 ++	{ 0x434F /* CO */, "Colombia" },
 ++	{ 0x4D58 /* MX */, "Mexico" },
 ++	{ 0x5553 /* US */, "United States" },
+++	{ 0x5053 /* PS */, "Public Safety" },
 ++	{ 0,               "" }
 ++};
 ++
