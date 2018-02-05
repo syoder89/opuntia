@@ -32,9 +32,9 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
 
 --- a/package/base-files/Makefile
 +++ b/package/base-files/Makefile
-@@ -122,11 +122,11 @@ define Package/base-files/install
+@@ -139,11 +139,11 @@ define Package/base-files/install
  
- 	$(VERSION_SED) \
+ 	$(VERSION_SED_SCRIPT) \
  		$(1)/etc/banner \
 -		$(1)/etc/openwrt_version \
 +		$(1)/etc/opuntia_version \
@@ -72,7 +72,7 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
  set timeout="@TIMEOUT@"
  set root='(cd)'
  
--menuentry "LEDE" {
+-menuentry "OpenWrt" {
 +menuentry "Opuntia" {
  	linux /boot/vmlinuz @CMDLINE@ noinitrd
  }
@@ -82,28 +82,27 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
  set timeout="@TIMEOUT@"
  set root='(@ROOT@)'
  
--menuentry "LEDE" {
+-menuentry "OpenWrt" {
 +menuentry "Opuntia" {
  	linux /boot/vmlinuz @CMDLINE@ noinitrd
  }
--menuentry "LEDE (failsafe)" {
+-menuentry "OpenWrt (failsafe)" {
 +menuentry "Opuntia (failsafe)" {
  	linux /boot/vmlinuz failsafe=true @CMDLINE@ noinitrd
  }
 --- a/package/base-files/files/etc/openwrt_release
 +++ /dev/null
-@@ -1,8 +0,0 @@
+@@ -1,7 +0,0 @@
 -DISTRIB_ID='%D'
 -DISTRIB_RELEASE='%V'
 -DISTRIB_REVISION='%R'
--DISTRIB_CODENAME='%n'
 -DISTRIB_TARGET='%S'
 -DISTRIB_ARCH='%A'
--DISTRIB_DESCRIPTION='%D %N %V %C'
+-DISTRIB_DESCRIPTION='%D %V %C'
 -DISTRIB_TAINTS='%t'
 --- a/package/base-files/files/bin/config_generate
 +++ b/package/base-files/files/bin/config_generate
-@@ -55,7 +55,7 @@ generate_static_network() {
+@@ -56,7 +56,7 @@ generate_static_network() {
  	fi
  }
  
@@ -112,7 +111,7 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
  generate_network() {
  	local ifname macaddr protocol type ipaddr netmask
  
-@@ -91,8 +91,8 @@ generate_network() {
+@@ -92,8 +92,8 @@ generate_network() {
  		static)
  			local ipad
  			case "$1" in
@@ -123,11 +122,11 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
  			esac
  
  			netm=${netmask:-"255.255.255.0"}
-@@ -226,8 +226,8 @@ generate_static_system() {
+@@ -224,8 +224,8 @@ generate_static_system() {
  	uci -q batch <<-EOF
  		delete system.@system[0]
  		add system system
--		set system.@system[-1].hostname='LEDE'
+-		set system.@system[-1].hostname='OpenWrt'
 -		set system.@system[-1].timezone='UTC'
 +		set system.@system[-1].hostname='Opuntia'
 +		set system.@system[-1].timezone='America/Chicago'

@@ -1,23 +1,23 @@
 --- a/package/network/services/hostapd/files/hostapd.sh
 +++ b/package/network/services/hostapd/files/hostapd.sh
-@@ -148,6 +148,8 @@ hostapd_common_add_bss_config() {
- 	config_add_string ownip
+@@ -176,6 +176,8 @@ hostapd_common_add_bss_config() {
  	config_add_string iapp_interface
  	config_add_string eap_type ca_cert client_cert identity anonymous_identity auth priv_key priv_key_pwd
+ 	config_add_string ieee80211w_mgmt_cipher
 +	config_add_string radius_auth_req_attr
 +	config_add_string radius_acct_req_attr
  
  	config_add_int dynamic_vlan vlan_naming
  	config_add_string vlan_tagged_interface vlan_bridge
-@@ -271,6 +273,7 @@ hostapd_set_bss_options() {
+@@ -307,6 +309,7 @@ hostapd_set_bss_options() {
  				auth_server auth_secret auth_port \
  				dae_client dae_secret dae_port \
- 				ownip \
+ 				ownip radius_client_addr \
 +				radius_auth_req_attr radius_acct_req_attr \
  				eap_reauth_period
  
  			# radius can provide VLAN ID for clients
-@@ -288,6 +291,8 @@ hostapd_set_bss_options() {
+@@ -324,6 +327,8 @@ hostapd_set_bss_options() {
  			append bss_conf "auth_server_addr=$auth_server" "$N"
  			append bss_conf "auth_server_port=$auth_port" "$N"
  			append bss_conf "auth_server_shared_secret=$auth_secret" "$N"

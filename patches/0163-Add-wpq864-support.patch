@@ -1,6 +1,6 @@
 --- a/target/linux/ipq806x/base-files/etc/board.d/02_network
 +++ b/target/linux/ipq806x/base-files/etc/board.d/02_network
-@@ -50,6 +50,14 @@ nbg6817)
+@@ -52,6 +52,14 @@ zyxel,nbg6817)
  	ucidef_set_interface_macaddr "lan" "$(macaddr_add $hw_mac_addr 2)"
  	ucidef_set_interface_macaddr "wan" "$(macaddr_add $hw_mac_addr 3)"
  	;;
@@ -15,18 +15,6 @@
  *)
  	echo "Unsupported hardware. Network interfaces not intialized"
  	;;
---- a/target/linux/ipq806x/base-files/lib/ipq806x.sh
-+++ b/target/linux/ipq806x/base-files/lib/ipq806x.sh
-@@ -50,6 +50,9 @@ ipq806x_board_detect() {
- 	*"VR2600v")
- 		name="vr2600v"
- 		;;
-+	*"WPQ864")
-+		name="wpq864"
-+		;;
- 	esac
- 
- 	[ -z "$name" ] && name="unknown"
 --- /dev/null
 +++ b/target/linux/ipq806x/files-4.9/arch/arm/boot/dts/qcom-ipq8064-wpq864.dts
 @@ -0,0 +1,362 @@
@@ -394,9 +382,9 @@
 +
 --- a/target/linux/ipq806x/image/Makefile
 +++ b/target/linux/ipq806x/image/Makefile
-@@ -121,6 +121,17 @@ define Device/AP148-legacy
- 	DEVICE_PACKAGES := ath10k-firmware-qca99x0
+@@ -247,6 +247,18 @@ define Device/qcom_ipq8064-db149
  endef
+ TARGET_DEVICES += qcom_ipq8064-db149
  
 +define Device/WPQ864
 +	$(call Device/LegacyImage)
@@ -408,30 +396,23 @@
 +	DEVICE_TITLE := Compex WPQ864
 +	DEVICE_PACKAGES := kmod-gpio-beeper
 +endef
++TARGET_DEVICES += WPQ8064
 +
- define Device/C2600
+ define Device/tplink_c2600
  	$(call Device/TpSafeImage)
  	DEVICE_DTS := qcom-ipq8064-c2600
-@@ -281,6 +292,6 @@ define Device/AP-DK04.1-C1
- endef
- 
- TARGET_DEVICES += AP148 AP148-legacy C2600 D7800 DB149 EA8500 FRITZ4040 R7500 \
--		  R7500v2 R7800 NBG6817 VR2600v AP-DK01.1-C1 AP-DK04.1-C1
-+		  R7500v2 R7800 NBG6817 VR2600v AP-DK01.1-C1 AP-DK04.1-C1 WPQ8064
- 
- $(eval $(call BuildImage))
 --- a/target/linux/ipq806x/patches-4.9/0069-arm-boot-add-dts-files.patch
 +++ b/target/linux/ipq806x/patches-4.9/0069-arm-boot-add-dts-files.patch
 @@ -10,7 +10,7 @@ Signed-off-by: John Crispin <john@phroze
  
  --- a/arch/arm/boot/dts/Makefile
  +++ b/arch/arm/boot/dts/Makefile
--@@ -618,7 +618,18 @@ dtb-$(CONFIG_ARCH_QCOM) += \
-+@@ -618,7 +618,19 @@ dtb-$(CONFIG_ARCH_QCOM) += \
+-@@ -616,9 +616,19 @@ dtb-$(CONFIG_ARCH_QCOM) += \
++@@ -616,9 +616,20 @@ dtb-$(CONFIG_ARCH_QCOM) += \
+  	qcom-apq8074-dragonboard.dtb \
+  	qcom-apq8084-ifc6540.dtb \
   	qcom-apq8084-mtp.dtb \
-  	qcom-ipq4019-ap.dk01.1-c1.dtb \
-  	qcom-ipq4019-ap.dk04.1-c1.dtb \
-@@ -26,6 +26,7 @@ Signed-off-by: John Crispin <john@phroze
+@@ -27,6 +27,7 @@ Signed-off-by: John Crispin <john@phroze
  +	qcom-ipq8064-r7500v2.dtb \
  +	qcom-ipq8065-nbg6817.dtb \
  +	qcom-ipq8065-r7800.dtb \
