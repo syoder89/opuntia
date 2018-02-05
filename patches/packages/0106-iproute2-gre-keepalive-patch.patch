@@ -44,8 +44,8 @@ index 0000000..566782a
 + 		} else {
 + 			if (strcmp(*argv, "name") == 0) {
 + 				NEXT_ARG();
-+--- a/include/linux/if_tunnel.h
-++++ b/include/linux/if_tunnel.h
++--- a/include/uapi/linux/if_tunnel.h
+++++ b/include/uapi/linux/if_tunnel.h
 +@@ -35,6 +35,10 @@ struct ip_tunnel_parm {
 + 	__be32			i_key;
 + 	__be32			o_key;
