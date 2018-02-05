@@ -5477,7 +5477,7 @@ CONFIG_PACKAGE_collectd-mod-users=y
 # CONFIG_PACKAGE_flashrom-pci is not set
 # CONFIG_PACKAGE_flashrom-spi is not set
 # CONFIG_PACKAGE_flashrom-usb is not set
-# CONFIG_PACKAGE_flock is not set
+CONFIG_PACKAGE_flock=y
 # CONFIG_PACKAGE_fortune-mod is not set
 # CONFIG_PACKAGE_fowsr is not set
 # CONFIG_PACKAGE_ftdi_eeprom is not set
