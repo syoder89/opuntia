@@ -313,3 +313,9 @@ CONFIG_PACKAGE_luci-theme-opuntia=y
 CONFIG_PACKAGE_stats=y
 
 CONFIG_ATH10K_MAC_OVERRIDE=y
+
+# CONFIG_PACKAGE_kmod-ath10k is not set
+CONFIG_PACKAGE_kmod-ath10k-ct=y
+# CONFIG_PACKAGE_ath10k-firmware-qca9888 is not set
+# CONFIG_PACKAGE_ath10k-firmware-qca9888-ct is not set
+CONFIG_PACKAGE_ath10k-firmware-qca988x-ct=y
