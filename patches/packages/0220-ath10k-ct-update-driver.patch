@@ -6,8 +6,8 @@
  PKG_SOURCE_PROTO:=git
 -PKG_SOURCE_DATE:=2017-06-13
 -PKG_SOURCE_VERSION:=bded1823912549017d819d1796273b3134c3de20
-+PKG_SOURCE_DATE:=2018-01-19
-+PKG_SOURCE_VERSION:=e1edd74d5f0c5291b0be72c81033e74e267929d4
++PKG_SOURCE_DATE:=2018-03-27
++PKG_SOURCE_VERSION:=2853e1337ecf13ac70e188e199d93be02df69c67
  PKG_MIRROR_HASH:=616174650e12a82edb6b6bd18ac186e2c6a48fdad0082df9d2011ab20940814b
  
  PKG_MAINTAINER:=Ben Greear <greearb@candelatech.com>
@@ -57,12 +57,12 @@
  endef
  
 -QCA988X_FIRMWARE_FILE_CT:=firmware-2-ct-full-community-19.bin.lede
-+QCA988X_FIRMWARE_FILE_CT:=firmware-2-ct-nrcc-community.bin
++QCA988X_FIRMWARE_FILE_CT:=firmware-2-ct-full-community-21.bin.lede.001
  define Download/ath10k-firmware-qca988x-ct
 -  $(call Download/ct-firmware,QCA988X,)
 -  HASH:=bff98f028062dae9fc638c7596aec3c79bf9eddaff65cfacba067f6d72f217cd
-+  $(call Download/ct-firmware,QCA988X,ath10k-fw-beta)
-+  HASH:=1c4a1b580d3792192ffae143770f3c524caacac9f00b145cde2ddc31c5ca9f21
++  $(call Download/ct-firmware,QCA988X,)
++  HASH:=a3d029c46a77be265e33bb57f827a59f01969f157825d66ecf42a9d327127578
  endef
  $(eval $(call Download,ath10k-firmware-qca988x-ct))
  
