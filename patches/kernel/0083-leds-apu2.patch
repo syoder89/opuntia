@@ -1,0 +1,11 @@
+--- a/package/kernel/leds-apu2/src/leds-apu2.c
++++ b/package/kernel/leds-apu2/src/leds-apu2.c
+@@ -335,7 +335,7 @@ static int __init gpio_apu2_init (void)
+ 	if (!board_name \
+ 			|| !board_vendor \
+ 			|| strcasecmp(board_vendor, "PC Engines") \
+-			|| (strcasecmp(board_name, "apu2") && strcasecmp(board_name, "apu3"))) {
++			|| (strcasecmp(board_name, "PC Engines APU2") && strcasecmp(board_name, "PC Engines APU3"))) {
+ 		err = -ENODEV;
+ 		goto exit;
+ 	}

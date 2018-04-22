@@ -41,7 +41,6 @@ packages/0183-squid-minimal.patch
 packages/0184-squid-https-icap-sni-support.patch
 kernel/0058-wpj344-mac-fixes.patch
 packages/0186-squid-reduce-size.patch
-0187-openvpn-iproute2-path-wrong.patch
 kernel/0059-wpj558-mac-fixes.patch
 packages/0066-conntrack-tools-logging.patch
 packages/0067-mrd6-disable-logging.patch
@@ -113,3 +112,4 @@ packages/0217-wireless-adhoc-workaround-race.patch
 0219-openvswitch-fix-python-path.patch
 packages/0219-ath10k-ct-remove-debug-from-coverage.patch
 packages/0220-ath10k-ct-update-driver.patch
+kernel/0083-leds-apu2.patch
