@@ -112,4 +112,3 @@ packages/0217-wireless-adhoc-workaround-race.patch
 0219-openvswitch-fix-python-path.patch
 packages/0219-ath10k-ct-remove-debug-from-coverage.patch
 packages/0220-ath10k-ct-update-driver.patch
-kernel/0083-leds-apu2.patch
