@@ -10,8 +10,6 @@ Subject: [PATCH 04/14] Update luci with wwan "extrastatus" for man3g
  .../modules/luci-mod-admin-full/luasrc/view/admin_network/iface_status.htm | 5 +++++
  4 files changed, 15 insertions(+)
 
-diff --git a/applications/luci-app-multiwan/luasrc/model/cbi/multiwan/multiwan.lua b/applications/luci-app-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
-index 586b630..4797fbd 100644
 --- a/applications/luci-app-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
 +++ b/applications/luci-app-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
 @@ -52,6 +52,7 @@ interval.rmempty = false
@@ -22,17 +20,15 @@ index 586b630..4797fbd 100644
  icmp_hosts:value("dns", "DNS Server(s)")
  icmp_hosts:value("gateway", "WAN Gateway")
  icmp_hosts.default = "dns"
-diff --git a/modules/luci-base/luasrc/model/network.lua b/modules/luci-base/luasrc/model/network.lua
-index 6496116..389eeef 100644
 --- a/modules/luci-base/luasrc/model/network.lua
 +++ b/modules/luci-base/luasrc/model/network.lua
-@@ -1023,6 +1023,14 @@ function protocol.adminlink(self)
+@@ -1137,6 +1137,14 @@ function protocol.adminlink(self)
  	return dsp.build_url("admin", "network", "network", self.sid)
  end
  
 +function protocol.extrastatus(self)
 +	local p = self:proto()
-+	if p == "qmi" then
++	if p == "qmi" or p == "ncm" then
 +		return utl.exec("man3g -i %s status" % self:get("ifname"))
 +	end
 +	return 0
@@ -41,24 +37,20 @@ index 6496116..389eeef 100644
  
  interface = utl.class()
  
-diff --git a/modules/luci-mod-admin-full/luasrc/controller/admin/network.lua b/modules/luci-mod-admin-full/luasrc/controller/admin/network.lua
-index 54afa1b..340c5b4 100644
 --- a/modules/luci-mod-admin-full/luasrc/controller/admin/network.lua
 +++ b/modules/luci-mod-admin-full/luasrc/controller/admin/network.lua
-@@ -272,6 +272,7 @@ function iface_status(ifaces)
+@@ -248,6 +248,7 @@ function iface_status(ifaces)
  				tx_bytes   = device:tx_bytes(),
  				rx_packets = device:rx_packets(),
  				tx_packets = device:tx_packets(),
 +				extrastatus = net:extrastatus(),
  
- 				ipaddrs    = { },
- 				ip6addrs   = { },
-diff --git a/modules/luci-mod-admin-full/luasrc/view/admin_network/iface_status.htm b/modules/luci-mod-admin-full/luasrc/view/admin_network/iface_status.htm
-index 8136383..e6d369a 100644
+ 				subdevices = { }
+ 			}
 --- a/modules/luci-mod-admin-full/luasrc/view/admin_network/iface_status.htm
 +++ b/modules/luci-mod-admin-full/luasrc/view/admin_network/iface_status.htm
-@@ -67,6 +67,11 @@
- 						html += '<br />';
+@@ -60,6 +60,11 @@
+ 						html += String.format('<strong><%:IPv6-PD%>:</strong> %s<br />', ifc.ip6prefix);
  					}
  
 +					if (ifc.extrastatus)
@@ -69,6 +61,3 @@ index 8136383..e6d369a 100644
  					d.innerHTML = html;
  				}
  				else if (d)
--- 
-2.0.0
-

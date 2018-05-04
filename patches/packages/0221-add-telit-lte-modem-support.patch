@@ -1,0 +1,1037 @@
+--- a/package/network/utils/comgt/Makefile
++++ b/package/network/utils/comgt/Makefile
+@@ -68,10 +68,13 @@ define Package/comgt/install
+ 	$(INSTALL_DIR) $(1)/usr/bin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/comgt $(1)/usr/bin/
+ 	$(LN) comgt $(1)/usr/bin/gcom
++	$(INSTALL_DIR) $(1)/bin
++	$(INSTALL_BIN) ./files/man3g $(1)/bin/
+ 	$(INSTALL_DIR) $(1)/etc/chatscripts
+ 	$(INSTALL_DATA) ./files/3g.chat $(1)/etc/chatscripts/3g.chat
+ 	$(INSTALL_DATA) ./files/evdo.chat $(1)/etc/chatscripts/evdo.chat
+ 	$(INSTALL_DIR) $(1)/etc/gcom
++	$(INSTALL_DATA) ./files/man3g_getall.gcom $(1)/etc/gcom/man3g_getall.gcom
+ 	$(INSTALL_DATA) ./files/setpin.gcom $(1)/etc/gcom/setpin.gcom
+ 	$(INSTALL_DATA) ./files/setmode.gcom $(1)/etc/gcom/setmode.gcom
+ 	$(INSTALL_DATA) ./files/getcardinfo.gcom $(1)/etc/gcom/getcardinfo.gcom
+@@ -97,6 +100,7 @@ define Package/comgt-ncm/install
+ 	$(INSTALL_DIR) $(1)/etc/gcom
+ 	$(INSTALL_DATA) ./files/ncm.json $(1)/etc/gcom/ncm.json
+ 	$(INSTALL_DATA) ./files/runcommand.gcom $(1)/etc/gcom/runcommand.gcom
++	$(INSTALL_DATA) ./files/telit-getaddrs.gcom $(1)/etc/gcom/telit-getaddrs.gcom
+ 	$(INSTALL_DIR) $(1)/lib/netifd/proto
+ 	$(INSTALL_BIN) ./files/ncm.sh $(1)/lib/netifd/proto/ncm.sh
+ endef
+--- /dev/null
++++ b/package/network/utils/comgt/files/man3g
+@@ -0,0 +1,509 @@
++#!/bin/bash
++
++function usage() {
++	echo "usage: man3g -i {config name} command"
++	echo "Commands: status"
++	echo "Example: man3g -i wwan0 status"
++	exit 1
++}
++
++function status() {
++	STATS_TMP="/tmp/qmi_stats.$$"
++	STATS_TMP2="/tmp/qmi_stats2.$$"
++	CACHEF="/tmp/man3g-${DEVICE}.cache"
++
++	CUR=`cat /proc/uptime | awk '{ print $1 }' | cut -d '.' -f 1`
++	CACHE_EXPIRE=$((CUR))
++	if [ -f ${CACHEF} ] ; then
++		. ${CACHEF}
++	fi
++	if [ $((CUR)) -ge $((CACHE_EXPIRE)) ] ; then
++		if [ "${CDCDEV}" == "" ] ; then
++			let tries=1
++			while [ $((tries)) -ge 0 ] ; do
++				do_lock
++				eval $(gcom -d ${MODEMDEV} -s /etc/gcom/man3g_getall.gcom) 2>/dev/null
++				res="$?"
++				do_unlock
++				[ "$res" = "0" ] && break
++				let tries=tries-1
++				sleep 1
++			done
++			[ $((tries)) -le 0 ] && {
++				echo "Failed to communicate with radio!"
++				exit 1
++			}
++			csq_pct=$(((csq*100)/31))
++		else
++			do_lock
++			uqmi -d ${CDCDEV} --get-serving-system > ${STATS_TMP}
++			msisdn=`qmicli -d ${CDCDEV} --dms-get-msisdn | grep MSISDN: | awk '{print $2}' | cut -d "'" -f 2`
++			t_mode=`qmicli -d ${CDCDEV} --dms-get-operating-mode | grep Mode:`
++			mode=`echo $t_mode | awk '{print $2}' | cut -d "'" -f 2`
++			power_mode=`echo $t_mode | cut -d ':' -f 2 | cut -d "'" -f 2`
++			data_session=`qmicli -d ${CDCDEV} --wds-get-packet-service-status | grep status: | cut -d ':' -f 2 | cut -d "'" -f 2`
++			data_bearer=`qmicli -d ${CDCDEV} --wds-get-current-data-bearer-technology 2>/dev/null | grep Technology: | cut -d ':' -f 2 | awk '{print toupper($0)}' | cut -d "'" -f 2`
++			qmicli -d ${CDCDEV} --nas-get-signal-strength > ${STATS_TMP2}
++			csq=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_csq.gcom | head -n 1 | cut -d "," -f 1`
++			lac=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_lac.gcom | head -n 1 | cut -d "," -f 3-4`
++			do_unlock
++			carrier=`grep description ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
++			registration=`grep registration ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
++			mcc=`grep mcc ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
++			mnc=`grep mnc ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
++			roaming=`grep roaming ${STATS_TMP} | awk '{print $2}' | cut -d '"' -f 2 | cut -d ',' -f 1`
++			rssi_net=`grep Network ${STATS_TMP2} | head -n 1 | awk '{print toupper($2)}' | cut -d "'" -f 2`
++			rssi_val=`grep Network ${STATS_TMP2} | head -n 1 | awk '{print $3}' | cut -d "'" -f 2`
++			rssi_eico=`grep -A 1 ECIO ${STATS_TMP2} | tail -n 1 | awk '{print $3}' | cut -d "'" -f 2`
++			rssi_sinr=`grep SINR: ${STATS_TMP2} | awk '{print $3}' | cut -d "'" -f 2`
++			csq_pct=$(((csq*100)/31))
++			ci=`echo $lac | cut -d "," -f 2 | cut -d '"' -f 2`
++			lac=`echo $lac | cut -d "," -f 1 | cut -d '"' -f 2`
++			rm -f ${STATS_TMP}
++			rm -f ${STATS_TMP2}
++		fi
++		cat << EOM > ${CACHEF}
++CACHE_EXPIRE=$((CUR+10))
++carrier="$carrier"
++registration="$registration"
++mcc="$mcc"
++mnc="$mnc"
++roaming="$roaming"
++msisdn="$msisdn"
++mode="$mode"
++power_mode="$power_mode"
++data_session="$data_session"
++csq="$csq"
++csq_pct="$csq_pct"
++lac="$lac"
++ci="$ci"
++data_bearer="$data_bearer"
++rssi_net="$rssi_net"
++rssi_val="$rssi_val"
++rsrp="$rsrp"
++rsrq="$rsrq"
++EOM
++	fi
++
++	data_session_connect=$(ubus call network.interface.$DEVICE status | grep uptime | cut -d : -f 2 | cut -d , -f 1)
++	if [ "$data_session_connect" = "" ] || [ $((data_session_connect)) -eq 0 ] ; then
++		data_session="disconnected"
++	fi
++
++	if [ "$rssi_net" = "EUTRAN" ] ; then
++		if [ $((rsrp)) -ge -85 ] ; then
++			rssi_bars="XXXX"
++		elif [ $((rsrp)) -ge -95 ] ; then
++			rssi_bars="XXX"
++		elif [ $((rsrp)) -ge -105 ] ; then
++			rssi_bars="XX"
++		elif [ $((rsrp)) -ge -115 ] ; then
++			rssi_bars="X"
++		else
++			rssi_bars="0"
++		fi
++	elif [ "$rssi_net" = "UMTS" ] ; then
++		if [ $((rssi_val)) -ge -80 ] ; then
++			rssi_bars="XXXX"
++		elif [ $((rssi_val)) -ge -90 ] ; then
++			rssi_bars="XXX"
++		elif [ $((rssi_val)) -ge -100 ] ; then
++			rssi_bars="XX"
++		elif [ $((rssi_val)) -ge -106 ] ; then
++			rssi_bars="X"
++		else
++			rssi_bars="0"
++		fi
++	else
++		if [ $((rssi_val)) -ge -80 ] ; then
++			rssi_bars="XXXX"
++		elif [ $((rssi_val)) -ge -89 ] ; then
++			rssi_bars="XXX"
++		elif [ $((rssi_val)) -ge -98 ] ; then
++			rssi_bars="XX"
++		elif [ $((rssi_val)) -ge -104 ] ; then
++			rssi_bars="X"
++		else
++			rssi_bars="0"
++		fi
++	fi
++
++	if [ "$roaming" = "false" ] ; then
++		network="Home"
++		roaming_val=1
++	else
++		network="Roaming"
++		roaming_val=0
++	fi
++
++	apn=$(uci get network.${DEVICE}.apn 2>/dev/null || echo "Not configured")
++
++	if [ "$machine" = "0" ] ; then
++		echo "Device: ${DEVICE}"
++		echo "Carrier: ${carrier} (MCC ${mcc}, MNC ${mnc})"
++		echo "APN: ${apn}"
++		if [ "$lac" != "" ] ; then
++			echo "Location code: ${lac}, Cell ID: ${ci}"
++		fi
++		echo "Mobile number: ${msisdn}"
++		echo "State: ${registration^}"
++		echo "Power Mode: ${power_mode^}"
++		echo "Radio Service type: ${rssi_net}"
++		echo "Data Bearer Technology: ${data_bearer}"
++		echo "Data session: ${data_session^}"
++		if [ "$data_session_connect" != "" ] && [ $((data_session_connect)) -gt 0 ] ; then
++			echo "Connected ${data_session_connect}s"
++		fi
++		echo "Network: ${network}"
++		echo "Signal quality: $csq/31 ($csq_pct%)"
++		if [ "$rssi_net" = "EUTRAN" ] ; then
++			echo "RSSI: ${rssi_val}, RSRP: ${rsrp}, RSRQ: ${rsrq}"
++			echo "Signal strength (${rssi_net}): ${rsrp}dBm, bars: ${rssi_bars}"
++		else
++			echo "Signal strength (${rssi_net}): ${rssi_val}dBm, bars: ${rssi_bars}"
++		fi
++	else
++		case $registration in
++			registered*)
++				registration=1
++			;;
++			*searching*)
++				registration=2
++			;;
++			*)
++				registration=0
++			;;
++		esac
++		case $data_session in
++			connected*)
++				data_session=2
++			;;
++			*)
++				data_session=1
++			;;
++		esac
++		case $data_bearer in
++			*GPRS*)
++				data_bearer=3
++			;;
++			*WCDMA*)
++				data_bearer=4
++			;;
++			*EDGE*)
++				data_bearer=6
++			;;
++			*HSDPA*|*HSUPA*|*HSPA*)
++				data_bearer=9
++			;;
++			*)
++				data_bearer=0
++			;;
++		esac
++                echo "${carrier}"
++		echo "${rssi_net}"
++		echo "${mcc}"
++		echo "${mnc}"
++		echo "${rssi_val}"
++		echo "0"
++		echo "0"
++		echo "${apn}"
++		echo "${csq}"
++		echo "${data_bearer}"
++		echo "0"
++		echo "${registration}"
++		echo "${data_session}"
++		echo "$((data_session_connect*100))"
++		echo "${roaming_val}"
++		echo "${msisdn}"
++		echo "${lac}"
++		echo "${ci}"
++	fi	
++}
++
++do_parse_sms() {
++	want_id=$1
++	match="$2"
++	SMS_TMP="/tmp/man3g_sms.$$"
++	gcom -d ${MODEMDEV} -s /etc/gcom/man3g_readallsms.gcom > $SMS_TMP 2>/dev/null
++	while : ;
++	do
++		while : ;
++		do
++			if [ "${line:0:6}" = "+CMGL:" ] ; then
++				break
++			fi
++			read line || break
++		done
++		line=`echo ${line:7}`
++		id=`echo "$line" | cut -d ',' -f 1`
++		if [ "$want_id" != "" ] && [ "$want_id" != "$id" ] ; then
++			continue
++		fi
++		STATUS=`echo "$line" | cut -d ',' -f 2`
++		SMSC=""
++		SENDER=`echo "$line" | cut -d ',' -f 3`
++		ts=`echo "$line" | cut -d ',' -f 5-6`
++		# Ok this needs explaining. The output should look like: "2010-12-13,18:43:49.0,-06:00"
++		# The ts string looks like: "14/02/03,14:31:46-24" so I use a neat bash substring trick to
++		# print all but the last character of ts (substring start at 0 through length -1) and
++		# also split the timezone from -0600 to the format -06:00.
++		tzo=`date +%z`
++		cent=`date +%C`
++		ts=`echo "${cent}${ts:1:2}-${ts:4:2}-${ts:7:11}.0,${tzo:0:3}:${tzo:3}"`
++		if [ "$machine" = "0" ] ; then
++			echo -n "Message "
++		fi
++		echo "$((id+1))"
++		if [ "$machine" = "0" ] ; then
++			echo "Status: $STATUS"
++		else
++			echo "0"
++		fi
++		if [ "$machine" = "0" ] ; then
++			echo -n "SMSC: "
++		fi
++		echo '""'
++		if [ "$machine" = "0" ] ; then
++			echo -n "Sender: "
++		fi
++		echo "$SENDER"
++		if [ "$machine" = "0" ] ; then
++			echo -n "Date: "
++		fi
++		echo "\"$ts\""
++		if [ "$machine" = "0" ] ; then
++			echo -n "Text: "
++		fi
++		message=""
++		while read line
++		do
++			if [ "${line:0:2}" = "OK" ] || [ "${line:0:6}" = "+CMGL:" ] ; then
++				break
++			fi
++			message="${message} ${line}"
++		done
++ 		message=`echo $message | tr -d '\r'`
++		if [ "$machine" = "1" ] ; then
++			echo ${#message}
++		fi
++		echo \"$message\"
++		if [ "$machine" = "0" ] ; then
++			echo
++		fi
++		[ "$match" != "" ] && echo "$message" | grep "$match" > /dev/null 2>&1 && found=$((id+1))
++		if [ "${line:0:6}" != "+CMGL:" ] ; then
++			read line || break
++		fi
++		if [ "$want_id" == "$id" ] ; then
++			break
++		fi
++	done < ${SMS_TMP}
++	rm -f ${SMS_TMP}
++}
++
++display_sms() {
++	do_parse_sms "$1" "$2"
++}
++
++send_sms() {
++	export SMS_NUMBER="$number"
++	export SMS_MESSAGE="$message"
++	id=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_sendsms.gcom`
++	RET="$?"
++	if [ "$RET" = "0" ] ; then
++		echo "SMS message sent with id $id"
++	elif [ "$RET" = "1" ] ; then
++		echo "Unable to send SMS message, error $id"
++	else
++		echo "Unable to send SMS message, unable to communicate with modem!"
++	fi
++}
++delete_sms() {
++	id=$1
++	export SMS_ID="$id"
++	out=`gcom -d ${MODEMDEV} -s /etc/gcom/man3g_deletesms.gcom`
++	RET="$?"
++	if [ "$RET" = "0" ] ; then
++		echo "SMS message $((id+1)) deleted"
++	elif [ "$RET" = "1" ] ; then
++		echo "Unable to delete SMS message, error $out"
++	else
++		echo "Unable to delete SMS message, unable to communicate with modem!"
++	fi
++}
++
++scan() {
++        uqmi -d ${CDCDEV} --network-scan
++}
++
++# This is a way to reset the modem by removing it from the usb bus, removing the usb hubs and rescanning
++# the PCI bus for USB hubs and devices
++remove() {
++	logger "Removing USB device..."
++	echo "Removing USB device..."
++	ifdown ${DEVICE}
++	sleep 10
++	echo 1 > /sys/bus/usb/devices/usb1/remove
++	echo 1 > /sys/devices/pci0000:00/0000:00:0f.5/remove
++	echo 1 > /sys/devices/pci0000:00/0000:00:0f.4/remove
++	logger "Rescanning/adding USB device..."
++	echo "Rescanning/adding USB device..."
++	echo 1 > /sys/devices/pci0000:00/pci_bus/0000:00/rescan
++	sleep 10
++	logger "Setting WWAN up..."
++	echo "Setting WWAN up..."
++	ifup ${DEVICE}
++}
++
++LCKFILE="/var/run/man3g.pid"
++
++do_lock() {
++    let cnt=600
++    LAST_PID=0
++    while [ $((cnt)) -ge 0 ] ; do
++  	if [ -e ${LCKFILE} ] ; then
++		PID=$(cat ${LCKFILE} 2>/dev/null)
++		if [ "$PID" == "$$" ] ; then
++			return
++		fi
++        	kill -0 ${PID} > /dev/null 2>&1
++        	if [ "$?" = "0" ] ; then
++			if [ "$machine" = "0" ] && [ $((cnt % 90)) -eq 0 ] ; then
++                		echo "Waiting for another man3g process to finish... (pid ${PID})"
++			fi
++        	elif [ -e ${LCKFILE} ] ; then
++			# Lock file still exists, see if someone else took it
++			usleep 50000
++			PID=$(cat ${LCKFILE} 2>/dev/null)
++			if [ "${LAST_PID}" = "${PID}" ] ; then
++				if [ "$machine" = "0" ] ; then
++                			echo "Stale lock file from pid ${PID}! Process is not running. Removing lock..."
++					break
++				fi
++			fi
++		else
++			# Lock file gone - process exited, we can grab it
++			break
++        	fi
++		LAST_PID=${PID}
++		usleep 100000
++	else
++		break
++	fi
++	let cnt=cnt-1
++    done
++# Don't do this because it screws up locking
++#    trap do_exit SIGINT SIGHUP SIGTERM
++    echo "$$" > ${LCKFILE}
++    # verify that we got it!
++    do_lock
++    LOCKED=1
++#    logger "Man3g: PID $$ took lock..."
++}
++
++do_unlock() {
++    rm -f ${LCKFILE}
++    LOCKED=0
++#    logger "Man3g: PID $$ released lock..."
++}
++
++do_exit() {
++    if [ "$LOCKED" = "1" ] ; then
++    	do_unlock
++    fi
++    exit
++}
++
++do_set_device() {
++	if [ "${DEVICE:0:4}" = "wwan" ] ; then
++		idx=${DEVICE:4:1}
++		CDCDEV=""
++		MODEMDEV=/dev/ttyACM$((3+(idx*6)))
++	elif [ "${DEVICE:0:3}" = "usb" ] ; then
++		CDCDEV=""
++		MODEMDEV=/dev/$(basename $(ls /sys/class/net/${DEVICE}/device/subsystem/drivers/option/*.2/ttyUSB* -d))
++	fi
++	[ -e ${MODEMDEV} ] && return 0
++	return 1
++}
++
++if [ "$1" = "-i" ] ; then
++	shift
++	DEVICE=$1
++	shift
++fi
++if [ "$1" = "" ] ; then
++	usage
++fi
++machine=0
++msgid=""
++match=""
++found=0
++while [ $# -gt 0 ] ; do
++	if [ "$1" = "--machine" ] ; then
++		machine=1
++	elif [ "$1" = "--msgid" ] || [ "$1" = "--id" ] ; then
++		shift
++		msgid=$1
++		let msgid=msgid-1
++	elif [ "$1" = "--to" ] || [ "$1" = "--number" ] ; then
++		shift
++		number=$1
++	elif [ "$1" = "--message" ] ; then
++		shift
++		message=$1
++	elif [ "$1" = "--match" ] ; then
++		shift
++		match=$1
++	else
++		cmd=$1
++	fi
++	shift
++done
++
++case $cmd in
++	status)
++		DEVICES="${DEVICE}"
++		[ -z $DEVICES ] && DEVICES="wwan0 wwan1"
++		for DEVICE in $DEVICES; do
++			do_set_device && status && echo
++		done
++	;;
++	display-sms)
++		do_lock
++		display_sms "$msgid" "$match"
++		do_unlock
++		exit $found
++	;;
++	delete-sms)
++		do_lock
++		if [ $((msgid)) -ge 0 ] ; then
++			delete_sms $msgid
++		fi
++		do_unlock
++	;;
++	send-sms)
++		if [ "$number" = "" ] ; then
++			echo "Must specify recipient mobile number with --to!"
++			exit 1
++		fi
++		if [ "$message" = "" ] ; then
++			echo "Must specify a message with --message!"
++			exit 1
++		fi
++		do_lock
++		send_sms
++		do_unlock
++	;;
++	remove)
++		remove
++	;;
++        scan)
++                do_lock
++                scan
++                do_unlock
++        ;;
++	*)
++		usage
++	;;
++esac
+--- a/package/network/utils/comgt/files/ncm.json
++++ b/package/network/utils/comgt/files/ncm.json
+@@ -74,5 +74,46 @@
+ 		"connect": "AT+CGACT=1,${profile}",
+ 		"finalize": "AT+CGDATA=\\\"M-MBIM\\\",${profile},1",
+ 		"disconnect": "AT+CGACT=0,${profile}"
++	},
++	"telit": {
++		"initialize": [
++			"AT+CFUN=1"
++		],
++		"modes": {
++			"umts": "AT+WS46=22",
++			"lte": "AT+WS46=28",
++			"preferlte": "AT+WS46=31",
++			"preferumts": "AT+WS46=22",
++			"gsm": "AT+WS46=31",
++			"auto": "AT+WS46=31"
++		},
++		"configure": [
++			"AT+CGDCONT=${profile},\\\"${pdptype}\\\",\\\"${apn}\\\"",
++			"AT#NCMD=0"
++		],
++		"connect": "AT#NCM=2,${profile}",
++		"disconnect": "AT#NCMD=0",
++		"getaddrs": "/etc/gcom/telit-getaddrs.gcom"
++	},
++	"oldtelit": {
++		"initialize": [
++			"AT+CFUN=1"
++		],
++		"modes": {
++			"umts": "AT+WS46=22",
++			"lte": "AT+WS46=28",
++			"preferlte": "AT+WS46=31",
++			"preferumts": "AT+WS46=22",
++			"gsm": "AT+WS46=31",
++			"auto": "AT+WS46=31"
++		},
++		"configure": [
++			"AT+CGDCONT=${profile},\\\"${pdptype}\\\",\\\"${apn}\\\"",
++			"AT#NCM=1,${profile}",
++			"AT+CGACT=1,${profile}"
++		],
++		"connect": "AT+CGDATA=\\\"M-RAW_IP\\\",1",
++		"disconnect": "AT#NCMD=0",
++		"getaddrs": "/etc/gcom/telit-getaddrs.gcom"
+ 	}
+ }
+--- a/package/network/utils/comgt/files/ncm.sh
++++ b/package/network/utils/comgt/files/ncm.sh
+@@ -25,7 +25,7 @@ proto_ncm_init_config() {
+ proto_ncm_setup() {
+ 	local interface="$1"
+ 
+-	local manufacturer initialize setmode connect finalize ifname devname devpath
++	local manufacturer initialize setmode connect finalize ifname devname devpath getaddrs
+ 
+ 	local device apn auth username password pincode delay mode pdptype profile $PROTO_DEFAULT_OPTIONS
+ 	json_get_vars device apn auth username password pincode delay mode pdptype profile $PROTO_DEFAULT_OPTIONS
+@@ -57,11 +57,21 @@ proto_ncm_setup() {
+ 	case "$devname" in
+ 	'tty'*)
+ 		devpath="$(readlink -f /sys/class/tty/$devname/device)"
+-		ifname="$( ls "$devpath"/../../*/net )"
++		ifname="$( ls "$devpath"/../*/net )"
++		# On module reset the device might not be present yet
++		[ -n "$ifname" ] || {
++			sleep 1
++			ifname="$( ls "$devpath"/../*/net )"
++		}
+ 		;;
+ 	*)
+ 		devpath="$(readlink -f /sys/class/usbmisc/$devname/device/)"
+ 		ifname="$( ls "$devpath"/net )"
++		# On module reset the device might not be present yet
++		[ -n "$ifname" ] || {
++			sleep 1
++			ifname="$( ls "$devpath"/net )"
++		}
+ 		;;
+ 	esac
+ 	[ -n "$ifname" ] || {
+@@ -73,9 +83,19 @@ proto_ncm_setup() {
+ 
+ 	[ -n "$delay" ] && sleep "$delay"
+ 
++	do_lock
+ 	manufacturer=`gcom -d "$device" -s /etc/gcom/getcardinfo.gcom | awk 'NF && $0 !~ /AT\+CGMI/ { sub(/\+CGMI: /,""); print tolower($1); exit; }'`
+-	[ $? -ne 0 ] && {
+-		echo "Failed to get modem information"
++	[ -n "$manufacturer" ] || {
++		old_device="$device"
++		idx=${device: -1:1}
++		idx=$((idx+3))
++		device="${device::-1}$idx"
++		echo "Unable to communicate on $old_device, trying $device"
++		manufacturer=`gcom -d "$device" -s /etc/gcom/getcardinfo.gcom | awk 'NF && $0 !~ /AT\+CGMI/ { sub(/\+CGMI: /,""); print tolower($1); exit; }'`
++	}
++	[ -n "$manufacturer" ] || {
++		do_unlock
++		echo "Failed to get modem information from $device"
+ 		proto_notify_error "$interface" GETINFO_FAILED
+ 		return 1
+ 	}
+@@ -83,6 +103,7 @@ proto_ncm_setup() {
+ 	json_load "$(cat /etc/gcom/ncm.json)"
+ 	json_select "$manufacturer"
+ 	[ $? -ne 0 ] && {
++		do_unlock
+ 		echo "Unsupported modem"
+ 		proto_notify_error "$interface" UNSUPPORTED_MODEM
+ 		proto_set_available "$interface" 0
+@@ -91,6 +112,7 @@ proto_ncm_setup() {
+ 	json_get_values initialize initialize
+ 	for i in $initialize; do
+ 		eval COMMAND="$i" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
++			do_unlock
+ 			echo "Failed to initialize modem"
+ 			proto_notify_error "$interface" INITIALIZE_FAILED
+ 			return 1
+@@ -99,6 +121,7 @@ proto_ncm_setup() {
+ 
+ 	[ -n "$pincode" ] && {
+ 		PINCODE="$pincode" gcom -d "$device" -s /etc/gcom/setpin.gcom || {
++			do_unlock
+ 			echo "Unable to verify PIN"
+ 			proto_notify_error "$interface" PIN_FAILED
+ 			proto_block_restart "$interface"
+@@ -110,6 +133,7 @@ proto_ncm_setup() {
+ 	echo "Configuring modem"
+ 	for i in $configure; do
+ 		eval COMMAND="$i" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
++			do_unlock
+ 			echo "Failed to configure modem"
+ 			proto_notify_error "$interface" CONFIGURE_FAILED
+ 			return 1
+@@ -121,6 +145,7 @@ proto_ncm_setup() {
+ 		json_get_var setmode "$mode"
+ 		echo "Setting mode"
+ 		eval COMMAND="$setmode" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
++			do_unlock
+ 			echo "Failed to set operating mode"
+ 			proto_notify_error "$interface" SETMODE_FAILED
+ 			return 1
+@@ -132,47 +157,67 @@ proto_ncm_setup() {
+ 	json_get_vars connect
+ 	echo "Connecting modem"
+ 	eval COMMAND="$connect" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
++		do_unlock
+ 		echo "Failed to connect"
+ 		proto_notify_error "$interface" CONNECT_FAILED
+ 		return 1
+ 	}
+ 
+ 	json_get_vars finalize
++	json_get_vars getaddrs
+ 
+ 	echo "Setting up $ifname"
+ 	proto_init_update "$ifname" 1
+ 	proto_add_data
+ 	json_add_string "manufacturer" "$manufacturer"
+ 	proto_close_data
+-	proto_send_update "$interface"
+ 
+-	[ "$pdptype" = "IP" -o "$pdptype" = "IPV4V6" ] && {
+-		json_init
+-		json_add_string name "${interface}_4"
+-		json_add_string ifname "@$interface"
+-		json_add_string proto "dhcp"
+-		proto_add_dynamic_defaults
+-		ubus call network add_dynamic "$(json_dump)"
+-	}
+-
+-	[ "$pdptype" = "IPV6" -o "$pdptype" = "IPV4V6" ] && {
+-		json_init
+-		json_add_string name "${interface}_6"
+-		json_add_string ifname "@$interface"
+-		json_add_string proto "dhcpv6"
+-		json_add_string extendprefix 1
+-		proto_add_dynamic_defaults
+-		ubus call network add_dynamic "$(json_dump)"
+-	}
++	if [ -n "$getaddrs" ] ; then
++		eval PROFILE="$profile" $(gcom -d "$device" -s $getaddrs) || {
++			do_unlock
++			echo "Failed to get IP address information"
++			proto_notify_error "$interface" GETADDRS_FAILED
++			return 1
++		}
++
++		proto_add_ipv4_address "$ip" "$subnet"
++                [ "$defaultroute" = 0 ] || proto_add_ipv4_route "0.0.0.0" 0 "$gateway" "" "$metric"
++                [ "$peerdns" = 0 ] || {
++                        proto_add_dns_server "$dns1"
++#                        proto_add_dns_server "$dns2"
++                }
++                proto_send_update "$interface"
++	else
++		proto_send_update "$interface"
++		[ "$pdptype" = "IP" -o "$pdptype" = "IPV4V6" ] && {
++			json_init
++			json_add_string name "${interface}_4"
++			json_add_string ifname "@$interface"
++			json_add_string proto "dhcp"
++			proto_add_dynamic_defaults
++			ubus call network add_dynamic "$(json_dump)"
++		}
++
++		[ "$pdptype" = "IPV6" -o "$pdptype" = "IPV4V6" ] && {
++			json_init
++			json_add_string name "${interface}_6"
++			json_add_string ifname "@$interface"
++			json_add_string proto "dhcpv6"
++			json_add_string extendprefix 1
++			proto_add_dynamic_defaults
++			ubus call network add_dynamic "$(json_dump)"
++		}
++	fi
+ 
+ 	[ -n "$finalize" ] && {
+ 		eval COMMAND="$finalize" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
++			do_unlock
+ 			echo "Failed to configure modem"
+ 			proto_notify_error "$interface" FINALIZE_FAILED
+ 			return 1
+ 		}
+ 	}
+-
++	do_unlock
+ }
+ 
+ proto_ncm_teardown() {
+@@ -201,15 +246,68 @@ proto_ncm_teardown() {
+ 	}
+ 
+ 	json_get_vars disconnect
++	do_lock
+ 	eval COMMAND="$disconnect" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
++		do_unlock
+ 		echo "Failed to disconnect"
+ 		proto_notify_error "$interface" DISCONNECT_FAILED
+ 		return 1
+ 	}
++	do_unlock
+ 
+ 	proto_init_update "*" 0
+ 	proto_send_update "$interface"
+ }
++
++LCKFILE="/var/run/man3g.pid"
++
++do_lock() {
++    let cnt=600
++    LAST_PID=0
++    while [ $((cnt)) -gt 0 ] ; do
++        if [ -e ${LCKFILE} ] ; then
++                PID=$(cat ${LCKFILE})
++                if [ "$PID" == "$$" ] ; then
++                        return
++                fi
++                kill -0 ${PID} > /dev/null 2>&1
++                if [ "$?" = "0" ] ; then
++                        if [ $((cnt % 50)) -eq 0 ] ; then
++                                echo "Waiting for another man3g process to finish... (pid ${PID})"
++                        fi
++                else
++                        if [ "${LAST_PID}" = "${PID}" ] ; then
++                                echo "Stale lock file from pid ${PID}! Process is not running. Removing lock..."
++                                break
++                        fi
++                fi
++                LAST_PID=${PID}
++                usleep 100000
++        else
++                break
++        fi
++        let cnt=cnt-1
++    done
++    trap do_exit SIGTERM
++    echo "$$" > ${LCKFILE}
++    # verify that we got it!
++    do_lock
++    LOCKED=1
++}
++
++do_unlock() {
++    rm -f ${LCKFILE}
++    LOCKED=0
++}
++
++do_exit() {
++    echo "Exiting while lock held, unlocking..."
++    if [ "$LOCKED" = "1" ] ; then
++        do_unlock
++    fi
++    exit
++}
++
+ [ -n "$INCLUDE_ONLY" ] || {
+ 	add_protocol ncm
+ }
+--- /dev/null
++++ b/package/network/utils/comgt/files/telit-getaddrs.gcom
+@@ -0,0 +1,36 @@
++opengt
++ set com 115200n81
++ set comecho off
++ set senddelay 0.02
++ waitquiet 0.2 0.2
++ flash 0.1
++
++:start
++ send "AT+CGCONTRDP="+$env("PROFILE")
++ send "^m"
++ get 1 "\"" $s
++ get 1 "\"" $s
++ get 1 "\"" $s
++ get 1 "." $a
++ get 1 "." $b
++ get 1 "." $c
++ get 1 "." $d
++ print "ip=\"",$a,".",$b,".",$c+".",$d,"\"\n"
++ get 1 "." $a
++ get 1 "." $b
++ get 1 "." $c
++ get 1 "\"" $d
++ print "subnet=\"",$a,".",$b,".",$c+".",$d,"\"\n"
++ get 1 "\"" $s
++ get 1 "." $a
++ get 1 "." $b
++ get 1 "." $c
++ get 1 "\"" $d
++ print "gateway=\"",$a,".",$b,".",$c+".",$d,"\"\n"
++ get 1 "\"" $s
++ get 1 "." $a
++ get 1 "." $b
++ get 1 "." $c
++ get 1 "\"" $d
++ print "dns1=\"",$a,".",$b,".",$c+".",$d,"\"\n"
++ exit 0
+--- /dev/null
++++ b/package/network/utils/comgt/files/man3g_getall.gcom
+@@ -0,0 +1,157 @@
++# Get all params
++opengt
++ set com 115200n81
++ set senddelay 0.02
++ waitquiet 1 0.2
++ flash 0.1
++
++:disableresults
++ send "AT\^CURC=0^m"
++ get 1 "^m" $n
++
++:getpower
++ print "power_mode=\"online\"\n"
++
++:getmsisdn
++ send "AT+CNUM^m"
++ get 1 "^m" $n
++ get 1 ":" $n
++ get 1 "\"" $n
++ get 1 "\"" $n
++ get 1 "\"" $n
++ print "msisdn=\"",$n,"\"\n"
++
++:getreg
++ send "AT+CREG?^m"
++ get 1 "^m" $n
++ get 1 ":" $n
++ get 1 "," $n
++ get 1 ",^m" $n
++ let n = val($n)
++ if n = 0 let $r="searching"
++ else if n = 1 let $r="registered"
++ else if n = 2 let $r="searching"
++ else if n = 3 let $r="denied"
++ else if n = 5 let $r="registered"
++ else let $r = "unknown"
++ print "registration=\"",$r,"\"\n"
++ if n = 5 let $r = "true"
++ else let $r = "false"
++ print "roaming=\"",$r,"\"\n"
++
++:getregdetail
++ send "AT+COPS?^m"
++ get 1 "^m" $n
++ get 1 ":" $n
++ get 1 "," $n
++ get 1 "\"" $n
++ get 1 "\"" $o
++ get 1 ",^m" $r
++ print "carrier=\"",$o,"\"\n"
++ let r = val($r)
++ if r = 0 let $d="GSM" let $r1="GSM"
++ else if r = 1 let $d="GSM" let $r1="GSM"
++ else if r = 2 let $d="WCDMA" let $r1="UMTS"
++ else if r = 3 let $d="EDGE" let $r1="UMTS"
++ else if r = 4 let $d="HSDPA" let $r1="UMTS"
++ else if r = 5 let $d="HSUPA" let $r1="UMTS"
++ else if r = 6 let $d="HSPA" let $r1="UMTS"
++ else if r = 7 let $d="LTE" let $r1="EUTRAN"
++ else let $d="GSM"
++ print "data_bearer=\"",$d,"\"\n"
++ print "rssi_net=\"",$r1,"\"\n"
++
++:getservingcell
++ send "AT#RFSTS^m"
++ get 1 "^m" $n
++ get 1 ":" $n
++ get 1 "\"" $n
++ get 1 " " $m1
++ get 1 "\"" $m2
++ if $r1 = "GSM" goto gscgsm
++ else if $r1 = "UMTS" goto gscwcdma
++ else if $r1 = "EUTRAN" goto gsclte
++ else goto gsctimeout
++
++:gscgsm
++ let $r3="0"
++ let $r4="0"
++ get 1 "," $s
++ get 1 "," $r2
++ get 1 "," $l1
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $c1
++ get 1 ",^m" $s
++ goto gscprint
++
++:gscwcdma
++ let $r4="0"
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $r3
++ get 1 "," $r2
++ get 1 "," $l1
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $c1
++ get 1 ",^m" $s
++ goto gscprint
++
++:gsclte
++ get 1 "," $s
++ get 1 "," $r3
++ get 1 "," $r2
++ get 1 "," $r4
++ get 1 "," $l1
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $s
++ get 1 "," $c1
++ get 1 ",^m" $s
++ goto gscprint
++
++:gsctimeout
++
++:gscprint
++ print "mcc=\"",$m1,"\"\n"
++ print "mnc=\"",$m2,"\"\n"
++ print "lac=\"",$l1,"\"\n"
++ print "ci=",$c1,"\n"
++ print "rssi_val=\"",$r2,"\"\n"
++ print "rsrp=\"",$r3,"\"\n"
++ print "rsrq=\"",$r4,"\"\n"
++
++:getcsq
++ send "AT+CSQ^m"
++ get 1 "^m" $n
++ get 1 ":" $n
++ get 1 "," $n
++ print "csq=\"",$mid($n,1,9999),"\"\n"
++
++ let s1=0
++ print "rssi_sinr=\"",s1,"\"\n"
++
++:getdatasession
++ send "AT+CGATT?^m"
++ get 1 "^m" $n
++ get 1 ":" $n
++ get 1 "^m" $n
++ let n = val($n)
++ if n = 1 let $d = "connected"
++ else let $d = "disconnected"
++ print "data_session=\"",$d,"\"\n"
++
++:done
++ exit 0
