@@ -24,7 +24,7 @@
  endef
 --- /dev/null
 +++ b/package/network/utils/comgt/files/man3g
-@@ -0,0 +1,509 @@
+@@ -0,0 +1,510 @@
 +#!/bin/bash
 +
 +function usage() {
@@ -396,7 +396,8 @@
 +        	kill -0 ${PID} > /dev/null 2>&1
 +        	if [ "$?" = "0" ] ; then
 +			if [ "$machine" = "0" ] && [ $((cnt % 90)) -eq 0 ] ; then
-+                		echo "Waiting for another man3g process to finish... (pid ${PID})"
++#                		echo "Waiting for another man3g process to finish... (pid ${PID})"
++				:
 +			fi
 +        	elif [ -e ${LCKFILE} ] ; then
 +			# Lock file still exists, see if someone else took it
@@ -404,7 +405,7 @@
 +			PID=$(cat ${LCKFILE} 2>/dev/null)
 +			if [ "${LAST_PID}" = "${PID}" ] ; then
 +				if [ "$machine" = "0" ] ; then
-+                			echo "Stale lock file from pid ${PID}! Process is not running. Removing lock..."
++#                			echo "Stale lock file from pid ${PID}! Process is not running. Removing lock..."
 +					break
 +				fi
 +			fi
@@ -445,7 +446,7 @@
 +	if [ "${DEVICE:0:4}" = "wwan" ] ; then
 +		idx=${DEVICE:4:1}
 +		CDCDEV=""
-+		MODEMDEV=/dev/ttyACM$((3+(idx*6)))
++		MODEMDEV=/dev/ttyACM$((0+(idx*6)))
 +	elif [ "${DEVICE:0:3}" = "usb" ] ; then
 +		CDCDEV=""
 +		MODEMDEV=/dev/$(basename $(ls /sys/class/net/${DEVICE}/device/subsystem/drivers/option/*.2/ttyUSB* -d))
@@ -594,7 +595,15 @@
  
  	local device apn auth username password pincode delay mode pdptype profile $PROTO_DEFAULT_OPTIONS
  	json_get_vars device apn auth username password pincode delay mode pdptype profile $PROTO_DEFAULT_OPTIONS
-@@ -57,11 +57,21 @@ proto_ncm_setup() {
+@@ -33,6 +33,7 @@ proto_ncm_setup() {
+ 	[ "$metric" = "" ] && metric="0"
+ 
+ 	[ -n "$profile" ] || profile=1
++	[ -n "$delay" ] || delay=1
+ 
+ 	pdptype=`echo "$pdptype" | awk '{print toupper($0)}'`
+ 	[ "$pdptype" = "IP" -o "$pdptype" = "IPV6" -o "$pdptype" = "IPV4V6" ] || pdptype="IP"
+@@ -57,11 +58,21 @@ proto_ncm_setup() {
  	case "$devname" in
  	'tty'*)
  		devpath="$(readlink -f /sys/class/tty/$devname/device)"
@@ -617,7 +626,7 @@
  		;;
  	esac
  	[ -n "$ifname" ] || {
-@@ -73,9 +83,19 @@ proto_ncm_setup() {
+@@ -73,16 +84,28 @@ proto_ncm_setup() {
  
  	[ -n "$delay" ] && sleep "$delay"
  
@@ -627,9 +636,9 @@
 -		echo "Failed to get modem information"
 +	[ -n "$manufacturer" ] || {
 +		old_device="$device"
-+		idx=${device: -1:1}
++		idx=$(echo device | awk '{print substr($0,length($0),1)}')
 +		idx=$((idx+3))
-+		device="${device::-1}$idx"
++		device="$(echo $device | awk '{print substr($0,0,length($0)-1)}')$idx"
 +		echo "Unable to communicate on $old_device, trying $device"
 +		manufacturer=`gcom -d "$device" -s /etc/gcom/getcardinfo.gcom | awk 'NF && $0 !~ /AT\+CGMI/ { sub(/\+CGMI: /,""); print tolower($1); exit; }'`
 +	}
@@ -639,7 +648,8 @@
  		proto_notify_error "$interface" GETINFO_FAILED
  		return 1
  	}
-@@ -83,6 +103,7 @@ proto_ncm_setup() {
++	echo "Manufacturer is \"$manufacturer\""
+ 
  	json_load "$(cat /etc/gcom/ncm.json)"
  	json_select "$manufacturer"
  	[ $? -ne 0 ] && {
@@ -647,7 +657,7 @@
  		echo "Unsupported modem"
  		proto_notify_error "$interface" UNSUPPORTED_MODEM
  		proto_set_available "$interface" 0
-@@ -91,6 +112,7 @@ proto_ncm_setup() {
+@@ -91,6 +114,7 @@ proto_ncm_setup() {
  	json_get_values initialize initialize
  	for i in $initialize; do
  		eval COMMAND="$i" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
@@ -655,7 +665,7 @@
  			echo "Failed to initialize modem"
  			proto_notify_error "$interface" INITIALIZE_FAILED
  			return 1
-@@ -99,6 +121,7 @@ proto_ncm_setup() {
+@@ -99,6 +123,7 @@ proto_ncm_setup() {
  
  	[ -n "$pincode" ] && {
  		PINCODE="$pincode" gcom -d "$device" -s /etc/gcom/setpin.gcom || {
@@ -663,7 +673,7 @@
  			echo "Unable to verify PIN"
  			proto_notify_error "$interface" PIN_FAILED
  			proto_block_restart "$interface"
-@@ -110,6 +133,7 @@ proto_ncm_setup() {
+@@ -110,6 +135,7 @@ proto_ncm_setup() {
  	echo "Configuring modem"
  	for i in $configure; do
  		eval COMMAND="$i" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
@@ -671,7 +681,7 @@
  			echo "Failed to configure modem"
  			proto_notify_error "$interface" CONFIGURE_FAILED
  			return 1
-@@ -121,6 +145,7 @@ proto_ncm_setup() {
+@@ -121,6 +147,7 @@ proto_ncm_setup() {
  		json_get_var setmode "$mode"
  		echo "Setting mode"
  		eval COMMAND="$setmode" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
@@ -679,7 +689,7 @@
  			echo "Failed to set operating mode"
  			proto_notify_error "$interface" SETMODE_FAILED
  			return 1
-@@ -132,47 +157,67 @@ proto_ncm_setup() {
+@@ -132,47 +159,67 @@ proto_ncm_setup() {
  	json_get_vars connect
  	echo "Connecting modem"
  	eval COMMAND="$connect" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
@@ -767,7 +777,7 @@
  }
  
  proto_ncm_teardown() {
-@@ -201,15 +246,68 @@ proto_ncm_teardown() {
+@@ -201,15 +248,68 @@ proto_ncm_teardown() {
  	}
  
  	json_get_vars disconnect
@@ -813,7 +823,7 @@
 +        fi
 +        let cnt=cnt-1
 +    done
-+    trap do_exit SIGTERM
++#    trap do_exit SIGTERM
 +    echo "$$" > ${LCKFILE}
 +    # verify that we got it!
 +    do_lock
@@ -843,8 +853,8 @@
 + set com 115200n81
 + set comecho off
 + set senddelay 0.02
-+ waitquiet 0.2 0.2
-+ flash 0.1
++ waitquiet 1 0.5
++ flash 0.5
 +
 +:start
 + send "AT+CGCONTRDP="+$env("PROFILE")
@@ -882,8 +892,8 @@
 +opengt
 + set com 115200n81
 + set senddelay 0.02
-+ waitquiet 1 0.2
-+ flash 0.1
++ waitquiet 1 0.5
++ flash 0.5
 +
 +:disableresults
 + send "AT\^CURC=0^m"
