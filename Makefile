@@ -38,6 +38,13 @@ PARALLEL_MAKE=-j $(shell echo $$(( $(NUM_CPU) * 2 )))
 CACHE_DIR?=$(shell pwd)/ccache
 BUILD_OPTS=
 
+docker_build:
+	sudo apt-get update && sudo apt-get install -y docker.io && \
+	sudo docker build --tag opuntia:latest docker/
+
+docker_run: docker_build
+	sudo docker run --rm --name opuntia -it -v /home/ubuntu/opuntia:/opuntia opuntia:latest /bin/bash
+
 build: prepare setup_cache $(built)
 	@if [ ! -d $(CACHE_DIR) ] ; then \
 		mkdir $(CACHE_DIR); \
