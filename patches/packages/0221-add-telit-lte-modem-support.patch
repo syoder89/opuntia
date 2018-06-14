@@ -1,20 +1,14 @@
 --- a/package/network/utils/comgt/Makefile
 +++ b/package/network/utils/comgt/Makefile
-@@ -68,10 +68,13 @@ define Package/comgt/install
+@@ -68,6 +68,7 @@ define Package/comgt/install
  	$(INSTALL_DIR) $(1)/usr/bin
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/comgt $(1)/usr/bin/
  	$(LN) comgt $(1)/usr/bin/gcom
 +	$(INSTALL_DIR) $(1)/bin
-+	$(INSTALL_BIN) ./files/man3g $(1)/bin/
  	$(INSTALL_DIR) $(1)/etc/chatscripts
  	$(INSTALL_DATA) ./files/3g.chat $(1)/etc/chatscripts/3g.chat
  	$(INSTALL_DATA) ./files/evdo.chat $(1)/etc/chatscripts/evdo.chat
- 	$(INSTALL_DIR) $(1)/etc/gcom
-+	$(INSTALL_DATA) ./files/man3g_getall.gcom $(1)/etc/gcom/man3g_getall.gcom
- 	$(INSTALL_DATA) ./files/setpin.gcom $(1)/etc/gcom/setpin.gcom
- 	$(INSTALL_DATA) ./files/setmode.gcom $(1)/etc/gcom/setmode.gcom
- 	$(INSTALL_DATA) ./files/getcardinfo.gcom $(1)/etc/gcom/getcardinfo.gcom
-@@ -97,6 +100,7 @@ define Package/comgt-ncm/install
+@@ -97,6 +98,7 @@ define Package/comgt-ncm/install
  	$(INSTALL_DIR) $(1)/etc/gcom
  	$(INSTALL_DATA) ./files/ncm.json $(1)/etc/gcom/ncm.json
  	$(INSTALL_DATA) ./files/runcommand.gcom $(1)/etc/gcom/runcommand.gcom

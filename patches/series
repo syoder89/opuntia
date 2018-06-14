@@ -113,3 +113,4 @@ packages/0217-wireless-adhoc-workaround-race.patch
 packages/0219-ath10k-ct-remove-debug-from-coverage.patch
 packages/0220-ath10k-ct-update-driver.patch
 packages/0221-add-telit-lte-modem-support.patch
+packages/0222-remove-broken-mbim-pin-required-check.patch

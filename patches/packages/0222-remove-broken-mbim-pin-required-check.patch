@@ -1,0 +1,25 @@
+--- a/package/network/utils/umbim/files/lib/netifd/proto/mbim.sh
++++ b/package/network/utils/umbim/files/lib/netifd/proto/mbim.sh
+@@ -81,14 +81,14 @@ _proto_mbim_setup() {
+ 	}
+ 	tid=$((tid + 1))
+ 
+-	echo "mbim[$$]" "Checking pin"
+-	umbim $DBG -n -t $tid -d $device pinstate || {
+-		echo "mbim[$$]" "PIN required"
+-		proto_notify_error "$interface" PIN_FAILED
+-		proto_block_restart "$interface"
+-		return 1
+-	}
+-	tid=$((tid + 1))
++#	echo "mbim[$$]" "Checking pin"
++#	umbim $DBG -n -t $tid -d $device pinstate || {
++#		echo "mbim[$$]" "PIN required"
++#		proto_notify_error "$interface" PIN_FAILED
++#		proto_block_restart "$interface"
++#		return 1
++#	}
++#	tid=$((tid + 1))
+ 
+ 	echo "mbim[$$]" "Checking subscriber"
+  	umbim $DBG -n -t $tid -d $device subscriber || {
