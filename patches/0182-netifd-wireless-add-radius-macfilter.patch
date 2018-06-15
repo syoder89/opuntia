@@ -1,5 +1,7 @@
---- a/package/network/services/hostapd/files/hostapd.sh
-+++ b/package/network/services/hostapd/files/hostapd.sh
+Index: build_dir/package/network/services/hostapd/files/hostapd.sh
+===================================================================
+--- build_dir.orig/package/network/services/hostapd/files/hostapd.sh
++++ build_dir/package/network/services/hostapd/files/hostapd.sh
 @@ -180,8 +180,8 @@ hostapd_common_add_bss_config() {
  	config_add_string iapp_interface
  	config_add_string eap_type ca_cert client_cert identity anonymous_identity auth priv_key priv_key_pwd
@@ -11,18 +13,16 @@
  
  	config_add_int dynamic_vlan vlan_naming
  	config_add_string vlan_tagged_interface vlan_bridge
-@@ -231,7 +231,9 @@ hostapd_set_bss_options() {
- 		wps_independent wps_device_type wps_device_name wps_manufacturer wps_pin \
+@@ -236,6 +236,8 @@ hostapd_set_bss_options() {
  		macfilter ssid wmm uapsd hidden short_preamble rsn_preauth \
  		iapp_interface eapol_version dynamic_vlan ieee80211w nasid \
--		acct_server acct_secret acct_port acct_interval
-+		acct_server acct_secret acct_port acct_interval \
+ 		acct_server acct_secret acct_port acct_interval \
 +		ieee80211w auth_servers acct_servers auth_server auth_secret \
-+		auth_port dae_client dae_secret dae_port ownip
++		auth_port dae_client dae_secret dae_port ownip \
+ 		bss_load_update_period chan_util_avg_period
  
  	set_default isolate 0
- 	set_default maxassoc 0
-@@ -283,6 +285,75 @@ hostapd_set_bss_options() {
+@@ -292,6 +294,75 @@ hostapd_set_bss_options() {
  
  	local vlan_possible=""
  
@@ -98,7 +98,7 @@
  	case "$auth_type" in
  		none)
  			wps_possible=1
-@@ -309,88 +380,13 @@ hostapd_set_bss_options() {
+@@ -318,88 +389,13 @@ hostapd_set_bss_options() {
  			wps_possible=1
  		;;
  		eap)
@@ -188,7 +188,7 @@
  			append bss_conf "eapol_key_index_workaround=1" "$N"
  			append bss_conf "ieee8021x=1" "$N"
  
-@@ -529,6 +525,10 @@ hostapd_set_bss_options() {
+@@ -559,6 +555,10 @@ hostapd_set_bss_options() {
  			append bss_conf "macaddr_acl=0" "$N"
  			append bss_conf "deny_mac_file=$_macfile" "$N"
  		;;

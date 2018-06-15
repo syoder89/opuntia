@@ -5,7 +5,6 @@ packages/0028-Add-etc-rc.d-to-sysupgrade-so-service-start-stop-are.patch
 kernel/0043-Fix-panic-in-ledtrig-netdev-due-to-a-netdev-callback.patch
 kernel/0044-Linux-3.13-updates.patch
 packages/0062-Set-root-password.patch
-packages/0064-Add-bash-job-support.-Change-default-login-shell-to-.patch
 oldpackages/0065-Multiwan-fixes.patch
 packages/0073-Fix-timeout-problem-with-uhttpd-causing-large-firmwa.patch
 packages/0076-x86-upgrade-copy-licenses.patch
@@ -18,8 +17,6 @@ packages/0159-Update-authsae-06-2014.patch
 packages/0160-Authsae-fix-bad-frames-in-commit-8531ab1.patch
 packages/0163-Mac80211-fix-fail-to-set-vif-mac-addr.patch
 packages/0164-Authsae-check-if-running.patch
-packages/0165-Mac80211-init-mesh_params-after-meshd.patch
-packages/0166-Bash-fix-parallel-build.patch
 oldpackages/0066-Multiwan-work-with-qos-mark-mask-fixes.patch
 0150-Fix-Linux-Pam-URL.patch
 0160-Add-wpj344-support.patch
@@ -69,7 +66,6 @@ packages/0177-firewall-fix-musl-errno-options-parsing.patch
 packages/0175-hostapd-ovs-support.patch
 packages/0178-procps-ng-disable-modern-top.patch
 0150-Add-vid-option-to-switch-config.patch
-packages/0195-ovs-add-vxlan-module.patch
 packages/0176-netifd-replace-bridge-with-ovs.patch
 packages/0177-ath10k-ct-change-modprobe-order.patch
 0176-scott-fix-ath10k-ct-dynamic-vlan-gtk-sw_crypto-disabled.patch
@@ -93,7 +89,6 @@ packages/0197-quagga-version-1.2.1.patch
 packages/0197-quagga-run-as-root-to-write-conf-to-overlay.patch
 packages/0200-batman-adv-fix-expected-throughput-ath10k.patch
 0163-Add-wpq864-support.patch
-packages/0210-openvswitch-update-version-2.7.patch
 kernel/0075-shortcut-fe-4.9.patch
 kernel/0080-remove-mtd-ubi-add-EOF-marker.patch
 kernel/0078-ath10k-ct-add-coverage-setting.patch
@@ -101,7 +96,6 @@ kernel/0078-ath10k-ct-update-firmware-v19-htt.patch
 packages/0201-ath10k-ct-htt-mgmt-if-wmi-not-defined.patch
 packages/0202-ath10k-ct-no-pci-read32-for-irq.patch
 kernel/0081-remove-ip_gre-module-due-to-openvswitch-conflict.patch
-kernel/0082-ar71xx-enable-preempt.patch
 packages/0211-firewall-allow-web-ssh-snmp-default-ports.patch
 packages/0212-ath10k-ct-update-version.patch
 packages/0214-ath10k-ct-update-coverage-class-on-fw-reset.patch
@@ -109,7 +103,6 @@ packages/0215-batman-adv-lower-node-timeout.patch
 packages/0216-wireless-fix-adhoc-scan-and-respawn.patch
 packages/0217-wireless-adhoc-workaround-race.patch
 0164-Add-wpj563-support.patch
-0219-openvswitch-fix-python-path.patch
 packages/0219-ath10k-ct-remove-debug-from-coverage.patch
 packages/0220-ath10k-ct-update-driver.patch
 packages/0221-add-telit-lte-modem-support.patch
