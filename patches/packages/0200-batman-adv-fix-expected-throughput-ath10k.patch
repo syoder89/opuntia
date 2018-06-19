@@ -1,5 +1,7 @@
+Index: build_dir/feeds/routing/batman-adv/patches/0100-scott-ath10k-fix-expected-throughput.patch
+===================================================================
 --- /dev/null
-+++ b/feeds/routing/batman-adv/patches/0100-scott-ath10k-fix-expected-throughput.patch
++++ build_dir/feeds/routing/batman-adv/patches/0100-scott-ath10k-fix-expected-throughput.patch
 @@ -0,0 +1,32 @@
 +--- a/net/batman-adv/bat_v_elp.c
 ++++ b/net/batman-adv/bat_v_elp.c
@@ -18,9 +20,9 @@
 +-		if (!(sinfo.filled & BIT(NL80211_STA_INFO_EXPECTED_THROUGHPUT)))
 +-			goto default_throughput;
 ++		if (!(sinfo.filled & BIT(NL80211_STA_INFO_EXPECTED_THROUGHPUT))) {
-++			if (sinfo.filled & BIT(NL80211_STA_INFO_TX_BITRATE)) {
+++			if (sinfo.filled & BIT(NL80211_STA_INFO_RX_BITRATE)) {
 ++				/* cfg80211_calculate_bitrate will return 0 for mcs >= 32 */
-++				throughput = cfg80211_calculate_bitrate(&sinfo.txrate);
+++				throughput = cfg80211_calculate_bitrate(&sinfo.rxrate);
 ++			}
 ++			else
 ++				goto default_throughput;
