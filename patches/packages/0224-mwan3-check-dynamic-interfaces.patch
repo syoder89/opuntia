@@ -1,12 +1,14 @@
---- a/feeds/packages/net/mwan3/files/etc/hotplug.d/iface/15-mwan3
-+++ b/feeds/packages/net/mwan3/files/etc/hotplug.d/iface/15-mwan3
-@@ -15,6 +15,9 @@ mwan3_set_connected_iptables
+Index: build_dir/feeds/packages/net/mwan3/files/etc/hotplug.d/iface/15-mwan3
+===================================================================
+--- build_dir.orig/feeds/packages/net/mwan3/files/etc/hotplug.d/iface/15-mwan3
++++ build_dir/feeds/packages/net/mwan3/files/etc/hotplug.d/iface/15-mwan3
+@@ -22,6 +22,9 @@ mwan3_set_connected_iptables
+ mwan3_unlock
  
- config_load mwan3
  config_get enabled $INTERFACE enabled 0
 +# Check dynamic interfaces
 +[ "$enabled" == "1" ] || INTERFACE="${INTERFACE%_4}" config_get enabled $INTERFACE enabled 0
 +[ "$enabled" == "1" ] || INTERFACE="${INTERFACE%_6}" config_get enabled $INTERFACE enabled 0
+ config_get initial_state $INTERFACE initial_state "online"
  [ "$enabled" == "1" ] || exit 0
  
- if [ "$ACTION" == "ifup" ]; then
