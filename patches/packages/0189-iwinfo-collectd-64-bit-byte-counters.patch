@@ -1,9 +1,13 @@
+Index: build_dir/package/network/utils/iwinfo/patches/002-64-bit-stats.patch
+===================================================================
 --- /dev/null
-+++ b/package/network/utils/iwinfo/patches/002-64-bit-stats.patch
-@@ -0,0 +1,74 @@
-+--- a/include/iwinfo.h
-++++ b/include/iwinfo.h
-+@@ -102,8 +102,8 @@ struct iwinfo_assoclist_entry {
++++ build_dir/package/network/utils/iwinfo/patches/002-64-bit-stats.patch
+@@ -0,0 +1,80 @@
++Index: libiwinfo-2018-05-18-e59f9253/include/iwinfo.h
++===================================================================
++--- libiwinfo-2018-05-18-e59f9253.orig/include/iwinfo.h
+++++ libiwinfo-2018-05-18-e59f9253/include/iwinfo.h
++@@ -116,8 +116,8 @@ struct iwinfo_assoclist_entry {
 + 	uint32_t tx_packets;
 + 	struct iwinfo_rate_entry rx_rate;
 + 	struct iwinfo_rate_entry tx_rate;
@@ -14,9 +18,11 @@
 + 	uint32_t tx_retries;
 + 	uint32_t tx_failed;
 + 	uint64_t t_offset;
-+--- a/iwinfo_cli.c
-++++ b/iwinfo_cli.c
-+@@ -709,14 +709,14 @@ static void print_assoclist(const struct
++Index: libiwinfo-2018-05-18-e59f9253/iwinfo_cli.c
++===================================================================
++--- libiwinfo-2018-05-18-e59f9253.orig/iwinfo_cli.c
+++++ libiwinfo-2018-05-18-e59f9253/iwinfo_cli.c
++@@ -695,14 +695,14 @@ static void print_assoclist(const struct
 + 			(e->signal - e->noise),
 + 			e->inactive);
 + 
@@ -27,17 +33,19 @@
 ++			e->rx_packets, e->rx_bytes
 + 		);
 + 
-+-		printf("	TX: %-38s  %8d Pkts.\n\n",
++-		printf("	TX: %-38s  %8d Pkts.\n",
 ++		printf("	TX: %-38s  %8d Pkts, %13llu Bytes.\n\n",
 + 			format_assocrate(&e->tx_rate),
 +-			e->tx_packets
 ++			e->tx_packets, e->tx_bytes
 + 		);
-+ 	}
-+ }
-+--- a/iwinfo_nl80211.c
-++++ b/iwinfo_nl80211.c
-+@@ -1231,8 +1231,8 @@ static int nl80211_fill_signal_cb(struct
++ 
++ 		printf("	expected throughput: %s\n\n",
++Index: libiwinfo-2018-05-18-e59f9253/iwinfo_nl80211.c
++===================================================================
++--- libiwinfo-2018-05-18-e59f9253.orig/iwinfo_nl80211.c
+++++ libiwinfo-2018-05-18-e59f9253/iwinfo_nl80211.c
++@@ -1253,8 +1253,8 @@ static int nl80211_fill_signal_cb(struct
 + 
 + 	static struct nla_policy stats_policy[NL80211_STA_INFO_MAX + 1] = {
 + 		[NL80211_STA_INFO_INACTIVE_TIME] = { .type = NLA_U32    },
@@ -48,7 +56,7 @@
 + 		[NL80211_STA_INFO_RX_PACKETS]    = { .type = NLA_U32    },
 + 		[NL80211_STA_INFO_TX_PACKETS]    = { .type = NLA_U32    },
 + 		[NL80211_STA_INFO_SIGNAL]        = { .type = NLA_U8     },
-+@@ -1644,8 +1644,8 @@ static int nl80211_get_assoclist_cb(stru
++@@ -1701,8 +1701,8 @@ static int nl80211_get_assoclist_cb(stru
 + 		[NL80211_STA_INFO_RX_BITRATE]    = { .type = NLA_NESTED },
 + 		[NL80211_STA_INFO_TX_BITRATE]    = { .type = NLA_NESTED },
 + 		[NL80211_STA_INFO_SIGNAL]        = { .type = NLA_U8     },
@@ -59,9 +67,9 @@
 + 		[NL80211_STA_INFO_TX_RETRIES]    = { .type = NLA_U32    },
 + 		[NL80211_STA_INFO_TX_FAILED]     = { .type = NLA_U32    },
 + 		[NL80211_STA_INFO_T_OFFSET]      = { .type = NLA_U64    },
-+@@ -1756,11 +1756,11 @@ static int nl80211_get_assoclist_cb(stru
-+ 				e->tx_rate.vht_nss = nla_get_u8(rinfo[NL80211_RATE_INFO_VHT_NSS]);
-+ 		}
++@@ -1758,11 +1758,11 @@ static int nl80211_get_assoclist_cb(stru
++ 		                      sinfo[NL80211_STA_INFO_TX_BITRATE], rate_policy))
++ 			nl80211_parse_rateinfo(rinfo, &e->tx_rate);
 + 
 +-		if (sinfo[NL80211_STA_INFO_RX_BYTES])
 +-			e->rx_bytes = nla_get_u32(sinfo[NL80211_STA_INFO_RX_BYTES]);

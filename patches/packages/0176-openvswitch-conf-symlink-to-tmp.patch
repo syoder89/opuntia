@@ -1,14 +1,111 @@
---- a/feeds/packages/net/openvswitch/files/etc/init.d/openvswitch.init
-+++ b/feeds/packages/net/openvswitch/files/etc/init.d/openvswitch.init
-@@ -7,6 +7,11 @@ USE_PROCD=1
+Index: build_dir/feeds/packages/net/openvswitch/files/openvswitch.init
+===================================================================
+--- build_dir.orig/feeds/packages/net/openvswitch/files/openvswitch.init
++++ build_dir/feeds/packages/net/openvswitch/files/openvswitch.init
+@@ -1,68 +1,45 @@
+ #!/bin/sh /etc/rc.common
+ # Copyright (C) 2013 Julius Schulz-Zander <julius@net.t-labs.tu-berlin.de>
+-# Copyright (C) 2014-2017 OpenWrt.org
+-# Copyright (C) 2018 Yousong Zhou <yszhou4tech@gmail.com>
++# Copyright (C) 2014 OpenWrt.org
  
- start_service() {
- 	[ -x /var/run/openvswitch ] || mkdir -p /var/run/openvswitch
+ START=15
++USE_PROCD=1
+ 
+-ovs_script_dir=/usr/share/openvswitch/scripts
+-ovs_ctl="$ovs_script_dir/ovs-ctl"
+-ovn_ctl="$ovs_script_dir/ovn-ctl"
++start_service() {
++        [ -x /var/run/openvswitch ] || mkdir -p /var/run/openvswitch
 +        [ ! -h /etc/openvswitch -a -d /etc/openvswitch ] && {
 +                rm -rf /etc/openvswitch
 +                ln -s /tmp/openvswitch /etc/openvswitch
 +        }
 +        [ -d /tmp/openvswitch ] || mkdir /tmp/openvswitch
- 	[ -e /etc/openvswitch/conf.db ] || {
- 		/usr/bin/ovsdb-tool create /etc/openvswitch/conf.db /usr/share/openvswitch/vswitch.ovsschema
- 	}
++        [ -e /etc/openvswitch/conf.db ] || {
++                /usr/bin/ovsdb-tool create /etc/openvswitch/conf.db /usr/share/openvswitch/vswitch.ovsschema
++        }
++
++        # ovsdb-server
++        procd_open_instance
++        procd_set_param command /usr/sbin/ovsdb-server
++        procd_append_param command --remote=punix:/var/run/openvswitch/db.sock
++        procd_append_param command --remote=db:Open_vSwitch,Open_vSwitch,manager_options
++        procd_append_param command --pidfile=/var/run/ovsdb-server.pid
++        procd_set_param respawn
++        procd_append_param respawn 3600
++        procd_append_param respawn 5
++        procd_append_param respawn -1
++        procd_set_param nice
++        procd_append_param nice -10
++        procd_close_instance
++
++        # ovs-vswitchd
++        procd_open_instance
++        procd_set_param command /usr/sbin/ovs-vswitchd
++        procd_append_param command --pidfile=/var/run/ovs-vswitchd.pid
++        procd_set_param respawn
++        procd_append_param respawn 3600
++        procd_append_param respawn 5
++        procd_append_param respawn -1
++        procd_set_param nice
++        procd_append_param nice -10
++        procd_close_instance
+ 
+-EXTRA_COMMANDS=status
+-
+-start() {
+-	ovs_action start "$@"
+-}
+-
+-stop() {
+-	ovs_action stop "$@"
+-}
+-
+-restart() {
+-	ovs_action restart "$@"
+-}
+-
+-status() {
+-	ovs_action status "$@"
+-}
+-
+-ovs_action_cfgs=
+-ovs_action() {
+-	local action="$1"; shift
+-	local cfgtype
+-
+-	ovs_action_cfgs="$*"
+-	config_load openvswitch
+-	for cfgtype in ovs ovn_northd ovn_controller; do
+-		config_foreach "ovs_xx" "$cfgtype" "$action" "$cfgtype"
+-	done
+-}
+-
+-ovs_xx() {
+-	local cfg="$1"
+-	local action="$2"
+-	local cfgtype="$3"
+-	local disabled
+-
+-	if [ -n "$ovs_action_cfgs" ] && ! list_contains "ovs_action_cfgs" "$cfg"; then
+-		return
+-	fi
+-	case "$action" in
+-		status|stop) ;;
+-		*)
+-			config_get_bool disabled "$cfg" disabled 0
+-			[ "$disabled" -le 0 ] || return
+-			;;
+-	esac
+-
+-	case "$cfgtype" in
+-		ovs)
+-			"$ovs_ctl" "$action" \
+-				--system-id=random
+-			;;
+-		ovn_*)
+-			"$ovn_ctl" "${action}_${cfgtype#ovn_}"
+-			;;
+-	esac
+ }

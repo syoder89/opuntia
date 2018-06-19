@@ -1,5 +1,6 @@
 OPENWRT_GIT:=https://git.lede-project.org/source.git
-OPENWRT_COMMIT:=a8b023272d334e47ee82449eadda01b96e9c2a90
+OPENWRT_COMMIT:=1b8f3d9c2ec3dd89dda524c37e4d69c3d213918e
+#OPENWRT_COMMIT:=a8b023272d334e47ee82449eadda01b96e9c2a90 = 4.8.8
 #OPENWRT_COMMIT:=6aa4b97a8a4e4d07895682e47184c5d49441b1bb = 4.8.7
 #OPENWRT_COMMIT:=254f0da6d2d9a7dac5e1281de8dcf450aff7bacd = 4.8.6
 #OPENWRT_COMMIT:=8322dba029034b0a8a2c2dd57250cd225aa5abc9 = 4.8.5
@@ -72,6 +73,13 @@ install: $(built)
 	elif [ "$${sysup}" != "" ] ; then \
 		cp -f $${sysup} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-sysupgrade.bin; \
 	fi
+
+docker_build:
+	sudo apt-get update && sudo apt-get install -y docker.io && \
+	sudo docker build --tag opuntia:latest docker/
+
+docker_run: docker_build
+	sudo docker run --rm --name opuntia -it -v /home/ubuntu/opuntia:/opuntia opuntia:latest /bin/bash
 
 setup_cache:
 	@if [ ! -d dl.cache ] ; then \

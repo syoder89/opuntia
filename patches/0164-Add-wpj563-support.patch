@@ -1,5 +1,7 @@
---- a/tools/firmware-utils/src/mkmylofw.c
-+++ b/tools/firmware-utils/src/mkmylofw.c
+Index: build_dir/tools/firmware-utils/src/mkmylofw.c
+===================================================================
+--- build_dir.orig/tools/firmware-utils/src/mkmylofw.c
++++ build_dir/tools/firmware-utils/src/mkmylofw.c
 @@ -167,6 +167,9 @@ struct cpx_board boards[] = {
  	CPX_BOARD_AR71XX(DEVID_COMPEX_WPJ531, 16,
  		"WPJ531", "Compex WPJ531",
@@ -10,8 +12,10 @@
  
  	CPX_BOARD_AR23XX(DEVID_COMPEX_NP25G, 4,
  		"NP25G", "Compex NetPassage 25G",
---- a/tools/firmware-utils/src/myloader.h
-+++ b/tools/firmware-utils/src/myloader.h
+Index: build_dir/tools/firmware-utils/src/myloader.h
+===================================================================
+--- build_dir.orig/tools/firmware-utils/src/myloader.h
++++ build_dir/tools/firmware-utils/src/myloader.h
 @@ -66,6 +66,7 @@
  #define DEVID_COMPEX_WPJ344	0x0687
  #define DEVID_COMPEX_WPJ558	0x0691
@@ -20,8 +24,10 @@
  
  /* Devices based on the IXP422 */
  #define DEVID_COMPEX_WP18	0x047E
---- a/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj563.c
-+++ b/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj563.c
+Index: build_dir/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj563.c
+===================================================================
+--- build_dir.orig/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj563.c
++++ build_dir/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj563.c
 @@ -27,6 +27,7 @@
  #include "dev-m25p80.h"
  #include "machtypes.h"
@@ -108,15 +114,16 @@
  
  	/* GMAC0 is connected to an QCA8334 switch */
  	ath79_eth0_data.phy_if_mode = PHY_INTERFACE_MODE_SGMII;
---- a/target/linux/ar71xx/files/arch/mips/ath79/dev-eth.c
-+++ b/target/linux/ar71xx/files/arch/mips/ath79/dev-eth.c
-@@ -1117,6 +1117,9 @@ void __init ath79_register_eth(unsigned
+Index: build_dir/target/linux/ar71xx/files/arch/mips/ath79/dev-eth.c
+===================================================================
+--- build_dir.orig/target/linux/ar71xx/files/arch/mips/ath79/dev-eth.c
++++ build_dir/target/linux/ar71xx/files/arch/mips/ath79/dev-eth.c
+@@ -1079,6 +1079,8 @@ void __init ath79_register_eth(unsigned
+ 
  		pdata->has_gbit = 1;
  		pdata->is_ar724x = 1;
- 
 +		pdata->max_frame_len = SZ_16K - 1;
 +		pdata->desc_pktlen_mask = SZ_16K - 1;
-+
- 		if (!pdata->fifo_cfg1)
- 			pdata->fifo_cfg1 = 0x0010ffff;
- 		if (!pdata->fifo_cfg2)
+ 		break;
+ 
+ 	default:

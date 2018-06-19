@@ -7,8 +7,10 @@ Subject: [PATCH] Update correct openvpn init script
  package/network/services/openvpn/files/openvpn.init | 2 ++
  1 file changed, 2 insertions(+)
 
---- a/package/network/services/openvpn/files/openvpn.init
-+++ b/package/network/services/openvpn/files/openvpn.init
+Index: build_dir/package/network/services/openvpn/files/openvpn.init
+===================================================================
+--- build_dir.orig/package/network/services/openvpn/files/openvpn.init
++++ build_dir/package/network/services/openvpn/files/openvpn.init
 @@ -4,7 +4,7 @@
  # This is free software, licensed under the GNU General Public License v2.
  # See /LICENSE for more information.
@@ -71,21 +73,3 @@ Subject: [PATCH] Update correct openvpn init script
  	append_bools "$s" $OPENVPN_BOOLS
  	append_params "$s" $OPENVPN_PARAMS
  
---- a/package/network/services/openvpn/files/openvpn.options
-+++ b/package/network/services/openvpn/files/openvpn.options
-@@ -14,7 +14,6 @@ cipher
- client_config_dir
- client_connect
- client_disconnect
--comp_lzo
- compress
- connect_freq
- connect_retry
-@@ -145,6 +144,7 @@ ccd_exclusive
- client
- client_cert_not_required
- client_to_client
-+comp_lzo
- comp_noadapt
- disable
- disable_occ

@@ -1,6 +1,8 @@
---- a/feeds/packages/net/squid/Makefile
-+++ b/feeds/packages/net/squid/Makefile
-@@ -51,19 +51,22 @@ endef
+Index: build_dir/feeds/packages/net/squid/Makefile
+===================================================================
+--- build_dir.orig/feeds/packages/net/squid/Makefile
++++ build_dir/feeds/packages/net/squid/Makefile
+@@ -67,15 +67,18 @@ endef
  
  CONFIGURE_ARGS += \
  	--config-cache \
@@ -14,13 +16,9 @@
  	--sysconfdir=/etc/squid \
  	--enable-shared \
  	--disable-static \
- 	--enable-icmp \
 -	--enable-delay-pools \
- 	--enable-icap-client \
  	--enable-kill-parent-hack \
- 	--disable-snmp \
  	--enable-ssl \
- 	--enable-ssl-crtd \
 -	--enable-cache-digests \
  	--enable-linux-netfilter \
  	--disable-unlinkd \

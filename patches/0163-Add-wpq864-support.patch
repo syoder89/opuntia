@@ -1,6 +1,8 @@
---- a/target/linux/ipq806x/base-files/etc/board.d/02_network
-+++ b/target/linux/ipq806x/base-files/etc/board.d/02_network
-@@ -52,6 +52,14 @@ zyxel,nbg6817)
+Index: build_dir/target/linux/ipq806x/base-files/etc/board.d/02_network
+===================================================================
+--- build_dir.orig/target/linux/ipq806x/base-files/etc/board.d/02_network
++++ build_dir/target/linux/ipq806x/base-files/etc/board.d/02_network
+@@ -45,6 +45,14 @@ zyxel,nbg6817)
  	ucidef_set_interface_macaddr "lan" "$(macaddr_add $hw_mac_addr 2)"
  	ucidef_set_interface_macaddr "wan" "$(macaddr_add $hw_mac_addr 3)"
  	;;
@@ -15,8 +17,10 @@
  *)
  	echo "Unsupported hardware. Network interfaces not intialized"
  	;;
+Index: build_dir/target/linux/ipq806x/files-4.9/arch/arm/boot/dts/qcom-ipq8064-wpq864.dts
+===================================================================
 --- /dev/null
-+++ b/target/linux/ipq806x/files-4.9/arch/arm/boot/dts/qcom-ipq8064-wpq864.dts
++++ build_dir/target/linux/ipq806x/files-4.9/arch/arm/boot/dts/qcom-ipq8064-wpq864.dts
 @@ -0,0 +1,362 @@
 +/* Copyright (c) 2015, The Linux Foundation. All rights reserved.
 + *
@@ -380,9 +384,11 @@
 +       compatible = "qcom,tcsr";
 +};
 +
---- a/target/linux/ipq806x/image/Makefile
-+++ b/target/linux/ipq806x/image/Makefile
-@@ -247,6 +247,18 @@ define Device/qcom_ipq8064-db149
+Index: build_dir/target/linux/ipq806x/image/Makefile
+===================================================================
+--- build_dir.orig/target/linux/ipq806x/image/Makefile
++++ build_dir/target/linux/ipq806x/image/Makefile
+@@ -198,6 +198,18 @@ define Device/qcom_ipq8064-db149
  endef
  TARGET_DEVICES += qcom_ipq8064-db149
  
@@ -401,22 +407,3 @@
  define Device/tplink_c2600
  	$(call Device/TpSafeImage)
  	DEVICE_DTS := qcom-ipq8064-c2600
---- a/target/linux/ipq806x/patches-4.9/0069-arm-boot-add-dts-files.patch
-+++ b/target/linux/ipq806x/patches-4.9/0069-arm-boot-add-dts-files.patch
-@@ -10,7 +10,7 @@ Signed-off-by: John Crispin <john@phroze
- 
- --- a/arch/arm/boot/dts/Makefile
- +++ b/arch/arm/boot/dts/Makefile
--@@ -616,9 +616,19 @@ dtb-$(CONFIG_ARCH_QCOM) += \
-+@@ -616,9 +616,20 @@ dtb-$(CONFIG_ARCH_QCOM) += \
-  	qcom-apq8074-dragonboard.dtb \
-  	qcom-apq8084-ifc6540.dtb \
-  	qcom-apq8084-mtp.dtb \
-@@ -27,6 +27,7 @@ Signed-off-by: John Crispin <john@phroze
- +	qcom-ipq8064-r7500v2.dtb \
- +	qcom-ipq8065-nbg6817.dtb \
- +	qcom-ipq8065-r7800.dtb \
-++	qcom-ipq8064-wpq864.dtb \
-  	qcom-msm8660-surf.dtb \
-  	qcom-msm8960-cdp.dtb \
-  	qcom-msm8974-lge-nexus5-hammerhead.dtb \
