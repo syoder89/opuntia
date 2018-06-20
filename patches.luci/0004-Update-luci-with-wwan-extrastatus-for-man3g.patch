@@ -28,8 +28,8 @@ Subject: [PATCH 04/14] Update luci with wwan "extrastatus" for man3g
  
 +function protocol.extrastatus(self)
 +	local p = self:proto()
-+	if p == "qmi" or p == "ncm" then
-+		return utl.exec("man3g -i %s status" % self:get("ifname"))
++	if p == "ndis" then
++		return utl.exec("man3g -i %s status" % self:name())
 +	end
 +	return 0
 +end
@@ -55,7 +55,7 @@ Subject: [PATCH 04/14] Update luci with wwan "extrastatus" for man3g
  
 +					if (ifc.extrastatus)
 +					{
-+						html += String.format('<pre style=" width: 320px;">%s</pre></div><br />', ifc.extrastatus);
++						html += String.format('<br /><pre style=" width: 420px;">%s</pre></div>', ifc.extrastatus);
 +					}
 +
  					d.innerHTML = html;

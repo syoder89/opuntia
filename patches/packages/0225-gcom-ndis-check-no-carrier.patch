@@ -1,0 +1,28 @@
+Index: build_dir/package/network/utils/comgt/files/runcommand.gcom
+===================================================================
+--- build_dir.orig/package/network/utils/comgt/files/runcommand.gcom
++++ build_dir/package/network/utils/comgt/files/runcommand.gcom
+@@ -10,11 +10,12 @@ opengt
+  send $env("COMMAND")
+  send "^m"
+ 
+- waitfor 15 "OK","ERR","ERROR","COMMAND NOT SUPPORT"
++ waitfor 15 "OK","ERR","ERROR","COMMAND NOT SUPPORT","NO CARRIER"
+  if % = 0 goto continue
+  if % = 1 goto error
+  if % = 2 goto error
+  if % = 3 goto notsupported
++ if % = 4 goto nocarrier
+ 
+  print "Timeout running AT-command\n"
+  exit 1
+@@ -27,5 +28,9 @@ opengt
+  print "AT-command not supported\n"
+  exit 1
+ 
++:nocarrier
++ print "No Carrier\n"
++ exit 1
++
+ :continue
+  exit 0

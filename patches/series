@@ -109,3 +109,4 @@ packages/0221-add-telit-lte-modem-support.patch
 packages/0222-remove-broken-mbim-pin-required-check.patch
 packages/0223-add-simcom-sim7600-support.patch
 packages/0224-mwan3-check-dynamic-interfaces.patch
+packages/0225-gcom-ndis-check-no-carrier.patch
