@@ -1,5 +1,5 @@
 --- /dev/null
-+++ b/target/linux/generic/pending-4.9/999-scott-simcom-7600-modem-support.patch
++++ b/target/linux/generic/pending-4.14/999-scott-simcom-7600-modem-support.patch
 @@ -0,0 +1,11 @@
 +--- a/drivers/net/usb/qmi_wwan.c
 ++++ b/drivers/net/usb/qmi_wwan.c
