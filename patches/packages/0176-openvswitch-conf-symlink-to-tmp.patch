@@ -17,7 +17,7 @@ Index: build_dir/feeds/packages/net/openvswitch/files/openvswitch.init
 -ovn_ctl="$ovs_script_dir/ovn-ctl"
 +start_service() {
 +        [ -x /var/run/openvswitch ] || mkdir -p /var/run/openvswitch
-+        [ ! -h /etc/openvswitch -a -d /etc/openvswitch ] && {
++        [ ! -h /etc/openvswitch ] && {
 +                rm -rf /etc/openvswitch
 +                ln -s /tmp/openvswitch /etc/openvswitch
 +        }
