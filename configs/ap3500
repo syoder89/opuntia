@@ -214,8 +214,8 @@ CONFIG_TARGET_PROFILE="DEVICE_wpj558"
 CONFIG_HAS_SUBTARGETS=y
 CONFIG_TARGET_BOARD="ar71xx"
 CONFIG_TARGET_ARCH_PACKAGES="ar71xx"
-CONFIG_DEFAULT_TARGET_OPTIMIZATION="-Os -pipe -mno-branch-likely -mips32r2 -mtune=34kc"
-CONFIG_CPU_TYPE="34kc"
+CONFIG_DEFAULT_TARGET_OPTIMIZATION="-Os -pipe -mips32r2 -mtune=74kc -fno-caller-saves -freorder-blocks"
+CONFIG_CPU_TYPE="74kc"
 CONFIG_LINUX_4_1=y
 CONFIG_DEFAULT_base-files=y
 CONFIG_DEFAULT_busybox=y
@@ -248,7 +248,6 @@ CONFIG_PCI_SUPPORT=y
 CONFIG_USB_SUPPORT=y
 CONFIG_BIG_ENDIAN=y
 CONFIG_USES_SQUASHFS=y
-CONFIG_HAS_MIPS16=y
 CONFIG_mips=y
 CONFIG_ARCH="mips"
 
@@ -311,11 +310,38 @@ CONFIG_PACKAGE_luci-app-isis-openvpn=y
 CONFIG_PACKAGE_luci-app-snmp=y
 CONFIG_PACKAGE_luci-theme-opuntia=y
 CONFIG_PACKAGE_stats=y
-
-CONFIG_ATH10K_MAC_OVERRIDE=y
+# CONFIG_PACKAGE_wifi-watchdog is not set
 
 # CONFIG_PACKAGE_kmod-ath10k is not set
 CONFIG_PACKAGE_kmod-ath10k-ct=y
 # CONFIG_PACKAGE_ath10k-firmware-qca9888 is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca9888-ct is not set
 CONFIG_PACKAGE_ath10k-firmware-qca988x-ct=y
+
+# CONFIG_PACKAGE_kmod-via-rhine is not set
+# CONFIG_PACKAGE_python is not set
+# CONFIG_PACKAGE_libgnutls is not set
+# CONFIG_PACKAGE_chat is not set
+# CONFIG_PACKAGE_etherwake is not set
+# CONFIG_PACKAGE_pppstats is not set
+# CONFIG_PACKAGE_raddump is not set
+# CONFIG_PACKAGE_radiusclient-ng is not set
+# CONFIG_PACKAGE_ser2net is not set
+# CONFIG_PACKAGE_serialoverip is not set
+# CONFIG_PACKAGE_smtptrapd is not set
+# CONFIG_PACKAGE_nstat is not set
+# CONFIG_PACKAGE_quagga-ripd is not set
+# CONFIG_PACKAGE_quagga-ripngd is not set
+# CONFIG_PACKAGE_macchanger is not set
+# CONFIG_PACKAGE_minicom is not set
+CONFIG_USE_UCLIBCXX=y
+# CONFIG_USE_LIBSTDCXX is not set
+
+# CONFIG_DEFAULT_TARGET_OPTIMIZATION="-Os -pipe -mno-branch-likely -mips32r2 -mtune=74kc"
+# CONFIG_CPU_TYPE="74kc"
+# CONFIG_TARGET_OPTIONS=y
+# CONFIG_TARGET_OPTIMIZATION="-Os -pipe -mno-branch-likely -mips32r2 -mtune=74kc"
+# CONFIG_SOFT_FLOAT is not set
+# CONFIG_USE_MIPS16=y
+CONFIG_ATH10K_MAC_OVERRIDE=y
+CONFIG_PACKAGE_kmod-shortcut_fe=y
