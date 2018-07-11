@@ -1,5 +1,7 @@
---- a/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
-+++ b/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
+Index: build_dir/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
+===================================================================
+--- build_dir.orig/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
++++ build_dir/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
 @@ -55,27 +55,27 @@
  
  static struct gpio_led wpj558_leds_gpio[] __initdata = {
@@ -95,7 +97,7 @@
  	ath79_register_mdio(0, 0x0);
  
 -	ath79_init_mac(ath79_eth0_data.mac_addr, mac + WPJ558_MAC_OFFSET, 0);
-+	ath79_init_mac(ath79_eth0_data.mac_addr, (u8 *) KSEG1ADDR(0x1f02e010) + WPJ558_MAC_OFFSET, 0);
++	ath79_init_mac(ath79_eth0_data.mac_addr, (u8 *) KSEG1ADDR(0x1f02e010), 0);
  
  	ath79_setup_qca955x_eth_cfg(QCA955X_ETH_CFG_RGMII_EN);
  
