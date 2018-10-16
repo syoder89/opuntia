@@ -20,10 +20,10 @@ Index: build_dir/package/network/services/openvpn/files/openvpn.init
  STOP=10
  
  USE_PROCD=1
-@@ -67,13 +67,16 @@ openvpn_add_instance() {
- 		--cd "$dir" \
+@@ -68,13 +68,16 @@ openvpn_add_instance() {
  		--config "$conf"
  	procd_set_param file "$dir/$conf"
+ 	procd_set_param term_timeout 15
 -	procd_set_param respawn
 -	procd_append_param respawn 3600
 -	procd_append_param respawn 5
@@ -41,7 +41,7 @@ Index: build_dir/package/network/services/openvpn/files/openvpn.init
  start_instance() {
  	local s="$1"
  
-@@ -96,6 +99,31 @@ start_instance() {
+@@ -97,6 +100,31 @@ start_instance() {
  	[ ! -d "/var/etc" ] && mkdir -p "/var/etc"
  	[ -f "/var/etc/openvpn-$s.conf" ] && rm "/var/etc/openvpn-$s.conf"
  

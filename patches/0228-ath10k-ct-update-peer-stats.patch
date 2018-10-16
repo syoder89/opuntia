@@ -1,0 +1,193 @@
+Index: build_dir.ap2100/package/kernel/ath10k-ct/patches/1013-scott-ath10k-4.16-update-peer-stats.patch
+===================================================================
+--- /dev/null
++++ build_dir.ap2100/package/kernel/ath10k-ct/patches/1013-scott-ath10k-4.16-update-peer-stats.patch
+@@ -0,0 +1,188 @@
++Index: ath10k-ct-2018-09-29-b9989fbd/ath10k-4.16/core.h
++===================================================================
++--- ath10k-ct-2018-09-29-b9989fbd.orig/ath10k-4.16/core.h
+++++ ath10k-ct-2018-09-29-b9989fbd/ath10k-4.16/core.h
++@@ -413,6 +413,8 @@ struct ath10k_sta {
++ 
++ 	struct work_struct update_wk;
++ 	u64 rx_duration;
+++	u32 tx_rate_kbps;
+++	u32 rx_rate_kbps;
++ 
++ #ifdef CONFIG_MAC80211_DEBUGFS
++ 	/* protected by conf_mutex */
++@@ -458,6 +460,8 @@ struct ath10k_vif {
++ 	s8 def_wep_key_idx;
++ 
++ 	u16 tx_seq_no;
+++	u32 tx_rate_kbps;
+++	u32 rx_rate_kbps;
++ 
++ 	union {
++ 		struct {
++Index: ath10k-ct-2018-09-29-b9989fbd/ath10k-4.16/debug.c
++===================================================================
++--- ath10k-ct-2018-09-29-b9989fbd.orig/ath10k-4.16/debug.c
+++++ ath10k-ct-2018-09-29-b9989fbd/ath10k-4.16/debug.c
++@@ -430,6 +430,58 @@ static void ath10k_debug_fw_stats_reset(
++ 	spin_unlock_bh(&ar->data_lock);
++ }
++ 
+++static void ath10k_mac_update_txrx_rate_iter(void *data,
+++					     u8 *mac,
+++					     struct ieee80211_vif *vif)
+++{
+++	struct ath10k_fw_stats_peer *peer = data;
+++	struct ath10k_vif *arvif;
+++
+++	if (memcmp(vif->addr, peer->peer_macaddr, ETH_ALEN))
+++		return;
+++
+++	arvif = (void *)vif->drv_priv;
+++	arvif->tx_rate_kbps = peer->peer_tx_rate;
+++	arvif->rx_rate_kbps = peer->peer_rx_rate;
+++}
+++
+++static void ath10k_mac_update_txrx_rate(struct ath10k *ar,
+++					struct ath10k_fw_stats *stats)
+++{
+++	struct ieee80211_hw *hw = ar->hw;
+++	struct ath10k_fw_stats_peer *peer;
+++	struct ath10k_sta *arsta;
+++	struct ieee80211_sta *sta;
+++	const u8 *localaddr = NULL;
+++
+++	rcu_read_lock();
+++
+++	list_for_each_entry(peer, &stats->peers, list) {
+++		/* This doesn't account for multiple STA connected on different
+++		 * vifs. Unfortunately there's no way to derive that from the available
+++		 * information.
+++		 */
+++		sta = ieee80211_find_sta_by_ifaddr(hw,
+++						   peer->peer_macaddr,
+++						   localaddr);
+++		if (!sta) {
+++			/* This tries to update multicast rates */
+++			ieee80211_iterate_active_interfaces_atomic(
+++					hw,
+++					IEEE80211_IFACE_ITER_NORMAL,
+++					ath10k_mac_update_txrx_rate_iter,
+++					peer);
+++			continue;
+++		}
+++
+++		arsta = (void *)sta->drv_priv;
+++		arsta->tx_rate_kbps = peer->peer_tx_rate;
+++		arsta->rx_rate_kbps = peer->peer_rx_rate;
+++	}
+++
+++	rcu_read_unlock();
+++}
+++
++ void ath10k_debug_fw_stats_process(struct ath10k *ar, struct sk_buff *skb)
++ {
++ 	struct ath10k_fw_stats stats = {};
++@@ -601,6 +653,8 @@ void ath10k_debug_fw_stats_process(struc
++ 		goto free;
++ 	}
++ 
+++	ath10k_mac_update_txrx_rate(ar, &stats);
+++
++ 	/* Stat data may exceed htc-wmi buffer limit. In such case firmware
++ 	 * splits the stats data and delivers it in a ping-pong fashion of
++ 	 * request cmd-update event.
++@@ -615,13 +669,6 @@ void ath10k_debug_fw_stats_process(struc
++ 	if (ath10k_peer_stats_enabled(ar))
++ 		ath10k_sta_update_rx_duration(ar, &stats);
++ 
++-	if (ar->debug.fw_stats_done) {
++-		if (!ath10k_peer_stats_enabled(ar))
++-			ath10k_warn(ar, "received unsolicited stats update event\n");
++-
++-		goto free;
++-	}
++-
++ 	num_peers = ath10k_wmi_fw_stats_num_peers(&ar->debug.fw_stats.peers);
++ 	num_vdevs = ath10k_wmi_fw_stats_num_vdevs(&ar->debug.fw_stats.vdevs);
++ 	is_start = (list_empty(&ar->debug.fw_stats.pdevs) &&
++Index: ath10k-ct-2018-09-29-b9989fbd/ath10k-4.16/mac.c
++===================================================================
++--- ath10k-ct-2018-09-29-b9989fbd.orig/ath10k-4.16/mac.c
+++++ ath10k-ct-2018-09-29-b9989fbd/ath10k-4.16/mac.c
++@@ -5453,16 +5453,14 @@ static int ath10k_start(struct ieee80211
++ 
++ 	ar->ani_enabled = true;
++ 
++-	if (ath10k_peer_stats_enabled(ar)) {
++-		param = ar->wmi.pdev_param->peer_stats_update_period;
++-		ret = ath10k_wmi_pdev_set_param(ar, param,
++-						PEER_DEFAULT_STATS_UPDATE_PERIOD);
++-		if (ret) {
++-			ath10k_warn(ar,
++-				    "failed to set peer stats period : %d\n",
++-				    ret);
++-			goto err_core_stop;
++-		}
+++	param = ar->wmi.pdev_param->peer_stats_update_period;
+++	ret = ath10k_wmi_pdev_set_param(ar, param,
+++					PEER_DEFAULT_STATS_UPDATE_PERIOD);
+++	if (ret) {
+++		ath10k_warn(ar,
+++			    "failed to set peer stats period : %d\n",
+++			    ret);
+++		goto err_core_stop;
++ 	}
++ 
++ 	param = ar->wmi.pdev_param->enable_btcoex;
++@@ -8626,6 +8624,14 @@ ath10k_mac_op_switch_vif_chanctx(struct
++ 	return 0;
++ }
++ 
+++static u32
+++ath10k_mac_op_get_expected_throughput(struct ieee80211_hw *hw, struct ieee80211_sta *sta)
+++{
+++	struct ath10k_sta *arsta = (struct ath10k_sta *)sta->drv_priv;
+++	return arsta->tx_rate_kbps;
+++}
+++
+++
++ static void ath10k_mac_op_sta_pre_rcu_remove(struct ieee80211_hw *hw,
++ 					     struct ieee80211_vif *vif,
++ 					     struct ieee80211_sta *sta)
++@@ -8687,6 +8693,7 @@ static const struct ieee80211_ops ath10k
++ 	.conf_tx			= ath10k_conf_tx,
++ 	.remain_on_channel		= ath10k_remain_on_channel,
++ 	.cancel_remain_on_channel	= ath10k_cancel_remain_on_channel,
+++	.get_expected_throughput	= ath10k_mac_op_get_expected_throughput,
++ 	.set_rts_threshold		= ath10k_set_rts_threshold,
++ 	.set_frag_threshold		= ath10k_mac_op_set_frag_threshold,
++ 	.flush				= ath10k_flush,
++Index: ath10k-ct-2018-09-29-b9989fbd/ath10k-4.16/wmi.h
++===================================================================
++--- ath10k-ct-2018-09-29-b9989fbd.orig/ath10k-4.16/wmi.h
+++++ ath10k-ct-2018-09-29-b9989fbd/ath10k-4.16/wmi.h
++@@ -3702,7 +3702,7 @@ struct wmi_csa_event {
++ /* the definition of different PDEV parameters */
++ #define PDEV_DEFAULT_STATS_UPDATE_PERIOD    500
++ #define VDEV_DEFAULT_STATS_UPDATE_PERIOD    500
++-#define PEER_DEFAULT_STATS_UPDATE_PERIOD    500
+++#define PEER_DEFAULT_STATS_UPDATE_PERIOD    100
++ 
++ struct wmi_pdev_param_map {
++ 	u32 tx_chain_mask;
++Index: ath10k-ct-2018-09-29-b9989fbd/ath10k-4.16/txrx.c
++===================================================================
++--- ath10k-ct-2018-09-29-b9989fbd.orig/ath10k-4.16/txrx.c
+++++ ath10k-ct-2018-09-29-b9989fbd/ath10k-4.16/txrx.c
++@@ -201,7 +201,9 @@ int ath10k_txrx_tx_unref(struct ath10k_h
++ 	    (info->flags & IEEE80211_TX_CTL_NO_ACK))
++ 		info->flags |= IEEE80211_TX_STAT_NOACK_TRANSMITTED;
++ 
++-	if (tx_done->tx_rate_code || tx_done->tx_rate_flags || ar->ok_tx_rate_status) {
+++/* So we often see rate code 0 and rate flags 0 and it really screws up rate reporting. Better to ignore
+++   the case for 48Mbps IMO as we rarely see it  - Scott 10-16-2018 */
+++	if (tx_done->tx_rate_code || tx_done->tx_rate_flags) {
++ 		/* rate-code for 48Mbps is 0, with no flags, so we need to remember
++ 		 * any other valid rates we might have seen and use that to know if
++ 		 * firmware is sending tx rates.

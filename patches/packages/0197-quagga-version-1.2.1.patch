@@ -1,5 +1,7 @@
---- a/feeds/routing/quagga/Makefile
-+++ b/feeds/routing/quagga/Makefile
+Index: build_dir/feeds/routing/quagga/Makefile
+===================================================================
+--- build_dir.orig/feeds/routing/quagga/Makefile
++++ build_dir/feeds/routing/quagga/Makefile
 @@ -8,9 +8,9 @@
  include $(TOPDIR)/rules.mk
  
@@ -7,11 +9,11 @@
 -PKG_VERSION:=1.1.0
 +PKG_VERSION:=1.2.1
  PKG_RELEASE:=1
--PKG_MD5SUM:=daa303871e07ea5856aae6fd79e89722
+-PKG_HASH:=f7a43a9c59bfd3722002210530b2553c8d5cc05bfea5acd56d4f102b9f55dc63
 +PKG_MD5SUM:=b1546de89062f7070d56e780b30be4b1
  
  PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
- PKG_SOURCE_URL:=http://download.savannah.gnu.org/releases/quagga/
+ PKG_SOURCE_URL:=@SAVANNAH/quagga/
 @@ -37,7 +37,7 @@ define Package/quagga/Default
    SECTION:=net
    CATEGORY:=Network
@@ -21,7 +23,9 @@
    TITLE:=The Quagga Software Routing Suite
    URL:=http://www.quagga.net
    MAINTAINER:=Vasilis Tsiligiannis <acinonyx@openwrt.gr>
---- a/feeds/routing/quagga/patches/140-holdtimer-set.patch
+Index: build_dir/feeds/routing/quagga/patches/140-holdtimer-set.patch
+===================================================================
+--- build_dir.orig/feeds/routing/quagga/patches/140-holdtimer-set.patch
 +++ /dev/null
 @@ -1,22 +0,0 @@
 ---- a/bgpd/bgp_network.c

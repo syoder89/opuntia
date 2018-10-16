@@ -1,16 +1,18 @@
---- a/package/kernel/mac80211/Makefile
-+++ b/package/kernel/mac80211/Makefile
-@@ -549,7 +549,7 @@ define KernelPackage/ath5k
-   URL:=http://linuxwireless.org/en/users/Drivers/ath5k
-   DEPENDS+= @PCI_SUPPORT||@TARGET_atheros +kmod-ath
+Index: build_dir/package/kernel/mac80211/ath.mk
+===================================================================
+--- build_dir.orig/package/kernel/mac80211/ath.mk
++++ build_dir/package/kernel/mac80211/ath.mk
+@@ -133,7 +133,7 @@ define KernelPackage/ath5k
+   URL:=https://wireless.wiki.kernel.org/en/users/drivers/ath5k
+   DEPENDS+= @PCI_SUPPORT||@TARGET_ath25 +kmod-ath +@DRIVER_11W_SUPPORT
    FILES:=$(PKG_BUILD_DIR)/drivers/net/wireless/ath/ath5k/ath5k.ko
 -  AUTOLOAD:=$(call AutoProbe,ath5k)
 +  AUTOLOAD:=$(call AutoLoad,52,ath5k)
  endef
  
  define KernelPackage/ath5k/description
-@@ -574,7 +574,7 @@ define KernelPackage/ath9k
-   DEPENDS+= @PCI_SUPPORT||TARGET_ar71xx +kmod-ath9k-common
+@@ -196,7 +196,7 @@ define KernelPackage/ath9k
+   DEPENDS+= @PCI_SUPPORT||TARGET_ar71xx||TARGET_ath79 +kmod-ath9k-common
    FILES:= \
  	$(PKG_BUILD_DIR)/drivers/net/wireless/ath/ath9k/ath9k.ko
 -  AUTOLOAD:=$(call AutoProbe,ath9k)
@@ -18,8 +20,8 @@
  endef
  
  define KernelPackage/ath9k/description
-@@ -597,7 +597,7 @@ define KernelPackage/ath9k-htc
-   DEPENDS+= @USB_SUPPORT +kmod-ath9k-common +kmod-usb-core
+@@ -228,7 +228,7 @@ define KernelPackage/ath9k-htc
+   DEPENDS+= @USB_SUPPORT +kmod-ath9k-common +kmod-usb-core +ath9k-htc-firmware
    FILES:= \
  	$(PKG_BUILD_DIR)/drivers/net/wireless/ath/ath9k/ath9k_htc.ko
 -  AUTOLOAD:=$(call AutoProbe,ath9k_htc)

@@ -1,0 +1,92 @@
+Index: build_dir/package/firmware/ath10k-firmware/Makefile
+===================================================================
+--- build_dir.orig/package/firmware/ath10k-firmware/Makefile
++++ build_dir/package/firmware/ath10k-firmware/Makefile
+@@ -51,6 +51,7 @@ endef
+ 
+ CT_FIRMWARE_FILE = $(1)-$($(1)_FIRMWARE_FILE_CT)
+ CT_FIRMWARE_FILE_HTT = $(1)-$($(1)_FIRMWARE_FILE_CT_HTT)
++CT_FIRMWARE_FILE_HTT_BETA = $(1)-$($(1)_FIRMWARE_FILE_CT_HTT_BETA)
+ 
+ define Download/ct-firmware
+   URL:=https://www.candelatech.com/downloads/$(2)
+@@ -64,6 +65,12 @@ define Download/ct-firmware-htt
+   URL_FILE:=$($(1)_FIRMWARE_FILE_CT_HTT)
+ endef
+ 
++define Download/ct-firmware-htt-beta
++  URL:=https://www.candelatech.com/downloads/$(2)
++  FILE:=$(call CT_FIRMWARE_FILE_HTT_BETA,$(1))
++  URL_FILE:=$($(1)_FIRMWARE_FILE_CT_HTT_BETA)
++endef
++
+ QCA988X_FIRMWARE_FILE_CT:=firmware-2-ct-full-community-21.bin.lede.002
+ define Download/ath10k-firmware-qca988x-ct
+   $(call Download/ct-firmware,QCA988X,)
+@@ -78,6 +85,12 @@ define Download/ath10k-firmware-qca988x-
+ endef
+ $(eval $(call Download,ath10k-firmware-qca988x-ct-htt))
+ 
++QCA988X_FIRMWARE_FILE_CT_HTT_BETA:=firmware-2-ct-full-htt-mgt-community.bin
++define Download/ath10k-firmware-qca988x-ct-htt-beta
++  $(call Download/ct-firmware-htt-beta,QCA988X,ath10k-fw-beta)
++  HASH:=78e82e35afa11d6f12a9b0fd4344666942814777b7630c1a2bd4a28383eda3eb
++endef
++$(eval $(call Download,ath10k-firmware-qca988x-ct-htt-beta))
+ 
+ QCA9887_FIRMWARE_FILE_CT:=firmware-2-ct-full-community-21.bin.lede.001
+ define Download/ath10k-firmware-qca9887-ct
+@@ -176,6 +189,14 @@ $(Package/ath10k-firmware-default)
+   PROVIDES:=ath10k-firmware-qca988x
+   DEPENDS:=+kmod-ath10k-ct
+ endef
++define Package/ath10k-firmware-qca988x-ct-htt-beta
++$(Package/ath10k-firmware-default)
++  TITLE:=ath10k CT 10.1 htt-mgt beta fw for QCA988x
++  SECTION:=firmware
++  CATEGORY:=Firmware
++  PROVIDES:=ath10k-firmware-qca988x
++  DEPENDS:=+kmod-ath10k-ct
++endef
+ 
+ define Package/ath10k-firmware-qca9887-ct
+ $(Package/ath10k-firmware-default)
+@@ -209,6 +230,14 @@ Enables IBSS and other features.  See:
+ http://www.candelatech.com/ath10k-10.1.php
+ This firmware selects and requires the ath10k-ct driver.
+ endef
++define Package/ath10k-firmware-qca988x-ct-htt-beta/description
++Alternative beta ath10k firmware for QCA988X from Candela Technologies.
++Uses normal HTT TX data path for management frames, which improves
++stability in busy networks and fixes .11r authentication.
++Enables IBSS and other features.  See:
++http://www.candelatech.com/ath10k-10.1.php
++This firmware selects and requires the ath10k-ct driver.
++endef
+ 
+ define Package/ath10k-firmware-qca9887-ct/description
+ Alternative ath10k firmware for QCA9887 from Candela Technologies.
+@@ -517,6 +546,15 @@ define Package/ath10k-firmware-qca988x-c
+ 		$(DL_DIR)/$(call CT_FIRMWARE_FILE_HTT,QCA988X) \
+ 		$(1)/lib/firmware/ath10k/QCA988X/hw2.0/ct-firmware-2.bin
+ endef
++define Package/ath10k-firmware-qca988x-ct-htt-beta/install
++	$(INSTALL_DIR) $(1)/lib/firmware/ath10k/QCA988X/hw2.0
++	$(INSTALL_DATA) \
++		$(PKG_BUILD_DIR)/QCA988X/hw2.0/board.bin \
++		$(1)/lib/firmware/ath10k/QCA988X/hw2.0/
++	$(INSTALL_DATA) \
++		$(DL_DIR)/$(call CT_FIRMWARE_FILE_HTT_BETA,QCA988X) \
++		$(1)/lib/firmware/ath10k/QCA988X/hw2.0/ct-firmware-2.bin
++endef
+ 
+ define Package/ath10k-firmware-qca99x0-ct/install
+ 	$(INSTALL_DIR) $(1)/lib/firmware/ath10k/QCA99X0/hw2.0
+@@ -618,6 +656,7 @@ $(eval $(call BuildPackage,ath10k-firmwa
+ $(eval $(call BuildPackage,ath10k-firmware-qca9887-ct-htt))
+ $(eval $(call BuildPackage,ath10k-firmware-qca988x-ct))
+ $(eval $(call BuildPackage,ath10k-firmware-qca988x-ct-htt))
++$(eval $(call BuildPackage,ath10k-firmware-qca988x-ct-htt-beta))
+ $(eval $(call BuildPackage,ath10k-firmware-qca99x0-ct))
+ $(eval $(call BuildPackage,ath10k-firmware-qca99x0-ct-htt))
+ $(eval $(call BuildPackage,ath10k-firmware-qca9984-ct))

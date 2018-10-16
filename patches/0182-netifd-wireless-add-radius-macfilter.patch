@@ -2,7 +2,7 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
 ===================================================================
 --- build_dir.orig/package/network/services/hostapd/files/hostapd.sh
 +++ build_dir/package/network/services/hostapd/files/hostapd.sh
-@@ -180,8 +180,8 @@ hostapd_common_add_bss_config() {
+@@ -207,8 +207,8 @@ hostapd_common_add_bss_config() {
  	config_add_string iapp_interface
  	config_add_string eap_type ca_cert client_cert identity anonymous_identity auth priv_key priv_key_pwd
  	config_add_string ieee80211w_mgmt_cipher
@@ -13,18 +13,18 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
  
  	config_add_int dynamic_vlan vlan_naming
  	config_add_string vlan_tagged_interface vlan_bridge
-@@ -236,6 +236,8 @@ hostapd_set_bss_options() {
+@@ -267,6 +267,8 @@ hostapd_set_bss_options() {
  		macfilter ssid wmm uapsd hidden short_preamble rsn_preauth \
  		iapp_interface eapol_version dynamic_vlan ieee80211w nasid \
  		acct_server acct_secret acct_port acct_interval \
 +		ieee80211w auth_servers acct_servers auth_server auth_secret \
 +		auth_port dae_client dae_secret dae_port ownip \
- 		bss_load_update_period chan_util_avg_period
+ 		bss_load_update_period chan_util_avg_period sae_require_mfp
  
  	set_default isolate 0
-@@ -292,6 +294,75 @@ hostapd_set_bss_options() {
- 
- 	local vlan_possible=""
+@@ -321,6 +323,75 @@ hostapd_set_bss_options() {
+ 			append bss_conf "radius_acct_interim_interval=$acct_interval" "$N"
+ 	}
  
 +	set_default auth_port 1812
 +	set_default dae_port 3799
@@ -96,12 +96,12 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
 +	[ -n "$ownip" ] && append bss_conf "own_ip_addr=$ownip" "$N"
 +
  	case "$auth_type" in
- 		none)
- 			wps_possible=1
-@@ -318,88 +389,13 @@ hostapd_set_bss_options() {
+ 		sae|owe|eap192|eap-eap192)
+ 			set_default ieee80211w 2
+@@ -366,88 +437,10 @@ hostapd_set_bss_options() {
  			wps_possible=1
  		;;
- 		eap)
+ 		eap|eap192|eap-eap192)
 -			json_get_vars \
 -				auth_servers acct_servers \
 -				auth_server auth_secret auth_port \
@@ -109,11 +109,10 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
 -				ownip radius_client_addr \
 -				radius_auth_req_attr radius_acct_req_attr \
 -				eap_reauth_period
-+			json_get_vars eap_reauth_period
- 
- 			# radius can provide VLAN ID for clients
- 			vlan_possible=1
- 
+-
+-			# radius can provide VLAN ID for clients
+-			vlan_possible=1
+-
 -			# legacy compatibility
 -			[ -n "$auth_server" ] || json_get_var auth_server server
 -			[ -n "$auth_port" ] || json_get_var auth_port port
@@ -175,7 +174,8 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
 -                        	json_select ".."
 -			}
 -
--
++			json_get_vars eap_reauth_period eapol_version
+ 
  			[ -n "$eap_reauth_period" ] && append bss_conf "eap_reauth_period=$eap_reauth_period" "$N"
  
 -			[ -n "$dae_client" -a -n "$dae_secret" ] && {
@@ -188,7 +188,7 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
  			append bss_conf "eapol_key_index_workaround=1" "$N"
  			append bss_conf "ieee8021x=1" "$N"
  
-@@ -559,6 +555,10 @@ hostapd_set_bss_options() {
+@@ -607,6 +600,10 @@ hostapd_set_bss_options() {
  			append bss_conf "macaddr_acl=0" "$N"
  			append bss_conf "deny_mac_file=$_macfile" "$N"
  		;;
