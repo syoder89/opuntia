@@ -1,0 +1,20 @@
+Index: build_dir/package/kernel/ath10k-ct/patches/1013-scott-ath10k-4.16-update-peer-stats.patch
+===================================================================
+--- /dev/null
++++ build_dir/package/kernel/ath10k-ct/patches/1013-scott-ath10k-4.16-update-peer-stats.patch
+@@ -0,0 +1,15 @@
++Index: ath10k-ct-2018-09-29-b9989fbd/ath10k-4.16/txrx.c
++===================================================================
++--- ath10k-ct-2018-09-29-b9989fbd.orig/ath10k-4.16/txrx.c
+++++ ath10k-ct-2018-09-29-b9989fbd/ath10k-4.16/txrx.c
++@@ -201,7 +201,9 @@ int ath10k_txrx_tx_unref(struct ath10k_h
++ 	    (info->flags & IEEE80211_TX_CTL_NO_ACK))
++ 		info->flags |= IEEE80211_TX_STAT_NOACK_TRANSMITTED;
++ 
++-	if (tx_done->tx_rate_code || tx_done->tx_rate_flags || ar->ok_tx_rate_status) {
+++/* So we often see rate code 0 and rate flags 0 and it really screws up rate reporting. Better to ignore
+++   the case for 48Mbps IMO as we rarely see it  - Scott 10-16-2018 */
+++	if (tx_done->tx_rate_code || tx_done->tx_rate_flags) {
++ 		/* rate-code for 48Mbps is 0, with no flags, so we need to remember
++ 		 * any other valid rates we might have seen and use that to know if
++ 		 * firmware is sending tx rates.

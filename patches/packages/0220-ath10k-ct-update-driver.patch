@@ -1,0 +1,100 @@
+Index: build_dir/package/kernel/ath10k-ct/Makefile
+===================================================================
+--- build_dir.orig/package/kernel/ath10k-ct/Makefile
++++ build_dir/package/kernel/ath10k-ct/Makefile
+@@ -1,21 +1,21 @@
+ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=ath10k-ct
+-PKG_RELEASE=2
++PKG_RELEASE=3
+ 
+ PKG_LICENSE:=GPLv2
+ PKG_LICENSE_FILES:=
+ 
+ PKG_SOURCE_URL:=https://github.com/greearb/ath10k-ct.git
+ PKG_SOURCE_PROTO:=git
+-PKG_SOURCE_DATE:=2018-05-30
+-PKG_SOURCE_VERSION:=127f98189ee57260ed175a60d6654a43c32a8f4b
+-PKG_MIRROR_HASH:=f8856c9d950d3b12ce0d8770e56e861df14878a1b3601592205c5d51edc794ac
++PKG_SOURCE_DATE:=2018-09-29
++PKG_SOURCE_VERSION:=b9989fbd5d6e3269b3e49ab3ec71b4174a02209e
++PKG_MIRROR_HASH:=67bb1c81518aea5880757d521023db25190d9cca21ba67bf1c7e577efd287430
+ 
+ # Build the 4.13 ath10k-ct driver version.  Other options are "-4.9", or
+ # leave un-defined for 4.7 kernel.  Probably this should match as closely as
+ # possible to whatever mac80211 backports version is being used.
+-CT_KVER="-4.13"
++CT_KVER="-4.16"
+ 
+ PKG_MAINTAINER:=Ben Greear <greearb@candelatech.com>
+ PKG_BUILD_PARALLEL:=1
+@@ -38,15 +38,12 @@ define KernelPackage/ath10k-ct
+ endef
+ 
+ define KernelPackage/ath10k-ct/config
+-  if PACKAGE_kmod-ath10k-ct
+-       config ATH10K_MAC_OVERRIDE
+-		bool "Override ath10k MAC address from board"
+-                default n
+-                help
+-                  Override the ath10k card's MAC address with one pre-allocated by the motherboard
+-  endif
+-endef
+ 
++       config ATH10K-CT_LEDS
++               bool "Enable LED support"
++               default y
++               depends on PACKAGE_kmod-ath10k-ct
++endef
+ 
+ NOSTDINC_FLAGS = \
+ 	-I$(PKG_BUILD_DIR) \
+@@ -75,11 +72,6 @@ ifdef CONFIG_PACKAGE_MAC80211_DEBUGFS
+   NOSTDINC_FLAGS += -DCONFIG_ATH10K_DEBUGFS
+ endif
+ 
+-ifdef CONFIG_PACKAGE_ATH10K_TRACING
+-  CT_MAKEDEFS += CONFIG_ATH10K_TRACING=y
+-  NOSTDINC_FLAGS += -DCONFIG_ATH10K_TRACING
+-endif
+-
+ ifdef CONFIG_PACKAGE_ATH_DEBUG
+   NOSTDINC_FLAGS += -DCONFIG_ATH10K_DEBUG
+ endif
+@@ -93,12 +85,9 @@ ifdef CONFIG_PACKAGE_ATH_SPECTRAL
+   NOSTDINC_FLAGS += -DCONFIG_ATH10K_SPECTRAL
+ endif
+ 
+-ifdef CONFIG_ATH10K_MAC_OVERRIDE
+-  NOSTDINC_FLAGS += -DCONFIG_ATH10K_MAC_OVERRIDE
+-endif
+-
+-ifdef CONFIG_PACKAGE_ATH_LICENSED_CHAN
+-  NOSTDINC_FLAGS += -DCONFIG_ATH10K_LICENSED_CHAN
++ifeq ($(CONFIG_ATH10K-CT_LEDS),y)
++  CT_MAKEDEFS += CONFIG_ATH10K_LEDS=y
++  NOSTDINC_FLAGS += -DCONFIG_ATH10K_LEDS
+ endif
+ 
+ define Build/Configure
+Index: build_dir/package/kernel/ath10k-ct/patches/1013-scott-ath10k-ct-add-pci-vendor-ubiquiti.patch
+===================================================================
+--- /dev/null
++++ build_dir/package/kernel/ath10k-ct/patches/1013-scott-ath10k-ct-add-pci-vendor-ubiquiti.patch
+@@ -0,0 +1,15 @@
++Index: ath10k-ct-2018-09-29-b9989fbd/ath10k-4.16/pci.c
++===================================================================
++--- ath10k-ct-2018-09-29-b9989fbd.orig/ath10k-4.16/pci.c
+++++ ath10k-ct-2018-09-29-b9989fbd/ath10k-4.16/pci.c
++@@ -57,6 +57,10 @@ MODULE_PARM_DESC(reset_mode, "0: auto, 1
++  */
++ #define ATH10K_DIAG_TRANSFER_LIMIT	0x5000
++ 
+++#ifndef PCI_VENDOR_ID_UBIQUITI
+++#define PCI_VENDOR_ID_UBIQUITI	0x0777
+++#endif
+++
++ static const struct pci_device_id ath10k_pci_id_table[] = {
++ 	/* PCI-E QCA988X V2 (Ubiquiti branded) */
++ 	{ PCI_VDEVICE(UBIQUITI, QCA988X_2_0_DEVICE_ID_UBNT) },
