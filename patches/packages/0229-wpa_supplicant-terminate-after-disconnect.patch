@@ -1,0 +1,25 @@
+Index: build_dir/package/network/services/hostapd/patches/999-scott-terminate-on-disconnect.patch
+===================================================================
+--- /dev/null
++++ build_dir/package/network/services/hostapd/patches/999-scott-terminate-on-disconnect.patch
+@@ -0,0 +1,20 @@
++Index: hostapd-2018-05-21-62566bc2/wpa_supplicant/events.c
++===================================================================
++--- hostapd-2018-05-21-62566bc2.orig/wpa_supplicant/events.c
+++++ hostapd-2018-05-21-62566bc2/wpa_supplicant/events.c
++@@ -4050,6 +4050,7 @@ void supplicant_event(void *ctx, enum wp
++ 	case EVENT_DISASSOC:
++ 		wpas_event_disassoc(wpa_s,
++ 				    data ? &data->disassoc_info : NULL);
+++		wpa_supplicant_terminate_proc(wpa_s->global);
++ 		break;
++ 	case EVENT_DEAUTH:
++ #ifdef CONFIG_TESTING_OPTIONS
++@@ -4066,6 +4067,7 @@ void supplicant_event(void *ctx, enum wp
++ #endif /* CONFIG_TESTING_OPTIONS */
++ 		wpas_event_deauth(wpa_s,
++ 				  data ? &data->deauth_info : NULL);
+++		wpa_supplicant_terminate_proc(wpa_s->global);
++ 		break;
++ 	case EVENT_MICHAEL_MIC_FAILURE:
++ 		wpa_supplicant_event_michael_mic_failure(wpa_s, data);
