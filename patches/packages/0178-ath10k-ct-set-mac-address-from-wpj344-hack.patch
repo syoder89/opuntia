@@ -1,35 +1,10 @@
+Index: build_dir/package/kernel/ath10k-ct/patches/1002-scott-ath10k-set-mac-address-from-wpj344-hack.patch
+===================================================================
 --- /dev/null
-+++ b/package/kernel/ath10k-ct/patches/1002-scott-ath10k-set-mac-address-from-wpj344-hack.patch
-@@ -0,0 +1,52 @@
-+--- a/ath10k/mac.c
-++++ b/ath10k/mac.c
-+@@ -8681,6 +8681,11 @@ static const struct ieee80211_tpt_blink
-+ };
-+ #endif
-+ 
-++#if defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj344) || defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj558) || \
-++	defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj563)
-++extern u8 *ath10k_macaddr;
-++#endif
-++
-+ int ath10k_mac_register(struct ath10k *ar)
-+ {
-+ 	static const u32 cipher_suites[] = {
-+@@ -8694,6 +8699,12 @@ int ath10k_mac_register(struct ath10k *a
-+ 	void *channels;
-+ 	int ret;
-+ 
-++#if defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj344) || defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj558) || \
-++	defined(CONFIG_TARGET_ar71xx_generic_DEVICE_wpj563)
-++        if (ath10k_macaddr)
-++                memcpy(ar->mac_addr, ath10k_macaddr, ETH_ALEN);
-++#endif
-++
-+ 	SET_IEEE80211_PERM_ADDR(ar->hw, ar->mac_addr);
-+ 
-+ 	SET_IEEE80211_DEV(ar->hw, ar->dev);
-+--- a/ath10k-4.13/mac.c
-++++ b/ath10k-4.13/mac.c
++++ build_dir/package/kernel/ath10k-ct/patches/1002-scott-ath10k-set-mac-address-from-wpj344-hack.patch
+@@ -0,0 +1,25 @@
++--- a/ath10k-4.19/mac.c
+++++ b/ath10k-4.19/mac.c
 +@@ -9007,6 +9007,10 @@ static const struct ieee80211_tpt_blink
 + };
 + #endif
@@ -53,10 +28,12 @@
 + 	SET_IEEE80211_PERM_ADDR(ar->hw, ar->mac_addr);
 + 
 + 	SET_IEEE80211_DEV(ar->hw, ar->dev);
---- a/package/kernel/ath10k-ct/Makefile
-+++ b/package/kernel/ath10k-ct/Makefile
-@@ -36,6 +36,17 @@ define KernelPackage/ath10k-ct
-   AUTOLOAD:=$(call AutoProbe,ath10k_pci)
+Index: build_dir/package/kernel/ath10k-ct/Makefile
+===================================================================
+--- build_dir.orig/package/kernel/ath10k-ct/Makefile
++++ build_dir/package/kernel/ath10k-ct/Makefile
+@@ -45,6 +45,17 @@ define KernelPackage/ath10k-ct/config
+                depends on PACKAGE_kmod-ath10k-ct
  endef
  
 +define KernelPackage/ath10k-ct/config
@@ -73,8 +50,8 @@
  NOSTDINC_FLAGS = \
  	-I$(PKG_BUILD_DIR) \
  	-I$(STAGING_DIR)/usr/include/mac80211-backport/uapi \
-@@ -69,6 +80,10 @@ ifdef CONFIG_PACKAGE_ATH_DFS
-   NOSTDINC_FLAGS += -DCONFIG_ATH10K_DFS_CERTIFIED
+@@ -90,6 +101,10 @@ ifeq ($(CONFIG_ATH10K-CT_LEDS),y)
+   NOSTDINC_FLAGS += -DCONFIG_ATH10K_LEDS
  endif
  
 +ifdef CONFIG_ATH10K_MAC_OVERRIDE

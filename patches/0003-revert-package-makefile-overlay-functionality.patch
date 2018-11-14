@@ -13,9 +13,11 @@ Signed-off-by: Felix Fietkau <nbd@nbd.name>
  include/toplevel.mk | 2 +-
  2 files changed, 1 insertion(+), 8 deletions(-)
 
---- a/include/package.mk
-+++ b/include/package.mk
-@@ -232,7 +232,14 @@ define Build/DefaultTargets
+Index: build_dir/include/package.mk
+===================================================================
+--- build_dir.orig/include/package.mk
++++ build_dir/include/package.mk
+@@ -242,7 +242,14 @@ define Build/DefaultTargets
    endef
  endef
  
@@ -30,14 +32,16 @@ Signed-off-by: Felix Fietkau <nbd@nbd.name>
    $(eval $(Package/Default))
    $(eval $(Package/$(1)))
  
---- a/include/toplevel.mk
-+++ b/include/toplevel.mk
-@@ -82,7 +82,7 @@ _ignore = $(foreach p,$(IGNORE_PACKAGES)
- prepare-tmpinfo: FORCE
- 	@+$(MAKE) -r -s staging_dir/host/.prereq-build $(PREP_MK)
- 	mkdir -p tmp/info
--	$(_SINGLE)$(NO_TRACE_MAKE) -j1 -r -s -f include/scan.mk SCAN_TARGET="packageinfo" SCAN_DIR="package" SCAN_NAME="package" SCAN_DEPS="$(TOPDIR)/include/package*.mk" SCAN_DEPTH=5 SCAN_EXTRA=""
-+	$(_SINGLE)$(NO_TRACE_MAKE) -j1 -r -s -f include/scan.mk SCAN_TARGET="packageinfo" SCAN_DIR="package" SCAN_NAME="package" SCAN_DEPS="$(TOPDIR)/include/package*.mk $(TOPDIR)/overlay/*/*.mk" SCAN_DEPTH=5 SCAN_EXTRA=""
- 	$(_SINGLE)$(NO_TRACE_MAKE) -j1 -r -s -f include/scan.mk SCAN_TARGET="targetinfo" SCAN_DIR="target/linux" SCAN_NAME="target" SCAN_DEPS="image/Makefile profiles/*.mk $(TOPDIR)/include/kernel*.mk $(TOPDIR)/include/target.mk" SCAN_DEPTH=2 SCAN_EXTRA="" SCAN_MAKEOPTS="TARGET_BUILD=1"
- 	for type in package target; do \
- 		f=tmp/.$${type}info; t=tmp/.config-$${type}.in; \
+Index: build_dir/include/scan.mk
+===================================================================
+--- build_dir.orig/include/scan.mk
++++ build_dir/include/scan.mk
+@@ -15,7 +15,7 @@ export PATH:=$(TOPDIR)/staging_dir/host/
+ ifeq ($(SCAN_NAME),target)
+   SCAN_DEPS=image/Makefile profiles/*.mk $(TOPDIR)/include/kernel*.mk $(TOPDIR)/include/target.mk image/*.mk
+ else
+-  SCAN_DEPS=$(TOPDIR)/include/package*.mk
++  SCAN_DEPS=$(TOPDIR)/include/package*.mk $(TOPDIR)/overlay/*/*.mk
+ endif
+ 
+ ifeq ($(IS_TTY),1)

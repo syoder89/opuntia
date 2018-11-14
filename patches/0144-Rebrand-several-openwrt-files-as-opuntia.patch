@@ -30,8 +30,10 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
  create mode 100644 package/base-files/files/etc/opuntia_release
  create mode 100644 package/base-files/files/etc/opuntia_version
 
---- a/package/base-files/Makefile
-+++ b/package/base-files/Makefile
+Index: build_dir/package/base-files/Makefile
+===================================================================
+--- build_dir.orig/package/base-files/Makefile
++++ build_dir/package/base-files/Makefile
 @@ -139,11 +139,11 @@ define Package/base-files/install
  
  	$(VERSION_SED_SCRIPT) \
@@ -46,12 +48,16 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
  		$(1)/etc/device_info \
  		$(1)/usr/lib/os-release
  
---- a/package/base-files/files/etc/openwrt_version
+Index: build_dir/package/base-files/files/etc/openwrt_version
+===================================================================
+--- build_dir.orig/package/base-files/files/etc/openwrt_version
 +++ /dev/null
 @@ -1 +0,0 @@
 -%C
+Index: build_dir/package/base-files/files/etc/opuntia_release
+===================================================================
 --- /dev/null
-+++ b/package/base-files/files/etc/opuntia_release
++++ build_dir/package/base-files/files/etc/opuntia_release
 @@ -0,0 +1,9 @@
 +DISTRIB_ID="%D"
 +DISTRIB_RELEASE="%V"
@@ -62,35 +68,15 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
 +DISTRIB_MANUFACTURER="%M"
 +DISTRIB_PRODUCT="%P"
 +DISTRIB_HWREV="%h"
+Index: build_dir/package/base-files/files/etc/opuntia_version
+===================================================================
 --- /dev/null
-+++ b/package/base-files/files/etc/opuntia_version
++++ build_dir/package/base-files/files/etc/opuntia_version
 @@ -0,0 +1 @@
 +%V
---- a/target/linux/x86/image/grub-iso.cfg
-+++ b/target/linux/x86/image/grub-iso.cfg
-@@ -5,6 +5,6 @@ set default="0"
- set timeout="@TIMEOUT@"
- set root='(cd)'
- 
--menuentry "OpenWrt" {
-+menuentry "Opuntia" {
- 	linux /boot/vmlinuz @CMDLINE@ noinitrd
- }
---- a/target/linux/x86/image/grub.cfg
-+++ b/target/linux/x86/image/grub.cfg
-@@ -5,9 +5,9 @@ set default="0"
- set timeout="@TIMEOUT@"
- set root='(@ROOT@)'
- 
--menuentry "OpenWrt" {
-+menuentry "Opuntia" {
- 	linux /boot/vmlinuz @CMDLINE@ noinitrd
- }
--menuentry "OpenWrt (failsafe)" {
-+menuentry "Opuntia (failsafe)" {
- 	linux /boot/vmlinuz failsafe=true @CMDLINE@ noinitrd
- }
---- a/package/base-files/files/etc/openwrt_release
+Index: build_dir/package/base-files/files/etc/openwrt_release
+===================================================================
+--- build_dir.orig/package/base-files/files/etc/openwrt_release
 +++ /dev/null
 @@ -1,7 +0,0 @@
 -DISTRIB_ID='%D'
@@ -100,9 +86,11 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
 -DISTRIB_ARCH='%A'
 -DISTRIB_DESCRIPTION='%D %V %C'
 -DISTRIB_TAINTS='%t'
---- a/package/base-files/files/bin/config_generate
-+++ b/package/base-files/files/bin/config_generate
-@@ -56,7 +56,7 @@ generate_static_network() {
+Index: build_dir/package/base-files/files/bin/config_generate
+===================================================================
+--- build_dir.orig/package/base-files/files/bin/config_generate
++++ build_dir/package/base-files/files/bin/config_generate
+@@ -60,7 +60,7 @@ generate_static_network() {
  	fi
  }
  
@@ -111,7 +99,7 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
  generate_network() {
  	local ifname macaddr protocol type ipaddr netmask
  
-@@ -92,8 +92,8 @@ generate_network() {
+@@ -96,8 +96,8 @@ generate_network() {
  		static)
  			local ipad
  			case "$1" in
@@ -122,7 +110,7 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
  			esac
  
  			netm=${netmask:-"255.255.255.0"}
-@@ -224,8 +224,8 @@ generate_static_system() {
+@@ -234,8 +234,8 @@ generate_static_system() {
  	uci -q batch <<-EOF
  		delete system.@system[0]
  		add system system
@@ -133,3 +121,16 @@ Subject: [PATCH] Rebrand several openwrt files as opuntia
  		set system.@system[-1].ttylogin='0'
  		set system.@system[-1].log_size='64'
  		set system.@system[-1].urandom_seed='0'
+Index: build_dir/config/Config-images.in
+===================================================================
+--- build_dir.orig/config/Config-images.in
++++ build_dir/config/Config-images.in
+@@ -234,7 +234,7 @@ menu "Target Images"
+ 	config GRUB_TITLE
+ 		string "Title for the menu entry in GRUB"
+ 		depends on GRUB_IMAGES
+-		default "OpenWrt"
++		default "Opuntia"
+ 		help
+ 		  This is the title of the GRUB menu entry.
+ 		  If unspecified, it defaults to OpenWrt.
