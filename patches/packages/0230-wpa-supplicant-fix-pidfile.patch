@@ -1,0 +1,67 @@
+Index: build_dir/package/network/services/hostapd/patches/450-scan_wait.patch
+===================================================================
+--- build_dir.orig/package/network/services/hostapd/patches/450-scan_wait.patch
++++ build_dir/package/network/services/hostapd/patches/450-scan_wait.patch
+@@ -9,15 +9,26 @@
+  
+  
+  #ifndef CONFIG_NO_HOSTAPD_LOGGER
+-@@ -148,6 +150,14 @@ static void hostapd_logger_cb(void *ctx,
++@@ -148,6 +150,25 @@ static void hostapd_logger_cb(void *ctx,
+  }
+  #endif /* CONFIG_NO_HOSTAPD_LOGGER */
+  
+ +static void hostapd_setup_complete_cb(void *ctx)
+ +{
+-+	if (daemonize && os_daemonize(pid_file)) {
+-+		perror("daemon");
+-+		return;
+++	pid_t pid;
+++	if (daemonize) {
+++		if (os_daemonize(pid_file)) {
+++			perror("daemon");
+++			return;
+++		}
+++	}
+++	if (pid_file) {
+++		FILE *f = fopen(pid_file, "w");
+++		if (f) {
+++			pid = getpid();
+++			fprintf(f, "%u\n", pid);
+++			fclose(f);
+++		}
+ +	}
+ +	daemonize = 0;
+ +}
+Index: build_dir/package/network/services/hostapd/patches/999-scott-wpa_supplicant-always-write-pidfile.patch
+===================================================================
+--- /dev/null
++++ build_dir/package/network/services/hostapd/patches/999-scott-wpa_supplicant-always-write-pidfile.patch
+@@ -0,0 +1,27 @@
++Index: hostapd-2018-05-21-62566bc2/wpa_supplicant/wpa_supplicant.c
++===================================================================
++--- hostapd-2018-05-21-62566bc2.orig/wpa_supplicant/wpa_supplicant.c
+++++ hostapd-2018-05-21-62566bc2/wpa_supplicant/wpa_supplicant.c
++@@ -6307,10 +6307,20 @@ int wpa_supplicant_run(struct wpa_global
++ {
++ 	struct wpa_supplicant *wpa_s;
++ 
++-	if (global->params.daemonize &&
++-	    (wpa_supplicant_daemon(global->params.pid_file) ||
+++	if (global->params.daemonize) {
+++	    if ((wpa_supplicant_daemon(global->params.pid_file) ||
++ 	     eloop_sock_requeue()))
++ 		return -1;
+++	}
+++	else if (global->params.pid_file) {
+++		pid_t pid;
+++		FILE *f = fopen(global->params.pid_file, "w");
+++		if (f) {
+++			pid = getpid();
+++			fprintf(f, "%u\n", pid);
+++			fclose(f);
+++		}
+++	}
++ 
++ #ifdef CONFIG_MATCH_IFACE
++ 	if (wpa_supplicant_match_existing(global))

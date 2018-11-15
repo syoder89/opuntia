@@ -1,6 +1,18 @@
---- a/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-+++ b/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-@@ -861,6 +861,7 @@ drv_mac80211_teardown() {
+Index: build_dir/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
+===================================================================
+--- build_dir.orig/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
++++ build_dir/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
+@@ -778,9 +778,6 @@ drv_mac80211_setup() {
+ 	json_get_values basic_rate_list basic_rate
+ 	json_select ..
+ 
+-	# Restart the watchdog to avoid false positive triggers during reload
+-	/etc/init.d/wifi-watchdog restart || true
+-
+ 	find_phy || {
+ 		echo "Could not find PHY for device '$1'"
+ 		wireless_set_retry 0
+@@ -869,6 +866,7 @@ drv_mac80211_teardown() {
  
          . $IPKG_INSTROOT/lib/functions/procd.sh > /dev/null 2>&1
  	procd_kill hostapd-$phy $phy
@@ -8,9 +20,11 @@
  	mac80211_interface_cleanup "$phy"
  }
  
---- a/package/network/services/hostapd/files/hostapd.sh
-+++ b/package/network/services/hostapd/files/hostapd.sh
-@@ -843,21 +843,29 @@ wpa_supplicant_run() {
+Index: build_dir/package/network/services/hostapd/files/hostapd.sh
+===================================================================
+--- build_dir.orig/package/network/services/hostapd/files/hostapd.sh
++++ build_dir/package/network/services/hostapd/files/hostapd.sh
+@@ -937,21 +937,32 @@ wpa_supplicant_run() {
  
  	_wpa_supplicant_common "$ifname"
  
@@ -22,6 +36,13 @@
 -		-c "$_config" \
 -		-C "$_rpath" \
 -		"$@"
+-
+-	ret="$?"
+-	wireless_add_process "$(cat "/var/run/wpa_supplicant-${ifname}.pid")" /usr/sbin/wpa_supplicant 1
+-
+-	[ "$ret" != 0 ] && wireless_setup_vif_failed WPA_SUPPLICANT_FAILED
+-
+-	return $ret
 +	{
 +		. $IPKG_INSTROOT/lib/functions/procd.sh >/dev/null 2>&1
 +		procd_open_service wpa_supplicant-$phy
@@ -40,16 +61,13 @@
 +		procd_close_service 2>/dev/null
 +	}
 + 
-+#       ret="$?"
++	let retries=5
++	while [ $((retries)) -ge 0 ]; do
++		[ -f "/var/run/wpa_supplicant-${ifname}.pid" ] && break
++		let retries=retries-1
++		sleep 1
++	done
 +        wireless_add_process "$(cat "/var/run/wpa_supplicant-${ifname}.pid")" /usr/sbin/wpa_supplicant 1
- 
--	ret="$?"
--	wireless_add_process "$(cat "/var/run/wpa_supplicant-${ifname}.pid")" /usr/sbin/wpa_supplicant 1
--
--	[ "$ret" != 0 ] && wireless_setup_vif_failed WPA_SUPPLICANT_FAILED
--
--	return $ret
-+#       [ "$ret" != 0 ] && wireless_setup_vif_failed WPA_SUPPLICANT_FAILED
 +        return 0
  }
  
