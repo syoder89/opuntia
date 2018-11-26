@@ -4,9 +4,9 @@
  		$(1)/usr/sbin
  	$(INSTALL_BIN) 	$(PKG_INSTALL_DIR)/usr/sbin/conntrackd $(1)/usr/sbin/
  	$(INSTALL_BIN) ./files/conntrackd.init $(1)/etc/init.d/conntrackd
-+ 	$(INSTALL_CONF) \
++	$(INSTALL_CONF) \
 +		./files/conntrackd.conf \
-+ 		$(1)/etc/conntrackd/
++		$(1)/etc/conntrackd/
  endef
  
  $(eval $(call BuildPackage,conntrack))
