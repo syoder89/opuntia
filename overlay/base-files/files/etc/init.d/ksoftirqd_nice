@@ -8,9 +8,14 @@ START=5
 NICE_LEVEL=-10
 
 start() {
-	pid=$(pidof "ksoftirqd/0")
-	[ $((pid)) -gt 0 ] && {
-		logger "Changing priority of ksoftirqd to $NICE_LEVEL"
-		renice $NICE_LEVEL $pid
-	}
+	CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null)
+	let i=0
+	while [ $((i)) -lt $CORES ] ; do
+		pid=$(pidof "ksoftirqd/$i")
+		[ $((pid)) -gt 0 ] && {
+			logger "Changing priority of ksoftirqd/$i to $NICE_LEVEL"
+			renice $NICE_LEVEL $pid
+		}
+		let i=i+1
+	done
 }
