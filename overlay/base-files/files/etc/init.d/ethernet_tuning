@@ -1,0 +1,22 @@
+#!/bin/sh /etc/rc.common
+#
+#
+# ImageStream ethernet tuning for higher performance routers
+
+START=5
+
+start() {
+	let MAXETH=10
+	let i=0
+	while [ $((i)) -lt $MAXETH ] ; do
+		iface="eth${i}"
+		driver=$(ethtool -i $iface 2>/dev/null | grep ^driver: | awk '{ print $2}')
+		case "$driver" in
+			igb)
+				ethtool -G $iface rx 4096
+				logger "Changing rx ring of $iface to 4096..."
+			;;
+		esac
+		let i=i+1
+	done
+}

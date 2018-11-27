@@ -20,3 +20,4 @@
 0025-fix-dynamic-vlan-assoclist.patch
 0026-fix-switch-config-status-with-missing-ports.patch
 0027-luci-app-statistics-disable-cpufreq.patch
+0028-add-firewall-offload-toggle.patch

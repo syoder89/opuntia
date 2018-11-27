@@ -1,0 +1,14 @@
+Index: luci/applications/luci-app-firewall/luasrc/model/cbi/firewall/zones.lua
+===================================================================
+--- luci.orig/applications/luci-app-firewall/luasrc/model/cbi/firewall/zones.lua
++++ luci/applications/luci-app-firewall/luasrc/model/cbi/firewall/zones.lua
+@@ -19,6 +19,9 @@ s.addremove = false
+ s:option(Flag, "syn_flood", translate("Enable SYN-flood protection"))
+ 
+ o = s:option(Flag, "drop_invalid", translate("Drop invalid packets"))
++s:option(Flag, "flow_offloading", translate("Enable software flow offloading"))
++o = s:option(Flag, "flow_offloading_hw", translate("Enable hardware flow offloading"))
++o:depends("flow_offloading", "1")
+ 
+ p = {
+ 	s:option(ListValue, "input", translate("Input")),
