@@ -115,3 +115,6 @@ packages/0227-ath10k-ct-firmware-add-beta.patch
 packages/0229-wpa_supplicant-terminate-after-disconnect.patch
 packages/0230-wpa-supplicant-fix-pidfile.patch
 packages/0231-netifd-infinite-wireless-retries.patch
+packages/0232-decrease-ath10k-ct-buffers.patch
+packages/0233-remove-compiler-option-lto.patch
+packages/0234-fix-cfg80211-sinfo-release-content-memory-leak.patch

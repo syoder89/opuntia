@@ -1,0 +1,248 @@
+Index: build_dir/package/network/config/firewall/Makefile
+===================================================================
+--- build_dir.orig/package/network/config/firewall/Makefile
++++ build_dir/package/network/config/firewall/Makefile
+@@ -40,8 +40,8 @@ define Package/firewall/conffiles
+ /etc/firewall.user
+ endef
+ 
+-TARGET_CFLAGS += -ffunction-sections -fdata-sections -flto
+-TARGET_LDFLAGS += -Wl,--gc-sections -flto
++TARGET_CFLAGS += -ffunction-sections -fdata-sections
++TARGET_LDFLAGS += -Wl,--gc-sections
+ CMAKE_OPTIONS += $(if $(CONFIG_IPV6),,-DDISABLE_IPV6=1)
+ 
+ define Package/firewall/install
+Index: build_dir/package/network/services/dropbear/Makefile
+===================================================================
+--- build_dir.orig/package/network/services/dropbear/Makefile
++++ build_dir/package/network/services/dropbear/Makefile
+@@ -86,8 +86,8 @@ CONFIGURE_ARGS += \
+ 	$(if $(CONFIG_DROPBEAR_ZLIB),,--disable-zlib) \
+ 	--enable-bundled-libtom
+ 
+-TARGET_CFLAGS += -DARGTYPE=3 -ffunction-sections -fdata-sections -flto
+-TARGET_LDFLAGS += -Wl,--gc-sections -flto=jobserver
++TARGET_CFLAGS += -DARGTYPE=3 -ffunction-sections -fdata-sections
++TARGET_LDFLAGS += -Wl,--gc-sections
+ 
+ define Build/Configure
+ 	$(Build/Configure/Default)
+Index: build_dir/package/network/services/hostapd/Makefile
+===================================================================
+--- build_dir.orig/package/network/services/hostapd/Makefile
++++ build_dir/package/network/services/hostapd/Makefile
+@@ -443,8 +443,8 @@ TARGET_CPPFLAGS := \
+ 	-D_GNU_SOURCE \
+ 	$(if $(CONFIG_WPA_MSG_MIN_PRIORITY),-DCONFIG_MSG_MIN_PRIORITY=$(CONFIG_WPA_MSG_MIN_PRIORITY))
+ 
+-TARGET_CFLAGS += -ffunction-sections -fdata-sections -flto
+-TARGET_LDFLAGS += -Wl,--gc-sections -flto=jobserver -fuse-linker-plugin
++TARGET_CFLAGS += -ffunction-sections -fdata-sections
++TARGET_LDFLAGS += -Wl,--gc-sections -fuse-linker-plugin
+ ifeq ($(findstring supplicant,$(BUILD_VARIANT)),)
+   TARGET_LDFLAGS += -lubox -lubus
+ endif
+Index: build_dir/package/network/services/ppp/Makefile
+===================================================================
+--- build_dir.orig/package/network/services/ppp/Makefile
++++ build_dir/package/network/services/ppp/Makefile
+@@ -189,8 +189,8 @@ $(call Build/Configure/Default,, \
+ 		$(PKG_BUILD_DIR)/pppd/plugins/pppoatm/linux/
+ endef
+ 
+-TARGET_CFLAGS += -ffunction-sections -fdata-sections -flto
+-TARGET_LDFLAGS += -Wl,--gc-sections -flto -fuse-linker-plugin
++TARGET_CFLAGS += -ffunction-sections -fdata-sections
++TARGET_LDFLAGS += -Wl,--gc-sections -fuse-linker-plugin
+ 
+ MAKE_FLAGS += COPTS="$(TARGET_CFLAGS)" \
+ 		PRECOMPILED_FILTER=1 \
+Index: build_dir/package/system/procd/Makefile
+===================================================================
+--- build_dir.orig/package/system/procd/Makefile
++++ build_dir/package/system/procd/Makefile
+@@ -37,9 +37,6 @@ endif
+ CMAKE_OPTIONS += -DEARLY_PATH="$(TARGET_INIT_PATH)"
+ TARGET_LDFLAGS += $(if $(CONFIG_USE_GLIBC),-lrt)
+ 
+-TARGET_CFLAGS += -flto
+-TARGET_LDFLAGS += -flto
+-
+ define Package/procd
+   SECTION:=base
+   CATEGORY:=Base system
+Index: build_dir/package/system/ubus/Makefile
+===================================================================
+--- build_dir.orig/package/system/ubus/Makefile
++++ build_dir/package/system/ubus/Makefile
+@@ -47,8 +47,7 @@ define Package/libubus-lua
+   TITLE:=Lua binding for the OpenWrt RPC client
+ endef
+ 
+-TARGET_CFLAGS += -I$(STAGING_DIR)/usr/include -flto
+-TARGET_LDFLAGS += -flto
++TARGET_CFLAGS += -I$(STAGING_DIR)/usr/include
+ 
+ CMAKE_OPTIONS = \
+ 	-DLUAPATH=/usr/lib/lua
+Index: build_dir/package/utils/busybox/Makefile
+===================================================================
+--- build_dir.orig/package/utils/busybox/Makefile
++++ build_dir/package/utils/busybox/Makefile
+@@ -86,8 +86,7 @@ ifeq ($(CONFIG_USE_GLIBC),y)
+   LDLIBS += $(call BUSYBOX_IF_ENABLED,NSLOOKUP_OPENWRT,resolv)
+ endif
+ 
+-TARGET_CFLAGS += -flto
+-TARGET_LDFLAGS += -flto=jobserver -fuse-linker-plugin
++TARGET_LDFLAGS += -fuse-linker-plugin
+ 
+ MAKE_VARS :=
+ MAKE_FLAGS += \
+Index: build_dir/package/utils/e2fsprogs/Makefile
+===================================================================
+--- build_dir.orig/package/utils/e2fsprogs/Makefile
++++ build_dir/package/utils/e2fsprogs/Makefile
+@@ -131,10 +131,9 @@ $(call Package/e2fsprogs)
+   DEPENDS:= +e2fsprogs
+ endef
+ 
+-TARGET_CFLAGS += $(FPIC) -ffunction-sections -fdata-sections -flto
++TARGET_CFLAGS += $(FPIC) -ffunction-sections -fdata-sections
+ 
+ TARGET_LDFLAGS += $(if $(CONFIG_USE_GLIBC),-lrt)
+-TARGET_LDFLAGS += -flto
+ 
+ CONFIGURE_ARGS += \
+ 	--disable-testio-debug \
+Index: build_dir/feeds/packages/libs/sbc/Makefile
+===================================================================
+--- build_dir.orig/feeds/packages/libs/sbc/Makefile
++++ build_dir/feeds/packages/libs/sbc/Makefile
+@@ -37,9 +37,6 @@ define Package/sbc/description
+   Needed for A2DP support.
+ endef
+ 
+-TARGET_CFLAGS += -flto
+-TARGET_LDFLAGS += -flto
+-
+ define Build/InstallDev
+ 	$(INSTALL_DIR) $(1)/usr/include/sbc
+ 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/include/sbc/sbc.h $(1)/usr/include/sbc/
+Index: build_dir/feeds/packages/net/miniupnpd/Makefile
+===================================================================
+--- build_dir.orig/feeds/packages/net/miniupnpd/Makefile
++++ build_dir/feeds/packages/net/miniupnpd/Makefile
+@@ -39,8 +39,8 @@ define Build/Prepare
+ endef
+ 
+ TARGET_CFLAGS := $(filter-out -O%,$(TARGET_CFLAGS))
+-TARGET_CFLAGS += -flto -ffunction-sections -fdata-sections -O2
+-TARGET_LDFLAGS += $(FPIC) -flto -Wl,--gc-sections
++TARGET_CFLAGS += -ffunction-sections -fdata-sections -O2
++TARGET_LDFLAGS += $(FPIC) -Wl,--gc-sections
+ MAKE_FLAGS += \
+ 	TARGET_OPENWRT=1 TEST=0 LIBS="" \
+ 	CC="$(TARGET_CC) -DIPTABLES_143 -lip4tc -luuid \
+Index: build_dir/feeds/packages/net/openvswitch/Makefile
+===================================================================
+--- build_dir.orig/feeds/packages/net/openvswitch/Makefile
++++ build_dir/feeds/packages/net/openvswitch/Makefile
+@@ -299,7 +299,7 @@ ifneq ($(ovs_intree_kmod_enabled),)
+   CONFIGURE_ARGS += --with-linux=$(LINUX_DIR)
+ endif
+ 
+-TARGET_CFLAGS += -flto -std=gnu99
++TARGET_CFLAGS += -std=gnu99
+ MAKE_VARS += PYTHONPATH="$(HOST_PYTHONPATH)"
+ 
+ $(foreach p,$(ovs_kmod_packages),\
+Index: build_dir/feeds/packages/sound/fdk-aac/Makefile
+===================================================================
+--- build_dir.orig/feeds/packages/sound/fdk-aac/Makefile
++++ build_dir/feeds/packages/sound/fdk-aac/Makefile
+@@ -23,10 +23,9 @@ PKG_CONFIG_DEPENDS:= CONFIG_FDK-AAC_OPTI
+ 
+ ifeq ($(CONFIG_FDK-AAC_OPTIMIZE_SPEED),y)
+ 	TARGET_CFLAGS := $(filter-out -O%,$(TARGET_CFLAGS))
+-	TARGET_CFLAGS += $(TARGET_CFLAGS) -O2 -flto
++	TARGET_CFLAGS += $(TARGET_CFLAGS) -O2
+ 	TARGET_CXXFLAGS := $(filter-out -O%,$(TARGET_CXXFLAGS))
+-	TARGET_CXXFLAGS += $(TARGET_CXXFLAGS) -O2 -flto
+-	TARGET_LDFLAGS += $(TARGET_LDFLAGS) -flto
++	TARGET_CXXFLAGS += $(TARGET_CXXFLAGS) -O2
+ endif
+ 
+ include $(INCLUDE_DIR)/package.mk
+Index: build_dir/feeds/packages/utils/btrfs-progs/Makefile
+===================================================================
+--- build_dir.orig/feeds/packages/utils/btrfs-progs/Makefile
++++ build_dir/feeds/packages/utils/btrfs-progs/Makefile
+@@ -52,8 +52,8 @@ CONFIGURE_ARGS += \
+ 	--disable-python \
+ 	--disable-zstd
+ 
+-TARGET_CFLAGS += -ffunction-sections -fdata-sections -flto
+-TARGET_LDFLAGS += -Wl,--gc-sections -flto
++TARGET_CFLAGS += -ffunction-sections -fdata-sections
++TARGET_LDFLAGS += -Wl,--gc-sections
+ 
+ EXTRA_CFLAGS=$(TARGET_CPPFLAGS)
+ 
+Index: build_dir/feeds/packages/utils/domoticz/Makefile
+===================================================================
+--- build_dir.orig/feeds/packages/utils/domoticz/Makefile
++++ build_dir/feeds/packages/utils/domoticz/Makefile
+@@ -72,8 +72,7 @@ CMAKE_OPTIONS += \
+ 	-DUSE_PYTHON=yes \
+ 	-DWITH_LIBUSB=no
+ 
+-TARGET_CFLAGS+=-flto
+-TARGET_CXXFLAGS+=-DWITH_GPIO -flto
++TARGET_CXXFLAGS+=-DWITH_GPIO
+ 
+ define Build/Prepare
+ 	$(call Build/Prepare/Default)
+Index: build_dir/feeds/routing/alfred/Makefile
+===================================================================
+--- build_dir.orig/feeds/routing/alfred/Makefile
++++ build_dir/feeds/routing/alfred/Makefile
+@@ -62,7 +62,7 @@ MAKE_ALFRED_FLAGS=\
+         LIBNL_GENL_NAME="libnl-tiny" \
+         REVISION="openwrt-$(PKG_VERSION)-$(PKG_RELEASE)"
+ 
+-TARGET_CFLAGS  += -ffunction-sections -fdata-sections -flto
++TARGET_CFLAGS  += -ffunction-sections -fdata-sections
+ TARGET_LDFLAGS += -Wl,--gc-sections -fuse-linker-plugin
+ 
+ define Build/Compile
+Index: build_dir/feeds/routing/batctl/Makefile
+===================================================================
+--- build_dir.orig/feeds/routing/batctl/Makefile
++++ build_dir/feeds/routing/batctl/Makefile
+@@ -46,7 +46,6 @@ TARGET_LDFLAGS += -Wl,--gc-sections
+ # source file to the global source view. This is done by emitting the GIMPLE
+ # representation in each object file and analyzing it again during the link step.
+ 
+-TARGET_CFLAGS  += -flto
+ TARGET_LDFLAGS += -fuse-linker-plugin
+ 
+ MAKE_BATCTL_ENV += \
+Index: build_dir/package/network/config/netifd/Makefile
+===================================================================
+--- build_dir.orig/package/network/config/netifd/Makefile
++++ build_dir/package/network/config/netifd/Makefile
+@@ -27,10 +27,9 @@ endef
+ 
+ TARGET_CFLAGS += \
+ 	-I$(STAGING_DIR)/usr/include/libnl-tiny \
+-	-I$(STAGING_DIR)/usr/include \
+-	-flto
++	-I$(STAGING_DIR)/usr/include
+ 
+-TARGET_LDFLAGS += -flto -fuse-linker-plugin
++TARGET_LDFLAGS += -fuse-linker-plugin
+ 
+ CMAKE_OPTIONS += \
+ 	-DLIBNL_LIBS=-lnl-tiny \

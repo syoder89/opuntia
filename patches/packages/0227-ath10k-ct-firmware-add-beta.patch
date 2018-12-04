@@ -27,10 +27,10 @@ Index: build_dir/package/firmware/ath10k-firmware/Makefile
  endef
  $(eval $(call Download,ath10k-firmware-qca988x-ct-htt))
  
-+QCA988X_FIRMWARE_FILE_CT_HTT_BETA:=firmware-2-ct-full-htt-mgt-community.bin
++QCA988X_FIRMWARE_FILE_CT_HTT_BETA:=firmware-2-ct-full-community.bin
 +define Download/ath10k-firmware-qca988x-ct-htt-beta
 +  $(call Download/ct-firmware-htt-beta,QCA988X,ath10k-fw-beta)
-+  HASH:=c0b93d767bbf0a8392bdf73f954b20f0f93eaae651e59c16594993a98e1d0517
++  HASH:=6eef6fe1731ebb54a3d018d27325be1e67f3bb8c32e771a310d2f08ad00ba611
 +endef
 +$(eval $(call Download,ath10k-firmware-qca988x-ct-htt-beta))
  

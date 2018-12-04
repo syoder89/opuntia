@@ -1,0 +1,65 @@
+Index: build_dir/package/kernel/mac80211/patches/subsys/1001-scott-fix-cfg80211-sinfo-release-content-memory-leak.patch
+===================================================================
+--- /dev/null
++++ build_dir/package/kernel/mac80211/patches/subsys/1001-scott-fix-cfg80211-sinfo-release-content-memory-leak.patch
+@@ -0,0 +1,42 @@
++Index: backports-4.19-rc5-1/net/wireless/wext-compat.c
++===================================================================
++--- backports-4.19-rc5-1.orig/net/wireless/wext-compat.c
+++++ backports-4.19-rc5-1/net/wireless/wext-compat.c
++@@ -1278,12 +1278,16 @@ static int cfg80211_wext_giwrate(struct
++ 	if (err)
++ 		return err;
++ 
++-	if (!(sinfo.filled & BIT_ULL(NL80211_STA_INFO_TX_BITRATE)))
++-		return -EOPNOTSUPP;
+++	if (!(sinfo.filled & BIT_ULL(NL80211_STA_INFO_TX_BITRATE))) {
+++		err = -EOPNOTSUPP;
+++		goto free;
+++	}
++ 
++ 	rate->value = 100000 * cfg80211_calculate_bitrate(&sinfo.txrate);
++ 
++-	return 0;
+++free:
+++	cfg80211_sinfo_release_content(&sinfo);
+++	return err;
++ }
++ 
++ /* Get wireless statistics.  Called by /proc/net/wireless and by SIOCGIWSTATS */
++@@ -1293,7 +1297,7 @@ static struct iw_statistics *cfg80211_wi
++ 	struct cfg80211_registered_device *rdev = wiphy_to_rdev(wdev->wiphy);
++ 	/* we are under RTNL - globally locked - so can use static structs */
++ 	static struct iw_statistics wstats;
++-	static struct station_info sinfo;
+++	static struct station_info sinfo = {};
++ 	u8 bssid[ETH_ALEN];
++ 
++ 	if (dev->ieee80211_ptr->iftype != NL80211_IFTYPE_STATION)
++@@ -1352,6 +1356,8 @@ static struct iw_statistics *cfg80211_wi
++ 	if (sinfo.filled & BIT_ULL(NL80211_STA_INFO_TX_FAILED))
++ 		wstats.discard.retries = sinfo.tx_failed;
++ 
+++	cfg80211_sinfo_release_content(&sinfo);
+++
++ 	return &wstats;
++ }
++ 
+Index: build_dir/feeds/routing/batman-adv/patches/0102-scott-fix-cfg80211-sinfo-release-content-memory-leak.patch
+===================================================================
+--- /dev/null
++++ build_dir/feeds/routing/batman-adv/patches/0102-scott-fix-cfg80211-sinfo-release-content-memory-leak.patch
+@@ -0,0 +1,13 @@
++Index: batman-adv-2018.4/net/batman-adv/bat_v_elp.c
++===================================================================
++--- batman-adv-2018.4.orig/net/batman-adv/bat_v_elp.c
+++++ batman-adv-2018.4/net/batman-adv/bat_v_elp.c
++@@ -106,6 +106,8 @@ static u32 batadv_v_elp_get_throughput(s
++ 		ret = cfg80211_get_station(real_netdev, neigh->addr, &sinfo);
++ 
++ 		dev_put(real_netdev);
+++		if (sinfo.pertid)
+++			cfg80211_sinfo_release_content(&sinfo);
++ 		if (ret == -ENOENT) {
++ 			/* Node is not associated anymore! It would be
++ 			 * possible to delete this neighbor. For now set
