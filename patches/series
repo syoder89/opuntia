@@ -118,3 +118,4 @@ packages/0231-netifd-infinite-wireless-retries.patch
 packages/0232-decrease-ath10k-ct-buffers.patch
 packages/0233-remove-compiler-option-lto.patch
 packages/0234-fix-cfg80211-sinfo-release-content-memory-leak.patch
+kernel/0083-skb-flow-classifier-add-batman.patch
