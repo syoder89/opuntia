@@ -37,12 +37,12 @@ Index: build_dir/package/network/services/hostapd/Makefile
  	$(if $(CONFIG_WPA_MSG_MIN_PRIORITY),-DCONFIG_MSG_MIN_PRIORITY=$(CONFIG_WPA_MSG_MIN_PRIORITY))
  
 -TARGET_CFLAGS += -ffunction-sections -fdata-sections -flto
--TARGET_LDFLAGS += -Wl,--gc-sections -flto=jobserver -fuse-linker-plugin
+-TARGET_LDFLAGS += -Wl,--gc-sections -flto=jobserver -fuse-linker-plugin -lubox -lubus
 +TARGET_CFLAGS += -ffunction-sections -fdata-sections
-+TARGET_LDFLAGS += -Wl,--gc-sections -fuse-linker-plugin
- ifeq ($(findstring supplicant,$(BUILD_VARIANT)),)
-   TARGET_LDFLAGS += -lubox -lubus
- endif
++TARGET_LDFLAGS += -Wl,--gc-sections -flto=jobserver -lubox -lubus
+ 
+ ifdef CONFIG_PACKAGE_kmod-cfg80211
+   TARGET_LDFLAGS += -lm -lnl-tiny
 Index: build_dir/package/network/services/ppp/Makefile
 ===================================================================
 --- build_dir.orig/package/network/services/ppp/Makefile

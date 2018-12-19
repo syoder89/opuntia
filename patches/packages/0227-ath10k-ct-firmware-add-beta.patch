@@ -10,8 +10,8 @@ Index: build_dir/package/firmware/ath10k-firmware/Makefile
  
  define Download/ct-firmware
    URL:=https://www.candelatech.com/downloads/$(2)
-@@ -64,6 +65,12 @@ define Download/ct-firmware-htt
-   URL_FILE:=$($(1)_FIRMWARE_FILE_CT_HTT)
+@@ -58,6 +59,12 @@ define Download/ct-firmware
+   URL_FILE:=$($(1)_FIRMWARE_FILE_CT)
  endef
  
 +define Download/ct-firmware-htt-beta
@@ -20,9 +20,9 @@ Index: build_dir/package/firmware/ath10k-firmware/Makefile
 +  URL_FILE:=$($(1)_FIRMWARE_FILE_CT_HTT_BETA)
 +endef
 +
- QCA988X_FIRMWARE_FILE_CT:=firmware-2-ct-full-community-21.bin.lede.002
- define Download/ath10k-firmware-qca988x-ct
-   $(call Download/ct-firmware,QCA988X,)
+ define Download/ct-firmware-htt
+   URL:=https://www.candelatech.com/downloads/$(2)
+   FILE:=$(call CT_FIRMWARE_FILE_HTT,$(1))
 @@ -78,6 +85,12 @@ define Download/ath10k-firmware-qca988x-
  endef
  $(eval $(call Download,ath10k-firmware-qca988x-ct-htt))
@@ -34,7 +34,7 @@ Index: build_dir/package/firmware/ath10k-firmware/Makefile
 +endef
 +$(eval $(call Download,ath10k-firmware-qca988x-ct-htt-beta))
  
- QCA9887_FIRMWARE_FILE_CT:=firmware-2-ct-full-community-21.bin.lede.001
+ QCA9887_FIRMWARE_FILE_CT:=firmware-2-ct-full-community-22.bin.lede.001
  define Download/ath10k-firmware-qca9887-ct
 @@ -176,6 +189,14 @@ $(Package/ath10k-firmware-default)
    PROVIDES:=ath10k-firmware-qca988x

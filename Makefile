@@ -1,5 +1,6 @@
 OPENWRT_GIT:=https://git.lede-project.org/source.git
-OPENWRT_COMMIT:=32bc733796e1d409db656fbadd9ca5e2a2468ae9
+OPENWRT_COMMIT:=99ddff0c7f836e05156a0a084b2895ef2607811d
+#OPENWRT_COMMIT:=32bc733796e1d409db656fbadd9ca5e2a2468ae9 = 4.8.10
 #OPENWRT_COMMIT:=78ca6a5578d6c7b06ca520b0aac965a1babf5417 = 4.8.10
 #OPENWRT_COMMIT:=be3e69d99189636d5f0854bd3a91e004b2c370e0
 #OPENWRT_COMMIT:=15f16bf05b8441aed0e0c6000740996b75724ac1
@@ -83,7 +84,7 @@ docker_build:
 	sudo docker build --tag opuntia:latest docker/
 
 docker_run: docker_build
-	sudo docker run --rm --name opuntia -it -v /home/ubuntu/opuntia:/opuntia opuntia:latest /bin/bash
+	sudo docker run -d --rm --name opuntia -it -v /home/ubuntu/opuntia:/opuntia opuntia:latest /bin/bash
 
 setup_cache:
 	@if [ ! -d dl.cache ] ; then \
