@@ -1,0 +1,67 @@
+--- a/commands-wds.c
++++ b/commands-wds.c
+@@ -5,6 +5,10 @@ static struct qmi_wds_start_network_requ
+ 	         QMI_WDS_AUTHENTICATION_PAP | QMI_WDS_AUTHENTICATION_CHAP),
+ };
+ 
++static struct qmi_wds_disable_enhanced_autoconnect_request wds_ac_req = {
++	QMI_INIT(enable_autoconnect, false),
++};
++
+ #define cmd_wds_set_auth_cb no_cb
+ static enum qmi_cmd_result
+ cmd_wds_set_auth_prepare(struct qmi_dev *qmi, struct qmi_request *req, struct qmi_msg *msg, char *arg)
+@@ -110,3 +114,12 @@ cmd_wds_reset_prepare(struct qmi_dev *qm
+ 	qmi_set_wds_reset_request(msg);
+ 	return QMI_CMD_REQUEST;
+ }
++
++#define cmd_wds_disable_enhanced_autoconnect_cb no_cb
++static enum qmi_cmd_result
++cmd_wds_disable_enhanced_autoconnect_prepare(struct qmi_dev *qmi, struct qmi_request *req, struct qmi_msg *msg, char *arg)
++{
++	qmi_set_ptr(&wds_ac_req, enable_autoconnect, arg);
++	qmi_set_wds_disable_enhanced_autoconnect_request(msg, &wds_ac_req);
++	return QMI_CMD_REQUEST;
++}
+--- a/commands-wds.h
++++ b/commands-wds.h
+@@ -5,7 +5,8 @@
+ 	__uqmi_command(wds_set_password, password, required, CMD_TYPE_OPTION), \
+ 	__uqmi_command(wds_set_autoconnect, autoconnect, no, CMD_TYPE_OPTION), \
+ 	__uqmi_command(wds_get_packet_service_status, get-data-status, no, QMI_SERVICE_WDS), \
+-	__uqmi_command(wds_reset, reset-wds, no, QMI_SERVICE_WDS) \
++	__uqmi_command(wds_reset, reset-wds, no, QMI_SERVICE_WDS), \
++	__uqmi_command(wds_disable_enhanced_autoconnect, disable-enhanced-autoconnect, no, QMI_SERVICE_WDS) \
+ 
+ 
+ #define wds_helptext \
+@@ -15,4 +16,5 @@
+ 		"    --password <password>:          Use network password\n" \
+ 		"    --autconnect:                   Enable automatic connect/reconnect\n" \
+ 		"  --get-data-status:                Get current data access status\n" \
++		"  --disable-enhanced-autoconnect:   Disable enhanced autoconnect:\n" \
+ 
+--- a/data/qmi-service-wds.json
++++ b/data/qmi-service-wds.json
+@@ -467,6 +467,20 @@
+                                         "format" : "guint32" } ] } ] },
+ 
+   // *********************************************************************************
++  {  "name"    : "Disable Enhanced Autoconnect",
++     "type"    : "Message",
++     "service" : "WDS",
++     "id"      : "0x0051",
++     "version" : "1.12",
++     "input"   : [  { "name"          : "Enable Autoconnect",
++                      "id"            : "0x01",
++                      "mandatory"     : "yes",
++                      "type"          : "TLV",
++                      "format"        : "guint8",
++                      "public-format" : "bool" } ],
++     "output"  : [  { "common-ref" : "Operation Result" } ] },
++
++  // *********************************************************************************
+   {  "name"    : "Set IP Family",
+      "type"    : "Message",
+      "service" : "WDS",

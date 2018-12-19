@@ -1,0 +1,413 @@
+IMAGESTREAM-3G-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY, OBJECT-TYPE, Counter32, Gauge32,
+    Integer32, TimeTicks,
+    NOTIFICATION-TYPE                        FROM SNMPv2-SMI
+    TEXTUAL-CONVENTION, DisplayString        FROM SNMPv2-TC
+    OBJECT-GROUP,
+    NOTIFICATION-GROUP                       FROM SNMPv2-CONF
+    router                                   FROM IMAGESTREAM-ROOT-MIB;
+
+
+is3gMIB MODULE-IDENTITY
+    LAST-UPDATED "201205150000Z"
+    ORGANIZATION "Image Telemetrics Operational, Inc."
+    CONTACT-INFO
+            "   Scott Yoder
+                Image Telemetrics Operational, Inc.
+                4374 FM 1518
+                Selma, TX 78154
+                US
+
+                574-935-8484
+                support@imagestream.com"
+    DESCRIPTION
+            "The MIB module to describe generic objects for ImageStream's
+            3G interfaces."
+
+    REVISION      "201205150000Z"
+    DESCRIPTION
+            "Initial revision."
+    ::= { router 3 }
+
+
+is3gConformance OBJECT IDENTIFIER ::= { is3gMIB 2 }
+is3gGroups      OBJECT IDENTIFIER ::= { is3gConformance 1 }
+
+Is3gInterfaceIndex ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d"
+    STATUS       current
+    DESCRIPTION
+            "A unique value, greater than zero, that indentifies the 3G
+            interface. This value corresponds to the IF-MIB ifIndex."
+    SYNTAX       Integer32 (1..2147483647)
+
+Is3gInterfaceIndexOrZero ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "d"
+    STATUS       current
+    DESCRIPTION
+            "An index where 0 is allowed."
+    SYNTAX       Integer32 (0..2147483647)
+
+-- the is3gTable table
+
+is3gTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF Is3gEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "A list of 3G interfaces entries."
+    ::= { is3gMIB 1 }
+
+is3gEntry OBJECT-TYPE
+    SYNTAX      Is3gEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "An entry containing management information applicable to a
+            particular 3G interface."
+    INDEX   { is3gIfIndex }
+    ::= { is3gTable 1 }
+
+Is3gEntry ::=
+    SEQUENCE {
+        is3gIfIndex                Is3gInterfaceIndex,
+        is3gCarrier                DisplayString,
+        is3gTechnology             DisplayString,
+        is3gMcc                    Integer32,
+        is3gMnc                    Integer32,
+        is3gSignalStrength         Integer32,
+        is3gCurrentRxBitRate       Integer32,
+        is3gCurrentTxBitRate       Integer32,
+        is3gAPN                    DisplayString,
+        is3gSignalQuality          Integer32,
+        is3gDataBearer             INTEGER,
+        is3gBandClass              INTEGER,
+        is3gRegistration           INTEGER,
+        is3gDataConnection         INTEGER,
+        is3gConnectTime            TimeTicks,
+        is3gNetworkType            INTEGER,
+        is3gSMSCount               Integer32
+    }
+
+is3gIfIndex OBJECT-TYPE
+    SYNTAX      Is3gInterfaceIndex
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "A unique value, greater than zero, that indentifies the 3G
+            interface. This value corresponds to the IF-MIB ifIndex."
+    ::= { is3gEntry 1 }
+
+is3gCarrier OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "A textual string containing information about the carrier."
+    ::= { is3gEntry 2 }
+
+is3gTechnology OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "A textual string containing information about the 3G
+            technology."
+    ::= { is3gEntry 3 }
+
+is3gMcc OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The Mobile Country Code (MCC)."
+    ::= { is3gEntry 4 }
+
+is3gMnc OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The Mobile Network Code (MNC)."
+    ::= { is3gEntry 5 }
+
+is3gSignalStrength OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The signal strength represented by a dBm value."
+    ::= { is3gEntry 6 }
+
+is3gCurrentRxBitRate OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The current Rx bit rate in kbps."
+    ::= { is3gEntry 7 }
+
+is3gCurrentTxBitRate OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The current Tx bit rate in kbps."
+    ::= { is3gEntry 8 }
+
+is3gAPN OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "A textual string containing the current 3G APN for GSM/UMTS."
+    ::= { is3gEntry 9 }
+
+is3gSignalQuality OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The signal quality represented by a value from 0 (worst) to 31 (best)."
+    ::= { is3gEntry 10 }
+
+is3gDataBearer OBJECT-TYPE
+    SYNTAX  INTEGER {
+                CDMA1xRTT(1),
+                CDMA1xEVDORev0(2),
+                GPRS(3),
+                WCDMA(4),
+                CDMA1xEVDORevA(5),
+                EDGE(6),
+                HSDPADLWCDMAUL(7),
+                WCDMADLHSUPAUL(8),
+                HSDPA(9),
+                LTE(10)
+            }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The data bearer technology in use by the modem."
+    ::= { is3gEntry 11 }
+
+is3gBandClass OBJECT-TYPE
+    SYNTAX  INTEGER {
+                CDMABandClass1(1),
+                CDMABandClass2(2),
+                CDMABandClass3(3),
+                CDMABandClass4(4),
+                CDMABandClass5(5),
+                CDMABandClass6(6),
+                CDMABandClass7(7),
+                CDMABandClass8(8),
+                CDMABandClass9(9),
+                CDMABandClass10(10),
+                CDMABandClass11(11),
+                CDMABandClass12(12),
+                CDMABandClass13(13),
+                CDMABandClass14(14),
+                CDMABandClass15(15),
+                CDMABandClass16(16),
+                GSM450(40),
+                GSM480(41),
+                GSM750(42),
+                GSM850(43),
+                GSM900Extended(44),
+                GSM900Primary(45),
+                GSM900Railways(46),
+                GSM1800(47),
+                GSM1900(48),
+                WCDMA2100(80),
+                WCDMAPCS1900(81),
+                WCDMADCS1800(82),
+                WCDMA1700US(83),
+                WCDMA850(84),
+                WCDMA800(85),
+                WCDMA2600(86),
+                WCDMA900(87),
+                WCDMA1700Japan(88)
+            }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The data session state."
+    ::= { is3gEntry 12 }
+
+is3gRegistration OBJECT-TYPE
+    SYNTAX  INTEGER {
+                NotRegistered(0),
+                Registered(1),
+                SearchingNotRegistered(2),
+                RegistrationDenied(3)
+            }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The modem registration state."
+    ::= { is3gEntry 13 }
+
+is3gDataConnection OBJECT-TYPE
+    SYNTAX  INTEGER {
+                Disconnected(1),
+                Connected(2),
+                Suspended(3),
+                Authenticating(4)
+            }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The data session state."
+    ::= { is3gEntry 14 }
+
+is3gConnectTime OBJECT-TYPE
+    SYNTAX      TimeTicks
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The duration of the current data session in 1/100 of a second."
+    ::= { is3gEntry 15 }
+
+is3gNetworkType OBJECT-TYPE
+    SYNTAX  INTEGER {
+                Roaming(0),
+                Home(1),
+                RoamingPartner(2)
+            }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The data session state."
+    ::= { is3gEntry 16 }
+
+is3gMobileNumber OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "A textual string containing the mobile phone number."
+    ::= { is3gEntry 17 }
+
+is3gSMSCount   OBJECT-TYPE
+    SYNTAX      Integer32
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The number of SMS messages stored in the modem."
+    ::= { is3gEntry 40 }
+
+is3gSMSTable OBJECT-TYPE
+    SYNTAX      SEQUENCE OF Is3gSMSEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "A list of 3G SMS entries."
+    ::= { is3gEntry 41 }
+
+is3gSMSEntry OBJECT-TYPE
+    SYNTAX      Is3gSMSEntry
+    MAX-ACCESS  not-accessible
+    STATUS      current
+    DESCRIPTION
+            "An entry containing SMS Message information."
+    INDEX   { is3gSMSIndex }
+    ::= { is3gSMSTable 1 }
+
+Is3gSMSEntry ::=
+    SEQUENCE {
+        is3gSMSIndex               Is3gInterfaceIndex,
+	is3gSMSStatus		   Integer,
+	is3gSMSC		   DisplayString,
+	is3gSMSSender		   DisplayString,
+	is3gSMSDate		   DisplayString,
+	is3gSMSMessage		   DisplayString,
+	is3gSMSDelete		   Integer,
+	is3gSMSMark  		   Integer
+    }
+
+is3gSMSIndex OBJECT-TYPE
+    SYNTAX      Is3gInterfaceIndex
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "A unique value, greater than zero, that indentifies the 3G
+            SMS message."
+    ::= { is3gSMSEntry 1 }
+
+is3gSMSStatus OBJECT-TYPE
+    SYNTAX  INTEGER {
+                Read(0),
+                Unread(1),
+                Sent(2),
+                NotSent(3)
+            }
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The SMS message status."
+    ::= { is3gSMSEntry 2 }
+
+is3gSMSC OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "A textual string containing the identifier of the SMS center which delivered the message."
+    ::= { is3gSMSEntry 3 }
+
+is3gSMSSender OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..255))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "A textual string containing the number of the message sender."
+    ::= { is3gSMSEntry 4 }
+
+is3gSMSDate OBJECT-TYPE
+    SYNTAX      DisplayString
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "The date and time the message was received. The format is identical to DateAndTime but as
+            an ASCII string."
+    ::= { is3gSMSEntry 5 }
+
+is3gSMSMessage OBJECT-TYPE
+    SYNTAX      DisplayString (SIZE (0..2048))
+    MAX-ACCESS  read-only
+    STATUS      current
+    DESCRIPTION
+            "A textual string containing the SMS message."
+    ::= { is3gSMSEntry 6 }
+
+is3gSMSDelete OBJECT-TYPE
+    SYNTAX      INTEGER
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+            "Set to 1 to delete the SMS message."
+    ::= { is3gSMSEntry 10 }
+
+is3gSMSMark OBJECT-TYPE
+    SYNTAX  INTEGER {
+                Read(0),
+                Unread(1)
+            }
+    MAX-ACCESS  read-write
+    STATUS      current
+    DESCRIPTION
+            "Set to 0 to mark the SMS message as read, 1 to mark as unread."
+    ::= { is3gSMSEntry 11 }
+
+is3gGroup    OBJECT-GROUP
+    OBJECTS { is3gIfIndex, is3gCarrier, is3gTechnology, is3gMcc, is3gMnc,
+        is3gSignalStrength, is3gCurrentRxBitRate, is3gCurrentTxBitRate,
+	is3gAPN, is3gSignalQuality, is3gSMSTable }
+    STATUS  current
+    DESCRIPTION
+            "A collection of objects providing information applicable to
+            all 3G interfaces."
+    ::= { is3gGroups 1 }
+
+END

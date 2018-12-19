@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+# Copyright (C) 2013 ImageStream Internet Solutions, Inc.
+#
+
+uci batch <<EOF
+set network.Clients.proto='static'
+set network.Clients.ipaddr=10.10.199.1
+set network.Clients.netmask=255.255.255.0
+EOF
+
+uci commit network
+
+exit 0
+

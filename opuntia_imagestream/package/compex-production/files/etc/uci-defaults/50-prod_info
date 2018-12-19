@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Copyright (C) 2013-2014 ImageStream Internet Solutions, Inc.
+#
+
+# Password protect the api
+grep 'info' /etc/httpd.conf > /dev/null 2>&1 ||
+	echo '/info.txt:root:$p$root' >> /etc/httpd.conf
+
+uci batch <<EOF
+set uhttpd.main.config=/etc/httpd.conf
+set uhttpd.main.redirect_https='0'
+EOF
+
+uci commit uhttpd
+/etc/init.d/uhttpd restart
+
+exit 0
+

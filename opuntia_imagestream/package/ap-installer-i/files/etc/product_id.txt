@@ -1,0 +1,3 @@
+WIFI AP Indoor
+AP1000-I
+1

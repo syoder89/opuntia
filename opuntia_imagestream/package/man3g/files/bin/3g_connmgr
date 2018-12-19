@@ -1,0 +1,115 @@
+#!/bin/bash
+
+TIMEOUT=120
+
+function usage() {
+	echo "usage: 3g_connmgr -i {config name}"
+	echo "Example: 3g_connmgr -i lte1"
+	exit 1
+}
+
+function trigger_watchdog() {
+	logger "3g_connmgr: Triggering hardware watchdog forcing a hardware reset in 60 seconds..."
+	killall -9 watchdog
+}
+
+function start_watchdog() {
+	(
+		while sleep 10 ; do
+			LAST=`cat ${STATUS_FILE}`
+			CURR=`date '+%s'`
+			if [ $(($CURR-$LAST)) -gt $TIMEOUT ] ; then
+				logger "3g_connmgr ($DEVICE): No status update in $TIMEOUT seconds, performing resets..."
+#				man3g -i ${DEVICE} remove
+			fi
+		done
+	) < /dev/null > /dev/null 2>&1 &
+	local watchdog_pid=$!
+	echo $watchdog_pid > $WDPIDFILE
+	logger "Started 3g_connmgr watchdog pid $watchdog_pid"
+}
+
+function stop_watchdog() {
+	[ -e $WDPIDFILE ] && {
+		kill -9 $(cat $WDPIDFILE)
+		rm $WDPIDFILE
+	}
+}
+
+failcnt=0
+failmax=4
+function check_status() {
+	data_session=$(man3g -i $DEVICE status | grep 'session:' | awk '{ print $3 }')
+	if [ "$data_session" != "Connected" ] ; then
+		let failcnt=failcnt+1
+		logger "3g_connmgr ($DEVICE): Data session is not connected... ($failcnt/$failmax)!"
+		if [ $((failcnt)) -ge $((failmax)) ] ; then
+			logger "3g_connmgr ($DEVICE): Resetting device!"
+			ifup $DEVICE
+		fi
+	else
+		failcnt=0
+	fi
+}
+
+check_reboot_sms() {
+	man3g -i ${DEVICE} display-sms --match "$REBOOT_CODE" > /dev/null 2>&1
+	id="$?"
+	if [ $((id)) -gt 0 ] ; then
+		logger "3g_connmgr: Received reboot code in message $id! Rebooting via watchdog..."
+		message=`man3g -i ${DEVICE} display-sms --id $id`
+		logger "3g_connmgr: message: $message"
+		man3g -i ${DEVICE} delete-sms --id $id
+		trigger_watchdog
+		sleep 120
+		sync
+		sync
+		sync
+		reboot -f
+	fi
+}
+
+do_exit() {
+#    stop_watchdog
+    rm -f ${PIDFILE}
+    logger "ImageStream 3G Connection Manager for $DEVICE pid $$ exiting"
+    exit
+}
+
+REBOOT_CODE=""
+if [ "$1" = "-i" ] ; then
+	shift
+	DEVICE=$1
+	shift
+fi
+[ -n "$DEVICE" ] || usage
+
+PIDFILE="/var/run/3g_connmgr_$DEVICE.pid"
+WDPIDFILE="/var/run/3g_connmgr_watchdog_$DEVICE.pid"
+STATUS_FILE="/tmp/3g_connmgr_$DEVICE.status"
+
+while [ $# -gt 0 ] ; do
+	if [ "$1" = "--reboot-code" ] ; then
+		shift
+		REBOOT_CODE=$1
+	fi
+	shift
+done
+
+update_status() {
+	date '+%s' > $STATUS_FILE
+}
+
+echo $$ > ${PIDFILE}
+logger "ImageStream WWAN Connection Manager for $DEVICE starting (pid $$)"
+#start_watchdog
+trap do_exit SIGINT SIGHUP SIGTERM
+while : ; do
+	check_status
+	update_status
+	if [ "$REBOOT_CODE" != "" ] ; then
+		check_reboot_sms
+	fi
+	# Weird, but kill doesn't immediately break the sleep
+	sleep 10 && sleep 10 && sleep 10 && sleep 10 && sleep 10 && sleep 10
+done

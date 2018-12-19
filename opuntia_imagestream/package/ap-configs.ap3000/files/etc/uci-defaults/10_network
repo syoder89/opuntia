@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# Copyright (C) 2013 ImageStream Internet Solutions, Inc.
+#
+
+#uci batch <<EOF
+#delete network.lan
+#set network.Clients=interface
+#set network.Clients.proto='static'
+#set network.Clients.ipaddr=10.10.199.1
+#set network.Clients.netmask=255.255.255.0
+#set network.Clients.type 'bridge'
+#set network.Clients.ifname 'eth0.4001'
+#EOF
+#
+#uci commit network
+
+exit 0

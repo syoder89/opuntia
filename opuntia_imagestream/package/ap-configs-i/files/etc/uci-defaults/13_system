@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# Copyright (C) 2013 ImageStream Internet Solutions, Inc.
+#
+
+# Change LED 2 to the 2nd WIFI Interface
+
+uci batch <<EOF
+delete system.@led[2]
+add system led
+set system.@led[2]=led
+set system.@led[2].sysfs=alix:3
+set system.@led[2].name=WiFi50
+set system.@led[2].default=1
+set system.@led[2].trigger=phy1tpt
+EOF
+
+uci commit system
+
+exit 0
+
+

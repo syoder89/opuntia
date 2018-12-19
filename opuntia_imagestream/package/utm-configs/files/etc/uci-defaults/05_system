@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Copyright (C) 2013 ImageStream Internet Solutions, Inc.
+#
+
+uci batch <<EOF
+set system.@system[0]=system
+set system.@system[0].hostname=Opuntia
+set system.@system[0].zonename=America/Chicago
+set system.@system[0].timezone=CST6CDT,M3.2.0,M11.1.0
+set system.@system[0].conloglevel=8
+set system.@system[0].cronloglevel=8
+delete system.ntp.server
+add_list system.ntp.server='0.pool.ntp.org'
+add_list system.ntp.server='1.pool.ntp.org'
+add_list system.ntp.server='2.pool.ntp.org'
+add_list system.ntp.server='3.pool.ntp.org'
+EOF
+
+uci commit system
+
+exit 0
+

@@ -1,0 +1,20 @@
+{
+	"simcom": {
+		"initialize": [
+			"AT+CFUN=1"
+		],
+		"modes": {
+			"umts": "AT+CNMP=14",
+			"lte": "AT+CNMP=38",
+			"preferlte": "AT+CNMP=2",
+			"preferumts": "AT+CNMP=48",
+			"gsm": "AT+CNMP=13",
+			"auto": "AT+CNMP=2"
+		},
+		"configure": [
+			"AT+CGDCONT=${profile},\\\"${pdptype}\\\",\\\"${apn}\\\"",
+		],
+		"connect": "AT\\$QCRMCALL=${profile},1,,,,${apn:+,\\\"$apn\\\"}${username:+,\\\"$username\\\"}${password:+,\\\"$password\\\"}${auth:+,$auth}",
+		"disconnect": "AT\\$QCRMCALL=0,1",
+	}
+}

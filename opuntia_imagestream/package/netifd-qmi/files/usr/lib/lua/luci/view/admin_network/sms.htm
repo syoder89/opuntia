@@ -1,0 +1,111 @@
+<%#
+LuCI - Lua Configuration Interface
+Copyright 2008-2009 Steven Barth <steven@midlink.org>
+Copyright 2008-2013 Jo-Philipp Wich <xm@subsignal.org>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+-%>
+
+<%-
+	local sys = require "luci.sys"
+	local fs = require "luci.fs"
+	local utl = require "luci.util"
+	local uci = require "luci.model.uci".cursor()
+	local ntm = require "luci.model.network"
+
+	ntm.init(uci)
+
+--	local proto = ntm:get_protocol("qmi")
+--	local devices  = proto:get_interfaces(proto)
+
+--	local netdevs = { }
+
+--	local dev
+--	for _, dev in ipairs(devices) do
+--		local net
+--		for _, net in ipairs(dev:get_networks()) do
+--			netlist[#netlist+1] = net:id()
+--			netdevs[net:id()] = dev:name()
+--		end
+--	end
+-%>
+
+<%+header%>
+
+<script type="text/javascript" src="<%=resource%>/cbi.js"></script>
+<script type="text/javascript">//<![CDATA[
+
+	function nowrap(s) {
+		return s.replace(/ /g, '&#160;');
+	}
+
+	XHR.poll(60, '<%=luci.dispatcher.build_url("admin", "services", "sms", "status")%>', null,
+		function(x, st)
+		{
+			if (st)
+			{
+				var smstable = document.getElementById('smslist');
+				if (smstable)
+					while (smstable.rows.length > 1)
+						smstable.rows[1].parentNode.removeChild(smstable.rows[1]);
+
+				var rowstyle = 1;
+
+				for( var i = 0; i < st.length; i++ )
+				{
+					if (smstable)
+					{
+						var tr = smstable.insertRow(-1);
+						    tr.className = 'cbi-section-table-row cbi-rowstyle-' + rowstyle;
+
+						tr.insertCell(-1).innerHTML = '';
+						tr.insertCell(-1).innerHTML = st[i].sender;
+						tr.insertCell(-1).innerHTML = st[i].smsc;
+						tr.insertCell(-1).innerHTML = st[i].date;
+						tr.insertCell(-1).innerHTML = st[i].message;
+
+						rowstyle = (rowstyle == 1) ? 2 : 1;
+					}
+				}
+
+				if (smstable && smstable.rows.length == 1)
+				{
+					var tr = smstable.insertRow(-1);
+					    tr.className = 'cbi-section-table-row';
+
+					var td = tr.insertCell(-1);
+					    td.colSpan = 5;
+					    td.innerHTML = '<br /><em><%:No messages%></em>';
+				}
+			}
+		}
+	);
+//]]></script>
+
+<h2><a id="content" name="content"><%:SMS Messages%></a></h2>
+
+<div class="cbi-map">
+	<fieldset class="cbi-section">
+		<table class="cbi-section-table" id="smslist">
+			<tr class="cbi-section-table-titles">
+				<th class="cbi-section-table-cell"></th>
+				<th class="cbi-section-table-cell"><%:Sender%></th>
+				<th class="cbi-section-table-cell"><%:SMSC%></th>
+				<th class="cbi-section-table-cell"><%:Date%></th>
+				<th class="cbi-section-table-cell"><%:Message%></th>
+			</tr>
+			<tr class="cbi-section-table-row cbi-rowstyle-2">
+				<td class="cbi-value-field" colspan="5">
+					<em><%:Collecting data...%></em>
+				</td>
+			</tr>
+		</table>
+	</fieldset>
+</div>
+
+<%+footer%>

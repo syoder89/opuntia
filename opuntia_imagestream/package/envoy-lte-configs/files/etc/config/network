@@ -1,0 +1,34 @@
+config interface 'loopback'
+        option ifname 'lo'
+        option proto 'static'
+        option ipaddr '127.0.0.1'
+        option netmask '255.0.0.0'
+
+config globals 'globals'
+        option ula_prefix 'auto'
+
+config interface 'lan'
+        option type 'bridge'
+        option ifname 'eth1 eth2'
+        option proto 'static'
+        option netmask '255.255.255.0'
+        option ip6assign '60'
+        option ipaddr '10.10.199.1'
+
+config interface 'wan'
+        option ifname 'eth0'
+        option proto 'dhcp'
+
+config interface 'wan6'
+        option ifname 'eth0'
+        option proto 'dhcpv6'
+
+config interface 'lte1'
+        option metric '20'
+        option proto 'ndis'
+        option usb_idx '1'
+
+config interface 'lte2'
+        option metric '30'
+        option proto 'ndis'
+        option usb_idx '2'

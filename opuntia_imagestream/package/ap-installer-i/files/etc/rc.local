@@ -1,0 +1,45 @@
+# ImageStream WIFI AP netboot installer
+
+. /lib/functions.sh
+. /lib/upgrade/platform.sh
+
+IMAGE="opuntia-x86-alix2-combined-squashfs.img"
+URL="http://install1.imagestream.com/ap-installer-i"
+RC_POSTINSTALL="rc.postinstall"
+
+do_fetch() {
+        fetch_url="$1"
+        desc="$2"
+        let retries=10
+        success=0
+        while [ $((retries)) -gt 0 ] ; do
+                wget "${fetch_url}"
+                if [ "$?" = "0" ] ; then
+                        success=1
+                        break
+                fi
+                let retries=retries-1
+                sleep 1
+        done
+        if [ "$success" != "1" ] ; then
+                logger "Failed to download ${desc}!"
+                exit 1
+        fi
+}
+
+logger "Installing WIFI AP Indoor"
+mkdir /tmp/root
+cd /tmp
+
+do_fetch "${URL}/${IMAGE}" "image"
+
+logger "Installing operating system..."
+
+cd /tmp
+do_fetch "${URL}/${RC_POSTINSTALL}" "post-installation script"
+chmod +x ${RC_POSTINSTALL}
+CONF_IMAGE="/tmp/sysupgrade.tgz"
+mv ${RC_POSTINSTALL} /etc/rc.local
+
+logger "Installing operating system..."
+sysupgrade ${IMAGE}

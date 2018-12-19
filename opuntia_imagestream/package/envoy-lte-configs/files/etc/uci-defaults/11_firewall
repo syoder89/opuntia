@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# Copyright (C) 2018 ImageStream Internet Solutions, Inc.
+#
+
+wan_idx=0
+i=0
+while [ $((i)) -lt 100 ] ; do
+        name=$(uci get firewall.@zone[$i].name)
+        [ "$name" = "wan" ] && {
+                wan_idx=$i
+                break
+        }
+        let i=i+1
+done
+for iface in lte1 lte2; do
+        grep $iface /etc/config/firewall > /dev/null || {
+                network=$(uci get firewall.@zone[$wan_idx].network)
+                echo "$iface not found - adding"
+                uci set firewall.@zone[$wan_idx].network="$network $iface"
+                uci commit firewall
+        }
+done
+exit 0

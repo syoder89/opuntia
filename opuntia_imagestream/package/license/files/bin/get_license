@@ -1,0 +1,19 @@
+#!/bin/bash
+
+license="$1"
+item="$2"
+
+if [ ! -f /var/licenses/$license ] ; then
+        exit 10
+fi
+
+ret=1
+if [ "$item" != "" ] ; then
+        # Quick and dirty simple XML parser to get the value for $item
+        val=$(grep $item /var/licenses/$license)
+        ret="$?"
+        if [ "$ret" = "0" ] ; then
+                echo $val | sed -e "s/[[:space:]]*<[/]*$item>//g"
+        fi
+fi
+exit $ret

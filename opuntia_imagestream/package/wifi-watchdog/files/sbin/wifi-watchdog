@@ -1,0 +1,234 @@
+#!/bin/bash
+
+. /lib/functions.sh
+. /usr/share/libubox/jshn.sh
+
+WATCHDOG_INTERVAL=120
+MAX_ERROR_COUNT=5
+
+function error_exit()
+{
+	echo "$1" >&2
+	exit 1
+}
+
+scan_wifi() {
+        local cfgfile="$1"
+        DEVICES=
+        config_cb() {
+                local type="$1"
+                local section="$2"
+
+                # section start
+                case "$type" in
+                        wifi-device)
+                                append DEVICES "$section"
+                                config_set "$section" vifs ""
+                                config_set "$section" ht_capab ""
+                        ;;
+                esac
+
+                # section end
+                config_get TYPE "$CONFIG_SECTION" TYPE
+                case "$TYPE" in
+                        wifi-iface)
+                                config_get device "$CONFIG_SECTION" device
+                                config_get vifs "$device" vifs
+                                append vifs "$CONFIG_SECTION"
+                                config_set "$device" vifs "$vifs"
+                        ;;
+                esac
+        }
+        config_load "${cfgfile:-wireless}"
+}
+
+function getWiFiStatus()
+{
+	ifname=
+	status=
+	json_load "$(ubus call network.wireless status)"
+	json_select $device
+        json_get_keys _w_ifaces interfaces
+	json_select interfaces
+        for _w_iface in $_w_ifaces; do
+               	json_select "$_w_iface"
+		json_get_vars ifname
+		json_get_vars section
+		json_select config
+		json_get_var lssid ssid
+		json_select ..
+		json_select ..
+		if [ "$ssid" == "$lssid" ] ; then
+			status=$(ubus call iwinfo info "{ \"device\": \"$ifname\" }")
+			return 
+		fi
+	done
+}
+
+function doRestartWiFiIfaces()
+{
+	for section in "${RESTART_SECTIONS[@]}"; do
+		logger "Restarting section $section"
+		uci set wireless.${section}.disabled=1
+		uci set wireless.${section}.wd_disabled=1
+		uci commit wireless
+	done
+	logger "Reload config to disable"
+	/sbin/reload_config
+	sleep 10
+	for section in "${RESTART_SECTIONS[@]}"; do
+		uci set wireless.${section}.disabled=0
+		uci delete wireless.${section}.wd_disabled
+		uci commit wireless
+	done
+	/sbin/reload_config
+	logger "Reload config to enable"
+}
+
+function doTriggerRestartWiFiIface()
+{
+	RESTART_SECTIONS+=($section)
+	some_error=1
+}
+
+function doRestartAllWiFi()
+{
+	logger "Restarting wifi..."
+	wifi down
+	killall hostapd
+	sleep 5
+	wifi up
+	logger "Restarted wifi."
+}
+
+function doWiFiChecks()
+{
+	ok=1
+	if [ "$lchannel" = "auto" ] ; then
+		if [ "$channel" = "" ] || [ $((channel)) -le 0 ] ; then
+                	logger "Device: $device, SSID: $ssid, ifname: $ifname has no channel $channel, configured: $lchannel"
+			ok=0
+		fi
+	fi
+	if [ $((ok)) -eq 0 ]; then
+		logger "Device: $device, SSID: $ssid, ifname: $ifname will be restarted..."
+		doTriggerRestartWiFiIface
+	fi
+}
+
+function doTriggerRestartAll()
+{
+	need_restart_all=1
+}
+
+function checkVIFS()
+{
+        for device in ${1:-$DEVICES}; do
+                config_get disabled "$device" disabled
+                if [ "$disabled" = "1" ]; then
+			continue
+		fi
+		config_get lchannel "$device" channel
+		config_get distance "$device" distance
+		[ ! -z $distance ] && {
+			config_get phy "$device" phy
+			iw phy $phy distance $distance
+		}
+		config_get vifs "$device" vifs
+		for vif in $vifs; do
+                	config_get disabled "$vif" disabled
+                	config_get wd_disabled "$vif" wd_disabled
+                	if [ "$disabled" = "1" ]; then
+				# If we disabled it then we must have crashed - set it back
+				if [ "$wd_disabled" = "1" ] ; then
+					uci set wireless.${vif}.disabled=0
+					uci delete wireless.${vif}.wd_disabled
+					uci commit wireless
+				else
+					continue
+				fi
+			fi
+			config_get ssid "$vif" ssid
+			getWiFiStatus
+			if [ -z "$status" ]; then
+				logger "Device: $device, SSID: $ssid is not running."
+				logger "Status; $status"
+				doTriggerRestartAll
+			else
+				json_load "$status"
+				json_get_vars channel
+				doWiFiChecks
+			fi
+        	done
+	done
+	if [ "$some_error" = "0" ]; then
+		err_count=0
+	else
+		let err_count=err_count+1
+		if [ $((err_count)) -gt $((MAX_ERROR_COUNT)) ] ; then
+			logger "Reached maximum error count $MAX_ERROR_COUNT restarting WiFi..."
+			doTriggerRestartAll
+			err_count=0
+		else
+			logger "Error count $err_count / $MAX_ERROR_COUNT"
+		fi
+	fi
+}
+
+function checkVXLANTunnels()
+{
+	vxlans=$(uci show network | grep vxlan | grep -v interface | cut -d '.' -f 2 | sort -u)
+	for vxlan in $vxlans; do
+		network=$(uci get network.$vxlan.network)
+		(ovs-vsctl list-ports br-$network | grep $vxlan > /dev/null 2>&1) || {
+			logger "Missing $vxlan on br-$network, calling ifup $vxlan"
+			ifup $vxlan
+		}
+	done
+}
+
+function main_loop()
+{
+	some_error=0
+	need_restart_all=0
+	RESTART_SECTIONS=()
+	scan_wifi
+	checkVIFS
+	if [ "$need_restart_all" = "1" ]; then
+		doRestartAllWiFi
+	elif [ "${#RESTART_SECTIONS[*]}" != "0" ] ; then
+		doRestartWiFiIfaces
+	fi
+	checkVXLANTunnels
+}
+
+while getopts ":i:c:" opt; do
+	case $opt in
+		i)
+			WATCHDOG_INTERVAL=$OPTARG
+		;;
+		c)
+			MAX_ERROR_COUNT=$OPTARG
+		;;
+		\?)
+			error_exit "Invalid option: -$OPTARG"
+		;;
+		:)
+			error_exit "Option -$OPTARG requires an argument."
+		;;
+	esac
+done
+
+function err_report()
+{
+	logger "Error on line $1"
+}
+
+err_count=0
+
+trap 'err_report $LINENO' ERR
+include /lib/wifi
+while : ; do
+	sleep $WATCHDOG_INTERVAL
+	main_loop
+done

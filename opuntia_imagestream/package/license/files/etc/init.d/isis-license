@@ -1,0 +1,64 @@
+#!/bin/sh /etc/rc.common
+#
+#
+
+START=15
+
+license_check_flash() {
+	local rootfs="$(x86_get_rootfs)"
+	local rootfsdev="${rootfs##*:}"
+	
+	MNT_PNT="/tmp/nand_root"
+	mkdir $MNT_PNT
+
+	mount -t ext4 -o ro,noatime "${rootfsdev%[0-9]}1" $MNT_PNT
+	if [ -d /${MNT_PNT}/licenses ] ; then
+		cp -af ${MNT_PNT}/licenses /etc
+		flash_has_license=1
+	fi
+	if [ -f ${MNT_PNT}/product_id.txt ] ; then
+		cp -af ${MNT_PNT}/product_id.txt /etc
+		flash_has_product_id=1
+	fi
+	umount $MNT_PNT
+	rmdir $MNT_PNT
+}
+
+license_copy_to_flash() {
+	local rootfs="$(x86_get_rootfs)"
+	local rootfsdev="${rootfs##*:}"
+	
+	[ -n "$flash_has_license" ] && [ -n "$flash_has_product_id" ] && return
+
+	echo "Missing license files on flash, copying..."
+	MNT_PNT="/tmp/nand_root"
+	mkdir $MNT_PNT
+
+	mount -t ext4 "${rootfsdev%[0-9]}1" $MNT_PNT
+	cp -af /etc/licenses ${MNT_PNT}/
+	cp -af /etc/product_id.txt ${MNT_PNT}/
+	umount $MNT_PNT
+	rmdir $MNT_PNT
+}
+
+start() {
+	. /lib/functions.sh
+	. /lib/upgrade/platform.sh
+	flash_has_license=
+	flash_has_product_id=
+	license_check_flash
+	rm -rf /var/licenses
+	mkdir /var/licenses
+
+	if [ -d /etc/licenses ] ; then
+        	cd /etc/licenses
+        	for file in *; do
+                	echo "Extracting license file $file..."
+                	/usr/bin/gpg --batch --no-tty --quiet --homedir /lib/security/el_security \
+                        	--output /var/licenses/$file \
+                        	--decrypt /etc/licenses/$file
+        	done
+        	cd
+		license_copy_to_flash
+	fi
+}

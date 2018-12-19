@@ -1,0 +1,45 @@
+#!/bin/sh
+#
+# Copyright (C) 2013 ImageStream Internet Solutions, Inc.
+#
+
+#uci batch <<EOF
+#delete wireless.@wifi-iface[]
+#delete wireless.@wifi-iface[]
+#delete wireless.@wifi-iface[]
+#delete wireless.@wifi-iface[]
+#delete wireless.@wifi-iface[]
+#delete wireless.@wifi-iface[]
+#set wireless.radio0.channel='auto'
+#set wireless.radio0.country='US'
+#set wireless.radio0.txpower='17'
+#set wireless.radio0.disabled='0'
+#set wireless.radio0.phy='phy0'
+#add wireless wifi-iface
+#set wireless.@wifi-iface[0]='wifi-iface'
+#set wireless.@wifi-iface[0].device='radio0'
+#set wireless.@wifi-iface[0].mode='ap'
+#set wireless.@wifi-iface[0].ssid='Opuntia'
+#set wireless.@wifi-iface[0].encryption='psk2'
+#set wireless.@wifi-iface[0].network='lan'
+#set wireless.@wifi-iface[0].key='imagestream'
+#set wireless.@wifi-iface[0].ieee80211w='0'
+#set wireless.radio1.channel='auto'
+#set wireless.radio1.country='US'
+#set wireless.radio1.txpower='23'
+#set wireless.radio1.disabled='0'
+#set wireless.radio1.phy='phy1'
+#add wireless wifi-iface
+#set wireless.@wifi-iface[1]='wifi-iface'
+#set wireless.@wifi-iface[1].device='radio1'
+#set wireless.@wifi-iface[1].mode='ap'
+#set wireless.@wifi-iface[1].ssid='Opuntia'
+#set wireless.@wifi-iface[1].encryption='psk2'
+#set wireless.@wifi-iface[1].network='lan'
+#set wireless.@wifi-iface[1].key='imagestream'
+#set wireless.@wifi-iface[1].ieee80211w='0'
+#commit wireless
+#EOF
+
+exit 0
+

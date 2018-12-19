@@ -1,0 +1,146 @@
+# Get all params
+opengt
+ set com 115200n81
+ set senddelay 0.01
+ flash 0.01
+
+:getpower
+ print "power_mode=\"online\"\n"
+
+:getmsisdn
+ send "AT+CNUM^m"
+ get 1 "^m" $n
+ get 1 ":" $n
+ get 1 "," $n
+ get 1 "," $n
+ print "msisdn=",$n,"\n"
+
+:getreg
+ send "AT+CREG?^m"
+ get 1 "^m" $n
+ get 1 ":" $n
+ get 1 "," $n
+ get 1 ",^m" $n
+ let n = val($n)
+ if n = 0 let $r="searching"
+ else if n = 1 let $r="registered"
+ else if n = 2 let $r="searching"
+ else if n = 3 let $r="denied"
+ else if n = 5 let $r="registered"
+ else let $r = "unknown"
+ print "registration=\"",$r,"\"\n"
+ if n = 5 let $r = "true"
+ else let $r = "false"
+ print "roaming=\"",$r,"\"\n"
+
+:getregdetail
+ send "AT+COPS?^m"
+ get 1 "^m" $n
+ get 1 ":" $n
+ get 1 "," $n
+ get 1 "\"" $n
+ get 1 "\"" $o
+ get 1 ",^m" $r
+ print "carrier=\"",$o,"\"\n"
+ let r = val($r)
+ if r = 0 let $d="GSM" let $r1="GSM"
+ else if r = 1 let $d="GSM" let $r1="GSM"
+ else if r = 2 let $d="WCDMA" let $r1="UMTS"
+ else if r = 3 let $d="EDGE" let $r1="UMTS"
+ else if r = 4 let $d="HSDPA" let $r1="UMTS"
+ else if r = 5 let $d="HSUPA" let $r1="UMTS"
+ else if r = 6 let $d="HSPA" let $r1="UMTS"
+ else if r = 7 let $d="LTE" let $r1="EUTRAN"
+ else let $d="GSM"
+ print "data_bearer=\"",$d,"\"\n"
+ print "rssi_net=\"",$r1,"\"\n"
+
+:getservingcell
+ send "AT+CPSI?^m"
+ get 1 "^m" $n
+ get 1 ":" $n
+ get 1 "," $r1
+ let $r1 = $mid($r1,1,9999)
+ if $r1 = "GSM" goto gscgsm
+ else if $r1 = "WCDMA" goto gscwcdma
+ else if $r1 = "LTE" goto gsclte
+ else goto gsctimeout
+
+:gscgsm
+ get 1 "," $o1
+ get 1 "-" $m1
+ get 1 "," $m2
+ get 1 "," $l1
+ get 1 "," $c1
+ get 1 "," $r2
+ get 1 ",^m" $t1
+ print "rssi_val=\"",$r2,"\"\n"
+ goto gscprint
+
+:gscwcdma
+ get 1 "," $o1
+ get 1 "-" $m1
+ get 1 "," $m2
+ get 1 "," $l1
+ get 1 "," $c1
+ get 1 "," $f1
+ get 1 "," $p2
+ get 1 "," $f2
+ get 1 "," $s1
+ get 1 "," $e1
+ get 1 "," $r2
+ get 1 ",^m" $u2
+ print "ecio=\"",$e1,"\"\n"
+ let r= -10*val($r2)+val($e1)
+ print "rssi_val=\"",r,"\"\n"
+ goto gscprint
+
+:gsclte
+ get 1 "," $o1
+ get 1 "-" $m1
+ get 1 "," $m2
+ get 1 "," $l1
+ get 1 "," $c1
+ get 1 "," $p1
+ get 1 "," $f2
+ get 1 "," $e1
+ get 1 "," $d1
+ get 1 "," $u1
+ get 1 "," $s1
+ get 1 "," $s2
+ get 1 "," $r2
+ get 1 ",^m" $u2
+ print "rsrq=\"",$s1,"\"\n"
+ print "rsrp=\"",$s2,"\"\n"
+ print "rssnr=\"",$u2,"\"\n"
+ print "rssi_val=\"",$r2,"\"\n"
+ goto gscprint
+
+:gsctimeout
+
+:gscprint
+ print "mcc=\"",$m1,"\"\n"
+ print "mnc=\"",$m2,"\"\n"
+ print "lac=\"",$l1,"\"\n"
+ print "ci=\"",$c1,"\"\n"
+
+:getcsq
+ send "AT+CSQ^m"
+ get 1 "^m" $n
+ get 1 ":" $n
+ get 1 "," $n
+ print "csq=\"",$mid($n,1,9999),"\"\n"
+
+:getdatasession
+ send "AT$QCRMCALL?^m"
+ get 1 "^m" $n
+ get 1 ":" $n
+ get 1 "," $n
+ let n = val($n)
+ if n = 1 let $d = "connected"
+ else if n = 2 let $d = "connected"
+ else let $d = "disconnected"
+ print "data_session=\"",$d,"\"\n"
+
+:done
+ exit 0

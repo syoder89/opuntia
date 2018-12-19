@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# Copyright (C) 2013-2014 ImageStream Internet Solutions, Inc.
+#
+
+# Password protect the api
+grep 'prod_info' /etc/httpd.conf > /dev/null 2>&1 ||
+	echo '/prod_info.txt:root:$p$root' >> /etc/httpd.conf
+
+uci batch <<EOF
+set uhttpd.main.config=/etc/httpd.conf
+EOF
+
+uci commit uhttpd
+/etc/init.d/uhttpd restart
+
+exit 0
+

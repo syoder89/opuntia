@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# Copyright (C) 2014 ImageStream Internet Solutions, Inc.
+#
+
+# Disable DNS rebind
+
+uci batch <<EOF
+set dhcp.@dnsmasq[0].rebind_protection=0
+set dhcp.@dnsmasq[0].rebind_localhost=0
+EOF
+
+uci commit dhcp
+
+exit 0
+
+

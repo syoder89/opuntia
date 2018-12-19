@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+# Copyright (C) 2013 ImageStream Internet Solutions, Inc.
+#
+
+uci batch <<EOF
+set system.@system[0]=system
+set system.@system[0].hostname=Opuntia
+set system.@system[0].zonename=America/Chicago
+set system.@system[0].timezone=CST6CDT,M3.2.0,M11.1.0
+set system.@system[0].conloglevel=8
+set system.@system[0].cronloglevel=8
+delete system.ntp.server
+add_list system.ntp.server='0.pool.ntp.org'
+add_list system.ntp.server='1.pool.ntp.org'
+add_list system.ntp.server='2.pool.ntp.org'
+add_list system.ntp.server='3.pool.ntp.org'
+set system.@led[0]=led
+set system.@led[0].default=0
+set system.@led[0].name=Heartbeat
+set system.@led[0].sysfs=alix:1
+set system.@led[0].trigger=heartbeat
+set system.@led[1]=led
+set system.@led[1].default=1
+set system.@led[1].name=WiFi
+set system.@led[1].sysfs=alix:2
+set system.@led[1].trigger=phy0tpt
+set system.@led[2]=led
+set system.@led[2].name=WWAN
+set system.@led[2].sysfs=alix:3
+set system.@led[2].mode="link tx rx"
+set system.@led[2].dev=wwan0
+set system.@led[2].trigger=timer
+set system.@led[2].default=255
+EOF
+
+uci commit system
+
+exit 0
+

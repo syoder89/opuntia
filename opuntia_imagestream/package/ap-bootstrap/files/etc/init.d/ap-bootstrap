@@ -1,0 +1,19 @@
+#!/bin/sh /etc/rc.common
+#
+#
+# ImageStream Cloud Bootstrap for WiFi APs
+
+START=99
+STOP=99
+
+start() {
+        (
+		# Disable ourselves if successful
+#                name="$(basename "${initscript}")"
+		/etc/init.d/rssileds stop
+#                /usr/lib/bootstrap/bootstrap.php && rm -f /etc/rc.d/S${START}${name##S[0-9][0-9]}
+                /usr/lib/bootstrap/bootstrap.php
+		sleep 30
+		/etc/init.d/rssileds start
+        ) 2>&1 | logger &
+}

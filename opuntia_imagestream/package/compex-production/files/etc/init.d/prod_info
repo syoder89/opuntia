@@ -1,0 +1,40 @@
+#!/bin/bash /etc/rc.common
+#
+#
+# ImageStream Cloud Bootstrap for WiFi APs
+
+START=99
+STOP=99
+
+power2() {
+    local x=${1#-} n=1
+    while ((n<x)); do ((n*=2)); done
+    x=$((3*n>4*x?n/2:n))
+    echo $(($1<0?-x:x))
+}
+
+start() {
+        (
+	. /etc/opuntia_release
+	e0_mac=$(ip link show dev eth0 | grep link | awk '{ print $2 }')
+	w0_mac=$(ip link show dev wlan0 | grep link | awk '{ print $2 }')
+	w1_mac=$(ip link show dev wlan1 | grep link | awk '{ print $2 }')
+	let i=30
+	while [ $((i)) -gt 0 ]; do
+		iwinfo wlan1 info > /dev/null 2>&1 && break
+		sleep 1
+		let i=i-1
+	done
+	echo "Firmware Version: $DISTRIB_RELEASE $DISTRIB_REVISION"
+	echo "Loader Version: "$(strings /dev/mtd0 | grep U-Boot)
+	echo "First Radio MAC address: ${w0_mac^^}"
+	echo "Second Radio MAC address: ${w1_mac^^}"
+	echo "Ethernet MAC address: ${e0_mac^^}"
+	echo "Company Name: $DISTRIB_MANUFACTURER"
+	echo "Model Name: $DISTRIB_PRODUCT"
+	echo "Flash Size: "$(power2 $(($(dmesg | grep spi0 | grep 'Kbytes)' | cut -d '(' -f 2 | awk '{ print $1 }')/1000)) )" MB"
+	echo "RAM Size: "$(power2 $(($(grep MemTotal: /proc/meminfo | awk '{ print $2 }')/1000)) )" MB"
+	echo "PCIe Radio Detected: "$(iwinfo wlan1 info | grep 'HW Mode' | awk '{ print $5 }') $(iwinfo wlan1 info | grep Hardware: | cut -d '[' -f 2 | cut -d ']' -f 1)
+        ) 2>&1 | tee /www/_info.txt | logger
+	mv /www/_info.txt /www/info.txt
+}

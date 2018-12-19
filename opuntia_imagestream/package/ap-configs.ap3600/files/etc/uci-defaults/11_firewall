@@ -1,0 +1,145 @@
+#!/bin/sh
+#
+# Copyright (C) 2013 ImageStream Internet Solutions, Inc.
+#
+
+#uci batch <<EOF
+#delete firewall.@rule[]
+#delete firewall.@rule[]
+#delete firewall.@rule[]
+#delete firewall.@rule[]
+#delete firewall.@rule[]
+#delete firewall.@rule[]
+#delete firewall.@rule[]
+#delete firewall.@rule[]
+#delete firewall.@rule[]
+#delete firewall.@rule[]
+#delete firewall.@rule[]
+#delete firewall.@rule[]
+#delete firewall.@rule[]
+#delete firewall.@rule[]
+#delete firewall.@rule[]
+#delete firewall.@zone[]
+#delete firewall.@zone[]
+#delete firewall.@zone[]
+#delete firewall.@zone[]
+#delete firewall.@defaults[]
+#delete firewall.@include[]
+#delete firewall.@include[]
+#delete firewall.@include[]
+#delete firewall.@forwarding[]
+#delete firewall.@forwarding[]
+#delete firewall.@forwarding[]
+#add firewall defaults
+#set firewall.@defaults[0]="defaults"
+#set firewall.@defaults[0].syn_flood="1"
+#set firewall.@defaults[0].input="ACCEPT"
+#set firewall.@defaults[0].output="ACCEPT"
+#set firewall.@defaults[0].forward="REJECT"
+#add firewall zone
+#set firewall.@zone[0]="zone"
+#set firewall.@zone[0].name="wan"
+#set firewall.@zone[0].input="REJECT"
+#set firewall.@zone[0].output="ACCEPT"
+#set firewall.@zone[0].forward="REJECT"
+#set firewall.@zone[0].masq="1"
+#set firewall.@zone[0].mtu_fix="1"
+#set firewall.@zone[0].network="wan wan6"
+#add firewall rule
+#set firewall.@rule[0]="rule"
+#set firewall.@rule[0].target="ACCEPT"
+#set firewall.@rule[0].src="wan"
+#set firewall.@rule[0].proto="tcp"
+#set firewall.@rule[0].dest_port="80"
+#set firewall.@rule[0].name="Allow-Web-Admin"
+#add firewall rule
+#set firewall.@rule[1]="rule"
+#set firewall.@rule[1].target="ACCEPT"
+#set firewall.@rule[1].src="wan"
+#set firewall.@rule[1].proto="tcp"
+#set firewall.@rule[1].dest_port="22"
+#set firewall.@rule[1].name="Allow-SSH-Admin"
+#add firewall rule
+#set firewall.@rule[2]="rule"
+#set firewall.@rule[2].name="Allow-DHCP-Renew"
+#set firewall.@rule[2].src="wan"
+#set firewall.@rule[2].proto="udp"
+#set firewall.@rule[2].dest_port="68"
+#set firewall.@rule[2].target="ACCEPT"
+#set firewall.@rule[2].family="ipv4"
+#add firewall rule
+#set firewall.@rule[3]="rule"
+#set firewall.@rule[3].name="Allow-Ping"
+#set firewall.@rule[3].src="wan"
+#set firewall.@rule[3].proto="icmp"
+#set firewall.@rule[3].icmp_type="echo-request"
+#set firewall.@rule[3].family="ipv4"
+#set firewall.@rule[3].target="ACCEPT"
+#add firewall rule
+#set firewall.@rule[4]="rule"
+#set firewall.@rule[4].name="Allow-DHCPv6"
+#set firewall.@rule[4].src="wan"
+#set firewall.@rule[4].proto="udp"
+#set firewall.@rule[4].src_ip="fe80::/10"
+#set firewall.@rule[4].src_port="547"
+#set firewall.@rule[4].dest_ip="fe80::/10"
+#set firewall.@rule[4].dest_port="546"
+#set firewall.@rule[4].family="ipv6"
+#set firewall.@rule[4].target="ACCEPT"
+#add firewall rule
+#set firewall.@rule[5]="rule"
+#set firewall.@rule[5].name="Allow-ICMPv6-Input"
+#set firewall.@rule[5].src="wan"
+#set firewall.@rule[5].proto="icmp"
+#set firewall.@rule[5].icmp_type="echo-request echo-reply destination-unreachable packet-too-big time-exceeded bad-header unknown-header-type router-solicitation neighbour-solicitatiot"
+#set firewall.@rule[5].limit="1000/sec"
+#set firewall.@rule[5].family="ipv6"
+#set firewall.@rule[5].target="ACCEPT"
+#add firewall rule
+#set firewall.@rule[6]="rule"
+#set firewall.@rule[6].name="Allow-ICMPv6-Forward"
+#set firewall.@rule[6].src="wan"
+#set firewall.@rule[6].dest="*"
+#set firewall.@rule[6].proto="icmp"
+#set firewall.@rule[6].icmp_type="echo-request echo-reply destination-unreachable packet-too-big time-exceeded bad-header unknown-header-type"
+#set firewall.@rule[6].limit="1000/sec"
+#set firewall.@rule[6].family="ipv6"
+#set firewall.@rule[6].target="ACCEPT"
+#add firewall rule
+#set firewall.@rule[7]="rule"
+#set firewall.@rule[7].target="ACCEPT"
+#set firewall.@rule[7].src="wan"
+#set firewall.@rule[7].proto="tcp"
+#set firewall.@rule[7].dest_port="443"
+#set firewall.@rule[7].name="Allow-Web-Admin-SSL"
+#add firewall rule
+#set firewall.@rule[8]="rule"
+#set firewall.@rule[8].target="ACCEPT"
+#set firewall.@rule[8].src="wan"
+#set firewall.@rule[8].proto="udp"
+#set firewall.@rule[8].dest_port="161"
+#set firewall.@rule[8].name="Allow-SNMP"
+#add firewall include
+#set firewall.@include[0]="include"
+#set firewall.@include[0].path="/etc/firewall.user"
+#add firewall zone
+#set firewall.@zone[1]="zone"
+#set firewall.@zone[1].name="Clients"
+#set firewall.@zone[1].input="ACCEPT"
+#set firewall.@zone[1].output="ACCEPT"
+#set firewall.@zone[1].network="Clients"
+#set firewall.@zone[1].forward="ACCEPT"
+#add firewall forwarding
+#set firewall.@forwarding[0]="forwarding"
+#set firewall.@forwarding[0].dest="wan"
+#set firewall.@forwarding[0].src="Clients"
+#set firewall.miniupnpd="include"
+#set firewall.miniupnpd.type="script"
+#set firewall.miniupnpd.path="/usr/share/miniupnpd/firewall.include"
+#set firewall.miniupnpd.family="IPv4"
+#set firewall.miniupnpd.reload="1"
+#EOF
+#
+#uci commit firewall
+
+exit 0

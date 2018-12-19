@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Copyright (C) 2013 ImageStream Internet Solutions, Inc.
+#
+
+uci batch <<EOF
+add dhcp dhcp
+set dhcp.@dhcp[-1]='dhcp'
+set dhcp.@dhcp[-1].start=100
+set dhcp.@dhcp[-1].leasetime=12h
+set dhcp.@dhcp[-1].limit=150
+set dhcp.@dhcp[-1].interface='Clients'
+EOF
+
+uci commit dhcp
+
+exit 0
+
+
