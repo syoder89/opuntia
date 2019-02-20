@@ -20,3 +20,18 @@ Index: build_dir/package/firmware/ath10k-firmware/Makefile
  endef
  $(eval $(call Download,ath10k-firmware-qca988x-ct-htt-beta))
  
+Index: build_dir/package/kernel/ath10k-ct/Makefile
+===================================================================
+--- build_dir.orig/package/kernel/ath10k-ct/Makefile
++++ build_dir/package/kernel/ath10k-ct/Makefile
+@@ -8,8 +8,8 @@ PKG_LICENSE_FILES:=
+ 
+ PKG_SOURCE_URL:=https://github.com/greearb/ath10k-ct.git
+ PKG_SOURCE_PROTO:=git
+-PKG_SOURCE_DATE:=2018-12-11
+-PKG_SOURCE_VERSION:=812d90c08ca8ce8dcbd1b2281e89ff562c7096e1
++PKG_SOURCE_DATE:=2019-01-09
++PKG_SOURCE_VERSION:=9cbf8d4309746d9bd00284b0e949dc15ef1ead47
+ PKG_MIRROR_HASH:=986feafd27a828801be96ce4177886204998beea305cda40aafe92a9636db852
+ 
+ # Build the 4.19 ath10k-ct driver version.  Other options are "-4.16", or
