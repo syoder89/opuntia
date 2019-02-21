@@ -5,31 +5,34 @@ Subject: [PATCH 06/14] Add license info to overview page. Change distro name
  to Opuntia
 
 ---
- .../modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm           | 6 ++++++
+ .../modules/luci-mod-status/luasrc/view/admin_status/index.htm           | 6 ++++++
  1 file changed, 6 insertions(+)
 
---- a/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
-+++ b/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
-@@ -652,11 +652,13 @@
+Index: luci/modules/luci-mod-status/luasrc/view/admin_status/index/10-system.htm
+===================================================================
+--- luci.orig/modules/luci-mod-status/luasrc/view/admin_status/index/10-system.htm
++++ luci/modules/luci-mod-status/luasrc/view/admin_status/index/10-system.htm
+@@ -15,11 +15,12 @@
  
- 	<table width="100%" cellspacing="10">
- 		<tr><td width="33%"><%:Hostname%></td><td><%=luci.sys.hostname() or "?"%></td></tr>
--		<tr><td width="33%"><%:Model%></td><td><%=pcdata(boardinfo.model or boardinfo.system or "?")%></td></tr>
--		<tr><td width="33%"><%:Firmware Version%></td><td>
--			<%=pcdata(ver.distname)%> <%=pcdata(ver.distversion)%> /
--			<%=pcdata(ver.luciname)%> (<%=pcdata(ver.luciversion)%>)
-+		<tr><td width="33%"><%:Product Information%></td><td>
+ 	<div class="table" width="100%">
+ 		<div class="tr"><div class="td left" width="33%"><%:Hostname%></div><div class="td left"><%=luci.sys.hostname() or "?"%></div></div>
+-		<div class="tr"><div class="td left" width="33%"><%:Model%></div><div class="td left"><%=pcdata(boardinfo.model or "?")%></div></div>
+-		<div class="tr"><div class="td left" width="33%"><%:Architecture%></div><div class="td left"><%=pcdata(boardinfo.system or "?")%></div></div>
++		<div class="tr"><div class="td left" width="33%"><%:Product Information%></div><div class="td left">
 +			Manufacturer:  <%=pcdata(luci.version.distmanufacturer)%><br/>
 +			Product id:    <%=pcdata(luci.version.distproduct)%>, revision <%=pcdata(luci.version.disthwrev)%><br/>
- 		</td></tr>
-+                <tr><td width="33%"><%:Firmware Version%></td><td>
++		</div></div>
+ 		<div class="tr"><div class="td left" width="33%"><%:Firmware Version%></div><div class="td left">
+-			<%=pcdata(ver.distname)%> <%=pcdata(ver.distversion)%> /
+-			<%=pcdata(ver.luciname)%> (<%=pcdata(ver.luciversion)%>)
 +                        <%=pcdata(luci.version.distname)%> <%=pcdata(luci.version.distversion)%>
-+                </td></tr>
- 		<tr><td width="33%"><%:Kernel Version%></td><td><%=unameinfo.release or "?"%></td></tr>
- 		<tr><td width="33%"><%:Local Time%></td><td id="localtime">-</td></tr>
- 		<tr><td width="33%"><%:Uptime%></td><td id="uptime">-</td></tr>
---- a/modules/luci-base/src/mkversion.sh
-+++ b/modules/luci-base/src/mkversion.sh
+ 		</div></div>
+ 		<div class="tr"><div class="td left" width="33%"><%:Kernel Version%></div><div class="td left"><%=unameinfo.release or "?"%></div></div>
+ 		<div class="tr"><div class="td left" width="33%"><%:Local Time%></div><div class="td left" id="localtime">-</div></div>
+Index: luci/modules/luci-base/src/mkversion.sh
+===================================================================
+--- luci.orig/modules/luci-base/src/mkversion.sh
++++ luci/modules/luci-base/src/mkversion.sh
 @@ -14,9 +14,15 @@ if pcall(dofile, "/etc/openwrt_release")
  			distversion = distversion .. " " .. distrevision
  		end

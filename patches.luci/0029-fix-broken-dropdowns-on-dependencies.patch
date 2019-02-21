@@ -1,0 +1,40 @@
+Index: luci/modules/luci-base/htdocs/luci-static/resources/cbi.js
+===================================================================
+--- luci.orig/modules/luci-base/htdocs/luci-static/resources/cbi.js
++++ luci/modules/luci-base/htdocs/luci-static/resources/cbi.js
+@@ -750,17 +750,6 @@ function cbi_init() {
+ 		}
+ 	}
+ 
+-	nodes = document.querySelectorAll('[data-depends]');
+-
+-	for (var i = 0, node; (node = nodes[i]) !== undefined; i++) {
+-		var index = parseInt(node.getAttribute('data-index'), 10);
+-		var depends = JSON.parse(node.getAttribute('data-depends'));
+-		if (!isNaN(index) && depends.length > 0) {
+-			for (var alt = 0; alt < depends.length; alt++)
+-				cbi_d_add(node, depends[alt], index);
+-		}
+-	}
+-
+ 	nodes = document.querySelectorAll('[data-update]');
+ 
+ 	for (var i = 0, node; (node = nodes[i]) !== undefined; i++) {
+@@ -827,6 +816,17 @@ function cbi_init() {
+ 		i.addEventListener('mouseout', handler);
+ 	});
+ 
++	nodes = document.querySelectorAll('[data-depends]');
++
++	for (var i = 0, node; (node = nodes[i]) !== undefined; i++) {
++		var index = parseInt(node.getAttribute('data-index'), 10);
++		var depends = JSON.parse(node.getAttribute('data-depends'));
++		if (!isNaN(index) && depends.length > 0) {
++			for (var alt = 0; alt < depends.length; alt++)
++				cbi_d_add(node, depends[alt], index);
++		}
++	}
++
+ 	cbi_d_update();
+ }
+ 

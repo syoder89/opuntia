@@ -1,5 +1,7 @@
---- a/applications/luci-app-statistics/root/etc/config/luci_statistics
-+++ b/applications/luci-app-statistics/root/etc/config/luci_statistics
+Index: luci/applications/luci-app-statistics/root/etc/config/luci_statistics
+===================================================================
+--- luci.orig/applications/luci-app-statistics/root/etc/config/luci_statistics
++++ luci/applications/luci-app-statistics/root/etc/config/luci_statistics
 @@ -40,7 +40,7 @@ config statistics 'collectd_logfile'
  	option Timestamp '1'
  
@@ -9,7 +11,7 @@
  
  config statistics 'collectd_unixsock'
  	option enable '0'
-@@ -55,21 +55,22 @@ config statistics 'collectd_apcups'
+@@ -55,24 +55,25 @@ config statistics 'collectd_apcups'
  	option Port '3551'
  
  config statistics 'collectd_conntrack'
@@ -27,6 +29,9 @@
 -	option enable '0'
 +	option enable '1'
  
+ config statistics 'collectd_curl'
+ 	option enable '0'
+ 
  config statistics 'collectd_df'
 -	option enable '0'
 -	option Devices '/dev/mtdblock/4'
@@ -37,7 +42,7 @@
  	option FSTypes 'tmpfs'
  	option IgnoreSelected '0'
  
-@@ -127,7 +128,7 @@ config statistics 'collectd_memory'
+@@ -130,7 +131,7 @@ config statistics 'collectd_memory'
  	option enable '1'
  
  config statistics 'collectd_netlink'
@@ -46,7 +51,7 @@
  	option IgnoreSelected '0'
  	option VerboseInterfaces 'br-lan'
  	option QDiscs 'br-lan'
-@@ -142,14 +143,14 @@ config statistics 'collectd_olsrd'
+@@ -145,14 +146,14 @@ config statistics 'collectd_olsrd'
  	option Host '127.0.0.1'
  
  config statistics 'collectd_ping'
@@ -65,7 +70,7 @@
  
  config statistics 'collectd_sensors'
  	option enable '0'
-@@ -158,9 +159,9 @@ config statistics 'collectd_splash_lease
+@@ -161,9 +162,9 @@ config statistics 'collectd_splash_lease
  	option enable '0'
  
  config statistics 'collectd_tcpconns'
@@ -77,16 +82,18 @@
  
  config statistics 'collectd_thermal'
  	option enable '0'
-@@ -168,5 +169,5 @@ config statistics 'collectd_thermal'
+@@ -171,5 +172,5 @@ config statistics 'collectd_thermal'
  	option Device ''
  
  config statistics 'collectd_uptime'
 -	option enable '0'
 +	option enable '1'
  
---- a/applications/luci-app-statistics/root/usr/bin/stat-genconfig
-+++ b/applications/luci-app-statistics/root/usr/bin/stat-genconfig
-@@ -275,7 +275,7 @@ plugins = {
+Index: luci/applications/luci-app-statistics/root/usr/bin/stat-genconfig
+===================================================================
+--- luci.orig/applications/luci-app-statistics/root/usr/bin/stat-genconfig
++++ luci/applications/luci-app-statistics/root/usr/bin/stat-genconfig
+@@ -290,7 +290,7 @@ plugins = {
  
  	cpu	= {
  		{ },
@@ -95,8 +102,10 @@
  		{ }
  	},
  
---- a/applications/luci-app-statistics/luasrc/model/cbi/luci_statistics/cpu.lua
-+++ b/applications/luci-app-statistics/luasrc/model/cbi/luci_statistics/cpu.lua
+Index: luci/applications/luci-app-statistics/luasrc/model/cbi/luci_statistics/cpu.lua
+===================================================================
+--- luci.orig/applications/luci-app-statistics/luasrc/model/cbi/luci_statistics/cpu.lua
++++ luci/applications/luci-app-statistics/luasrc/model/cbi/luci_statistics/cpu.lua
 @@ -12,4 +12,8 @@ s = m:section( NamedSection, "collectd_c
  enable = s:option( Flag, "enable", translate("Enable this plugin") )
  enable.default = 0

@@ -13,16 +13,16 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
  
  	config_add_int dynamic_vlan vlan_naming
  	config_add_string vlan_tagged_interface vlan_bridge
-@@ -267,6 +267,8 @@ hostapd_set_bss_options() {
- 		macfilter ssid wmm uapsd hidden short_preamble rsn_preauth \
+@@ -270,6 +270,8 @@ hostapd_set_bss_options() {
+ 		macfilter ssid utf8_ssid wmm uapsd hidden short_preamble rsn_preauth \
  		iapp_interface eapol_version dynamic_vlan ieee80211w nasid \
  		acct_server acct_secret acct_port acct_interval \
 +		ieee80211w auth_servers acct_servers auth_server auth_secret \
 +		auth_port dae_client dae_secret dae_port ownip \
- 		bss_load_update_period chan_util_avg_period sae_require_mfp
+ 		bss_load_update_period chan_util_avg_period sae_require_mfp \
+ 		multi_ap multi_ap_backhaul_ssid multi_ap_backhaul_key
  
- 	set_default isolate 0
-@@ -321,6 +323,75 @@ hostapd_set_bss_options() {
+@@ -329,6 +331,75 @@ hostapd_set_bss_options() {
  			append bss_conf "radius_acct_interim_interval=$acct_interval" "$N"
  	}
  
@@ -98,7 +98,7 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
  	case "$auth_type" in
  		sae|owe|eap192|eap-eap192)
  			set_default ieee80211w 2
-@@ -366,88 +437,10 @@ hostapd_set_bss_options() {
+@@ -374,88 +445,10 @@ hostapd_set_bss_options() {
  			wps_possible=1
  		;;
  		eap|eap192|eap-eap192)
@@ -188,7 +188,7 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
  			append bss_conf "eapol_key_index_workaround=1" "$N"
  			append bss_conf "ieee8021x=1" "$N"
  
-@@ -607,6 +600,10 @@ hostapd_set_bss_options() {
+@@ -631,6 +624,10 @@ hostapd_set_bss_options() {
  			append bss_conf "macaddr_acl=0" "$N"
  			append bss_conf "deny_mac_file=$_macfile" "$N"
  		;;

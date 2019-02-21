@@ -1,5 +1,5 @@
---- a/package/network/utils/conntrack-tools/Makefile
-+++ b/package/network/utils/conntrack-tools/Makefile
+--- a/feeds/packages/net/conntrack-tools/Makefile
++++ b/feeds/packages/net/conntrack-tools/Makefile
 @@ -78,6 +78,9 @@ define Package/conntrackd/install
  		$(1)/usr/sbin
  	$(INSTALL_BIN) 	$(PKG_INSTALL_DIR)/usr/sbin/conntrackd $(1)/usr/sbin/
@@ -11,7 +11,7 @@
  
  $(eval $(call BuildPackage,conntrack))
 --- /dev/null
-+++ b/package/network/utils/conntrack-tools/files/conntrackd.conf
++++ b/feeds/packages/net/conntrack-tools/files/conntrackd.conf
 @@ -0,0 +1,141 @@
 +#
 +# General settings

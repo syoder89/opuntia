@@ -6,15 +6,17 @@ Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
 ---
  build/mkversion.sh                    |  4 ++--
  contrib/package/luci/Makefile         |  2 +-
- .../modules/luci-mod-admin-full/luasrc/controller/admin/network.lua     |  2 +-
- .../luci-mod-admin-full/luasrc/model/cbi/admin_system/system.lua        |  2 +-
- .../luci-mod-admin-full/luasrc/view/admin_network/diagnostics.htm       |  6 +++---
- .../modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm      | 10 ++++------
- .../modules/luci-mod-admin-full/luasrc/view/admin_system/flashops.htm   |  4 ++--
+ .../modules/luci-mod-network/luasrc/controller/admin/network.lua     |  2 +-
+ .../luci-mod-network/luasrc/model/cbi/admin_system/system.lua        |  2 +-
+ .../luci-mod-network/luasrc/view/admin_network/diagnostics.htm       |  6 +++---
+ .../modules/luci-mod-network/luasrc/view/admin_status/index.htm      | 10 ++++------
+ .../modules/luci-mod-network/luasrc/view/admin_system/flashops.htm   |  4 ++--
  7 files changed, 14 insertions(+), 16 deletions(-)
 
---- a/modules/luci-base/src/mkversion.sh
-+++ b/modules/luci-base/src/mkversion.sh
+Index: luci/modules/luci-base/src/mkversion.sh
+===================================================================
+--- luci.orig/modules/luci-base/src/mkversion.sh
++++ luci/modules/luci-base/src/mkversion.sh
 @@ -5,7 +5,7 @@ local pcall, dofile, _G = pcall, dofile,
  
  module "luci.version"
@@ -33,20 +35,24 @@ Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
  	distversion = "Development Snapshot"
  	distproduct = "Unknown"
  	distmanufacturer = "ISis ImageStream Internet Solutions"
---- a/modules/luci-mod-admin-full/luasrc/controller/admin/network.lua
-+++ b/modules/luci-mod-admin-full/luasrc/controller/admin/network.lua
-@@ -189,7 +189,7 @@ function wifi_add()
+Index: luci/modules/luci-mod-network/luasrc/controller/admin/network.lua
+===================================================================
+--- luci.orig/modules/luci-mod-network/luasrc/controller/admin/network.lua
++++ luci/modules/luci-mod-network/luasrc/controller/admin/network.lua
+@@ -174,7 +174,7 @@ function wifi_add()
  	if dev then
  		local net = dev:add_wifinet({
  			mode       = "ap",
 -			ssid       = "OpenWrt",
 +			ssid       = "Opuntia",
- 			encryption = "none"
+ 			encryption = "none",
+ 			disabled   = 1
  		})
- 
---- a/modules/luci-mod-admin-full/luasrc/model/cbi/admin_system/system.lua
-+++ b/modules/luci-mod-admin-full/luasrc/model/cbi/admin_system/system.lua
-@@ -155,7 +155,7 @@ if has_ntpd then
+Index: luci/modules/luci-mod-system/luasrc/model/cbi/admin_system/system.lua
+===================================================================
+--- luci.orig/modules/luci-mod-system/luasrc/model/cbi/admin_system/system.lua
++++ luci/modules/luci-mod-system/luasrc/model/cbi/admin_system/system.lua
+@@ -202,7 +202,7 @@ if has_ntpd then
  	if m:formvalue("cbid.system._timeserver._enable") then
  		m.uci:section("system", "timeserver", "ntp",
  			{
@@ -55,11 +61,13 @@ Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
  			}
  		)
  
---- a/modules/luci-mod-admin-full/luasrc/view/admin_network/diagnostics.htm
-+++ b/modules/luci-mod-admin-full/luasrc/view/admin_network/diagnostics.htm
+Index: luci/modules/luci-mod-network/luasrc/view/admin_network/diagnostics.htm
+===================================================================
+--- luci.orig/modules/luci-mod-network/luasrc/view/admin_network/diagnostics.htm
++++ luci/modules/luci-mod-network/luasrc/view/admin_network/diagnostics.htm
 @@ -10,9 +10,9 @@ local fs   = require "nixio.fs"
  local has_ping6 = fs.access("/bin/ping6") or fs.access("/usr/bin/ping6")
- local has_traceroute6 = fs.access("/usr/bin/traceroute6")
+ local has_traceroute6 = fs.access("/bin/traceroute6") or fs.access("/usr/bin/traceroute6")
  
 -local dns_host = luci.config.diag and luci.config.diag.dns or "dev.openwrt.org"
 -local ping_host = luci.config.diag and luci.config.diag.ping or "dev.openwrt.org"
@@ -69,4 +77,4 @@ Subject: [PATCH 11/14] Change OpenWRT to Opuntia or imagestream.
 +local route_host = luci.config.diag and luci.config.diag.route or "imagestream.com"
  %>
  
- <script type="text/javascript" src="<%=resource%>/cbi.js"></script>
+ <script type="text/javascript">//<![CDATA[

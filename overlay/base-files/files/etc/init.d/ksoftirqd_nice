@@ -5,7 +5,7 @@
 
 START=5
 
-NICE_LEVEL=-10
+NICE_LEVEL=-15
 
 start() {
 	CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null)

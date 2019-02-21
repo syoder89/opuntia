@@ -1,4 +1,3 @@
-0002-Add-remove-table-margin-patch.patch
 0004-Update-luci-with-wwan-extrastatus-for-man3g.patch
 0005-Update-theme-openvpn.patch
 0006-Add-license-info-to-overview-page.patch
@@ -7,17 +6,13 @@
 0009-Fixup-display-of-wireless-interface-in-mesh-mode.patch
 0010-Add-mesh-parameters-announce-gateway-and-root-mode.patch
 0011-Change-OpenWRT-to-Opuntia-or-imagestream.patch
-0012-Fix-failover-with-IPSec.patch
-0013-Update-AP-config.-Add-inactive-time-to-wifi-status.-.patch
 0015-Add-mesh-plink-timeout-param.patch
 0016-Rework-QOS-Page.patch
 0019-use-iwinfo-not-iwdata.patch
-0021-fix-process-list.patch
 0022-json-rpc-add-wifistatus.patch
 0023-add-collectd-defaults.patch
 0024-allow-uncompressed-restore-archive.patch
 801-wifi-alliance-cert-defaults.patch
-0025-fix-dynamic-vlan-assoclist.patch
-0026-fix-switch-config-status-with-missing-ports.patch
 0027-luci-app-statistics-disable-cpufreq.patch
 0028-add-firewall-offload-toggle.patch
+0029-fix-broken-dropdowns-on-dependencies.patch

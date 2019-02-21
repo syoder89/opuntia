@@ -8,12 +8,12 @@ Subject: [PATCH 13/14] Update AP config. Add inactive time to wifi status.
  and wan and is natted. Change root's shell to bash.
 
 ---
- .../modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm      | 2 ++
- .../openwrt-luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm  | 2 ++
+ .../modules/luci-mod-network/luasrc/view/admin_network/wifi_overview.htm      | 2 ++
+ .../openwrt-luci/modules/luci-mod-network/luasrc/view/admin_status/index.htm  | 2 ++
  2 files changed, 4 insertions(+)
 
---- a/modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm
-+++ b/modules/luci-mod-admin-full/luasrc/view/admin_network/wifi_overview.htm
+--- a/modules/luci-mod-network/luasrc/view/admin_network/wifi_overview.htm
++++ b/modules/luci-mod-network/luasrc/view/admin_network/wifi_overview.htm
 @@ -342,6 +342,7 @@
  							else
  								tr.insertCell(-1).innerHTML = '?';
@@ -30,8 +30,8 @@ Subject: [PATCH 13/14] Update AP config. Add inactive time to wifi status.
  				<th class="cbi-section-table-cell"><%:Signal%> / <%:Noise%></th>
  				<th class="cbi-section-table-cell"><%:RX Rate%> / <%:TX Rate%></th>
  			</tr>
---- a/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
-+++ b/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
+--- a/modules/luci-mod-network/luasrc/view/admin_status/index.htm
++++ b/modules/luci-mod-network/luasrc/view/admin_status/index.htm
 @@ -570,6 +570,7 @@
  					else
  						tr.insertCell(-1).innerHTML = '?';

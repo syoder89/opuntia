@@ -24,11 +24,11 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
 ===================================================================
 --- build_dir.orig/package/network/services/hostapd/files/hostapd.sh
 +++ build_dir/package/network/services/hostapd/files/hostapd.sh
-@@ -937,21 +937,32 @@ wpa_supplicant_run() {
+@@ -978,21 +978,32 @@ wpa_supplicant_run() {
  
  	_wpa_supplicant_common "$ifname"
  
--	/usr/sbin/wpa_supplicant -B \
+-	/usr/sbin/wpa_supplicant -B -s \
 -		${network_bridge:+-b $network_bridge} \
 -		-P "/var/run/wpa_supplicant-${ifname}.pid" \
 -		-D ${_w_driver:-wext} \

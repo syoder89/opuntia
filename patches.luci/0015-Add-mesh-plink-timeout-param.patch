@@ -1,5 +1,5 @@
---- a/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
-+++ b/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
+--- a/modules/luci-mod-network/luasrc/model/cbi/admin_network/wifi.lua
++++ b/modules/luci-mod-network/luasrc/model/cbi/admin_network/wifi.lua
 @@ -424,6 +424,10 @@ rootmode:value("2", translate("Root STA
  rootmode:value("3", translate("Root STA proactive PREQ with PREP"))
  rootmode:value("4", translate("Root STA proactive RANN"))

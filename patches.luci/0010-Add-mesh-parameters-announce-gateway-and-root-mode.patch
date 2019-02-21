@@ -4,13 +4,13 @@ Date: Wed, 25 Sep 2013 12:19:28 -0500
 Subject: [PATCH 10/14] Add mesh parameters announce gateway and root mode.
 
 ---
- .../luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua     | 14 ++++++++++++++
+ .../luci-mod-network/luasrc/model/cbi/admin_network/wifi.lua     | 14 ++++++++++++++
  1 file changed, 14 insertions(+)
 
-diff --git a/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua b/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
+diff --git a/modules/luci-mod-network/luasrc/model/cbi/admin_network/wifi.lua b/modules/luci-mod-network/luasrc/model/cbi/admin_network/wifi.lua
 index 6aefa26..b3b089d 100644
---- a/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
-+++ b/modules/luci-mod-admin-full/luasrc/model/cbi/admin_network/wifi.lua
+--- a/modules/luci-mod-network/luasrc/model/cbi/admin_network/wifi.lua
++++ b/modules/luci-mod-network/luasrc/model/cbi/admin_network/wifi.lua
 @@ -410,6 +410,20 @@ mode:value("adhoc", translate("Ad-Hoc"))
  
  bssid = s:taboption("general", Value, "bssid", translate("<abbr title=\"Basic Service Set Identifier\">BSSID</abbr>"))

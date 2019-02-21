@@ -26,7 +26,6 @@ packages/0171-add-802.11ac-support.patch
 packages/0172-iptraf-musl-libc-fixes.patch
 0172-change-ath9k-module-load-order.patch
 0172-add-delay-hostapd.patch
-packages/0172-remove-ip-tiny.patch
 kernel/0020-3.14-Add-ifindex-reuse-patch-so-tunnels-will-reuse-their-.patch
 kernel/0045-Linux-3.14-updates.patch
 0177-bash-default-shell-ar71xx.patch
@@ -107,7 +106,6 @@ packages/0219-ath10k-ct-remove-debug-from-coverage.patch
 packages/0220-ath10k-ct-update-driver.patch
 packages/0221-add-telit-lte-modem-support.patch
 packages/0222-remove-broken-mbim-pin-required-check.patch
-packages/0223-add-simcom-sim7600-support.patch
 packages/0224-mwan3-check-dynamic-interfaces.patch
 packages/0225-gcom-ndis-check-no-carrier.patch
 packages/0226-iw-revert-compile-with-lto-enabled.patch
@@ -116,6 +114,6 @@ packages/0229-wpa_supplicant-terminate-after-disconnect.patch
 packages/0230-wpa-supplicant-fix-pidfile.patch
 packages/0231-netifd-infinite-wireless-retries.patch
 packages/0232-decrease-ath10k-ct-buffers.patch
-packages/0234-fix-cfg80211-sinfo-release-content-memory-leak.patch
 kernel/0083-skb-flow-classifier-add-batman.patch
 packages/0235-ath10k-ct-firmware-rel22.patch
+packages/0236-batctl-fix-default-symlink.patch

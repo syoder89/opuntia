@@ -10,20 +10,12 @@ Subject: [PATCH 04/14] Update luci with wwan "extrastatus" for man3g
  .../modules/luci-mod-admin-full/luasrc/view/admin_network/iface_status.htm | 5 +++++
  4 files changed, 15 insertions(+)
 
---- a/applications/luci-app-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
-+++ b/applications/luci-app-multiwan/luasrc/model/cbi/multiwan/multiwan.lua
-@@ -52,6 +52,7 @@ interval.rmempty = false
- 
- icmp_hosts = s:option(Value, "icmp_hosts", translate("Health Monitor ICMP Host(s)"))
- icmp_hosts:value("disable", translate("Disable"))
-+icmp_hosts:value("arp_gateway", "WAN Gateway using ARP")
- icmp_hosts:value("dns", "DNS Server(s)")
- icmp_hosts:value("gateway", "WAN Gateway")
- icmp_hosts.default = "dns"
---- a/modules/luci-base/luasrc/model/network.lua
-+++ b/modules/luci-base/luasrc/model/network.lua
-@@ -1137,6 +1137,14 @@ function protocol.adminlink(self)
- 	return dsp.build_url("admin", "network", "network", self.sid)
+Index: luci/modules/luci-base/luasrc/model/network.lua
+===================================================================
+--- luci.orig/modules/luci-base/luasrc/model/network.lua
++++ luci/modules/luci-base/luasrc/model/network.lua
+@@ -1320,6 +1320,14 @@ function protocol.adminlink(self)
+ 	return stat and dsp.build_url("admin", "network", "network", self.sid)
  end
  
 +function protocol.extrastatus(self)
@@ -37,9 +29,11 @@ Subject: [PATCH 04/14] Update luci with wwan "extrastatus" for man3g
  
  interface = utl.class()
  
---- a/modules/luci-mod-admin-full/luasrc/controller/admin/network.lua
-+++ b/modules/luci-mod-admin-full/luasrc/controller/admin/network.lua
-@@ -248,6 +248,7 @@ function iface_status(ifaces)
+Index: luci/modules/luci-mod-network/luasrc/controller/admin/network.lua
+===================================================================
+--- luci.orig/modules/luci-mod-network/luasrc/controller/admin/network.lua
++++ luci/modules/luci-mod-network/luasrc/controller/admin/network.lua
+@@ -216,6 +216,7 @@ function iface_status(ifaces)
  				tx_bytes   = device:tx_bytes(),
  				rx_packets = device:rx_packets(),
  				tx_packets = device:tx_packets(),
@@ -47,17 +41,15 @@ Subject: [PATCH 04/14] Update luci with wwan "extrastatus" for man3g
  
  				subdevices = { }
  			}
---- a/modules/luci-mod-admin-full/luasrc/view/admin_network/iface_status.htm
-+++ b/modules/luci-mod-admin-full/luasrc/view/admin_network/iface_status.htm
-@@ -60,6 +60,11 @@
- 						html += String.format('<strong><%:IPv6-PD%>:</strong> %s<br />', ifc.ip6prefix);
- 					}
+Index: luci/modules/luci-mod-network/htdocs/luci-static/resources/view/network/iface_status.js
+===================================================================
+--- luci.orig/modules/luci-mod-network/htdocs/luci-static/resources/view/network/iface_status.js
++++ luci/modules/luci-mod-network/htdocs/luci-static/resources/view/network/iface_status.js
+@@ -31,6 +31,7 @@ requestAnimationFrame(function() {
+ 				_('IPv6'),    ifc.ip6addrs ? ifc.ip6addrs[8] : null,
+ 				_('IPv6'),    ifc.ip6addrs ? ifc.ip6addrs[9] : null,
+ 				_('IPv6-PD'), ifc.ip6prefix,
++				_('ExtraStatus'),    ifc.extrastatus ? ifc.extrastatus : null,
+ 				null,         ifc.ifname ? null : E('em', _('Interface not present or not connected yet.'))
+ 			]);
  
-+					if (ifc.extrastatus)
-+					{
-+						html += String.format('<br /><pre style=" width: 420px;">%s</pre></div>', ifc.extrastatus);
-+					}
-+
- 					d.innerHTML = html;
- 				}
- 				else if (d)
