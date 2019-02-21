@@ -136,9 +136,25 @@ body {
 	padding: 58px 5px 5px 5px;
 }
 
+/* Scott changed the cbi-section widths to keep most of the status pages looking normal and
+   allow the large tables to expand */
+.cbi-section {
+	max-width: fit-content;
+	min-width: 940px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.cbi-value-description {
+	max-width: 700px;
+}
+
+.cbi-map-descr {
+	max-width: 890px;
+}
+
 /* Scott changed the max-width and min-width */
 .container {
-	width: 100%;
 	max-width: fit-content;
 	min-width: 940px;
 	margin-left: auto;
