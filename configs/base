@@ -3392,8 +3392,8 @@ CONFIG_PACKAGE_luci-base=y
 # CONFIG_LUCI_LANG_cs is not set
 # CONFIG_LUCI_LANG_de is not set
 # CONFIG_LUCI_LANG_el is not set
-# CONFIG_LUCI_LANG_en is not set
-# CONFIG_LUCI_LANG_es is not set
+CONFIG_LUCI_LANG_en=y
+CONFIG_LUCI_LANG_es=y
 # CONFIG_LUCI_LANG_fr is not set
 # CONFIG_LUCI_LANG_he is not set
 # CONFIG_LUCI_LANG_hu is not set
