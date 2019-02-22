@@ -1,0 +1,18 @@
+Index: build_dir/feeds/packages/net/strongswan/patches/999-scott-increase-starter-timeout.patch
+===================================================================
+--- /dev/null
++++ build_dir/feeds/packages/net/strongswan/patches/999-scott-increase-starter-timeout.patch
+@@ -0,0 +1,13 @@
++Index: strongswan-5.7.2/src/starter/invokecharon.c
++===================================================================
++--- strongswan-5.7.2.orig/src/starter/invokecharon.c
+++++ strongswan-5.7.2/src/starter/invokecharon.c
++@@ -213,7 +213,7 @@ int starter_start_charon (starter_config
++ 					return 0;
++ 				}
++ 			}
++-			for (i = 0; i < 500 && _charon_pid; i++)
+++			for (i = 0; i < 1000 && _charon_pid; i++)
++ 			{
++ 				/* wait for charon for a maximum of 500 x 20 ms = 10 s */
++ 				usleep(20000);

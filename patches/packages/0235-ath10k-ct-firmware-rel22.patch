@@ -11,12 +11,16 @@ Index: build_dir/package/firmware/ath10k-firmware/Makefile
  PKG_SOURCE_VERSION:=d366b80d41309531c0c98b26625f23e318f33e31
  PKG_MIRROR_HASH:=ec06f10e6b1d4f7a28366a893c8a73a000454c2f031fc747381a1fb8aa1e0846
  PKG_RELEASE:=1
-@@ -88,7 +88,7 @@ $(eval $(call Download,ath10k-firmware-q
- QCA988X_FIRMWARE_FILE_CT_HTT_BETA:=firmware-2-ct-full-community.bin
+@@ -85,10 +85,10 @@ define Download/ath10k-firmware-qca988x-
+ endef
+ $(eval $(call Download,ath10k-firmware-qca988x-ct-htt))
+ 
+-QCA988X_FIRMWARE_FILE_CT_HTT_BETA:=firmware-2-ct-full-community.bin
++QCA988X_FIRMWARE_FILE_CT_HTT_BETA:=firmware-2-ct-htt-mgt-nrcc-community.bin
  define Download/ath10k-firmware-qca988x-ct-htt-beta
    $(call Download/ct-firmware-htt-beta,QCA988X,ath10k-fw-beta)
 -  HASH:=6eef6fe1731ebb54a3d018d27325be1e67f3bb8c32e771a310d2f08ad00ba611
-+  HASH:=2cd1a4e6f29ae7f4a5cf1ad03c468329a3b2eebf9e54f42fda348d9fae5f857a
++  HASH:=e6b275a9bc6aab897fcc29b4e737c80cd0400f31802ef4396833a27eacf94601
  endef
  $(eval $(call Download,ath10k-firmware-qca988x-ct-htt-beta))
  

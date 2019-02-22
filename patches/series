@@ -117,3 +117,4 @@ packages/0232-decrease-ath10k-ct-buffers.patch
 kernel/0083-skb-flow-classifier-add-batman.patch
 packages/0235-ath10k-ct-firmware-rel22.patch
 packages/0236-batctl-fix-default-symlink.patch
+packages/0237-strongswan-increase-starter-timeout.patch
