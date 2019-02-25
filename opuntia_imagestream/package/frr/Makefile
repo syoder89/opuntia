@@ -7,13 +7,12 @@
 
 include $(TOPDIR)/rules.mk
 PKG_NAME:=frr
-PKG_VERSION:=5.0.1
+PKG_SOURCE_URL:=https://github.com/FRRouting/frr
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_VERSION:=5a80b8c7c254b9955e357555ebd929ab9bc123ef
+PKG_VERSION:=6.0.2
 PKG_RELEASE:=1
-PKG_HASH:=b2d94960a248f953fef5ee34a95229ff6426ceac27f4d187179f0146275dbf14
-
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://github.com/FRRouting/frr/archive/
-PKG_BUILD_DIR = $(BUILD_DIR)/$(PKG_NAME)-$(PKG_NAME)-$(PKG_VERSION)
+PKG_BUILD_DIR = $(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_CONFIG_DEPENDS:= \
 	CONFIG_IPV6 \
@@ -53,7 +52,7 @@ endef
 
 define Package/frr
   $(call Package/frr/Default)
-  DEPENDS:=+librt
+  DEPENDS:=+librt +libyang
   MENU:=1
 endef
 
