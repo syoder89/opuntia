@@ -79,7 +79,7 @@ Index: build_dir/package/kernel/mac80211/patches/ath/999-scott-ath10k-set-mac-ad
 ===================================================================
 --- /dev/null
 +++ build_dir/package/kernel/mac80211/patches/ath/999-scott-ath10k-set-mac-address-from-wpj344.patch
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,56 @@
 +Index: backports-4.19.23-1/drivers/net/wireless/ath/ath10k/mac.c
 +===================================================================
 +--- backports-4.19.23-1.orig/drivers/net/wireless/ath/ath10k/mac.c
@@ -88,12 +88,51 @@ Index: build_dir/package/kernel/mac80211/patches/ath/999-scott-ath10k-set-mac-ad
 + 	void *channels;
 + 	int ret;
 + 
-++	if (IS_ENABLED(CPTCFG_ATH10K_MAC_OVERRIDE)) {
-++		extern u8 *ath10k_macaddr;
-++		if (ath10k_macaddr)
-++			memcpy(ar->mac_addr, ath10k_macaddr, ETH_ALEN);
-++	}
+++#ifdef CPTCFG_ATH10K_MAC_OVERRIDE
+++	extern u8 *ath10k_macaddr;
+++	if (ath10k_macaddr)
+++		memcpy(ar->mac_addr, ath10k_macaddr, ETH_ALEN);
+++#endif
 ++
 + 	SET_IEEE80211_PERM_ADDR(ar->hw, ar->mac_addr);
 + 
 + 	SET_IEEE80211_DEV(ar->hw, ar->dev);
++Index: backports-4.19.23-1/Kconfig.local
++===================================================================
++--- backports-4.19.23-1.orig/Kconfig.local
+++++ backports-4.19.23-1/Kconfig.local
++@@ -427,6 +427,9 @@ config BACKPORTED_ATH10K_TRACING
++ config BACKPORTED_ATH10K_DFS_CERTIFIED
++ 	tristate
++ 	default ATH10K_DFS_CERTIFIED
+++config BACKPORTED_ATH10K_MAC_OVERRIDE
+++	tristate
+++	default :TH10K_MAC_OVERRIDE
++ config BACKPORTED_WCN36XX
++ 	tristate
++ 	default WCN36XX
++Index: backports-4.19.23-1/drivers/net/wireless/ath/ath10k/Kconfig
++===================================================================
++--- backports-4.19.23-1.orig/drivers/net/wireless/ath/ath10k/Kconfig
+++++ backports-4.19.23-1/drivers/net/wireless/ath/ath10k/Kconfig
++@@ -110,2 +110,8 @@ config ATH10K_DFS_CERTIFIED
++ 	ath10k.
++ 
+++ config ATH10K_MAC_OVERRIDE
+++	bool "Override ath10k MAC address from board"
+++ 	depends on ATH10K
+++ 	default n
+++ 	---help---
+++	Override the ath10k card's MAC address with one pre-allocated by the motherboard
++Index: backports-4.19.23-1/local-symbols
++===================================================================
++--- backports-4.19.23-1.orig/local-symbols
+++++ backports-4.19.23-1/local-symbols
++@@ -145,6 +145,7 @@ ATH10K_THERMAL=
++ ATH10K_LEDS=
++ ATH10K_TRACING=
++ ATH10K_DFS_CERTIFIED=
+++ATH10K_MAC_OVERRIDE=
++ WCN36XX=
++ WCN36XX_DEBUGFS=
++ WLAN_VENDOR_ATMEL=
