@@ -1,17 +1,12 @@
-Index: build_dir.ap3350/target/linux/ar71xx/patches-4.14/1001-scott-fix-ag71xx-max-mtu.patch
+Index: build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
 ===================================================================
---- /dev/null
-+++ build_dir.ap3350/target/linux/ar71xx/patches-4.14/1001-scott-fix-ag71xx-max-mtu.patch
-@@ -0,0 +1,12 @@
-+Index: linux-4.14.101/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
-+===================================================================
-+--- linux-4.14.101.orig/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
-++++ linux-4.14.101/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
-+@@ -1406,6 +1406,7 @@ static int ag71xx_probe(struct platform_
-+ 
-+ 	ag->max_frame_len = pdata->max_frame_len;
-+ 	ag->desc_pktlen_mask = pdata->desc_pktlen_mask;
-++	dev->max_mtu = ag->max_frame_len;
-+ 
-+ 	if (!pdata->is_ar724x && !pdata->is_ar91xx) {
-+ 		ag->tx_ring.desc_split = AG71XX_TX_RING_SPLIT;
+--- build_dir.orig/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
++++ build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
+@@ -1406,6 +1406,7 @@ static int ag71xx_probe(struct platform_
+ 
+ 	ag->max_frame_len = pdata->max_frame_len;
+ 	ag->desc_pktlen_mask = pdata->desc_pktlen_mask;
++	dev->max_mtu = ag->max_frame_len;
+ 
+ 	if (!pdata->is_ar724x && !pdata->is_ar91xx) {
+ 		ag->tx_ring.desc_split = AG71XX_TX_RING_SPLIT;

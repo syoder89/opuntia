@@ -1,0 +1,79 @@
+Index: build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
+===================================================================
+--- build_dir.orig/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
++++ build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
+@@ -45,7 +45,8 @@
+  * D-cache misses and lots more wasted cycles than we'll ever
+  * possibly gain from saving instructions.
+  */
+-#define AG71XX_NAPI_WEIGHT	32
++/* Scott tested and actually with the rx routine rewrite bigger is better */
++#define AG71XX_NAPI_WEIGHT	128
+ #define AG71XX_OOM_REFILL	(1 + HZ/10)
+ 
+ #define AG71XX_INT_ERR	(AG71XX_INT_RX_BE | AG71XX_INT_TX_BE)
+Index: build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
+===================================================================
+--- build_dir.orig/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
++++ build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
+@@ -1088,14 +1088,14 @@ static int ag71xx_rx_packets(struct ag71
+ 	unsigned int pktlen_mask = ag->desc_pktlen_mask;
+ 	int ring_mask = BIT(ring->order) - 1;
+ 	int ring_size = BIT(ring->order);
+-	struct sk_buff_head queue;
++//	struct sk_buff_head queue;
+ 	struct sk_buff *skb;
+-	int done = 0;
++	int done = 0, cleaned_count = 0;
+ 
+ 	DBG("%s: rx packets, limit=%d, curr=%u, dirty=%u\n",
+ 			dev->name, limit, ring->curr, ring->dirty);
+ 
+-	skb_queue_head_init(&queue);
++//	skb_queue_head_init(&queue);
+ 
+ 	while (done < limit) {
+ 		unsigned int i = ring->curr & ring_mask;
+@@ -1111,6 +1111,10 @@ static int ag71xx_rx_packets(struct ag71
+ 			break;
+ 		}
+ 
++		if (cleaned_count > 16) {
++			ag71xx_ring_rx_refill(ag);
++			cleaned_count = 0;
++		}
+ 		ag71xx_wr(ag, AG71XX_REG_RX_STATUS, RX_STATUS_PR);
+ 
+ 		pktlen = desc->ctrl & pktlen_mask;
+@@ -1121,6 +1125,7 @@ static int ag71xx_rx_packets(struct ag71
+ 
+ 		dev->stats.rx_packets++;
+ 		dev->stats.rx_bytes += pktlen;
++		cleaned_count++;
+ 
+ 		skb = build_skb(ring->buf[i].rx_buf, ag71xx_buffer_size(ag));
+ 		if (!skb) {
+@@ -1140,7 +1145,9 @@ static int ag71xx_rx_packets(struct ag71
+ 		} else {
+ 			skb->dev = dev;
+ 			skb->ip_summed = CHECKSUM_NONE;
+-			__skb_queue_tail(&queue, skb);
++			skb->protocol = eth_type_trans(skb, dev);
++			netif_receive_skb(skb);
++//			__skb_queue_tail(&queue, skb);
+ 		}
+ 
+ next:
+@@ -1152,10 +1159,12 @@ next:
+ 
+ 	ag71xx_ring_rx_refill(ag);
+ 
++/*
+ 	while ((skb = __skb_dequeue(&queue)) != NULL) {
+ 		skb->protocol = eth_type_trans(skb, dev);
+ 		netif_receive_skb(skb);
+ 	}
++*/
+ 
+ 	DBG("%s: rx finish, curr=%u, dirty=%u, done=%d\n",
+ 		dev->name, ring->curr, ring->dirty, done);
