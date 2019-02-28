@@ -1,7 +1,7 @@
-Index: build_dir/package/firmware/linux-firmware/Makefile
+Index: build_dir.ap2100/package/firmware/linux-firmware/Makefile
 ===================================================================
---- build_dir.orig/package/firmware/linux-firmware/Makefile
-+++ build_dir/package/firmware/linux-firmware/Makefile
+--- build_dir.ap2100.orig/package/firmware/linux-firmware/Makefile
++++ build_dir.ap2100/package/firmware/linux-firmware/Makefile
 @@ -11,8 +11,8 @@ PKG_NAME:=linux-firmware
  PKG_RELEASE:=1
  

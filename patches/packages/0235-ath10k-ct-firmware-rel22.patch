@@ -1,13 +1,13 @@
-Index: build_dir/package/firmware/ath10k-firmware/Makefile
+Index: build_dir.ap2100/package/firmware/ath10k-firmware/Makefile
 ===================================================================
---- build_dir.orig/package/firmware/ath10k-firmware/Makefile
-+++ build_dir/package/firmware/ath10k-firmware/Makefile
+--- build_dir.ap2100.orig/package/firmware/ath10k-firmware/Makefile
++++ build_dir.ap2100/package/firmware/ath10k-firmware/Makefile
 @@ -8,7 +8,7 @@
  include $(TOPDIR)/rules.mk
  
  PKG_NAME:=ath10k-firmware
 -PKG_SOURCE_DATE:=2018-10-10
-+PKG_SOURCE_DATE:=2019-02-14
++PKG_SOURCE_DATE:=2019-02-28
  PKG_SOURCE_VERSION:=d366b80d41309531c0c98b26625f23e318f33e31
  PKG_MIRROR_HASH:=ec06f10e6b1d4f7a28366a893c8a73a000454c2f031fc747381a1fb8aa1e0846
  PKG_RELEASE:=1
@@ -16,26 +16,26 @@ Index: build_dir/package/firmware/ath10k-firmware/Makefile
  $(eval $(call Download,ath10k-firmware-qca988x-ct-htt))
  
 -QCA988X_FIRMWARE_FILE_CT_HTT_BETA:=firmware-2-ct-full-community.bin
-+QCA988X_FIRMWARE_FILE_CT_HTT_BETA:=firmware-2-ct-htt-mgt-nrcc-community.bin
++QCA988X_FIRMWARE_FILE_CT_HTT_BETA:=firmware-2-ct-full-htt-mgt-nrcc-community.bin
  define Download/ath10k-firmware-qca988x-ct-htt-beta
    $(call Download/ct-firmware-htt-beta,QCA988X,ath10k-fw-beta)
 -  HASH:=6eef6fe1731ebb54a3d018d27325be1e67f3bb8c32e771a310d2f08ad00ba611
-+  HASH:=e6b275a9bc6aab897fcc29b4e737c80cd0400f31802ef4396833a27eacf94601
++  HASH:=dc96dcf3a0ca81931cd625308cead0a8e89b0f7a25d98f87830a02d233efce9d
  endef
  $(eval $(call Download,ath10k-firmware-qca988x-ct-htt-beta))
  
-Index: build_dir/package/kernel/ath10k-ct/Makefile
+Index: build_dir.ap2100/package/kernel/ath10k-ct/Makefile
 ===================================================================
---- build_dir.orig/package/kernel/ath10k-ct/Makefile
-+++ build_dir/package/kernel/ath10k-ct/Makefile
+--- build_dir.ap2100.orig/package/kernel/ath10k-ct/Makefile
++++ build_dir.ap2100/package/kernel/ath10k-ct/Makefile
 @@ -8,8 +8,8 @@ PKG_LICENSE_FILES:=
  
  PKG_SOURCE_URL:=https://github.com/greearb/ath10k-ct.git
  PKG_SOURCE_PROTO:=git
 -PKG_SOURCE_DATE:=2018-12-20
 -PKG_SOURCE_VERSION:=118e16da8e82f2e028654f86e47f4c8e5bddccc8
-+PKG_SOURCE_DATE:=2019-01-09
-+PKG_SOURCE_VERSION:=9cbf8d4309746d9bd00284b0e949dc15ef1ead47
++PKG_SOURCE_DATE:=2019-02-28
++PKG_SOURCE_VERSION:=9360f389234a58f742c6cb3f8eea5a419c7523f6
  PKG_MIRROR_HASH:=f84616d5c6c3f6c0aded40b821d9b54fd88b78737f534b37a6ed0c51db16ed06
  
  # Build the 4.19 ath10k-ct driver version.  Other options are "-4.16", or
