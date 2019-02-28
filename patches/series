@@ -108,7 +108,6 @@ packages/0221-add-telit-lte-modem-support.patch
 packages/0222-remove-broken-mbim-pin-required-check.patch
 packages/0224-mwan3-check-dynamic-interfaces.patch
 packages/0225-gcom-ndis-check-no-carrier.patch
-packages/0226-iw-revert-compile-with-lto-enabled.patch
 packages/0227-ath10k-ct-firmware-add-beta.patch
 packages/0229-wpa_supplicant-terminate-after-disconnect.patch
 packages/0230-wpa-supplicant-fix-pidfile.patch
