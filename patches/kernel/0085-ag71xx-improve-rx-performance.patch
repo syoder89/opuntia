@@ -1,7 +1,7 @@
-Index: build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
+Index: build_dir.ap2100/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
 ===================================================================
---- build_dir.orig/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
-+++ build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
+--- build_dir.ap2100.orig/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
++++ build_dir.ap2100/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
 @@ -45,7 +45,8 @@
   * D-cache misses and lots more wasted cycles than we'll ever
   * possibly gain from saving instructions.
@@ -12,10 +12,26 @@ Index: build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/a
  #define AG71XX_OOM_REFILL	(1 + HZ/10)
  
  #define AG71XX_INT_ERR	(AG71XX_INT_RX_BE | AG71XX_INT_TX_BE)
-Index: build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
+@@ -60,11 +61,11 @@
+ #define AG71XX_TX_RING_SPLIT		512
+ #define AG71XX_TX_RING_DS_PER_PKT	DIV_ROUND_UP(AG71XX_TX_MTU_LEN, \
+ 						     AG71XX_TX_RING_SPLIT)
+-#define AG71XX_TX_RING_SIZE_DEFAULT	128
+-#define AG71XX_RX_RING_SIZE_DEFAULT	256
++#define AG71XX_TX_RING_SIZE_DEFAULT	256
++#define AG71XX_RX_RING_SIZE_DEFAULT	4096
+ 
+-#define AG71XX_TX_RING_SIZE_MAX		128
+-#define AG71XX_RX_RING_SIZE_MAX		256
++#define AG71XX_TX_RING_SIZE_MAX		256
++#define AG71XX_RX_RING_SIZE_MAX		4096
+ 
+ #define QCA955X_SGMII_LINK_WAR_MAX_TRY	10
+ 
+Index: build_dir.ap2100/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
 ===================================================================
---- build_dir.orig/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
-+++ build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
+--- build_dir.ap2100.orig/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
++++ build_dir.ap2100/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
 @@ -1088,14 +1088,14 @@ static int ag71xx_rx_packets(struct ag71
  	unsigned int pktlen_mask = ag->desc_pktlen_mask;
  	int ring_mask = BIT(ring->order) - 1;
