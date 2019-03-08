@@ -1,0 +1,21 @@
+Index: build_dir.ap2100/package/base-files/files/etc/init.d/sysctl
+===================================================================
+--- build_dir.ap2100.orig/package/base-files/files/etc/init.d/sysctl
++++ build_dir.ap2100/package/base-files/files/etc/init.d/sysctl
+@@ -7,10 +7,14 @@ apply_defaults() {
+ 	local mem="$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)"
+ 	local min_free frag_low_thresh frag_high_thresh
+ 
+-	if [ "$mem" -gt 65536 ]; then # 128M
++	if [ "$mem" -gt 262144 ]; then # 512M
+ 		min_free=16384
+-	elif [ "$mem" -gt 32768 ]; then # 64M
++	elif [ "$mem" -gt 131072 ]; then # 256M
+ 		min_free=8192
++	elif [ "$mem" -gt 65536 ]; then # 128M
++		min_free=4096
++	elif [ "$mem" -gt 32768 ]; then # 64M
++		min_free=2048
+ 	else
+ 		min_free=1024
+ 		frag_low_thresh=393216

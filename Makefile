@@ -65,11 +65,11 @@ install: $(built)
 		mkdir $(DESTDIR); \
 	fi; \
 	conf=`cat $(configured) | awk '{print toupper($$0)}'`; \
-	combined=`find build_dir/bin/ -name '*combined*' | head -n 1`; \
-	sysup=`find build_dir/bin/ -name '*sysupgrade*' | head -n 1`; \
+	combined=`find ${BUILD_DIR}/bin/ -name '*combined*' | head -n 1`; \
+	sysup=`find ${BUILD_DIR}/bin/ -name '*sysupgrade*' | head -n 1`; \
 	ver=`grep CONFIG_VERSION_NUMBER $(BUILD_DIR)/.config | cut -d '"' -f 2`; \
-	rel=`cd build_dir && ./scripts/getver.sh`; \
-	factory=`find build_dir/bin/ -name '*factory*' | head -n 1`; \
+	rel=`cd ${BUILD_DIR} && ./scripts/getver.sh`; \
+	factory=`find ${BUILD_DIR}/bin/ -name '*factory*' | head -n 1`; \
 	if [ ! -z $${factory} ]; then \
 		cp -f $${factory} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-factory.img; \
 	elif [ "$${combined}" != "" ] ; then \
