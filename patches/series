@@ -121,3 +121,5 @@ packages/ath10k-firmware-update.patch
 kernel/0084-ag71xx-fix-max-mtu.patch
 kernel/0085-ag71xx-improve-rx-performance.patch
 lower_min_free_kbytes_avoid_oom.patch
+0229-ath79-add-compex-dts-support.patch
+packages/0238-nodogsplash-imagestream

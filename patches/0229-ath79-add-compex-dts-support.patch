@@ -1,0 +1,263 @@
+Index: build_dir/target/linux/ath79/dts/qca9558_compex_wpj558.dts
+===================================================================
+--- /dev/null
++++ build_dir/target/linux/ath79/dts/qca9558_compex_wpj558.dts
+@@ -0,0 +1,151 @@
++// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
++/dts-v1/;
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/input.h>
++
++#include "qca9557.dtsi"
++
++/ {
++	compatible = "compex,wpj558", "qca,qca9558";
++	model = "Compex WPJ558";
++
++        chosen {
++                bootargs = "console=ttyS0,115200n8";
++        };
++
++	extosc: ref {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-output-names = "ref";
++		clock-frequency = <40000000>;
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		wifi_red {
++			label = "wpj344:red:sig1";
++			gpios = <&gpio 14 GPIO_ACTIVE_LOW>;
++		};
++
++		wifi_yellow {
++			label = "wpj344:yellow:sig2";
++			gpios = <&gpio 15 GPIO_ACTIVE_LOW>;
++		};
++
++		wifi_green {
++			label = "wpj344:green:sig3";
++			gpios = <&gpio 22 GPIO_ACTIVE_LOW>;
++		};
++
++		wifi_green2 {
++			label = "wpj344:green:sig4";
++			gpios = <&gpio 23 GPIO_ACTIVE_LOW>;
++		};
++
++		buzzer {
++			label = "wpj344:buzzer";
++			gpios = <&gpio 4 GPIO_ACTIVE_HIGH>;
++		};
++	};
++
++	keys {
++		compatible = "gpio-keys-polled";
++		poll-interval = <20>;
++
++		button0 {
++			label = "reset";
++			linux,code = <KEY_RESTART>;
++			gpios = <&gpio 17 GPIO_ACTIVE_LOW>;
++                        debounce-interval = <60>;
++		};
++	};
++};
++
++&pcie0 {
++	status = "okay";
++};
++
++&uart {
++	status = "okay";
++};
++
++&pll {
++	clocks = <&extosc>;
++};
++
++&spi {
++	status = "okay";
++	num-cs = <1>;
++
++	flash@0 {
++		compatible = "jedec,spi-nor";
++		reg = <0>;
++		spi-max-frequency = <25000000>;
++
++		partitions {
++			compatible = "fixed-partitions";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			uboot: u-boot@0 {
++				label = "u-boot";
++				reg = <0x000000 0x030000>;
++				read-only;
++			};
++
++			firmware@30000 {
++				compatible = "denx,uimage";
++				label = "firmware";
++				reg = <0x030000 0xfc0000>;
++			};
++
++			art: art@ff0000 {
++				label = "ART";
++				reg = <0xff0000 0x010000>;
++				read-only;
++			};
++		};
++	};
++};
++
++&mdio0 {
++	status = "okay";
++
++        phy0: ethernet-phy@0 {
++                reg = <0>;
++
++                qca,ar8327-initvals = <
++                        0x04 0x00080080 /* PORT0 PAD MODE CTRL */
++                        0x0c 0x07600000 /* PORT6 PAD MODE CTRL */
++                        0x10 0x81000080 /* POWER_ON_STRAP */
++                        0x50 0xc737c737 /* LED_CTRL0 */
++                        0x54 0xc737c737 /* LED_CTRL1 */
++                        0x58 0xc737c737 /* LED_CTRL2 */
++                        0x5c 0x3ffff000 /* LED_CTRL3 */
++                        0x7c 0x0000007e /* PORT0_STATUS */
++                        0x94 0x0000007e /* PORT6 STATUS */
++                        >;
++        };
++};
++
++&eth0 {
++	status = "okay";
++
++        mtd-mac-address = <&uboot 0x2e010>;
++
++	phy-handle = <&phy0>;
++        pll-data = <0x56000000 0x00000101 0x00001616>;
++        gmac-config {
++                device = <&gmac>;
++                rgmii-enabled = <1>;
++        };
++};
++
++&wmac {
++        status = "okay";
++        mtd-cal-data = <&art 0x1000>;
++        mtd-mac-address = <&uboot 0x2e010>;
++        mtd-mac-address-increment = <3>;
++};
+Index: build_dir/target/linux/ath79/image/generic.mk
+===================================================================
+--- build_dir.orig/target/linux/ath79/image/generic.mk
++++ build_dir/target/linux/ath79/image/generic.mk
+@@ -171,6 +171,76 @@ define Device/comfast_cf-e120a-v3
+ endef
+ TARGET_DEVICES += comfast_cf-e120a-v3
+ 
++define Device/wpj-16m
++  $(Device/CpxImageParams16M)
++  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-usb-ledtrig-usbport
++  MTDPARTS := spi0.0:192k(u-boot)ro,16128k(firmware),64k(art)ro
++  IMAGE_SIZE := 16128k
++  IMAGES := sysupgrade.bin factory.img
++  IMAGE/sysupgrade.bin = append-kernel | pad-to $$$$(BLOCKSIZE) | append-rootfs | pad-rootfs | check-size $$$$(IMAGE_SIZE)
++  IMAGE/factory.img = Cpxfactory16M
++endef
++
++define Device/CpxImageParams16M
++  KSTART := 30000
++  RSTART := 1b0000
++  P1START := fe0000
++  P2START := ff0000
++  FIRMWARE_SIZE := 0x1000000
++  KERNEL_SIZE := 1572864
++  ROOTFS_SIZE := 14876672
++endef
++
++define Build/Cpxfactory16M
++        $(STAGING_DIR_HOST)/bin/mkmylofw -B $(BOARDID) -s $(FIRMWARE_SIZE) \
++                -p0x$(KSTART):$(KERNEL_SIZE):al:0x80060000:$(BOARDID):$(IMAGE_KERNEL) \
++                -p0x$(RSTART):$(ROOTFS_SIZE):::rootfs:$(IMAGE_ROOTFS) \
++                -p0x$(P1START):0x010000 \
++                -p0x$(P2START):0x010000 \
++                $@
++endef
++
++#define Device/wpj342
++#  $(Device/wpj-16m)
++#  DEVICE_TITLE := Compex WPJ342 (16MB flash)
++#  BOARDNAME := WPJ342
++#endef
++#TARGET_DEVICES += wpj342
++#
++#define Device/wpj344
++#  $(Device/wpj-16m)
++#  DEVICE_TITLE := Compex WPJ344 (16MB flash)
++#  BOARDNAME := WPJ344
++#  SUPPORTED_DEVICES := wpj344
++#  IMAGE/sysupgrade.bin := append-kernel | pad-to $$$$(BLOCKSIZE) | \
++#	append-rootfs | pad-rootfs | append-metadata | check-size $$$$(IMAGE_SIZE)
++#endef
++#TARGET_DEVICES += wpj344
++#
++#define Device/wpj531
++#  $(Device/wpj-16m)
++#  DEVICE_TITLE := Compex WPJ531 (16MB flash)
++#  BOARDNAME := WPJ531
++#endef
++#TARGET_DEVICES += wpj531
++
++define Device/compex_wpj558
++  $(Device/wpj-16m)
++  DEVICE_TITLE := Compex WPJ558 (16MB flash)
++  ATH_SOC := qca9558
++  BOARDID := WPJ558
++  IMAGE/sysupgrade.bin := append-kernel | pad-to $$$$(BLOCKSIZE) | \
++	append-rootfs | pad-rootfs | append-metadata | check-size $$$$(IMAGE_SIZE)
++endef
++TARGET_DEVICES += compex_wpj558
++
++#define Device/wpj563
++#  $(Device/wpj-16m)
++#  DEVICE_TITLE := Compex WPJ563 (16MB flash)
++#  BOARDNAME := WPJ563
++#endef
++#TARGET_DEVICES += wpj563
++
+ define Device/devolo_dvl1200e
+   ATH_SOC := qca9558
+   DEVICE_TITLE := devolo WiFi pro 1200e
+Index: build_dir/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
+===================================================================
+--- build_dir.orig/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
++++ build_dir/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
+@@ -30,6 +30,21 @@ case "$board" in
+ 		[ "$PHYNBR" -eq 1 ] && \
+ 			echo $(k2t_get_mac "lan_mac") > /sys${DEVPATH}/macaddress
+ 		;;
++	compex,wpj344)
++		# Use our reserved MAC address instead of the card's MAC
++		[ "$PHYNBR" -eq 1 ] && \
++			echo $(mtd_get_mac_binary u-boot 188448) > /sys${DEVPATH}/macaddress
++		;;
++	compex,wpj558)
++		# Use our reserved MAC address instead of the card's MAC
++		[ "$PHYNBR" -eq 1 ] && \
++			echo $(mtd_get_mac_binary u-boot 188448) > /sys${DEVPATH}/macaddress
++		;;
++	compex,wpj563)
++		# Use our reserved MAC address instead of the card's MAC
++		[ "$PHYNBR" -eq 1 ] && \
++			echo $(mtd_get_mac_binary u-boot 188448) > /sys${DEVPATH}/macaddress
++		;;
+ 	*)
+ 		;;
+ esac

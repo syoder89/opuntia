@@ -1,0 +1,37 @@
+Index: build_dir.ev1000/feeds/routing/nodogsplash/Makefile
+===================================================================
+--- build_dir.ev1000.orig/feeds/routing/nodogsplash/Makefile
++++ build_dir.ev1000/feeds/routing/nodogsplash/Makefile
+@@ -7,12 +7,14 @@ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=nodogsplash
+ PKG_FIXUP:=autoreconf
+-PKG_VERSION:=3.2.1
+-PKG_RELEASE:=2
++PKG_VERSION:=3.2.2
++PKG_RELEASE:=1
++
++PKG_SOURCE_URL:=https://github.com/imagestream/nodogsplash.git
++PKG_SOURCE_PROTO:=git
++PKG_SOURCE_DATE:=2019-03-15
++PKG_SOURCE_VERSION:=38c2d762975849d1d72d70776467518d8a886b66
+ 
+-PKG_SOURCE_URL:=https://codeload.github.com/nodogsplash/nodogsplash/tar.gz/v$(PKG_VERSION)?
+-PKG_SOURCE:=nodogsplash-$(PKG_VERSION).tar.gz
+-PKG_HASH:=16da76ecf7820cd8b32081237e05b24a7d2d8a9db8a47242badc7937d6cf1ae8
+ PKG_BUILD_DIR:=$(BUILD_DIR)/nodogsplash-$(PKG_VERSION)
+ 
+ PKG_MAINTAINER:=Moritz Warning <moritzwarning@web.de>
+Index: build_dir.ev1000/feeds/routing/nodogsplash/files/etc/init.d/nodogsplash
+===================================================================
+--- build_dir.ev1000.orig/feeds/routing/nodogsplash/files/etc/init.d/nodogsplash
++++ build_dir.ev1000/feeds/routing/nodogsplash/files/etc/init.d/nodogsplash
+@@ -136,7 +136,7 @@ generate_uci_config() {
+ 
+   addline "GatewayInterface $ifname"
+ 
+-  for option in binauth fasport fasremoteip faspath fas_secure_enabled \
++  for option in binauth fasport fasremoteip faspath fas_secure_enabled faskey \
+     daemon debuglevel maxclients gatewayname gatewayinterface gatewayiprange \
+     gatewayaddress gatewayport webroot splashpage statuspage imagesdir pagesdir \
+     redirecturl sessiontimeout preauthidletimeout authidletimeout checkinterval \
