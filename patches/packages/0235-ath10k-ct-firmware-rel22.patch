@@ -7,7 +7,7 @@ Index: build_dir.ap2100/package/firmware/ath10k-firmware/Makefile
  
  PKG_NAME:=ath10k-firmware
 -PKG_SOURCE_DATE:=2018-10-10
-+PKG_SOURCE_DATE:=2019-02-28
++PKG_SOURCE_DATE:=2019-04-16
  PKG_SOURCE_VERSION:=d366b80d41309531c0c98b26625f23e318f33e31
  PKG_MIRROR_HASH:=ec06f10e6b1d4f7a28366a893c8a73a000454c2f031fc747381a1fb8aa1e0846
  PKG_RELEASE:=1
@@ -20,7 +20,7 @@ Index: build_dir.ap2100/package/firmware/ath10k-firmware/Makefile
  define Download/ath10k-firmware-qca988x-ct-htt-beta
    $(call Download/ct-firmware-htt-beta,QCA988X,ath10k-fw-beta)
 -  HASH:=6eef6fe1731ebb54a3d018d27325be1e67f3bb8c32e771a310d2f08ad00ba611
-+  HASH:=dc96dcf3a0ca81931cd625308cead0a8e89b0f7a25d98f87830a02d233efce9d
++  HASH:=5e59cd75a22796362b0cc9b63ce69f5fdbb0dce11fd2ad8920d7c96acddc09d4
  endef
  $(eval $(call Download,ath10k-firmware-qca988x-ct-htt-beta))
  

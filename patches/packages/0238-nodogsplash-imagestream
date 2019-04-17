@@ -8,13 +8,13 @@ Index: build_dir.ev1000/feeds/routing/nodogsplash/Makefile
  PKG_FIXUP:=autoreconf
 -PKG_VERSION:=3.2.1
 -PKG_RELEASE:=2
-+PKG_VERSION:=3.2.2
++PKG_VERSION:=3.3.0
 +PKG_RELEASE:=1
 +
 +PKG_SOURCE_URL:=https://github.com/imagestream/nodogsplash.git
 +PKG_SOURCE_PROTO:=git
-+PKG_SOURCE_DATE:=2019-03-15
-+PKG_SOURCE_VERSION:=38c2d762975849d1d72d70776467518d8a886b66
++PKG_SOURCE_DATE:=2019-03-22
++PKG_SOURCE_VERSION:=333986ac69c603f733aa8309ccabe04176122c80
  
 -PKG_SOURCE_URL:=https://codeload.github.com/nodogsplash/nodogsplash/tar.gz/v$(PKG_VERSION)?
 -PKG_SOURCE:=nodogsplash-$(PKG_VERSION).tar.gz
@@ -22,16 +22,38 @@ Index: build_dir.ev1000/feeds/routing/nodogsplash/Makefile
  PKG_BUILD_DIR:=$(BUILD_DIR)/nodogsplash-$(PKG_VERSION)
  
  PKG_MAINTAINER:=Moritz Warning <moritzwarning@web.de>
-Index: build_dir.ev1000/feeds/routing/nodogsplash/files/etc/init.d/nodogsplash
+@@ -41,8 +43,6 @@ define Package/nodogsplash/description
+ endef
+ 
+ define Package/nodogsplash/install
+-	$(CP) ./files/* $(1)/
+-
+ 	$(INSTALL_DIR) $(1)/usr/bin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/nodogsplash $(1)/usr/bin/
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ndsctl $(1)/usr/bin/
+@@ -52,6 +52,7 @@ define Package/nodogsplash/install
+ 	$(CP) $(PKG_BUILD_DIR)/resources/splash.css $(1)/etc/nodogsplash/htdocs/
+ 	$(CP) $(PKG_BUILD_DIR)/resources/status.html $(1)/etc/nodogsplash/htdocs/
+ 	$(CP) $(PKG_BUILD_DIR)/resources/splash.jpg $(1)/etc/nodogsplash/htdocs/images/
++	$(CP) $(PKG_BUILD_DIR)/openwrt/nodogsplash/files/* $(1)/
+ endef
+ 
+ define Package/nodogsplash/postrm
+Index: build_dir.ev1000/feeds/routing/nodogsplash/patches/999-scott-add-faskey.patch
 ===================================================================
---- build_dir.ev1000.orig/feeds/routing/nodogsplash/files/etc/init.d/nodogsplash
-+++ build_dir.ev1000/feeds/routing/nodogsplash/files/etc/init.d/nodogsplash
-@@ -136,7 +136,7 @@ generate_uci_config() {
- 
-   addline "GatewayInterface $ifname"
- 
--  for option in binauth fasport fasremoteip faspath fas_secure_enabled \
-+  for option in binauth fasport fasremoteip faspath fas_secure_enabled faskey \
-     daemon debuglevel maxclients gatewayname gatewayinterface gatewayiprange \
-     gatewayaddress gatewayport webroot splashpage statuspage imagesdir pagesdir \
-     redirecturl sessiontimeout preauthidletimeout authidletimeout checkinterval \
+--- /dev/null
++++ build_dir.ev1000/feeds/routing/nodogsplash/patches/999-scott-add-faskey.patch
+@@ -0,0 +1,13 @@
++Index: nodogsplash-3.3.0/openwrt/nodogsplash/files/etc/init.d/nodogsplash
++===================================================================
++--- nodogsplash-3.3.0.orig/openwrt/nodogsplash/files/etc/init.d/nodogsplash
+++++ nodogsplash-3.3.0/openwrt/nodogsplash/files/etc/init.d/nodogsplash
++@@ -137,7 +137,7 @@ generate_uci_config() {
++ 
++   addline "GatewayInterface $ifname"
++ 
++-  for option in preauth binauth fasport fasremoteip faspath fas_secure_enabled \
+++  for option in preauth binauth fasport fasremoteip faspath fas_secure_enabled faskey \
++     daemon debuglevel maxclients gatewayname gatewayinterface gatewayiprange \
++     gatewayaddress gatewayport webroot splashpage statuspage imagesdir pagesdir \
++     redirecturl sessiontimeout preauthidletimeout authidletimeout checkinterval \
