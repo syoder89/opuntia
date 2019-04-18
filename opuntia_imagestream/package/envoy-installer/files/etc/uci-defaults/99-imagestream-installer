@@ -5,7 +5,7 @@
 . /lib/upgrade/platform.sh
 
 URL="http://router-updates.imagestream.com/opuntia/current/"
-INSTALL_URL="http://router-updates.imagestream.com/opuntia/current/"
+INSTALL_URL="http://install1.imagestream.com/envoy-installer/"
 RC_POSTINSTALL="rc.postinstall"
 PRODUCT_NAME="Envoy"
 
@@ -29,28 +29,34 @@ do_fetch() {
         fi
 }
 
-logger "Installing $PRODUCT_NAME"
-mkdir /tmp/root
-cd /tmp
+do_install() {
+	# Start up the random number generator
+	/etc/init.d/haveged start
+	sleep 30
+	logger "Installing $PRODUCT_NAME"
+	mkdir /tmp/root
+	cd /tmp
 
-# Find the latest Envoy EV1000 sysupgrade image
-# Ex: opuntia-EV1000-4.8.10-r41429-sysupgrade.bin
-IMAGE=$(wget -qO - ${URL} | grep -o 'opuntia-EV1000-[0-9]*\.[0-9]*\.[0-9]*-r[0-9]*-sysupgrade\.bin' | sort -rn | head -n 1)
-do_fetch "${URL}/${IMAGE}" "image"
+	# Find the latest Envoy EV1000 sysupgrade image
+	# Ex: opuntia-EV1000-4.8.10-r41429-sysupgrade.bin
+	IMAGE=$(wget -qO - ${URL} | grep -o 'opuntia-EV1000-[0-9]*\.[0-9]*\.[0-9]*-r[0-9]*-sysupgrade\.bin' | sort -rn | head -n 1)
+	do_fetch "${URL}/${IMAGE}" "image"
 
-logger "Installing post-installation script..."
-cd /tmp
-do_fetch "${INSTALL_URL}/${RC_POSTINSTALL}" "post-installation script"
-chmod +x ${RC_POSTINSTALL}
-mv ${RC_POSTINSTALL} /etc/rc.local
+	logger "Installing post-installation script..."
+	cd /tmp
+	do_fetch "${INSTALL_URL}/${RC_POSTINSTALL}" "post-installation script"
+	chmod +x ${RC_POSTINSTALL}
+	mv ${RC_POSTINSTALL} /etc/rc.local
 
-# Create the product_id.txt from the firmware release
-. /etc/opuntia_release 
-cat << EOM > /etc/product_id.txt
+	# Create the product_id.txt from the firmware release
+	. /etc/opuntia_release 
+	cat << EOM > /etc/product_id.txt
 $PRODUCT_NAME
 $DISTRIB_PRODUCT
 $DISTRIB_HWREV
 EOM
 
-logger "Installing operating system..."
-sysupgrade ${IMAGE}
+	logger "Installing operating system..."
+	sysupgrade ${IMAGE}
+}
+do_install &
