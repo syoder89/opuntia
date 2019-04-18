@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=imagestream-envoy-installer
-PKG_VERSION:=1.0
+PKG_VERSION:=2.0
 PKG_RELEASE:=1
 
 PKG_MAINTAINER:=Scott Yoder <syoder@imagestream.com>
@@ -15,7 +15,7 @@ define Package/imagestream-envoy-installer
 endef
 
 define Package/imagestream-envoy-installer/description
-  ImageStream WIFI AP install script
+  ImageStream Envoy install script
 endef
 
 define Build/Prepare

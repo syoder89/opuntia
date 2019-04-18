@@ -10,3 +10,22 @@ Index: build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/a
  
  	if (!pdata->is_ar724x && !pdata->is_ar91xx) {
  		ag->tx_ring.desc_split = AG71XX_TX_RING_SPLIT;
+Index: build_dir/target/linux/ath79/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
+===================================================================
+--- build_dir.orig/target/linux/ath79/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
++++ build_dir/target/linux/ath79/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
+@@ -1426,9 +1426,11 @@ static int ag71xx_probe(struct platform_
+ 	else
+ 		ag->desc_pktlen_mask = SZ_4K - 1;
+ 
+-	if (ag->desc_pktlen_mask == SZ_16K - 1 &&
+-	    !of_device_is_compatible(np, "qca,qca9550-eth") &&
+-	    !of_device_is_compatible(np, "qca,qca9560-eth"))
++	/* 558/563 can support 4K frames, just nothing bigger -- Scott 04-17-2019 */
++	if (of_device_is_compatible(np, "qca,qca9550-eth") ||
++	    of_device_is_compatible(np, "qca,qca9560-eth"))
++		max_frame_len = SZ_4K - 1;
++	else if (ag->desc_pktlen_mask == SZ_16K - 1)
+ 		max_frame_len = ag->desc_pktlen_mask;
+ 	else
+ 		max_frame_len = 1540;

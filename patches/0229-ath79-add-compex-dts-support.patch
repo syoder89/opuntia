@@ -2,7 +2,7 @@ Index: build_dir/target/linux/ath79/dts/qca9558_compex_wpj558.dts
 ===================================================================
 --- /dev/null
 +++ build_dir/target/linux/ath79/dts/qca9558_compex_wpj558.dts
-@@ -0,0 +1,151 @@
+@@ -0,0 +1,152 @@
 +// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
 +/dts-v1/;
 +
@@ -136,6 +136,7 @@ Index: build_dir/target/linux/ath79/dts/qca9558_compex_wpj558.dts
 +};
 +
 +&eth0 {
++        compatible = "qca,qca9550-eth", "syscon";
 +	status = "okay";
 +
 +        mtd-mac-address = <&uboot 0x2e010>;
@@ -158,9 +159,9 @@ Index: build_dir/target/linux/ath79/image/generic.mk
 ===================================================================
 --- build_dir.orig/target/linux/ath79/image/generic.mk
 +++ build_dir/target/linux/ath79/image/generic.mk
-@@ -171,6 +171,76 @@ define Device/comfast_cf-e120a-v3
+@@ -186,6 +186,74 @@ define Device/comfast_cf-e5
  endef
- TARGET_DEVICES += comfast_cf-e120a-v3
+ TARGET_DEVICES += comfast_cf-e5
  
 +define Device/wpj-16m
 +  $(Device/CpxImageParams16M)
@@ -174,11 +175,10 @@ Index: build_dir/target/linux/ath79/image/generic.mk
 +
 +define Device/CpxImageParams16M
 +  KSTART := 30000
-+  RSTART := 1b0000
-+  P1START := fe0000
-+  P2START := ff0000
++  RSTART := 1c0000
++  P1START := ff0000
 +  FIRMWARE_SIZE := 0x1000000
-+  KERNEL_SIZE := 1572864
++  KERNEL_SIZE := 1638400
 +  ROOTFS_SIZE := 14876672
 +endef
 +
@@ -187,7 +187,6 @@ Index: build_dir/target/linux/ath79/image/generic.mk
 +                -p0x$(KSTART):$(KERNEL_SIZE):al:0x80060000:$(BOARDID):$(IMAGE_KERNEL) \
 +                -p0x$(RSTART):$(ROOTFS_SIZE):::rootfs:$(IMAGE_ROOTFS) \
 +                -p0x$(P1START):0x010000 \
-+                -p0x$(P2START):0x010000 \
 +                $@
 +endef
 +

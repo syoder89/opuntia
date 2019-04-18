@@ -1,0 +1,38 @@
+Index: build_dir/feeds/packages/net/openvswitch/Makefile
+===================================================================
+--- build_dir.orig/feeds/packages/net/openvswitch/Makefile
++++ build_dir/feeds/packages/net/openvswitch/Makefile
+@@ -68,7 +68,9 @@ ovs_kmod_openvswitch_kconfig:=CONFIG_OPE
+ ovs_kmod_openvswitch_depends:=\
+ 	  +kmod-lib-crc32c +kmod-mpls \
+ 	  +kmod-nf-nat +IPV6:kmod-nf-nat6 \
+-	  +kmod-nf-conntrack +IPV6:kmod-nf-conntrack6
++	  +kmod-nf-conntrack +IPV6:kmod-nf-conntrack6 \
++	  +kmod-ipt-conntrack-extra +kmod-nsh
++
+ ovs_kmod_openvswitch_files:=$(ovs_kmod_upstream_dir)/openvswitch.ko
+ $(eval $(call OvsKmodPackageTemplate,openvswitch))
+ 
+Index: build_dir/package/kernel/linux/modules/netfilter.mk
+===================================================================
+--- build_dir.orig/package/kernel/linux/modules/netfilter.mk
++++ build_dir/package/kernel/linux/modules/netfilter.mk
+@@ -1060,6 +1060,18 @@ endef
+ $(eval $(call KernelPackage,ipt-rpfilter))
+ 
+ 
++define KernelPackage/nsh
++  SUBMENU:=$(NF_MENU)
++  TITLE:=NSH
++  KCONFIG:= \
++	CONFIG_NET_NSH=m
++  FILES:=$(LINUX_DIR)/net/nsh/nsh.ko
++  AUTOLOAD:=$(call AutoProbe,nsh)
++endef
++
++$(eval $(call KernelPackage,nsh))
++
++
+ define KernelPackage/nft-core
+   SUBMENU:=$(NF_MENU)
+   TITLE:=Netfilter nf_tables support

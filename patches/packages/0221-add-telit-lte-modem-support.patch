@@ -1,5 +1,7 @@
---- a/package/network/utils/comgt/Makefile
-+++ b/package/network/utils/comgt/Makefile
+Index: build_dir/package/network/utils/comgt/Makefile
+===================================================================
+--- build_dir.orig/package/network/utils/comgt/Makefile
++++ build_dir/package/network/utils/comgt/Makefile
 @@ -68,6 +68,7 @@ define Package/comgt/install
  	$(INSTALL_DIR) $(1)/usr/bin
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/comgt $(1)/usr/bin/
@@ -16,8 +18,10 @@
  	$(INSTALL_DIR) $(1)/lib/netifd/proto
  	$(INSTALL_BIN) ./files/ncm.sh $(1)/lib/netifd/proto/ncm.sh
  endef
+Index: build_dir/package/network/utils/comgt/files/man3g
+===================================================================
 --- /dev/null
-+++ b/package/network/utils/comgt/files/man3g
++++ build_dir/package/network/utils/comgt/files/man3g
 @@ -0,0 +1,510 @@
 +#!/bin/bash
 +
@@ -529,8 +533,10 @@
 +		usage
 +	;;
 +esac
---- a/package/network/utils/comgt/files/ncm.json
-+++ b/package/network/utils/comgt/files/ncm.json
+Index: build_dir/package/network/utils/comgt/files/ncm.json
+===================================================================
+--- build_dir.orig/package/network/utils/comgt/files/ncm.json
++++ build_dir/package/network/utils/comgt/files/ncm.json
 @@ -74,5 +74,46 @@
  		"connect": "AT+CGACT=1,${profile}",
  		"finalize": "AT+CGDATA=\\\"M-MBIM\\\",${profile},1",
@@ -578,8 +584,10 @@
 +		"getaddrs": "/etc/gcom/telit-getaddrs.gcom"
  	}
  }
---- a/package/network/utils/comgt/files/ncm.sh
-+++ b/package/network/utils/comgt/files/ncm.sh
+Index: build_dir/package/network/utils/comgt/files/ncm.sh
+===================================================================
+--- build_dir.orig/package/network/utils/comgt/files/ncm.sh
++++ build_dir/package/network/utils/comgt/files/ncm.sh
 @@ -25,7 +25,7 @@ proto_ncm_init_config() {
  proto_ncm_setup() {
  	local interface="$1"
@@ -683,7 +691,7 @@
  			echo "Failed to set operating mode"
  			proto_notify_error "$interface" SETMODE_FAILED
  			return 1
-@@ -132,47 +159,67 @@ proto_ncm_setup() {
+@@ -132,57 +159,75 @@ proto_ncm_setup() {
  	json_get_vars connect
  	echo "Connecting modem"
  	eval COMMAND="$connect" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
@@ -703,12 +711,18 @@
  	proto_close_data
 -	proto_send_update "$interface"
  
+ 	local zone="$(fw3 -q network "$interface" 2>/dev/null)"
+ 
 -	[ "$pdptype" = "IP" -o "$pdptype" = "IPV4V6" ] && {
 -		json_init
 -		json_add_string name "${interface}_4"
 -		json_add_string ifname "@$interface"
 -		json_add_string proto "dhcp"
 -		proto_add_dynamic_defaults
+-		[ -n "$zone" ] && {
+-			json_add_string zone "$zone"
+-		}
+-		json_close_object
 -		ubus call network add_dynamic "$(json_dump)"
 -	}
 -
@@ -719,8 +733,8 @@
 -		json_add_string proto "dhcpv6"
 -		json_add_string extendprefix 1
 -		proto_add_dynamic_defaults
--		ubus call network add_dynamic "$(json_dump)"
--	}
+-		[ -n "$zone" ] && {
+-			json_add_string zone "$zone"
 +	if [ -n "$getaddrs" ] ; then
 +		eval PROFILE="$profile" $(gcom -d "$device" -s $getaddrs) || {
 +			do_unlock
@@ -744,8 +758,14 @@
 +			json_add_string ifname "@$interface"
 +			json_add_string proto "dhcp"
 +			proto_add_dynamic_defaults
++			[ -n "$zone" ] && {
++				json_add_string zone "$zone"
++			}
 +			ubus call network add_dynamic "$(json_dump)"
-+		}
+ 		}
+-		json_close_object
+-		ubus call network add_dynamic "$(json_dump)"
+-	}
 +
 +		[ "$pdptype" = "IPV6" -o "$pdptype" = "IPV4V6" ] && {
 +			json_init
@@ -754,6 +774,9 @@
 +			json_add_string proto "dhcpv6"
 +			json_add_string extendprefix 1
 +			proto_add_dynamic_defaults
++			[ -n "$zone" ] && {
++				json_add_string zone "$zone"
++			}
 +			ubus call network add_dynamic "$(json_dump)"
 +		}
 +	fi
@@ -771,7 +794,7 @@
  }
  
  proto_ncm_teardown() {
-@@ -201,15 +248,68 @@ proto_ncm_teardown() {
+@@ -211,15 +256,68 @@ proto_ncm_teardown() {
  	}
  
  	json_get_vars disconnect
@@ -840,8 +863,10 @@
  [ -n "$INCLUDE_ONLY" ] || {
  	add_protocol ncm
  }
+Index: build_dir/package/network/utils/comgt/files/telit-getaddrs.gcom
+===================================================================
 --- /dev/null
-+++ b/package/network/utils/comgt/files/telit-getaddrs.gcom
++++ build_dir/package/network/utils/comgt/files/telit-getaddrs.gcom
 @@ -0,0 +1,36 @@
 +opengt
 + set com 115200n81
@@ -879,8 +904,10 @@
 + get 1 "\"" $d
 + print "dns1=\"",$a,".",$b,".",$c+".",$d,"\"\n"
 + exit 0
+Index: build_dir/package/network/utils/comgt/files/man3g_getall.gcom
+===================================================================
 --- /dev/null
-+++ b/package/network/utils/comgt/files/man3g_getall.gcom
++++ build_dir/package/network/utils/comgt/files/man3g_getall.gcom
 @@ -0,0 +1,157 @@
 +# Get all params
 +opengt

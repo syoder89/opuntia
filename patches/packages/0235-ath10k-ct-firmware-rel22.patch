@@ -1,7 +1,7 @@
-Index: build_dir.ap2100/package/firmware/ath10k-firmware/Makefile
+Index: build_dir/package/firmware/ath10k-firmware/Makefile
 ===================================================================
---- build_dir.ap2100.orig/package/firmware/ath10k-firmware/Makefile
-+++ build_dir.ap2100/package/firmware/ath10k-firmware/Makefile
+--- build_dir.orig/package/firmware/ath10k-firmware/Makefile
++++ build_dir/package/firmware/ath10k-firmware/Makefile
 @@ -8,7 +8,7 @@
  include $(TOPDIR)/rules.mk
  
@@ -24,18 +24,3 @@ Index: build_dir.ap2100/package/firmware/ath10k-firmware/Makefile
  endef
  $(eval $(call Download,ath10k-firmware-qca988x-ct-htt-beta))
  
-Index: build_dir.ap2100/package/kernel/ath10k-ct/Makefile
-===================================================================
---- build_dir.ap2100.orig/package/kernel/ath10k-ct/Makefile
-+++ build_dir.ap2100/package/kernel/ath10k-ct/Makefile
-@@ -8,8 +8,8 @@ PKG_LICENSE_FILES:=
- 
- PKG_SOURCE_URL:=https://github.com/greearb/ath10k-ct.git
- PKG_SOURCE_PROTO:=git
--PKG_SOURCE_DATE:=2018-12-20
--PKG_SOURCE_VERSION:=118e16da8e82f2e028654f86e47f4c8e5bddccc8
-+PKG_SOURCE_DATE:=2019-02-28
-+PKG_SOURCE_VERSION:=9360f389234a58f742c6cb3f8eea5a419c7523f6
- PKG_MIRROR_HASH:=f84616d5c6c3f6c0aded40b821d9b54fd88b78737f534b37a6ed0c51db16ed06
- 
- # Build the 4.19 ath10k-ct driver version.  Other options are "-4.16", or

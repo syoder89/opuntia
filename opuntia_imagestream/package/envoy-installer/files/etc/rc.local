@@ -1,11 +1,13 @@
+#!/bin/sh
 # ImageStream Envoy netboot installer
 
 . /lib/functions.sh
 . /lib/upgrade/platform.sh
 
-IMAGE="opuntia-x86-alix2-combined-squashfs.img"
-URL="http://install1.imagestream.com/envoy-installer"
+URL="http://router-updates.imagestream.com/opuntia/current/"
+INSTALL_URL="http://router-updates.imagestream.com/opuntia/current/"
 RC_POSTINSTALL="rc.postinstall"
+PRODUCT_NAME="Envoy"
 
 do_fetch() {
         fetch_url="$1"
@@ -27,26 +29,28 @@ do_fetch() {
         fi
 }
 
-logger "Installing Envoy"
+logger "Installing $PRODUCT_NAME"
 mkdir /tmp/root
 cd /tmp
 
+# Find the latest Envoy EV1000 sysupgrade image
+# Ex: opuntia-EV1000-4.8.10-r41429-sysupgrade.bin
+IMAGE=$(wget -qO - ${URL} | grep -o 'opuntia-EV1000-[0-9]*\.[0-9]*\.[0-9]*-r[0-9]*-sysupgrade\.bin' | sort -rn | head -n 1)
 do_fetch "${URL}/${IMAGE}" "image"
 
-logger "Installing operating system..."
-
-#rootfs="$(x86_get_rootfs)"
-#rootfsdev="${rootfs##*:}"
-#	
-#mount -t ext4 -o rw,noatime "${rootfsdev%[0-9]}1" $mnt_root
-#cd $mnt_root
+logger "Installing post-installation script..."
 cd /tmp
-do_fetch "${URL}/${RC_POSTINSTALL}" "post-installation script"
+do_fetch "${INSTALL_URL}/${RC_POSTINSTALL}" "post-installation script"
 chmod +x ${RC_POSTINSTALL}
-#umount $mnt_root
-#rmdir $mnt_root
-CONF_IMAGE="/tmp/sysupgrade.tgz"
 mv ${RC_POSTINSTALL} /etc/rc.local
+
+# Create the product_id.txt from the firmware release
+. /etc/opuntia_release 
+cat << EOM > /etc/product_id.txt
+$PRODUCT_NAME
+$DISTRIB_PRODUCT
+$DISTRIB_HWREV
+EOM
 
 logger "Installing operating system..."
 sysupgrade ${IMAGE}

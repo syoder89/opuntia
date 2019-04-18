@@ -113,13 +113,14 @@ packages/0229-wpa_supplicant-terminate-after-disconnect.patch
 packages/0230-wpa-supplicant-fix-pidfile.patch
 packages/0231-netifd-infinite-wireless-retries.patch
 packages/0232-decrease-ath10k-ct-buffers.patch
-kernel/0083-skb-flow-classifier-add-batman.patch
 packages/0235-ath10k-ct-firmware-rel22.patch
 packages/0236-batctl-fix-default-symlink.patch
 packages/0237-strongswan-increase-starter-timeout.patch
 packages/ath10k-firmware-update.patch
 kernel/0084-ag71xx-fix-max-mtu.patch
 kernel/0085-ag71xx-improve-rx-performance.patch
-lower_min_free_kbytes_avoid_oom.patch
+0230-lower-min-free-kbytes-avoid-oom.patch
 0229-ath79-add-compex-dts-support.patch
 packages/0238-nodogsplash-imagestream
+0231-ath79-4.19-kernel.patch
+packages/0239-ovs-fix-missing-nsh-conntrack-extras.patch
