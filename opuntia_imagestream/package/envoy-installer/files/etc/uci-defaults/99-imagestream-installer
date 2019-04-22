@@ -1,6 +1,12 @@
 #!/bin/sh
 # ImageStream Envoy netboot installer
 
+# This script doesn't work correctly from uci-defaults, so pop it into rc.local instead
+[ -f /etc/uci-defaults/99-imagestream-installer ] && {
+	cp /etc/uci-defaults/99-imagestream-installer /etc/rc.local
+	exit 0
+}
+
 . /lib/functions.sh
 . /lib/upgrade/platform.sh
 
@@ -29,34 +35,31 @@ do_fetch() {
         fi
 }
 
-do_install() {
-	# Start up the random number generator
-	/etc/init.d/haveged start
-	sleep 30
-	logger "Installing $PRODUCT_NAME"
-	mkdir /tmp/root
-	cd /tmp
+# Start up the random number generator
+/etc/init.d/haveged start
+sleep 30
+logger "Installing $PRODUCT_NAME"
+mkdir /tmp/root
+cd /tmp
 
-	# Find the latest Envoy EV1000 sysupgrade image
-	# Ex: opuntia-EV1000-4.8.10-r41429-sysupgrade.bin
-	IMAGE=$(wget -qO - ${URL} | grep -o 'opuntia-EV1000-[0-9]*\.[0-9]*\.[0-9]*-r[0-9]*-sysupgrade\.bin' | sort -rn | head -n 1)
-	do_fetch "${URL}/${IMAGE}" "image"
+# Find the latest Envoy EV1000 sysupgrade image
+# Ex: opuntia-EV1000-4.8.10-r41429-sysupgrade.bin
+IMAGE=$(wget -qO - ${URL} | grep -o 'opuntia-EV1000-[0-9]*\.[0-9]*\.[0-9]*-r[0-9]*-sysupgrade\.bin' | sort -rn | head -n 1)
+do_fetch "${URL}/${IMAGE}" "image"
 
-	logger "Installing post-installation script..."
-	cd /tmp
-	do_fetch "${INSTALL_URL}/${RC_POSTINSTALL}" "post-installation script"
-	chmod +x ${RC_POSTINSTALL}
-	mv ${RC_POSTINSTALL} /etc/rc.local
+logger "Installing post-installation script..."
+cd /tmp
+do_fetch "${INSTALL_URL}/${RC_POSTINSTALL}" "post-installation script"
+chmod +x ${RC_POSTINSTALL}
+mv ${RC_POSTINSTALL} /etc/rc.local
 
-	# Create the product_id.txt from the firmware release
-	. /etc/opuntia_release 
-	cat << EOM > /etc/product_id.txt
+# Create the product_id.txt from the firmware release
+. /etc/opuntia_release 
+cat << EOM > /etc/product_id.txt
 $PRODUCT_NAME
 $DISTRIB_PRODUCT
 $DISTRIB_HWREV
 EOM
 
-	logger "Installing operating system..."
-	sysupgrade ${IMAGE}
-}
-do_install &
+logger "Installing operating system..."
+sysupgrade ${IMAGE}
