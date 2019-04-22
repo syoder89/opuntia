@@ -124,3 +124,4 @@ kernel/0085-ag71xx-improve-rx-performance.patch
 packages/0238-nodogsplash-imagestream
 0231-ath79-4.19-kernel.patch
 packages/0239-ovs-fix-missing-nsh-conntrack-extras.patch
+packages/0240-coova-chilli-fix-init-disabled.patch
