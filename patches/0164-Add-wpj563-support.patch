@@ -118,7 +118,7 @@ Index: build_dir/target/linux/ar71xx/files/arch/mips/ath79/dev-eth.c
 ===================================================================
 --- build_dir.orig/target/linux/ar71xx/files/arch/mips/ath79/dev-eth.c
 +++ build_dir/target/linux/ar71xx/files/arch/mips/ath79/dev-eth.c
-@@ -1079,6 +1079,8 @@ void __init ath79_register_eth(unsigned
+@@ -1093,6 +1093,8 @@ void __init ath79_register_eth(unsigned
  
  		pdata->has_gbit = 1;
  		pdata->is_ar724x = 1;
@@ -127,3 +127,29 @@ Index: build_dir/target/linux/ar71xx/files/arch/mips/ath79/dev-eth.c
  		break;
  
  	default:
+Index: build_dir/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
+===================================================================
+--- build_dir.orig/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
++++ build_dir/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
+@@ -19,6 +19,21 @@ case "$board" in
+ 	archer-c60-v2)
+ 		echo $(macaddr_add $(mtd_get_mac_binary mac 8)  $(($PHYNBR - 1)) ) > /sys${DEVPATH}/macaddress
+ 		;;
++	compex,wpj344)
++		# Use our reserved MAC address instead of the card's MAC
++		[ "$PHYNBR" -eq 1 ] && \
++			echo $(mtd_get_mac_binary u-boot 188448) > /sys${DEVPATH}/macaddress
++		;;
++	compex,wpj558)
++		# Use our reserved MAC address instead of the card's MAC
++		[ "$PHYNBR" -eq 1 ] && \
++			echo $(mtd_get_mac_binary u-boot 188448) > /sys${DEVPATH}/macaddress
++		;;
++	compex,wpj563)
++		# Use our reserved MAC address instead of the card's MAC
++		[ "$PHYNBR" -eq 1 ] && \
++			echo $(mtd_get_mac_binary u-boot 188448) > /sys${DEVPATH}/macaddress
++		;;
+ 	*)
+ 		;;
+ esac

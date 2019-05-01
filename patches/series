@@ -122,6 +122,4 @@ kernel/0085-ag71xx-improve-rx-performance.patch
 0230-lower-min-free-kbytes-avoid-oom.patch
 0229-ath79-add-compex-dts-support.patch
 packages/0238-nodogsplash-imagestream
-0231-ath79-4.19-kernel.patch
-packages/0239-ovs-fix-missing-nsh-conntrack-extras.patch
 packages/0240-coova-chilli-fix-init-disabled.patch
