@@ -32,13 +32,13 @@ config switch
 	option alias_lan '1'
 
 config switch_vlan
-	option device 'switch0'
-	option vlan '3'
-	option ports '5 6t'
-	option vid '4000'
+        option device 'switch0'
+        option vlan '3'
+        option ports 'wan cput'
+        option vid '4000'
 
 config switch_vlan
-	option device 'switch0'
-	option vlan '4'
-	option ports '1 6t'
-	option vid '4001'
+        option device 'switch0'
+        option vlan '4'
+        option ports 'lan cput'
+        option vid '4001'

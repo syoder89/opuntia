@@ -33,5 +33,11 @@ start() {
                 uci set network.@switch[0].alias_lan='1'
                 uci commit network
                 ;;
+        wpj563)
+                uci set network.@switch[0].alias_cpu='0'
+                uci set network.@switch[0].alias_wan='3'
+                uci set network.@switch[0].alias_lan='2'
+                uci commit network
+                ;;
         esac
 }
