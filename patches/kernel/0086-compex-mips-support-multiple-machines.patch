@@ -1,0 +1,104 @@
+Index: build_dir/target/linux/ar71xx/patches-4.14/999-scott-compex-mips-support-multiple-machines.patch
+===================================================================
+--- /dev/null
++++ build_dir/target/linux/ar71xx/patches-4.14/999-scott-compex-mips-support-multiple-machines.patch
+@@ -0,0 +1,36 @@
++Index: linux-4.14.113/arch/mips/ath79/setup.c
++===================================================================
++--- linux-4.14.113.orig/arch/mips/ath79/setup.c
+++++ linux-4.14.113/arch/mips/ath79/setup.c
++@@ -311,6 +311,31 @@ void __init plat_time_init(void)
++ 
++ __setup("board=", mips_machtype_setup);
++ 
+++__init int compex_mips_mach_detect(char *enabled)
+++{
+++	switch(ath79_soc) {
+++		case ATH79_SOC_AR9344:
+++			pr_info("Detected compex board WPJ344\n");
+++			return mips_machtype_setup("WPJ344");
+++		break;
+++		case ATH79_SOC_QCA9558:
+++			pr_info("Detected compex board WPJ558\n");
+++			return mips_machtype_setup("WPJ558");
+++		break;
+++		case ATH79_SOC_QCA956X:
+++			pr_info("Detected compex board WPJ563\n");
+++			return mips_machtype_setup("WPJ563");
+++		break;
+++		default:
+++			pr_info("Unknown board %d\n", ath79_soc);
+++			return 0;
+++		break;
+++	}
+++	return 0;
+++}
+++
+++__setup("cpx_mips=", compex_mips_mach_detect);
+++
++ static int __init ath79_setup(void)
++ {
++ 	if  (mips_machtype == ATH79_MACH_GENERIC_OF)
+Index: build_dir/target/linux/ar71xx/image/generic.mk
+===================================================================
+--- build_dir.orig/target/linux/ar71xx/image/generic.mk
++++ build_dir/target/linux/ar71xx/image/generic.mk
+@@ -1277,8 +1277,8 @@ define Device/CpxImageParams16M
+ endef
+ 
+ define Build/Cpxfactory16M
+-        $(STAGING_DIR_HOST)/bin/mkmylofw -B $(BOARDNAME) -s $(FIRMWARE_SIZE) \
+-                -p0x$(KSTART):$(KERNEL_SIZE):al:0x80060000:$(BOARDNAME):$(IMAGE_KERNEL) \
++        $(STAGING_DIR_HOST)/bin/mkmylofw -B $(CPXBOARD) -s $(FIRMWARE_SIZE) \
++                -p0x$(KSTART):$(KERNEL_SIZE):al:0x80060000:$(CPXBOARD):$(IMAGE_KERNEL) \
+                 -p0x$(RSTART):$(ROOTFS_SIZE):::rootfs:$(IMAGE_ROOTFS) \
+                 -p0x$(P1START):0x010000 \
+                 -p0x$(P2START):0x010000 \
+@@ -1288,14 +1288,16 @@ endef
+ define Device/wpj342
+   $(Device/wpj-16m)
+   DEVICE_TITLE := Compex WPJ342 (16MB flash)
+-  BOARDNAME := WPJ342
++  CPXBOARD := WPJ342
++  CMDLINE += cpx_mips=1
+ endef
+ TARGET_DEVICES += wpj342
+ 
+ define Device/wpj344
+   $(Device/wpj-16m)
+   DEVICE_TITLE := Compex WPJ344 (16MB flash)
+-  BOARDNAME := WPJ344
++  CPXBOARD := WPJ344
++  CMDLINE += cpx_mips=1
+   SUPPORTED_DEVICES := wpj344
+   IMAGE/sysupgrade.bin := append-kernel | pad-to $$$$(BLOCKSIZE) | \
+ 	append-rootfs | pad-rootfs | append-metadata | check-size $$$$(IMAGE_SIZE)
+@@ -1305,14 +1307,16 @@ TARGET_DEVICES += wpj344
+ define Device/wpj531
+   $(Device/wpj-16m)
+   DEVICE_TITLE := Compex WPJ531 (16MB flash)
+-  BOARDNAME := WPJ531
++  CPXBOARD := WPJ531
++  CMDLINE += cpx_mips=1
+ endef
+ TARGET_DEVICES += wpj531
+ 
+ define Device/wpj558
+   $(Device/wpj-16m)
+   DEVICE_TITLE := Compex WPJ558 (16MB flash)
+-  BOARDNAME := WPJ558
++  CPXBOARD := WPJ558
++  CMDLINE += cpx_mips=1
+   SUPPORTED_DEVICES := wpj558
+   IMAGE/sysupgrade.bin := append-kernel | pad-to $$$$(BLOCKSIZE) | \
+ 	append-rootfs | pad-rootfs | append-metadata | check-size $$$$(IMAGE_SIZE)
+@@ -1322,7 +1326,8 @@ TARGET_DEVICES += wpj558
+ define Device/wpj563
+   $(Device/wpj-16m)
+   DEVICE_TITLE := Compex WPJ563 (16MB flash)
+-  BOARDNAME := WPJ563
++  CPXBOARD := WPJ563
++  CMDLINE += cpx_mips=1
+ endef
+ TARGET_DEVICES += wpj563
+ 
