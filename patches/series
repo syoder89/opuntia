@@ -124,3 +124,4 @@ kernel/0085-ag71xx-improve-rx-performance.patch
 packages/0238-nodogsplash-imagestream
 packages/0240-coova-chilli-fix-init-disabled.patch
 kernel/0086-compex-mips-support-multiple-machines.patch
+0165-Fix-compex-leds.patch

@@ -1,0 +1,21 @@
+Index: build_dir/target/linux/ar71xx/base-files/etc/board.d/01_leds
+===================================================================
+--- build_dir.orig/target/linux/ar71xx/base-files/etc/board.d/01_leds
++++ build_dir/target/linux/ar71xx/base-files/etc/board.d/01_leds
+@@ -1121,6 +1121,16 @@ zcn-1523h-5)
+ 	ucidef_set_led_netdev "lan1" "lan1" "zcn-1523h:green:lan1" "eth0"
+ 	ucidef_set_led_netdev "lan2" "lan2" "zcn-1523h:green:lan2" "eth1"
+ 	;;
++wpj344|\
++wpj558|\
++wpj563)
++        ucidef_set_rssimon "wlan1" "2000000" "1"
++        ucidef_set_led_rssi "rssilow" "RSSILOW" "wpj344:red:sig1" "wlan1" "1" "100"
++        ucidef_set_led_rssi "rssimediumlow" "RSSIMEDIUMLOW" "wpj344:yellow:sig2" "wlan1" "26" "100"
++        ucidef_set_led_rssi "rssimediumhigh" "RSSIMEDIUMHIGH" "wpj344:green:sig3" "wlan1" "51" "100"
++        ucidef_set_led_rssi "rssihigh" "RSSIHIGH" "wpj344:green:sig4" "wlan1" "76" "100"
++        ;;
++
+ esac
+ 
+ board_config_flush
