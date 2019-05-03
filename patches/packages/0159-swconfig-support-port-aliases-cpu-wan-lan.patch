@@ -1,7 +1,9 @@
---- a/package/network/config/swconfig/src/swlib.c
-+++ b/package/network/config/swconfig/src/swlib.c
-@@ -51,6 +51,32 @@ static struct nla_policy portmap_policy[
- 	[SWITCH_PORTMAP_VIRT] = { .type = NLA_U32 },
+Index: build_dir/package/network/config/swconfig/src/swlib.c
+===================================================================
+--- build_dir.orig/package/network/config/swconfig/src/swlib.c
++++ build_dir/package/network/config/swconfig/src/swlib.c
+@@ -61,6 +61,42 @@ static struct nla_policy link_policy[SWI
+ 	[SWITCH_LINK_FLAG_EEE_1000BASET] = { .type = NLA_FLAG },
  };
  
 +int alias_cpu = -1, alias_wan = -1, alias_lan = -1;
@@ -24,16 +26,26 @@
 +		found=1;
 +	}
 +	if (found) {
-+		tmp[strlen(tmp)] = ptr[3];
++		char c = ptr[3];
++		// Copy the tag character (t) unless end of string
++		// Replace tag with a space unless end of string
++		if (c != '\0') {
++			tmp[strlen(tmp)] = c;
++			c = ' ';
++		}
++		else
++			tmp[strlen(tmp)] = ' ';
++		// Copy all of tmp may not be null terminated if no tag present
 +		memcpy(ptr, tmp, strlen(tmp));
-+		ptr[3] = ' ';
++		// Copy the null terminator or space from above
++		ptr[3] = c;
 +	}
 +}
 +
  static inline void *
  swlib_alloc(size_t size)
  {
-@@ -378,6 +404,7 @@ int swlib_set_attr_string(struct switch_
+@@ -459,6 +495,7 @@ int swlib_set_attr_string(struct switch_
  			if (!*ptr)
  				break;
  
@@ -41,7 +53,7 @@
  			if (!isdigit(*ptr))
  				return -1;
  
-@@ -411,7 +438,6 @@ int swlib_set_attr_string(struct switch_
+@@ -534,7 +571,6 @@ int swlib_set_attr_string(struct switch_
  	return swlib_set_attr(dev, a, &val);
  }
  
@@ -49,8 +61,10 @@
  struct attrlist_arg {
  	int id;
  	int atype;
---- a/package/network/config/swconfig/src/uci.c
-+++ b/package/network/config/swconfig/src/uci.c
+Index: build_dir/package/network/config/swconfig/src/uci.c
+===================================================================
+--- build_dir.orig/package/network/config/swconfig/src/uci.c
++++ build_dir/package/network/config/swconfig/src/uci.c
 @@ -53,6 +53,8 @@ struct swlib_setting early_settings[] =
  static struct swlib_setting *settings;
  static struct swlib_setting **head;

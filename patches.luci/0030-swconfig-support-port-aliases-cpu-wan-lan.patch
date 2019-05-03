@@ -1,0 +1,61 @@
+Index: luci/modules/luci-base/luasrc/model/network.lua
+===================================================================
+--- luci.orig/modules/luci-base/luasrc/model/network.lua
++++ luci/modules/luci-base/luasrc/model/network.lua
+@@ -439,7 +439,6 @@ function init(cursor)
+ 						port.label = role:upper()
+ 					end
+ 
+-					port.role = nil
+ 					port.index = nil
+ 				end
+ 
+Index: luci/modules/luci-mod-network/luasrc/model/cbi/admin_network/vlan.lua
+===================================================================
+--- luci.orig/modules/luci-mod-network/luasrc/model/cbi/admin_network/vlan.lua
++++ luci/modules/luci-mod-network/luasrc/model/cbi/admin_network/vlan.lua
+@@ -234,11 +234,26 @@ m.uci:foreach("network", "switch",
+ 		local port_opts = { }
+ 		local untagged  = { }
+ 
++		local getrole = function(pn)
++			local pt
++               		for _, pt in ipairs(topo.ports) do
++				if tostring(pt.num) == pn then
++					return pt.role
++				end
++			end
++			return nil
++		end
++
+ 		-- Parse current tagging state from the "ports" option.
+ 		local portvalue = function(self, section)
+ 			local pt
++			local role = getrole(self.option)
+ 			for pt in (m:get(section, "ports") or ""):gmatch("%w+") do
+-				local pc, tu = pt:match("^(%d+)([tu]*)")
++				local pr, tr = pt:match("^([^t%s]+)([t]*)")
++				local pc, tu = pt:match("^([%d]+)([tu]*)")
++				if pr then
++					if pr == role then return (#tr > 0) and tr or "u" end
++				end
+ 				if pc == self.option then return (#tu > 0) and tu or "u" end
+ 			end
+ 			return ""
+@@ -294,10 +309,14 @@ m.uci:foreach("network", "switch",
+ 			local p = { }
+ 			for _, o in ipairs(port_opts) do
+ 				local new_tag = o:formvalue(section)
++				local pn = getrole(o.option)
++				if not pn then
++					pn = o.option
++				end
+ 				if new_tag == "t" then
+-					p[#p+1] = o.option .. new_tag
++					p[#p+1] = pn .. new_tag
+ 				elseif new_tag == "u" then
+-					p[#p+1] = o.option
++					p[#p+1] = pn
+ 				end
+ 
+ 				if o.info and o.info.device then
