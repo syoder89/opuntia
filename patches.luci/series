@@ -14,6 +14,5 @@
 0024-allow-uncompressed-restore-archive.patch
 801-wifi-alliance-cert-defaults.patch
 0027-luci-app-statistics-disable-cpufreq.patch
-0028-add-firewall-offload-toggle.patch
 0029-fix-broken-dropdowns-on-dependencies.patch
 0030-swconfig-support-port-aliases-cpu-wan-lan.patch
