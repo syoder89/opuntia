@@ -11,7 +11,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/imagestream-envoy-configs/config
 	config IS_ROUTER_FULL
 		bool "Full ImageStream router configs"
-		default y
+		default n
 endef
 
 define Package/imagestream-envoy-configs
