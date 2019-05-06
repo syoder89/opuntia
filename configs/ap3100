@@ -11,6 +11,7 @@ CONFIG_HAVE_DOT_CONFIG=y
 # CONFIG_TARGET_sunxi is not set
 # CONFIG_TARGET_ath25 is not set
 CONFIG_TARGET_ar71xx=y
+# CONFIG_TARGET_ath79 is not set
 # CONFIG_TARGET_at91 is not set
 # CONFIG_TARGET_brcm2708 is not set
 # CONFIG_TARGET_bcm53xx is not set
@@ -93,10 +94,10 @@ CONFIG_TARGET_ar71xx_generic=y
 # CONFIG_TARGET_ar71xx_generic_CF-E316N-V2 is not set
 # CONFIG_TARGET_ar71xx_generic_WP543 is not set
 # CONFIG_TARGET_ar71xx_generic_WPE72 is not set
-CONFIG_TARGET_PROFILE="DEVICE_wpj344"
-CONFIG_TARGET_ar71xx_generic_DEVICE_wpj344=y
+# CONFIG_TARGET_ar71xx_generic_WPJ344 is not set
 # CONFIG_TARGET_ar71xx_generic_WPJ531 is not set
-# CONFIG_TARGET_ar71xx_generic_WPJ558=y
+CONFIG_TARGET_ar71xx_generic_DEVICE_wpj563=y
+CONFIG_TARGET_PROFILE="DEVICE_wpj563"
 # CONFIG_TARGET_ar71xx_generic_DHP1565A1 is not set
 # CONFIG_TARGET_ar71xx_generic_DIR505A1 is not set
 # CONFIG_TARGET_ar71xx_generic_DIR600A1 is not set
@@ -214,8 +215,8 @@ CONFIG_TARGET_ar71xx_generic_DEVICE_wpj344=y
 CONFIG_HAS_SUBTARGETS=y
 CONFIG_TARGET_BOARD="ar71xx"
 CONFIG_TARGET_ARCH_PACKAGES="ar71xx"
-CONFIG_DEFAULT_TARGET_OPTIMIZATION="-Os -pipe -mno-branch-likely -mips32r2 -mtune=34kc"
-CONFIG_CPU_TYPE="34kc"
+CONFIG_DEFAULT_TARGET_OPTIMIZATION="-Os -pipe -mips32r2 -mtune=74kc -fno-caller-saves -freorder-blocks"
+CONFIG_CPU_TYPE="74kc"
 CONFIG_LINUX_4_1=y
 CONFIG_DEFAULT_base-files=y
 CONFIG_DEFAULT_busybox=y
@@ -228,65 +229,16 @@ CONFIG_DEFAULT_iptables=y
 CONFIG_DEFAULT_iwinfo=y
 CONFIG_DEFAULT_kmod-ath9k=y
 CONFIG_DEFAULT_kmod-gpio-button-hotplug=y
-CONFIG_DEFAULT_kmod-ledtrig-usbdev=y
 CONFIG_DEFAULT_kmod-nf-nathelper=y
-CONFIG_DEFAULT_kmod-usb-core=y
-CONFIG_DEFAULT_kmod-usb-ohci=y
-CONFIG_DEFAULT_kmod-usb2=y
-CONFIG_DEFAULT_libc=y
-CONFIG_DEFAULT_libgcc=y
-CONFIG_DEFAULT_mtd=y
-CONFIG_DEFAULT_netifd=y
 CONFIG_DEFAULT_odhcp6c=y
 CONFIG_DEFAULT_odhcpd=y
 CONFIG_DEFAULT_opkg=y
 CONFIG_DEFAULT_ppp=y
 CONFIG_DEFAULT_ppp-mod-pppoe=y
-CONFIG_DEFAULT_swconfig=y
 CONFIG_DEFAULT_uboot-envtools=y
-CONFIG_DEFAULT_uci=y
-CONFIG_DEFAULT_wpad-mini=y
-CONFIG_AUDIO_SUPPORT=y
-CONFIG_GPIO_SUPPORT=y
-CONFIG_PCI_SUPPORT=y
-CONFIG_USB_SUPPORT=y
-CONFIG_BIG_ENDIAN=y
-CONFIG_USES_SQUASHFS=y
-CONFIG_HAS_MIPS16=y
-CONFIG_mips=y
-CONFIG_ARCH="mips"
-
-#
-# Target Images
-#
-# CONFIG_TARGET_ROOTFS_INITRAMFS is not set
-CONFIG_EXTERNAL_CPIO=""
-
-#
-# Root filesystem archives
-#
-# CONFIG_TARGET_ROOTFS_CPIOGZ is not set
-CONFIG_TARGET_ROOTFS_TARGZ=y
-
-#
-# Root filesystem images
-#
-# CONFIG_TARGET_ROOTFS_EXT4FS is not set
-# CONFIG_TARGET_ROOTFS_JFFS2 is not set
-CONFIG_TARGET_ROOTFS_SQUASHFS=y
-CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=256
-CONFIG_TARGET_UBIFS_FREE_SPACE_FIXUP=y
-CONFIG_TARGET_UBIFS_JOURNAL_SIZE=""
-
-#
-# Image Options
-#
-CONFIG_TARGET_ROOTFS_INCLUDE_UIMAGE=y
-CONFIG_TARGET_ROOTFS_INCLUDE_ZIMAGE=y
-CONFIG_TARGET_ROOTFS_INCLUDE_FIT=y
 
 CONFIG_VERSION_PRODUCT="AP3100"
-CONFIG_VERSION_HWREV="1"
+CONFIG_VERSION_HWREV="2"
 
 #
 # ImageStream
@@ -307,7 +259,7 @@ CONFIG_PACKAGE_imagestream-wifi-ap-bootstrap=y
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs.v3 is not set
 # CONFIG_PACKAGE_imagestream-wifi-ap-installer is not set
 # CONFIG_PACKAGE_imagestream-wifi-ap-installer-i is not set
-CONFIG_PACKAGE_imagestream-wifi-ap-configs.ap3100=y
+CONFIG_PACKAGE_imagestream-wifi-ap-configs.ap3000=y
 # CONFIG_PACKAGE_ktt30-graphics is not set
 # CONFIG_PACKAGE_luci-app-ISismesh is not set
 CONFIG_PACKAGE_luci-app-ipsec=y
@@ -315,5 +267,47 @@ CONFIG_PACKAGE_luci-app-isis-openvpn=y
 CONFIG_PACKAGE_luci-app-snmp=y
 CONFIG_PACKAGE_luci-theme-opuntia=y
 CONFIG_PACKAGE_stats=y
+# CONFIG_PACKAGE_wifi-watchdog is not set
 
-CONFIG_ATH10K_MAC_OVERRIDE=y
+# CONFIG_PACKAGE_kmod-ath10k is not set
+CONFIG_PACKAGE_kmod-ath10k-ct=y
+# CONFIG_PACKAGE_ath10k-firmware-qca988x is not set
+# CONFIG_PACKAGE_ath10k-firmware-qca9888-ct is not set
+# CONFIG_PACKAGE_ath10k-firmware-qca988x-ct is not set
+CONFIG_PACKAGE_ath10k-firmware-qca988x-ct-htt=y
+# CONFIG_PACKAGE_ath10k-firmware-qca988x-ct-htt-beta is not set
+
+# CONFIG_PACKAGE_kmod-via-rhine is not set
+# CONFIG_PACKAGE_python is not set
+# CONFIG_PACKAGE_libgnutls is not set
+# CONFIG_PACKAGE_chat is not set
+# CONFIG_PACKAGE_etherwake is not set
+# CONFIG_PACKAGE_pppstats is not set
+# CONFIG_PACKAGE_raddump is not set
+# CONFIG_PACKAGE_radiusclient-ng is not set
+# CONFIG_PACKAGE_ser2net is not set
+# CONFIG_PACKAGE_serialoverip is not set
+# CONFIG_PACKAGE_smtptrapd is not set
+# CONFIG_PACKAGE_nstat is not set
+# CONFIG_PACKAGE_quagga-ripd is not set
+# CONFIG_PACKAGE_quagga-ripngd is not set
+# CONFIG_PACKAGE_macchanger is not set
+# CONFIG_PACKAGE_minicom is not set
+CONFIG_USE_UCLIBCXX=y
+# CONFIG_USE_LIBSTDCXX is not set
+
+# CONFIG_DEFAULT_TARGET_OPTIMIZATION="-Os -pipe -mno-branch-likely -mips32r2 -mtune=74kc"
+# CONFIG_CPU_TYPE="74kc"
+# CONFIG_TARGET_OPTIONS=y
+# CONFIG_TARGET_OPTIMIZATION="-Os -pipe -mno-branch-likely -mips32r2 -mtune=74kc"
+# CONFIG_SOFT_FLOAT is not set
+# CONFIG_USE_MIPS16=y
+# CONFIG_ATH10K_MAC_OVERRIDE is not set
+CONFIG_PACKAGE_ATH_DEBUG=y
+CONFIG_PACKAGE_ATH_SPECTRAL=y
+# CONFIG_PACKAGE_kmod-shortcut_fe is not set
+CONFIG_PACKAGE_openvswitch=y
+CONFIG_PACKAGE_kmod-openvswitch=y
+CONFIG_PACKAGE_kmod-nft-offload=y
+CONFIG_PACKAGE_conntrack=y
+CONFIG_PACKAGE_conntrackd=y

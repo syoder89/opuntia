@@ -26,8 +26,8 @@ config switch
         option reset '1'
         option enable_vlan '1'
         option alias_cpu '0'
-        option alias_wan '2'
-        option alias_lan '3'
+        option alias_wan '3'
+        option alias_lan '2'
 
 config switch_vlan
         option device 'switch0'
