@@ -45,7 +45,7 @@ cd /tmp
 
 # Find the latest AP sysupgrade image
 # Ex: opuntia-AP2100-4.8.10-r41429-sysupgrade.bin
-IMAGE=$(wget -qO - ${URL} | grep -o 'opuntia-${DISTRIB_PRODUCT}-[0-9]*\.[0-9]*\.[0-9]*-r[0-9]*-sysupgrade\.bin' | sort -rn | head -n 1)
+IMAGE=$(wget -qO - ${URL} | grep -o 'opuntia-'${DISTRIB_PRODUCT}'-[0-9]*\.[0-9]*\.[0-9]*-r[0-9]*-sysupgrade\.bin' | sort -rn | head -n 1)
 do_fetch "${URL}/${IMAGE}" "image"
 
 logger "Installing post-installation script..."
