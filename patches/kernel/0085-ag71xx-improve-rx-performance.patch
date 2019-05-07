@@ -1,33 +1,33 @@
-Index: build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
-===================================================================
---- build_dir.orig/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
-+++ build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
-@@ -45,7 +45,8 @@
-  * D-cache misses and lots more wasted cycles than we'll ever
-  * possibly gain from saving instructions.
-  */
--#define AG71XX_NAPI_WEIGHT	32
-+/* Scott tested and actually with the rx routine rewrite bigger is better */
-+#define AG71XX_NAPI_WEIGHT	128
- #define AG71XX_OOM_REFILL	(1 + HZ/10)
- 
- #define AG71XX_INT_ERR	(AG71XX_INT_RX_BE | AG71XX_INT_TX_BE)
-@@ -60,11 +61,11 @@
- #define AG71XX_TX_RING_SPLIT		512
- #define AG71XX_TX_RING_DS_PER_PKT	DIV_ROUND_UP(AG71XX_TX_MTU_LEN, \
- 						     AG71XX_TX_RING_SPLIT)
--#define AG71XX_TX_RING_SIZE_DEFAULT	128
--#define AG71XX_RX_RING_SIZE_DEFAULT	256
-+#define AG71XX_TX_RING_SIZE_DEFAULT	256
-+#define AG71XX_RX_RING_SIZE_DEFAULT	4096
- 
--#define AG71XX_TX_RING_SIZE_MAX		128
--#define AG71XX_RX_RING_SIZE_MAX		256
-+#define AG71XX_TX_RING_SIZE_MAX		256
-+#define AG71XX_RX_RING_SIZE_MAX		4096
- 
- #define QCA955X_SGMII_LINK_WAR_MAX_TRY	10
- 
+#Index: build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
+#===================================================================
+#--- build_dir.orig/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
+#+++ build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
+#@@ -45,7 +45,8 @@
+#  * D-cache misses and lots more wasted cycles than we'll ever
+#  * possibly gain from saving instructions.
+#  */
+#-#define AG71XX_NAPI_WEIGHT	32
+#+/* Scott tested and actually with the rx routine rewrite bigger is better */
+#+#define AG71XX_NAPI_WEIGHT	128
+# #define AG71XX_OOM_REFILL	(1 + HZ/10)
+# 
+# #define AG71XX_INT_ERR	(AG71XX_INT_RX_BE | AG71XX_INT_TX_BE)
+#@@ -60,11 +61,11 @@
+# #define AG71XX_TX_RING_SPLIT		512
+# #define AG71XX_TX_RING_DS_PER_PKT	DIV_ROUND_UP(AG71XX_TX_MTU_LEN, \
+# 						     AG71XX_TX_RING_SPLIT)
+#-#define AG71XX_TX_RING_SIZE_DEFAULT	128
+#-#define AG71XX_RX_RING_SIZE_DEFAULT	256
+#+#define AG71XX_TX_RING_SIZE_DEFAULT	256
+#+#define AG71XX_RX_RING_SIZE_DEFAULT	4096
+# 
+#-#define AG71XX_TX_RING_SIZE_MAX		128
+#-#define AG71XX_RX_RING_SIZE_MAX		256
+#+#define AG71XX_TX_RING_SIZE_MAX		256
+#+#define AG71XX_RX_RING_SIZE_MAX		4096
+# 
+# #define QCA955X_SGMII_LINK_WAR_MAX_TRY	10
+# 
 Index: build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
 ===================================================================
 --- build_dir.orig/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
@@ -93,44 +93,44 @@ Index: build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/a
  
  	DBG("%s: rx finish, curr=%u, dirty=%u, done=%d\n",
  		dev->name, ring->curr, ring->dirty, done);
-Index: build_dir/target/linux/ath79/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
-===================================================================
---- build_dir.orig/target/linux/ath79/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
-+++ build_dir/target/linux/ath79/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
-@@ -47,7 +47,8 @@
-  * D-cache misses and lots more wasted cycles than we'll ever
-  * possibly gain from saving instructions.
-  */
--#define AG71XX_NAPI_WEIGHT	32
-+/* Scott tested and actually with the rx routine rewrite bigger is better */
-+#define AG71XX_NAPI_WEIGHT     128
- #define AG71XX_OOM_REFILL	(1 + HZ/10)
- 
- #define AG71XX_INT_ERR	(AG71XX_INT_RX_BE | AG71XX_INT_TX_BE)
-@@ -62,11 +63,11 @@
- #define AG71XX_TX_RING_SPLIT		512
- #define AG71XX_TX_RING_DS_PER_PKT	DIV_ROUND_UP(AG71XX_TX_MTU_LEN, \
- 						     AG71XX_TX_RING_SPLIT)
--#define AG71XX_TX_RING_SIZE_DEFAULT	128
--#define AG71XX_RX_RING_SIZE_DEFAULT	256
-+#define AG71XX_TX_RING_SIZE_DEFAULT    256
-+#define AG71XX_RX_RING_SIZE_DEFAULT    4096
- 
--#define AG71XX_TX_RING_SIZE_MAX		128
--#define AG71XX_RX_RING_SIZE_MAX		256
-+#define AG71XX_TX_RING_SIZE_MAX        256
-+#define AG71XX_RX_RING_SIZE_MAX        4096
- 
- #ifdef CONFIG_AG71XX_DEBUG
- #define DBG(fmt, args...)	pr_debug(fmt, ## args)
-@@ -160,6 +161,7 @@ struct ag71xx {
- 	u16			rx_buf_size;
- 	u8			rx_buf_offset;
- 	u8			tx_hang_workaround:1;
-+	u8			pad[2];
- 
- 	struct net_device	*dev;
- 	struct platform_device  *pdev;
+#Index: build_dir/target/linux/ath79/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
+#===================================================================
+#--- build_dir.orig/target/linux/ath79/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
+#+++ build_dir/target/linux/ath79/files/drivers/net/ethernet/atheros/ag71xx/ag71xx.h
+#@@ -47,7 +47,8 @@
+#  * D-cache misses and lots more wasted cycles than we'll ever
+#  * possibly gain from saving instructions.
+#  */
+#-#define AG71XX_NAPI_WEIGHT	32
+#+/* Scott tested and actually with the rx routine rewrite bigger is better */
+#+#define AG71XX_NAPI_WEIGHT     128
+# #define AG71XX_OOM_REFILL	(1 + HZ/10)
+# 
+# #define AG71XX_INT_ERR	(AG71XX_INT_RX_BE | AG71XX_INT_TX_BE)
+#@@ -62,11 +63,11 @@
+# #define AG71XX_TX_RING_SPLIT		512
+# #define AG71XX_TX_RING_DS_PER_PKT	DIV_ROUND_UP(AG71XX_TX_MTU_LEN, \
+# 						     AG71XX_TX_RING_SPLIT)
+#-#define AG71XX_TX_RING_SIZE_DEFAULT	128
+#-#define AG71XX_RX_RING_SIZE_DEFAULT	256
+#+#define AG71XX_TX_RING_SIZE_DEFAULT    256
+#+#define AG71XX_RX_RING_SIZE_DEFAULT    4096
+# 
+#-#define AG71XX_TX_RING_SIZE_MAX		128
+#-#define AG71XX_RX_RING_SIZE_MAX		256
+#+#define AG71XX_TX_RING_SIZE_MAX        256
+#+#define AG71XX_RX_RING_SIZE_MAX        4096
+# 
+# #ifdef CONFIG_AG71XX_DEBUG
+# #define DBG(fmt, args...)	pr_debug(fmt, ## args)
+#@@ -160,6 +161,7 @@ struct ag71xx {
+# 	u16			rx_buf_size;
+# 	u8			rx_buf_offset;
+# 	u8			tx_hang_workaround:1;
+#+	u8			pad[2];
+# 
+# 	struct net_device	*dev;
+# 	struct platform_device  *pdev;
 Index: build_dir/target/linux/ath79/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
 ===================================================================
 --- build_dir.orig/target/linux/ath79/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
