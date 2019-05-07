@@ -1,0 +1,40 @@
+Index: build_dir.ap3100/package/network/config/netifd/files/lib/netifd/dhcp.script
+===================================================================
+--- build_dir.ap3100.orig/package/network/config/netifd/files/lib/netifd/dhcp.script
++++ build_dir.ap3100/package/network/config/netifd/files/lib/netifd/dhcp.script
+@@ -3,6 +3,7 @@
+ 
+ . /lib/functions.sh
+ . /lib/netifd/netifd-proto.sh
++. /lib/functions/network.sh
+ 
+ set_classless_routes() {
+ 	local max=128
+@@ -95,9 +96,27 @@ deconfig_interface() {
+ 	proto_send_update "$INTERFACE"
+ }
+ 
++check_fallback() {
++        ip=$(uci get network.${INTERFACE}.fb_ipaddr)
++        [ -z "$ip" ] && exit 0
++        subnet=$(uci get network.${INTERFACE}.fb_netmask)
++        router=$(uci get network.${INTERFACE}.fb_gateway)
++        dns=$(uci get network.${INTERFACE}.fb_dns)
++        fb_delay=$(uci get network.${INTERFACE}.fb_delay || echo 30)
++        sleep $fb_delay
++        network_get_ipaddr NET_IP "$INTERFACE"
++        if [ -z "$NET_IP" ]; then
++		logger "No DHCP address on $INTERFACE after $fb_delay seconds."
++		logger "Configuring fallback IP $ip $subnet on $INTERFACE"
++		setup_interface
++        fi
++
++}
++
+ case "$1" in
+ 	deconfig)
+ 		deconfig_interface
++		check_fallback &
+ 	;;
+ 	renew|bound)
+ 		setup_interface
