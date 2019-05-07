@@ -118,7 +118,6 @@ packages/0236-batctl-fix-default-symlink.patch
 packages/0237-strongswan-increase-starter-timeout.patch
 packages/ath10k-firmware-update.patch
 kernel/0084-ag71xx-fix-max-mtu.patch
-kernel/0085-ag71xx-improve-rx-performance.patch
 0230-lower-min-free-kbytes-avoid-oom.patch
 0229-ath79-add-compex-dts-support.patch
 packages/0238-nodogsplash-imagestream
