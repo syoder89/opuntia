@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=imagestream-wifi-ap-installer
-PKG_VERSION:=1.0
+PKG_VERSION:=2.0
 PKG_RELEASE:=1
 
 PKG_MAINTAINER:=Scott Yoder <syoder@imagestream.com>
@@ -11,11 +11,11 @@ include $(INCLUDE_DIR)/package.mk
 define Package/imagestream-wifi-ap-installer
   SECTION:=sys
   CATEGORY:=ImageStream
-  TITLE:=ImageStream WIFI AP install script
+  TITLE:=ImageStream WiFi AP install script
 endef
 
 define Package/imagestream-wifi-ap-installer/description
-  ImageStream WIFI AP install script
+  ImageStream WiFi AP install script
 endef
 
 define Build/Prepare
