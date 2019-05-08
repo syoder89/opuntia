@@ -1,0 +1,38 @@
+#!/bin/sh /etc/rc.common
+#
+#
+# ImageStream hardware version check for WiFI APs
+
+START=15
+STOP=99
+
+get_board_name() {
+        local name
+
+        [ -f /tmp/sysinfo/board_name ] && name=$(cat /tmp/sysinfo/board_name)
+        [ -z "$name" ] && name="unknown"
+
+        echo "$name"
+}
+
+set_hw_rev() {
+	sed -i 's/^DISTRIB_HWREV="[^'$1']"/DISTRIB_HWREV="'$1'"/g' /etc/opuntia_release
+}
+
+start() {
+        board=$(get_board_name)
+
+        case "$board" in
+        wpj344)
+		set_hw_rev 1
+                ;;
+
+        wpj558)
+		set_hw_rev 1
+                ;;
+        wpj563)
+		set_hw_rev 2
+                ;;
+        esac
+}
+
