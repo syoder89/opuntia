@@ -13,7 +13,7 @@ STOP=15
 URL="http://router-updates.imagestream.com/opuntia/current/"
 INSTALL_URL="http://install1.imagestream.com/ap-installer/"
 RC_POSTINSTALL="rc.postinstall"
-PRODUCT_NAME="Access Point"
+PRODUCT_NAME="WiFi AP"
 
 do_fetch() {
         fetch_url="$1"
