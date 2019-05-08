@@ -13,6 +13,17 @@ FileCommon=/var/ipsec/strongswan.conf
  
 FolderCerts=/var/ipsec/ipsec.d
  
+ipsec_enabled=0
+
+ConfigGlobal()
+{
+  config_get_bool ipsec_enabled $1 enabled 0
+}
+
+check_enabled() {
+        [ $ipsec_enabled -gt 0 ]
+}
+ 
 ConfigUser()
 {
   local enabled
@@ -406,6 +417,10 @@ do_unlock() {
 }
 
 start() {
+  config_load ipsec
+  config_foreach ConfigGlobal ipsec
+  check_enabled || return 1
+
   do_lock
 #  lock /var/run/ipsec-init.pid
   stop_watchdog
