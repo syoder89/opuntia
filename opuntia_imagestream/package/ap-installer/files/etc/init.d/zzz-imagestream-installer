@@ -1,11 +1,10 @@
-#!/bin/sh
+#!/bin/sh /etc/rc.common
+#
+#
 # ImageStream AP netboot installer
 
-# This script doesn't work correctly from uci-defaults, so pop it into rc.local instead
-[ -f /etc/uci-defaults/99-imagestream-installer ] && {
-	cp /etc/uci-defaults/99-imagestream-installer /etc/rc.local
-	exit 0
-}
+START=99
+STOP=15
 
 . /lib/functions.sh
 . /lib/upgrade/platform.sh
@@ -36,7 +35,7 @@ do_fetch() {
         fi
 }
 
-do_install() {
+start() {
 	# Start up the random number generator
 	/etc/init.d/haveged start
 	sleep 30
@@ -65,6 +64,3 @@ EOM
 	logger "Installing operating system..."
 	sysupgrade ${IMAGE}
 }
-
-do_install &
-exit 0
