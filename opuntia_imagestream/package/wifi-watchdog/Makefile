@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=wifi-watchdog
-PKG_VERSION:=1
-PKG_RELEASE:=2
+PKG_VERSION:=2
+PKG_RELEASE:=1
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -10,7 +10,7 @@ define Package/$(PKG_NAME)
   SECTION:=net
   CATEGORY:=ImageStream
   TITLE:=ImageStream WiFi Watchdog
-  DEFAULT:=y
+  DEFAULT:=n
 endef
 
 define Build/Configure
