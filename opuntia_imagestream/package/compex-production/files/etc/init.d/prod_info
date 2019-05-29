@@ -1,9 +1,10 @@
-#!/bin/bash
+#!/bin/bash /etc/rc.common
 #
 # Copyright (C) 2013-2014 ImageStream Internet Solutions, Inc.
 #
-# One-shot production info text file for Compex Production line
-# File will disappear after reboot
+# Create production info text file for Compex Production line
+
+START=99
 
 set +e
 . /lib/functions.sh
@@ -51,6 +52,7 @@ ethports_st() {
 }
 
 do_start() {
+	(
 	let retries=30
 	while [ $((retries)) -gt 0 ]; do
 		ip link show dev wlan1 > /dev/null 2>&1 && break
@@ -112,8 +114,11 @@ do_start() {
 	echo "USB LTE:"
 	echo "LTE SIM:"
 	echo "ETH PORTS: $ETHPORTS"
+	) 2>&1 | tee /tmp/_info.txt | logger
+	mkdir -p /www/prod/
+	mv /tmp/_info.txt /www/prod/info.txt
 }
 
-do_start > /tmp/info.txt 2>&1
-mkdir /www/prod/
-ln -s /tmp/info.txt /www/prod/info.txt
+start() {
+	do_start &
+}

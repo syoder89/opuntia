@@ -1,9 +1,0 @@
-#!/bin/bash
-#
-# Copyright (C) 2013-2014 ImageStream Internet Solutions, Inc.
-#
-# One-shot production info text file for Compex Production line
-# File will disappear after reboot
-
-cp -a /root/prod_info.sh /tmp
-/bin/bash /tmp/prod_info.sh &
