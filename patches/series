@@ -5,7 +5,6 @@ packages/0028-Add-etc-rc.d-to-sysupgrade-so-service-start-stop-are.patch
 kernel/0043-Fix-panic-in-ledtrig-netdev-due-to-a-netdev-callback.patch
 kernel/0044-Linux-3.13-updates.patch
 packages/0062-Set-root-password.patch
-oldpackages/0065-Multiwan-fixes.patch
 packages/0073-Fix-timeout-problem-with-uhttpd-causing-large-firmwa.patch
 packages/0076-x86-upgrade-copy-licenses.patch
 packages/0087-Set-default-ssid-Opuntia.patch
@@ -17,13 +16,11 @@ packages/0159-Update-authsae-06-2014.patch
 packages/0160-Authsae-fix-bad-frames-in-commit-8531ab1.patch
 packages/0163-Mac80211-fix-fail-to-set-vif-mac-addr.patch
 packages/0164-Authsae-check-if-running.patch
-oldpackages/0066-Multiwan-work-with-qos-mark-mask-fixes.patch
 0150-Fix-Linux-Pam-URL.patch
 0160-Add-wpj344-support.patch
 0161-Add-wpj558-support.patch
 0162-Add-wpj531-support.patch
 packages/0171-add-802.11ac-support.patch
-packages/0172-iptraf-musl-libc-fixes.patch
 0172-change-ath9k-module-load-order.patch
 0172-add-delay-hostapd.patch
 kernel/0020-3.14-Add-ifindex-reuse-patch-so-tunnels-will-reuse-their-.patch
@@ -47,7 +44,6 @@ packages/0191-ntpdate-missing-lib.patch
 0159-Fix-netifd-mesh-htmode.patch
 packages/0189-iwinfo-collectd-64-bit-byte-counters.patch
 801-wifi-alliance-cert-mods.patch
-packages/0193-bash-completion-conffile.patch
 kernel/0060-wpj558-switch-cpu-port-6.patch
 packages/0159-swconfig-support-port-aliases-cpu-wan-lan.patch
 packages/0173-hostapd-procd-respawn.patch
