@@ -1,4 +1,4 @@
-OPENWRT_GIT:=https://git.lede-project.org/source.git
+OPENWRT_GIT:=https://github.com/openwrt/openwrt.git
 OPENWRT_COMMIT:=d6643aca34cb2f425ea7c5d7a725c97166b3363d
 #OPENWRT_COMMIT:=bd3a18bbe433cc53b6f86dd708477f97ac406abc = 4.8.12
 #OPENWRT_COMMIT:=b2bf3745ff7e5e2fbf3b7b0e488cfaa5b3cca87c = 4.8.11
