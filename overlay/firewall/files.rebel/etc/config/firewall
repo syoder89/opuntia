@@ -1,0 +1,192 @@
+config defaults
+	option syn_flood '1'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'ACCEPT'
+	option flow_offloading '1'
+	option flow_offloading_hw '1'
+
+config zone
+	option name 'management'
+	list network 'eth5'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'ACCEPT'
+
+config zone
+	option name 'wan'
+	list network 'eth0'
+	list network 'eth0_6'
+	list network 'eth1'
+	list network 'eth2'
+	list network 'eth3'
+	list network 'eth4'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'ACCEPT'
+	option masq '1'
+	option mtu_fix '1'
+
+config forwarding
+	option src 'management'
+	option dest 'wan'
+
+config rule
+	option name 'Allow-DHCP-Renew'
+	option src 'wan'
+	option proto 'udp'
+	option dest_port '68'
+	option target 'ACCEPT'
+	option family 'ipv4'
+
+config rule
+	option name 'Allow-Ping'
+	option src 'wan'
+	option proto 'icmp'
+	option icmp_type 'echo-request'
+	option family 'ipv4'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-IGMP'
+	option src 'wan'
+	option proto 'igmp'
+	option family 'ipv4'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-DHCPv6'
+	option src 'wan'
+	option proto 'udp'
+	option src_ip 'fc00::/6'
+	option dest_ip 'fc00::/6'
+	option dest_port '546'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-MLD'
+	option src 'wan'
+	option proto 'icmp'
+	option src_ip 'fe80::/10'
+	list icmp_type '130/0'
+	list icmp_type '131/0'
+	list icmp_type '132/0'
+	list icmp_type '143/0'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-ICMPv6-Input'
+	option src 'wan'
+	option proto 'icmp'
+	list icmp_type 'echo-request'
+	list icmp_type 'echo-reply'
+	list icmp_type 'destination-unreachable'
+	list icmp_type 'packet-too-big'
+	list icmp_type 'time-exceeded'
+	list icmp_type 'bad-header'
+	list icmp_type 'unknown-header-type'
+	list icmp_type 'router-solicitation'
+	list icmp_type 'neighbour-solicitation'
+	list icmp_type 'router-advertisement'
+	list icmp_type 'neighbour-advertisement'
+	option limit '1000/sec'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-ICMPv6-Forward'
+	option src 'wan'
+	option dest '*'
+	option proto 'icmp'
+	list icmp_type 'echo-request'
+	list icmp_type 'echo-reply'
+	list icmp_type 'destination-unreachable'
+	list icmp_type 'packet-too-big'
+	list icmp_type 'time-exceeded'
+	list icmp_type 'bad-header'
+	list icmp_type 'unknown-header-type'
+	option limit '1000/sec'
+	option family 'ipv6'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-IPSec-ESP'
+	option src 'wan'
+	option dest 'management'
+	option proto 'esp'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-ISAKMP'
+	option src 'wan'
+	option dest 'management'
+	option dest_port '500'
+	option proto 'udp'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-SSH-Admin'
+	option src 'wan'
+	option proto 'tcp'
+	option dest_port '22'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-Web-Admin'
+	option src 'wan'
+	option proto 'tcp'
+	option dest_port '80'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-Web-Admin-SSL'
+	option src 'wan'
+	option proto 'tcp'
+	option dest_port '443'
+	option target 'ACCEPT'
+
+config rule
+	option name 'Allow-SNMP'
+	option src 'wan'
+	option proto 'udp'
+	option dest_port '161'
+	option target 'ACCEPT'
+
+config include
+	option path '/etc/firewall.user'
+
+config rule
+	option target 'ACCEPT'
+	option src 'wan'
+	option proto 'tcp'
+	option dest_port '23'
+	option name 'Allow-Telnet'
+
+config rule
+	option target 'ACCEPT'
+	option src 'wan'
+	option name 'Allow-OSPF'
+	option proto '89'
+
+config rule
+	option target 'ACCEPT'
+	option src 'wan'
+	option proto 'tcp'
+	option dest_port '179'
+	option name 'Allow-BGP'
+
+config rule
+	option target 'ACCEPT'
+	option src 'wan'
+	option proto 'tcp'
+	option dest_port '23'
+	option name 'Allow-Telnet'
+
+config include 'miniupnpd'
+	option type 'script'
+	option path '/usr/share/miniupnpd/firewall.include'
+	option family 'any'
+	option reload '1'
+

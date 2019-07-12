@@ -11,7 +11,7 @@ Index: luci/applications/luci-app-statistics/root/etc/config/luci_statistics
  
  config statistics 'collectd_unixsock'
  	option enable '0'
-@@ -55,24 +55,25 @@ config statistics 'collectd_apcups'
+@@ -55,24 +55,24 @@ config statistics 'collectd_apcups'
  	option Port '3551'
  
  config statistics 'collectd_conntrack'
@@ -37,21 +37,39 @@ Index: luci/applications/luci-app-statistics/root/etc/config/luci_statistics
 -	option Devices '/dev/mtdblock/4'
 -	option MountPoints '/jffs'
 +	option enable '1'
-+	option Devices '/dev/mtdblock4'
 +	option MountPoints '/overlay'
  	option FSTypes 'tmpfs'
  	option IgnoreSelected '0'
  
-@@ -130,7 +131,7 @@ config statistics 'collectd_memory'
+@@ -83,7 +83,6 @@ config statistics 'collectd_disk'
+ 
+ config statistics 'collectd_dns'
+ 	option enable '0'
+-	option Interfaces 'br-lan'
+ 	option IgnoreSources '127.0.0.1'
+ 
+ config statistics 'collectd_entropy'
+@@ -94,7 +93,6 @@ config statistics 'collectd_exec'
+ 
+ config statistics 'collectd_interface'
+ 	option enable '1'
+-	option Interfaces 'br-lan'
+ 	option IgnoreSelected '0'
+ 
+ config statistics 'collectd_iptables'
+@@ -130,10 +128,8 @@ config statistics 'collectd_memory'
  	option enable '1'
  
  config statistics 'collectd_netlink'
 -	option enable '0'
 +	option enable '1'
  	option IgnoreSelected '0'
- 	option VerboseInterfaces 'br-lan'
- 	option QDiscs 'br-lan'
-@@ -145,14 +146,14 @@ config statistics 'collectd_olsrd'
+-	option VerboseInterfaces 'br-lan'
+-	option QDiscs 'br-lan'
+ 
+ config statistics 'collectd_nut'
+ 	option enable '0'
+@@ -145,14 +141,13 @@ config statistics 'collectd_olsrd'
  	option Host '127.0.0.1'
  
  config statistics 'collectd_ping'
@@ -66,11 +84,10 @@ Index: luci/applications/luci-app-statistics/root/etc/config/luci_statistics
 -	option enable '0'
 -	option Processes 'uhttpd dnsmasq dropbear'
 +	option enable '1'
-+	option Processes 'uhttpd dnsmasq dropbear procd ubusd netifd openvpn zebra ospfd ospf6d bgpd collectd'
  
  config statistics 'collectd_sensors'
  	option enable '0'
-@@ -161,9 +162,9 @@ config statistics 'collectd_splash_lease
+@@ -161,9 +156,9 @@ config statistics 'collectd_splash_lease
  	option enable '0'
  
  config statistics 'collectd_tcpconns'
@@ -82,7 +99,7 @@ Index: luci/applications/luci-app-statistics/root/etc/config/luci_statistics
  
  config statistics 'collectd_thermal'
  	option enable '0'
-@@ -171,5 +172,5 @@ config statistics 'collectd_thermal'
+@@ -171,5 +166,5 @@ config statistics 'collectd_thermal'
  	option Device ''
  
  config statistics 'collectd_uptime'

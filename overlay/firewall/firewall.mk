@@ -2,12 +2,17 @@
 OVERLAY_DIR:=$(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 # Declare custom installation commands
-define custom_install_commands_router
-	$(CP) -a $(OVERLAY_DIR)/files.router/* $(1)/ 2>/dev/null || true
+define custom_install_commands_envoy
+	$(CP) -a $(OVERLAY_DIR)/files.envoy/* $(1)/ 2>/dev/null || true
 endef
 
-# Append custom commands to install recipe,
-# and make sure to include a newline to avoid syntax error
-ifdef CONFIG_IS_ROUTER_FULL
-Package/firewall/install += $(newline)$(custom_install_commands_router)
+define custom_install_commands_rebel
+	$(CP) -a $(OVERLAY_DIR)/files.rebel/* $(1)/ 2>/dev/null || true
+endef
+
+PRODUCT_VER := $(firstword $(subst -, ,$(CONFIG_VERSION_PRODUCT)))
+ifeq ($(PRODUCT_VER), "RR1000")
+Package/firewall/install += $(newline)$(custom_install_commands_rebel)
+else ifeq ($(PRODUCT_VER), "EV1000")
+Package/firewall/install += $(newline)$(custom_install_commands_envoy)
 endif

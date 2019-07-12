@@ -8,12 +8,6 @@ PKG_MAINTAINER:=Scott Yoder <syoder@imagestream.com>
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/imagestream-envoy-configs/config
-	config IS_ROUTER_FULL
-		bool "Full ImageStream router configs"
-		default n
-endef
-
 define Package/imagestream-envoy-configs
   SECTION:=sys
   CATEGORY:=ImageStream
