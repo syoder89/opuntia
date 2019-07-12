@@ -106,19 +106,6 @@ Index: luci/applications/luci-app-statistics/root/etc/config/luci_statistics
 -	option enable '0'
 +	option enable '1'
  
-Index: luci/applications/luci-app-statistics/root/usr/bin/stat-genconfig
-===================================================================
---- luci.orig/applications/luci-app-statistics/root/usr/bin/stat-genconfig
-+++ luci/applications/luci-app-statistics/root/usr/bin/stat-genconfig
-@@ -290,7 +290,7 @@ plugins = {
- 
- 	cpu	= {
- 		{ },
--		{ },
-+		{ "ValuesPercentage" },
- 		{ }
- 	},
- 
 Index: luci/applications/luci-app-statistics/luasrc/model/cbi/luci_statistics/cpu.lua
 ===================================================================
 --- luci.orig/applications/luci-app-statistics/luasrc/model/cbi/luci_statistics/cpu.lua
@@ -132,3 +119,16 @@ Index: luci/applications/luci-app-statistics/luasrc/model/cbi/luci_statistics/cp
 +valuespercentage:depends( "enable", 1 )
 +
  return m
+Index: luci/applications/luci-app-statistics/luasrc/statistics/plugins/cpu.lua
+===================================================================
+--- luci.orig/applications/luci-app-statistics/luasrc/statistics/plugins/cpu.lua
++++ luci/applications/luci-app-statistics/luasrc/statistics/plugins/cpu.lua
+@@ -1,7 +1,7 @@
+ return {
+ 	legend = {
+ 		{ },
+-		{ },
++		{ "ValuesPercentage" },
+ 		{ }
+ 	},
+ 	label = _("Processor"),

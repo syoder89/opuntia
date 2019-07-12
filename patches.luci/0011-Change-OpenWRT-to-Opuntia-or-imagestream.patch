@@ -48,19 +48,6 @@ Index: luci/modules/luci-mod-network/luasrc/controller/admin/network.lua
  			encryption = "none",
  			disabled   = 1
  		})
-Index: luci/modules/luci-mod-system/luasrc/model/cbi/admin_system/system.lua
-===================================================================
---- luci.orig/modules/luci-mod-system/luasrc/model/cbi/admin_system/system.lua
-+++ luci/modules/luci-mod-system/luasrc/model/cbi/admin_system/system.lua
-@@ -202,7 +202,7 @@ if has_ntpd then
- 	if m:formvalue("cbid.system._timeserver._enable") then
- 		m.uci:section("system", "timeserver", "ntp",
- 			{
--                	server = { "0.openwrt.pool.ntp.org", "1.openwrt.pool.ntp.org", "2.openwrt.pool.ntp.org", "3.openwrt.pool.ntp.org" }
-+                	server = { "0.pool.ntp.org", "1.pool.ntp.org", "2.pool.ntp.org", "3.pool.ntp.org" }
- 			}
- 		)
- 
 Index: luci/modules/luci-mod-network/luasrc/view/admin_network/diagnostics.htm
 ===================================================================
 --- luci.orig/modules/luci-mod-network/luasrc/view/admin_network/diagnostics.htm
