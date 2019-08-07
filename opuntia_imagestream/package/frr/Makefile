@@ -9,8 +9,8 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=frr
 PKG_SOURCE_URL:=https://github.com/FRRouting/frr
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_VERSION:=1b6242a19db13e3246cd9daea9ca9fdeb8358d1b
-PKG_VERSION:=7.0.1
+PKG_SOURCE_VERSION:=6453f430e62d5d716fd57b62a9f50d5ef32987d6
+PKG_VERSION:=7.1.0
 PKG_RELEASE:=1
 PKG_BUILD_DIR = $(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
@@ -29,6 +29,7 @@ PKG_CONFIG_DEPENDS:= \
 	CONFIG_PACKAGE_frr-pimd \
 	CONFIG_PACKAGE_frr-ripd \
 	CONFIG_PACKAGE_frr-ripngd \
+	CONFIG_PACKAGE_frr-staticd \
 	CONFIG_PACKAGE_frr-vtysh \
 	CONFIG_PACKAGE_frr-watchfrr \
 	CONFIG_PACKAGE_frr-zebra
@@ -143,6 +144,12 @@ define Package/frr-ripngd
   TITLE:=RIPNG daemon
 endef
 
+define Package/frr-staticd
+  $(call Package/frr/Default)
+  DEPENDS+=+frr-libfrr
+  TITLE:=Static route daemon
+endef
+
 define Package/frr-vtysh
   $(call Package/frr/Default)
   DEPENDS+=+frr-libfrr +libreadline +libncurses
@@ -216,6 +223,10 @@ define Package/frr-ripngd/conffiles
 /etc/frr/ripngd.conf
 endef
 
+define Package/frr-staticd/conffiles
+/etc/frr/staticd.conf
+endef
+
 define Package/frr-vtysh/conffiles
 /etc/frr/vtysh.conf
 endef
@@ -258,6 +269,7 @@ define Build/Configure
 	$(call autoconf_bool,CONFIG_PACKAGE_frr-pimd,pimd) \
 	$(call autoconf_bool,CONFIG_PACKAGE_frr-ripd,ripd) \
 	$(call autoconf_bool,CONFIG_PACKAGE_frr-ripngd,ripngd) \
+	$(call autoconf_bool,CONFIG_PACKAGE_frr-staticd,staticd) \
 	$(call autoconf_bool,CONFIG_PACKAGE_frr-vtysh,vtysh) \
 	$(call autoconf_bool,CONFIG_PACKAGE_frr-libfrr,zebra) \
 )
@@ -386,6 +398,14 @@ define Package/frr-ripngd/install
 	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/ripngd.conf
 endef
 
+define Package/frr-staticd/install
+	$(INSTALL_DIR) $(1)/usr/sbin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/staticd/.libs/staticd $(1)/usr/sbin/
+	$(INSTALL_DIR) $(1)/etc/frr
+	chmod 0750 $(1)/etc/frr
+	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/staticd.conf
+endef
+
 define Package/frr-vtysh/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/vtysh/.libs/vtysh $(1)/usr/bin/
@@ -413,6 +433,7 @@ $(eval $(call BuildPackage,frr-pbrd))
 $(eval $(call BuildPackage,frr-pimd))
 $(eval $(call BuildPackage,frr-ripd))
 $(eval $(call BuildPackage,frr-ripngd))
+$(eval $(call BuildPackage,frr-staticd))
 $(eval $(call BuildPackage,frr-vtysh))
 $(eval $(call BuildPackage,frr-watchfrr))
 $(eval $(call BuildPackage,frr-zebra))
