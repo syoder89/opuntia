@@ -47,7 +47,6 @@ packages/0189-iwinfo-collectd-64-bit-byte-counters.patch
 kernel/0060-wpj558-switch-cpu-port-6.patch
 packages/0159-swconfig-support-port-aliases-cpu-wan-lan.patch
 packages/0173-hostapd-procd-respawn.patch
-packages/0174-collectd-procd-respawn.patch
 packages/0174-netifd-support-hostapd-radius-extra-attrs.patch
 packages/0175-netifd-multiple-radius-servers.patch
 packages/0176-Add-candela-tech-ath10k-firmware-10.1.patch
