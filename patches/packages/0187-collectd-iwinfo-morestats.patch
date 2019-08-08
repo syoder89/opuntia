@@ -1,8 +1,12 @@
+Index: build_dir/feeds/packages/utils/collectd/patches/999-scott-iwinfo-morestats.patch
+===================================================================
 --- /dev/null
-+++ b/feeds/packages/utils/collectd/patches/999-scott-iwinfo-morestats.patch
-@@ -0,0 +1,197 @@
-+--- a/src/iwinfo.c
-++++ b/src/iwinfo.c
++++ build_dir/feeds/packages/utils/collectd/patches/999-scott-iwinfo-morestats.patch
+@@ -0,0 +1,201 @@
++Index: collectd-5.9.0/src/iwinfo.c
++===================================================================
++--- collectd-5.9.0.orig/src/iwinfo.c
+++++ collectd-5.9.0/src/iwinfo.c
 +@@ -52,12 +52,40 @@ static int iwinfo_config(const char *key
 + 	return 0;
 + }
@@ -162,11 +166,13 @@
 + 	}
 + 
 + 	iwinfo_finish();
-+--- a/src/types.db
-++++ b/src/types.db
-+@@ -261,6 +261,33 @@ vs_memory               value:GAUGE:0:92
-+ vs_processes            value:GAUGE:0:65535
-+ vs_threads              value:GAUGE:0:65535
++Index: collectd-5.9.0/src/types.db
++===================================================================
++--- collectd-5.9.0.orig/src/types.db
+++++ collectd-5.9.0/src/types.db
++@@ -241,6 +241,33 @@ spam_check              value:GAUGE:0:U
++ spam_score              value:GAUGE:U:U
++ spl                     value:GAUGE:U:U
 + stations                value:GAUGE:0:256
 ++txpower			value:GAUGE:0:U
 ++channel			value:GAUGE:0:U
@@ -195,6 +201,6 @@
 ++assoc_station_tx_short_gi       value:GAUGE:0:1
 ++assoc_station_tx_vht_nss        value:GAUGE:0:256
 ++assoc_station_tx_mcs    value:GAUGE:0:256
-+ 
-+ #
-+ # Legacy types
++ swap                    value:GAUGE:0:1099511627776
++ swap_io                 value:DERIVE:0:U
++ tcp_connections         value:GAUGE:0:4294967295
