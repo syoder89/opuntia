@@ -1,0 +1,17 @@
+Index: build_dir/package/network/services/lldpd/patches/002-add-missing-limits-include.patch
+===================================================================
+--- /dev/null
++++ build_dir/package/network/services/lldpd/patches/002-add-missing-limits-include.patch
+@@ -0,0 +1,12 @@
++Index: lldpd-1.0.3/src/daemon/priv.c
++===================================================================
++--- lldpd-1.0.3.orig/src/daemon/priv.c
+++++ lldpd-1.0.3/src/daemon/priv.c
++@@ -36,6 +36,7 @@
++ #include <sys/utsname.h>
++ #include <sys/ioctl.h>
++ #include <netinet/if_ether.h>
+++#include <limits.h>
++ 
++ #ifdef HAVE_LINUX_CAPABILITIES
++ #include <sys/capability.h>

@@ -1,19 +1,8 @@
---- a/package/base-files/files/lib/upgrade/common.sh
-+++ b/package/base-files/files/lib/upgrade/common.sh
-@@ -237,6 +237,10 @@ do_upgrade() {
- 		platform_copy_config
- 	fi
- 
-+	if type 'platform_copy_licenses' >/dev/null 2>/dev/null; then
-+		platform_copy_licenses
-+	fi
-+
- 	v "Upgrade completed"
- 	[ -n "$DELAY" ] && sleep "$DELAY"
- 	ask_bool 1 "Reboot" && {
---- a/target/linux/x86/base-files/lib/upgrade/platform.sh
-+++ b/target/linux/x86/base-files/lib/upgrade/platform.sh
-@@ -55,6 +55,16 @@ platform_copy_config() {
+Index: build_dir/target/linux/x86/base-files/lib/upgrade/platform.sh
+===================================================================
+--- build_dir.orig/target/linux/x86/base-files/lib/upgrade/platform.sh
++++ build_dir/target/linux/x86/base-files/lib/upgrade/platform.sh
+@@ -44,6 +44,16 @@ platform_copy_config() {
  	fi
  }
  
@@ -28,5 +17,5 @@
 +}
 +
  platform_do_upgrade() {
- 	platform_export_bootpart
+ 	local diskdev partdev diff
  

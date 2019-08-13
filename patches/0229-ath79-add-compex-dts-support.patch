@@ -159,7 +159,7 @@ Index: build_dir/target/linux/ath79/image/generic.mk
 ===================================================================
 --- build_dir.orig/target/linux/ath79/image/generic.mk
 +++ build_dir/target/linux/ath79/image/generic.mk
-@@ -186,6 +186,74 @@ define Device/comfast_cf-e5
+@@ -266,6 +266,74 @@ define Device/comfast_cf-e5
  endef
  TARGET_DEVICES += comfast_cf-e5
  
@@ -233,14 +233,14 @@ Index: build_dir/target/linux/ath79/image/generic.mk
 +
  define Device/devolo_dvl1200e
    ATH_SOC := qca9558
-   DEVICE_TITLE := devolo WiFi pro 1200e
+   DEVICE_VENDOR := devolo
 Index: build_dir/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
 ===================================================================
 --- build_dir.orig/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
 +++ build_dir/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
-@@ -30,6 +30,21 @@ case "$board" in
+@@ -34,6 +34,21 @@ case "$board" in
  		[ "$PHYNBR" -eq 1 ] && \
- 			echo $(k2t_get_mac "lan_mac") > /sys${DEVPATH}/macaddress
+ 			k2t_get_mac "lan_mac" > /sys${DEVPATH}/macaddress
  		;;
 +	compex,wpj344)
 +		# Use our reserved MAC address instead of the card's MAC
@@ -257,6 +257,6 @@ Index: build_dir/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wi
 +		[ "$PHYNBR" -eq 1 ] && \
 +			echo $(mtd_get_mac_binary u-boot 188448) > /sys${DEVPATH}/macaddress
 +		;;
- 	*)
- 		;;
- esac
+ 	trendnet,tew-823dru)
+ 	        # set the 2.4G interface mac address to LAN MAC
+ 	        [ "$PHYNBR" -eq 1 ] && \

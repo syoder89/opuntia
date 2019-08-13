@@ -1,0 +1,12 @@
+Index: build_dir/feeds/packages/net/keepalived/Makefile
+===================================================================
+--- build_dir.orig/feeds/packages/net/keepalived/Makefile
++++ build_dir/feeds/packages/net/keepalived/Makefile
+@@ -86,6 +86,7 @@ endef
+ 
+ CONFIGURE_ARGS+= \
+ 	--with-init=SYSV \
++	--with-run-dir=/var/run \
+ 	--disable-nftables
+ 
+ ifeq ($(CONFIG_KEEPALIVED_VRRP),)

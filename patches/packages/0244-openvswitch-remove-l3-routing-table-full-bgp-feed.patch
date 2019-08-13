@@ -1,0 +1,54 @@
+Index: build_dir/feeds/packages/net/openvswitch/patches/0006-improve-routing-table.patch
+===================================================================
+--- /dev/null
++++ build_dir/feeds/packages/net/openvswitch/patches/0006-improve-routing-table.patch
+@@ -0,0 +1,49 @@
++Index: openvswitch-2.11.1/lib/route-table.c
++===================================================================
++--- openvswitch-2.11.1.orig/lib/route-table.c
+++++ openvswitch-2.11.1/lib/route-table.c
++@@ -127,6 +127,7 @@ void
++ route_table_run(void)
++     OVS_EXCLUDED(route_table_mutex)
++ {
+++/*
++     ovs_mutex_lock(&route_table_mutex);
++     if (nln) {
++         rtnetlink_run();
++@@ -137,6 +138,7 @@ route_table_run(void)
++         }
++     }
++     ovs_mutex_unlock(&route_table_mutex);
+++*/
++ }
++ 
++ /* Causes poll_block() to wake up when route_table updates are required. */
++@@ -144,17 +146,20 @@ void
++ route_table_wait(void)
++     OVS_EXCLUDED(route_table_mutex)
++ {
+++/*
++     ovs_mutex_lock(&route_table_mutex);
++     if (nln) {
++         rtnetlink_wait();
++         nln_wait(nln);
++     }
++     ovs_mutex_unlock(&route_table_mutex);
+++*/
++ }
++ 
++ static int
++ route_table_reset(void)
++ {
+++/*
++     struct nl_dump dump;
++     struct rtgenmsg *rtgenmsg;
++     uint64_t reply_stub[NL_DUMP_BUFSIZE / 8];
++@@ -187,6 +192,7 @@ route_table_reset(void)
++     ofpbuf_uninit(&buf);
++ 
++     return nl_dump_done(&dump);
+++*/
++ }
++ 
++ /* Return RTNLGRP_IPV4_ROUTE or RTNLGRP_IPV6_ROUTE on success, 0 on parse

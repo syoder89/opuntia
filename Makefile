@@ -1,5 +1,6 @@
 OPENWRT_GIT:=https://github.com/openwrt/openwrt.git
-OPENWRT_COMMIT:=d6643aca34cb2f425ea7c5d7a725c97166b3363d
+OPENWRT_COMMIT:=7ec092e64125b920aee6d1767dacea3f61b2fa6f
+#OPENWRT_COMMIT:=d6643aca34cb2f425ea7c5d7a725c97166b3363d = 4.8.12
 #OPENWRT_COMMIT:=bd3a18bbe433cc53b6f86dd708477f97ac406abc = 4.8.12
 #OPENWRT_COMMIT:=b2bf3745ff7e5e2fbf3b7b0e488cfaa5b3cca87c = 4.8.11
 #OPENWRT_COMMIT:=0b373bf4d6a1a7a53e06946972ebb812b4cc2f0f = 4.8.11
@@ -44,7 +45,8 @@ built=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_built
 configured=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_configured
 BUILD_NUMBER?=1
 NUM_CPU=$(shell grep '^processor' /proc/cpuinfo | wc -l)
-PARALLEL_MAKE=-j $(shell echo $$(( $(NUM_CPU) * 2 )))
+#PARALLEL_MAKE=-j $(shell echo $$(( $(NUM_CPU) * 2 )))
+PARALLEL_MAKE=
 CACHE_DIR?=$(shell pwd)/ccache
 BUILD_OPTS=
 
@@ -53,11 +55,7 @@ build: prepare setup_cache $(built)
 		mkdir $(CACHE_DIR); \
 	fi; \
 	(export CCACHE_DIR=$(CACHE_DIR) && make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) defconfig world || \
-		((for retries in 1 2 3 4 5; do \
-			echo "Building bash attempt $$retries / 5"; \
-			make -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) package/bash/clean && make -C $(BUILD_DIR) DESTDIR= -j1 $(BUILD_OPTS) package/bash/compile && break; \
-		done;) \
-		&& make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) world || make -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) world V=s)) \
+		make -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) world V=s) \
 		&& touch $(built)
 	make setup_cache
 #	(make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= defconfig world || make -C $(BUILD_DIR) DESTDIR= world V=s) && touch $(built)
