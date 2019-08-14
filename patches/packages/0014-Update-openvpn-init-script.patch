@@ -20,7 +20,7 @@ Index: build_dir/package/network/services/openvpn/files/openvpn.init
  STOP=10
  
  USE_PROCD=1
-@@ -68,13 +68,16 @@ openvpn_add_instance() {
+@@ -82,13 +82,40 @@ openvpn_add_instance() {
  		--config "$conf"
  	procd_set_param file "$dir/$conf"
  	procd_set_param term_timeout 15
@@ -38,10 +38,34 @@ Index: build_dir/package/network/services/openvpn/files/openvpn.init
 +	fi
 +}
 +
++openvpn_getkey() {
++        if [[ ${secret_phrase} =~ ^[:xdigit:]* ]]; then
++                secret_phrase=$(echo -n ${secret_phrase} | md5sum | awk '{print $1}')
++        fi
++
++        len=${#secret_phrase}
++        let i=0
++        while [ $((i)) -le $((keylen_chars/len)) ] ; do
++                echo -n $secret_phrase
++                let i=i+1
++        done
++}
++
++openvpn_fixup_passphrase() {
++	keylen_chars=$((2048/8*2))
++	line=$(openvpn_getkey)
++	echo '#'
++	echo '# 2048 bit OpenVPN static key'
++	echo '#'
++	echo '-----BEGIN OpenVPN Static key V1-----'
++	echo "$(echo $line | cut -b 1-${keylen_chars} | sed -e 's/.\{32\}/&\n/g')"
++	echo '-----END OpenVPN Static key V1-----'
++}
++
  start_instance() {
  	local s="$1"
  
-@@ -97,6 +100,31 @@ start_instance() {
+@@ -111,6 +138,53 @@ start_instance() {
  	[ ! -d "/var/etc" ] && mkdir -p "/var/etc"
  	[ -f "/var/etc/openvpn-$s.conf" ] && rm "/var/etc/openvpn-$s.conf"
  
@@ -60,9 +84,31 @@ Index: build_dir/package/network/services/openvpn/files/openvpn.init
 +                config_set "$s" client 0
 + 	fi
 + 
++	# comp_lzo option is deprecated in 2.4 - change to compress
++        config_get comp_lzo "$s" 'comp_lzo'
++	if [ ! -z $comp_lzo ] ; then
++		config_unset "$s" comp_lzo
++		config_set "$s" compress "lzo"
++	fi
++
 +	# Fixup script-security for OpenVPN version >= 2.4
 +	config_get script_security "$s" 'script_security'
 +	openvpn_fixup_script_security $script_security
++
++	# Generate the key from passphrase for older 4.2/4.4 router compatability
++	config_get secret_type "$s" 'secret_type'
++	if [ "$secret_type" = "passphrase" ] ; then
++		config_get secret_phrase "$s" 'secret_phrase'
++		config_get secret "$s" 'secret'
++		if [ -z "$secret" ] ; then
++			secret="/lib/uci/upload/cbid.openvpn.$s.secret"
++			config_set "$s" secret "$secret"
++		fi
++		if [ ! -f $secret ] ; then
++			mkdir -p $(dirname $secret)
++			openvpn_fixup_passphrase > $secret
++		fi
++	fi
 +
 +	# Fix mtu-disc error with IPv6  for OpenVPN version >= 2.4
 +	config_get proto "$s" 'proto'
@@ -72,4 +118,4 @@ Index: build_dir/package/network/services/openvpn/files/openvpn.init
 +
  	append_bools "$s" $OPENVPN_BOOLS
  	append_params "$s" $OPENVPN_PARAMS
- 
+ 	append_list "$s" $OPENVPN_LIST
