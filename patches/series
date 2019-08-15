@@ -123,3 +123,4 @@ packages/0243-lldpd-add-missing-limits-include.patch
 packages/0244-openvswitch-remove-l3-routing-table-full-bgp-feed.patch
 packages/0245-keepalived-fix-pid-path.patch
 packages/0246-dnsmasq-add-subnet-feature.patch
+packages/0247-mwan3-check-if-enabled.patch

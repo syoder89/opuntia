@@ -1,0 +1,29 @@
+Index: build_dir/feeds/packages/net/mwan3/files/etc/init.d/mwan3
+===================================================================
+--- build_dir.orig/feeds/packages/net/mwan3/files/etc/init.d/mwan3
++++ build_dir/feeds/packages/net/mwan3/files/etc/init.d/mwan3
+@@ -8,7 +8,6 @@ reload() {
+ 
+ boot() {
+ 	. /lib/config/uci.sh
+-	uci_toggle_state mwan3 globals enabled "1"
+ }
+ 
+ start() {
+Index: build_dir/feeds/packages/net/mwan3/files/usr/sbin/mwan3
+===================================================================
+--- build_dir.orig/feeds/packages/net/mwan3/files/usr/sbin/mwan3
++++ build_dir/feeds/packages/net/mwan3/files/usr/sbin/mwan3
+@@ -127,8 +127,10 @@ start()
+ {
+ 	local enabled
+ 
+-	uci_toggle_state mwan3 globals enabled "1"
+-
++	config_get_bool enabled globals 'enabled' 0
++	[ ${enabled} -gt 0 ] || {
++		exit 1
++	}
+ 	config_foreach ifup interface
+ }
+ 
