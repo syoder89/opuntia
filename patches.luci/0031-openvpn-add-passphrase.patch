@@ -21,7 +21,7 @@ Index: luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-basic.lua
 ===================================================================
 --- luci.orig/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-basic.lua
 +++ luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-basic.lua
-@@ -7,6 +7,18 @@ local basicParams = {
+@@ -7,6 +7,22 @@ local basicParams = {
  	--
  	-- Widget, Name, Default(s), Description
  	--
@@ -33,6 +33,10 @@ Index: luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-basic.lua
 +		"dev_type",
 +		{ "tun", "tap" },
 +		translate("Type of used device") },
++	{ Value,
++		"local",
++		"0.0.0.0",
++		translate("Local host name or ip address") },
 +	{ DynamicList,
 +		"remote",
 +		"vpnserver.example.org",
@@ -40,7 +44,7 @@ Index: luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-basic.lua
  	{ ListValue,
  		"verb",
  		{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 },
-@@ -19,10 +31,14 @@ local basicParams = {
+@@ -19,10 +35,14 @@ local basicParams = {
  		"port",
  		1194,
  		translate("TCP/UDP port # for both local and remote") },
@@ -59,7 +63,7 @@ Index: luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-basic.lua
  	{ Value,
  		"ifconfig",
  		"10.200.200.3 10.200.200.1",
-@@ -43,6 +59,10 @@ local basicParams = {
+@@ -43,6 +63,10 @@ local basicParams = {
  		"comp_lzo",
  		{"yes","no","adaptive"},
  		translate("Use fast LZO compression") },
@@ -70,7 +74,7 @@ Index: luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-basic.lua
  	{ Value,
  		"keepalive",
  		"10 60",
-@@ -59,10 +79,16 @@ local basicParams = {
+@@ -59,10 +83,14 @@ local basicParams = {
  		"client_to_client",
  		0,
  		translate("Allow client-to-client traffic") },
@@ -81,13 +85,11 @@ Index: luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-basic.lua
 +	{ ListValue,
 +		"secret_type",
 +		{ "passphrase", "file" },
-+		translate("Type of static key"),
-+		{ mode="p2p" } },
++		translate("Type of static key") },
 +	{ Value,
 +		"secret_phrase",
 +		"87923f42fb719664d21f1fd242ee3063",
-+		translate("Secret phrase for generating ImageStream 4.4 compatible key"),
-+		{ mode="p2p" } },
++		translate("Secret phrase for generating ImageStream 4.4 compatible key") },
  	{ FileUpload,
  		"secret",
  		"/etc/openvpn/secret.key",
