@@ -2,13 +2,17 @@ Index: build_dir/feeds/routing/nodogsplash/Makefile
 ===================================================================
 --- build_dir.orig/feeds/routing/nodogsplash/Makefile
 +++ build_dir/feeds/routing/nodogsplash/Makefile
-@@ -10,9 +10,10 @@ PKG_FIXUP:=autoreconf
- PKG_VERSION:=3.3.0
+@@ -7,12 +7,13 @@ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=nodogsplash
+ PKG_FIXUP:=autoreconf
+-PKG_VERSION:=4.0.1
++PKG_VERSION:=3.3.0
  PKG_RELEASE:=1
  
 -PKG_SOURCE_URL:=https://codeload.github.com/nodogsplash/nodogsplash/tar.gz/v$(PKG_VERSION)?
 -PKG_SOURCE:=nodogsplash-$(PKG_VERSION).tar.gz
--PKG_HASH:=ad89af14086982ebb07da6dd079c10e93e31af149e06611649d0dbee79cb8e67
+-PKG_HASH:=b6787d042ab65f8cdc6982bd083a28a85ac3494896ae5c97e9de9b216585b1e7
 +PKG_SOURCE_URL:=https://github.com/imagestream/nodogsplash.git
 +PKG_SOURCE_PROTO:=git
 +PKG_SOURCE_DATE:=2019-03-22
@@ -16,7 +20,16 @@ Index: build_dir/feeds/routing/nodogsplash/Makefile
  PKG_BUILD_DIR:=$(BUILD_DIR)/nodogsplash-$(PKG_VERSION)
  
  PKG_MAINTAINER:=Moritz Warning <moritzwarning@web.de>
-@@ -55,10 +56,7 @@ define Package/nodogsplash/install
+@@ -26,7 +27,7 @@ define Package/nodogsplash
+ 	SUBMENU:=Captive Portals
+ 	SECTION:=net
+ 	CATEGORY:=Network
+-	DEPENDS:=+libpthread +iptables-mod-ipopt +libmicrohttpd-no-ssl
++	DEPENDS:=+libpthread +iptables-mod-ipopt +libmicrohttpd
+ 	TITLE:=Open public network gateway daemon
+ 	URL:=https://github.com/nodogsplash/nodogsplash
+ 	CONFLICTS:=nodogsplash2
+@@ -55,12 +56,7 @@ define Package/nodogsplash/install
  	$(CP) $(PKG_BUILD_DIR)/resources/splash.css $(1)/etc/nodogsplash/htdocs/
  	$(CP) $(PKG_BUILD_DIR)/resources/status.html $(1)/etc/nodogsplash/htdocs/
  	$(CP) $(PKG_BUILD_DIR)/resources/splash.jpg $(1)/etc/nodogsplash/htdocs/images/
@@ -24,6 +37,8 @@ Index: build_dir/feeds/routing/nodogsplash/Makefile
 -	$(CP) $(PKG_BUILD_DIR)/openwrt/nodogsplash/files/etc/init.d/nodogsplash $(1)/etc/init.d/
 -	$(CP) $(PKG_BUILD_DIR)/openwrt/nodogsplash/files/etc/uci-defaults/40_nodogsplash $(1)/etc/uci-defaults/
 -	$(CP) $(PKG_BUILD_DIR)/openwrt/nodogsplash/files/usr/lib/nodogsplash/restart.sh $(1)/usr/lib/nodogsplash/
+-	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/PreAuth/demo-preauth.sh $(1)/usr/lib/nodogsplash/login.sh
+-	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/fas-aes/fas-aes.php $(1)/etc/nodogsplash/
 +	$(CP) $(PKG_BUILD_DIR)/openwrt/nodogsplash/files/* $(1)/
  endef
  
