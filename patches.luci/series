@@ -2,11 +2,7 @@
 0005-Update-theme-openvpn.patch
 0006-Add-license-info-to-overview-page.patch
 0007-Add-multiwan-to-network-config-ucitrack-list.patch
-0008-Add-802.11s-SAE-authentication-support-in-Luci-and-..patch
-0009-Fixup-display-of-wireless-interface-in-mesh-mode.patch
-0010-Add-mesh-parameters-announce-gateway-and-root-mode.patch
 0011-Change-OpenWRT-to-Opuntia-or-imagestream.patch
-0015-Add-mesh-plink-timeout-param.patch
 0016-Rework-QOS-Page.patch
 0019-use-iwinfo-not-iwdata.patch
 0022-json-rpc-add-wifistatus.patch
@@ -14,5 +10,6 @@
 0024-allow-uncompressed-restore-archive.patch
 801-wifi-alliance-cert-defaults.patch
 0027-luci-app-statistics-disable-cpufreq.patch
-0029-fix-broken-dropdowns-on-dependencies.patch
 0030-swconfig-support-port-aliases-cpu-wan-lan.patch
+0031-openvpn-add-passphrase.patch
+0032-openvpn-change-templates.patch

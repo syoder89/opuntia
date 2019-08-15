@@ -1,0 +1,93 @@
+Index: luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-advanced.lua
+===================================================================
+--- luci.orig/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-advanced.lua
++++ luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-advanced.lua
+@@ -562,6 +562,14 @@ local knownParams = {
+ 	} },
+ 
+ 	{ "Cryptography", {
++		{ ListValue,
++			"secret_type",
++			{ "passphrase", "file" },
++			translate("Type of static key") },
++		{ Value,
++			"secret_phrase",
++			"87923f42fb719664d21f1fd242ee3063",
++			translate("Secret phrase for generating ImageStream 4.4 compatible key") },
+ 		{ FileUpload,
+ 			"secret",
+ 			"/etc/openvpn/secret.key",
+Index: luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-basic.lua
+===================================================================
+--- luci.orig/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-basic.lua
++++ luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-basic.lua
+@@ -7,6 +7,18 @@ local basicParams = {
+ 	--
+ 	-- Widget, Name, Default(s), Description
+ 	--
++	{ Value,
++		"dev",
++		"tun0",
++		translate("tun/tap device") },
++	{ ListValue,
++		"dev_type",
++		{ "tun", "tap" },
++		translate("Type of used device") },
++	{ DynamicList,
++		"remote",
++		"vpnserver.example.org",
++		translate("Remote host name or ip address") },
+ 	{ ListValue,
+ 		"verb",
+ 		{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 },
+@@ -19,10 +31,14 @@ local basicParams = {
+ 		"port",
+ 		1194,
+ 		translate("TCP/UDP port # for both local and remote") },
+-	{ ListValue,
+-		"dev_type",
+-		{ "tun", "tap" },
+-		translate("Type of used device") },
++	{ Value,
++		"lport",
++		1194,
++		translate("TCP/UDP port # for local (default=1194)") },
++	{ Value,
++		"rport",
++		1194,
++		translate("TCP/UDP port # for remote (default=1194)") },
+ 	{ Value,
+ 		"ifconfig",
+ 		"10.200.200.3 10.200.200.1",
+@@ -43,6 +59,10 @@ local basicParams = {
+ 		"comp_lzo",
+ 		{"yes","no","adaptive"},
+ 		translate("Use fast LZO compression") },
++	{ ListValue,
++		"compress",
++		{ "lzo", "lz4" },
++		translate("Enable a compression algorithm") },
+ 	{ Value,
+ 		"keepalive",
+ 		"10 60",
+@@ -59,10 +79,16 @@ local basicParams = {
+ 		"client_to_client",
+ 		0,
+ 		translate("Allow client-to-client traffic") },
+-	{ DynamicList,
+-		"remote",
+-		"vpnserver.example.org",
+-		translate("Remote host name or ip address") },
++	{ ListValue,
++		"secret_type",
++		{ "passphrase", "file" },
++		translate("Type of static key"),
++		{ mode="p2p" } },
++	{ Value,
++		"secret_phrase",
++		"87923f42fb719664d21f1fd242ee3063",
++		translate("Secret phrase for generating ImageStream 4.4 compatible key"),
++		{ mode="p2p" } },
+ 	{ FileUpload,
+ 		"secret",
+ 		"/etc/openvpn/secret.key",
