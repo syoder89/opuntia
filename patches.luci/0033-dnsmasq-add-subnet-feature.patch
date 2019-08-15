@@ -1,0 +1,20 @@
+Index: luci/modules/luci-mod-network/luasrc/model/cbi/admin_network/ifaces.lua
+===================================================================
+--- luci.orig/modules/luci-mod-network/luasrc/model/cbi/admin_network/ifaces.lua
++++ luci/modules/luci-mod-network/luasrc/model/cbi/admin_network/ifaces.lua
+@@ -502,6 +502,15 @@ if has_dnsmasq and net:proto() == "stati
+ 		--s:taboption("advanced", Value, "name", translate("Name"),
+ 		--	translate("Define a name for this network."))
+ 
++		subnet = s:taboption("advanced", Value, "subnet",
++			translate("<abbr title=\"Internet Protocol Version 4\">IPv4</abbr>-Subnet"),
++			translate("Specify the subnet to serve in case multiple subnets are configured, " ..
++				"for example \"192.168.5.0\". Can also specify the subnet mask in CIDR or dot notation, " ..
++				"for example \"192.168.5.0/24\"."))
++
++		subnet.optional = true
++		subnet.datatype = "or(cidr4,ipnet4)"
++
+ 		mask = s:taboption("advanced", Value, "netmask",
+ 			translate("<abbr title=\"Internet Protocol Version 4\">IPv4</abbr>-Netmask"),
+ 			translate("Override the netmask sent to clients. Normally it is calculated " ..

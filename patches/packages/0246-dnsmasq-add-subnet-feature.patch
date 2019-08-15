@@ -1,0 +1,54 @@
+Index: build_dir/package/network/services/dnsmasq/files/dnsmasq.init
+===================================================================
+--- build_dir.orig/package/network/services/dnsmasq/files/dnsmasq.init
++++ build_dir/package/network/services/dnsmasq/files/dnsmasq.init
+@@ -487,6 +487,7 @@ dhcp_add() {
+ 	local dhcp6range="::"
+ 	local nettag
+ 	local tags
++        local __nets __addr
+ 
+ 	config_get net "$cfg" interface
+ 	[ -n "$net" ] || return 0
+@@ -512,9 +513,41 @@ dhcp_add() {
+ 	# Do not support non-static interfaces for now
+ 	[ static = "$proto" ] || return 0
+ 
++	# Override subnet and netmask with dhcp config if applicable
++	config_get _subnet "$cfg" subnet
++	if [ ! -z "$_subnet" ] ; then
++		_netmask="${_subnet##*/}"
++		# If no netmask specified
++		[ "$_netmask" = "$_subnet" ] && _netmask=""
++		_subnet="${_subnet%%/*}"
++
++		# Find and use the netmask for the subnet
++		if [ -z "$_netmask" ] ; then
++        		if network_get_subnets __nets "$net"; then
++                		for __addr in $__nets; do
++					eval "$(ipcalc.sh "${__addr}")"
++                        		if [ "$NETWORK" = "${_subnet}" ] ; then
++						_netmask="${__addr##*/}"
++						break
++                        		fi
++				done
++			fi
++		fi
++		# Only override subnet if it's valid
++		if [ ! -z "$_netmask" ] ; then
++			subnet="${_subnet}/${_netmask}"
++		else
++			logger -t dnsmasq \
++				"Subnet $_subnet not found on network $net"
++		fi
++	fi
++
+ 	# Override interface netmask with dhcp config if applicable
+ 	config_get netmask "$cfg" netmask "${subnet##*/}"
+ 
++	logger -t dnsmasq \
++		"Using subnet $subnet for network $net"
++
+ 	#check for an already active dhcp server on the interface, unless 'force' is set
+ 	config_get_bool force "$cfg" force 0
+ 	[ $force -gt 0 ] || dhcp_check "$ifname" || return 0
