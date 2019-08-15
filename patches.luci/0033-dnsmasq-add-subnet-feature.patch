@@ -13,7 +13,7 @@ Index: luci/modules/luci-mod-network/luasrc/model/cbi/admin_network/ifaces.lua
 +				"for example \"192.168.5.0/24\"."))
 +
 +		subnet.optional = true
-+		subnet.datatype = "or(cidr4,ipnet4)"
++		subnet.datatype = "or(cidr4,ipnet4,ip4addr)"
 +
  		mask = s:taboption("advanced", Value, "netmask",
  			translate("<abbr title=\"Internet Protocol Version 4\">IPv4</abbr>-Netmask"),
