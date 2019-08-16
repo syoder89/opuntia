@@ -20,13 +20,13 @@ else {
 }
 
 function led_on($led) {
-	shell_exec("echo timer > $led/trigger");
-	shell_exec("echo 255 > $led/brightness");
+//	shell_exec("echo timer > $led/trigger");
+//	shell_exec("echo 255 > $led/brightness");
 }
 
 function led_off($led) {
-	shell_exec("echo none > $led/trigger");
-	shell_exec("echo 0 > $led/brightness");
+//	shell_exec("echo none > $led/trigger");
+//	shell_exec("echo 0 > $led/brightness");
 }
 
 led_off($red_led);
