@@ -12,27 +12,7 @@ Index: build_dir/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
  	# Check for loaded kernel bonding driver (/sys/class/net/bonding_masters exists)
  	[ -f "$BONDING_MASTERS" ] || {
  		echo "$cfg" "setup: bonding_masters does not exist in sysfs (kernel module not loaded?)"
-@@ -81,6 +84,9 @@ proto_bonding_setup() {
- 	# Add bonding interface to system
- 	echo "+$link" > "$BONDING_MASTERS"
- 
-+	# Bond interface must be down in order to set parameters, policy, etc
-+	ip link set $link down
-+
- 	# Set bonding policy (with corresponding parameters)
- 	local bonding_policy
- 	json_get_vars bonding_policy
-@@ -145,6 +151,9 @@ proto_bonding_setup() {
- 		;;
- 	esac
- 
-+	# Can now bring the bond interface up
-+	ip link set $link up
-+
- 	# Add slaves to bonding interface
- 	local slaves
- 	json_get_vars slaves
-@@ -164,7 +173,7 @@ proto_bonding_setup() {
+@@ -164,7 +167,7 @@ proto_bonding_setup() {
  
  		echo "+$slave" > /sys/class/net/"$link"/bonding/slaves
  
@@ -41,7 +21,7 @@ Index: build_dir/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
  	done
  
  	[ -n "$all_slaves_active" ] && echo "$all_slaves_active" > /sys/class/net/"$link"/bonding/all_slaves_active
-@@ -180,15 +189,9 @@ proto_bonding_setup() {
+@@ -180,15 +183,9 @@ proto_bonding_setup() {
  	proto_init_update "$link" 1
  
  	# For static configuration we _MUST_ have an IP address
@@ -59,7 +39,7 @@ Index: build_dir/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
  	proto_send_update "$cfg"
  }
  
-@@ -196,6 +199,9 @@ proto_bonding_teardown() {
+@@ -196,6 +193,9 @@ proto_bonding_teardown() {
  	local cfg="$1"
  	local link="bonding-$cfg"
  
