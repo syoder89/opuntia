@@ -12,6 +12,15 @@ Index: build_dir/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
  	# Check for loaded kernel bonding driver (/sys/class/net/bonding_masters exists)
  	[ -f "$BONDING_MASTERS" ] || {
  		echo "$cfg" "setup: bonding_masters does not exist in sysfs (kernel module not loaded?)"
+@@ -89,7 +92,7 @@ proto_bonding_setup() {
+ 
+ 		802.3ad)
+ 			echo "$bonding_policy" > /sys/class/net/"$link"/bonding/mode
+-			set_driver_values min_links ad_actor_sys_prio ad_actor_system ad_select lacp_rate
++			set_driver_values min_links ad_actor_sys_prio ad_actor_system ad_select lacp_rate xmit_hash_policy
+ 		;;
+ 
+ 		balance-rr)
 @@ -164,7 +167,7 @@ proto_bonding_setup() {
  
  		echo "+$slave" > /sys/class/net/"$link"/bonding/slaves
