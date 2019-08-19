@@ -1,0 +1,92 @@
+Index: build_dir/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
+===================================================================
+--- build_dir.orig/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
++++ build_dir/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
+@@ -70,6 +70,9 @@ proto_bonding_setup() {
+ 	local cfg="$1"
+ 	local link="bonding-$cfg"
+ 
++	json_get_vars ifname
++	[ -z "$ifname" ] || link="$ifname"
++
+ 	# Check for loaded kernel bonding driver (/sys/class/net/bonding_masters exists)
+ 	[ -f "$BONDING_MASTERS" ] || {
+ 		echo "$cfg" "setup: bonding_masters does not exist in sysfs (kernel module not loaded?)"
+@@ -81,6 +84,9 @@ proto_bonding_setup() {
+ 	# Add bonding interface to system
+ 	echo "+$link" > "$BONDING_MASTERS"
+ 
++	# Bond interface must be down in order to set parameters, policy, etc
++	ip link set $link down
++
+ 	# Set bonding policy (with corresponding parameters)
+ 	local bonding_policy
+ 	json_get_vars bonding_policy
+@@ -145,6 +151,9 @@ proto_bonding_setup() {
+ 		;;
+ 	esac
+ 
++	# Can now bring the bond interface up
++	ip link set $link up
++
+ 	# Add slaves to bonding interface
+ 	local slaves
+ 	json_get_vars slaves
+@@ -164,7 +173,7 @@ proto_bonding_setup() {
+ 
+ 		echo "+$slave" > /sys/class/net/"$link"/bonding/slaves
+ 
+-		ifconfig "$slave" up
++		ifup "$slave"
+ 	done
+ 
+ 	[ -n "$all_slaves_active" ] && echo "$all_slaves_active" > /sys/class/net/"$link"/bonding/all_slaves_active
+@@ -180,15 +189,9 @@ proto_bonding_setup() {
+ 	proto_init_update "$link" 1
+ 
+ 	# For static configuration we _MUST_ have an IP address
+-	[ -z "$ipaddr" ] && {
+-		echo "$cfg" "INVALID LOCAL ADDRESS"
+-		proto_notify_error "$cfg" "INVALID_LOCAL_ADDRESS"
+-		proto_block_restart "$cfg"
+-		return
++	[ -z "$ipaddr" ] || {
++		proto_add_ipv4_address "$ipaddr" "$netmask"
+ 	}
+-
+-	proto_add_ipv4_address "$ipaddr" "$netmask"
+-
+ 	proto_send_update "$cfg"
+ }
+ 
+@@ -196,6 +199,9 @@ proto_bonding_teardown() {
+ 	local cfg="$1"
+ 	local link="bonding-$cfg"
+ 
++	json_get_vars ifname
++	[ -z "$ifname" ] || link="$ifname"
++
+ 	# Check for loaded kernel bonding driver (/sys/class/net/bonding_masters exists)
+ 	[ -f "$BONDING_MASTERS" ] || {
+ 		echo "$cfg" "teardown: bonding_masters does not exist in sysfs (kernel module not loaded?)"
+Index: build_dir/package/kernel/linux/modules/netsupport.mk
+===================================================================
+--- build_dir.orig/package/kernel/linux/modules/netsupport.mk
++++ build_dir/package/kernel/linux/modules/netsupport.mk
+@@ -42,12 +42,16 @@ endef
+ $(eval $(call KernelPackage,atmtcp))
+ 
+ 
++# Need max_bonds=0 to make the kernel not auto add bond0
++# which will cause problems if you want to actually use
++# bond0 as your interface name - Scott 08-19-2019
+ define KernelPackage/bonding
+   SUBMENU:=$(NETWORK_SUPPORT_MENU)
+   TITLE:=Ethernet bonding driver
+   KCONFIG:=CONFIG_BONDING
+   FILES:=$(LINUX_DIR)/drivers/net/bonding/bonding.ko
+   AUTOLOAD:=$(call AutoLoad,40,bonding)
++  MODPARAMS.bonding:=max_bonds=0
+ endef
+ 
+ define KernelPackage/bonding/description
