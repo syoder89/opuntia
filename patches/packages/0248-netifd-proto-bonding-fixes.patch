@@ -21,16 +21,29 @@ Index: build_dir/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
  		;;
  
  		balance-rr)
-@@ -164,7 +167,7 @@ proto_bonding_setup() {
+@@ -158,13 +161,15 @@ proto_bonding_setup() {
+ 			return
+ 		fi
  
- 		echo "+$slave" > /sys/class/net/"$link"/bonding/slaves
+-		ifconfig "$slave" down
+-
+-		sleep 1
++		let retries=5
++		while [ $((retries)) -gt 0 ] ; do
++			ifconfig "$slave" down
++			echo "+$slave" > /sys/class/net/"$link"/bonding/slaves && break
++			let retries=retries-1
++			sleep 1
++		done
  
+-		echo "+$slave" > /sys/class/net/"$link"/bonding/slaves
+-
 -		ifconfig "$slave" up
 +		ifup "$slave"
  	done
  
  	[ -n "$all_slaves_active" ] && echo "$all_slaves_active" > /sys/class/net/"$link"/bonding/all_slaves_active
-@@ -180,15 +183,9 @@ proto_bonding_setup() {
+@@ -180,15 +185,9 @@ proto_bonding_setup() {
  	proto_init_update "$link" 1
  
  	# For static configuration we _MUST_ have an IP address
@@ -48,7 +61,7 @@ Index: build_dir/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
  	proto_send_update "$cfg"
  }
  
-@@ -196,6 +193,9 @@ proto_bonding_teardown() {
+@@ -196,6 +195,9 @@ proto_bonding_teardown() {
  	local cfg="$1"
  	local link="bonding-$cfg"
  
