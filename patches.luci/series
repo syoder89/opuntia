@@ -14,3 +14,4 @@
 0031-openvpn-add-passphrase.patch
 0032-openvpn-change-templates.patch
 0033-dnsmasq-add-subnet-feature.patch
+0034-wireguard-enhancements.patch
