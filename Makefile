@@ -1,5 +1,6 @@
 OPENWRT_GIT:=https://github.com/openwrt/openwrt.git
-OPENWRT_COMMIT:=7ec092e64125b920aee6d1767dacea3f61b2fa6f
+OPENWRT_COMMIT:=5ef9e4f107a94c502908403fdf56cf6bcdc08dd2
+#OPENWRT_COMMIT:=7ec092e64125b920aee6d1767dacea3f61b2fa6f = 4.8.13
 #OPENWRT_COMMIT:=d6643aca34cb2f425ea7c5d7a725c97166b3363d = 4.8.12
 #OPENWRT_COMMIT:=bd3a18bbe433cc53b6f86dd708477f97ac406abc = 4.8.12
 #OPENWRT_COMMIT:=b2bf3745ff7e5e2fbf3b7b0e488cfaa5b3cca87c = 4.8.11
@@ -45,8 +46,7 @@ built=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_built
 configured=$(BUILD_DIR)/.$(OPENWRT_COMMIT)_configured
 BUILD_NUMBER?=1
 NUM_CPU=$(shell grep '^processor' /proc/cpuinfo | wc -l)
-#PARALLEL_MAKE=-j $(shell echo $$(( $(NUM_CPU) * 2 )))
-PARALLEL_MAKE=
+PARALLEL_MAKE=-j $(shell echo $$(( $(NUM_CPU) * 2 )))
 CACHE_DIR?=$(shell pwd)/ccache
 BUILD_OPTS=
 

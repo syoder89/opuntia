@@ -6,13 +6,13 @@ Index: build_dir/feeds/routing/nodogsplash/Makefile
  
  PKG_NAME:=nodogsplash
  PKG_FIXUP:=autoreconf
--PKG_VERSION:=4.0.1
+-PKG_VERSION:=4.2.0
 +PKG_VERSION:=3.3.0
  PKG_RELEASE:=1
  
 -PKG_SOURCE_URL:=https://codeload.github.com/nodogsplash/nodogsplash/tar.gz/v$(PKG_VERSION)?
 -PKG_SOURCE:=nodogsplash-$(PKG_VERSION).tar.gz
--PKG_HASH:=b6787d042ab65f8cdc6982bd083a28a85ac3494896ae5c97e9de9b216585b1e7
+-PKG_HASH:=75f559b28a1443b2ecaa95c0cb98610372d558324c8d2f003a8ebe22185b81c0
 +PKG_SOURCE_URL:=https://github.com/imagestream/nodogsplash.git
 +PKG_SOURCE_PROTO:=git
 +PKG_SOURCE_DATE:=2019-03-22

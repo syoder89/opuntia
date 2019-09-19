@@ -2,10 +2,10 @@ Index: build_dir/package/network/services/hostapd/Makefile
 ===================================================================
 --- build_dir.orig/package/network/services/hostapd/Makefile
 +++ build_dir/package/network/services/hostapd/Makefile
-@@ -104,7 +104,7 @@ space :=
+@@ -90,7 +90,7 @@ space :=
  space +=
  
- ifeq ($(LOCAL_VARIANT),full)
+ ifneq ($(LOCAL_VARIANT),mini)
 -  DRIVER_MAKEOPTS += CONFIG_IEEE80211W=$(CONFIG_DRIVER_11W_SUPPORT)
 +  DRIVER_MAKEOPTS += CONFIG_IEEE80211W=$(CONFIG_DRIVER_11W_SUPPORT) CONFIG_DEBUG_SYSLOG=y
  endif
