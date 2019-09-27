@@ -1,5 +1,7 @@
+Index: build_dir/package/network/config/netifd/files/lib/netifd/proto/ovs_vxlan.sh
+===================================================================
 --- /dev/null
-+++ b/package/network/config/netifd/files/lib/netifd/proto/ovs_vxlan.sh
++++ build_dir/package/network/config/netifd/files/lib/netifd/proto/ovs_vxlan.sh
 @@ -0,0 +1,105 @@
 +#!/bin/sh
 +
@@ -106,18 +108,19 @@
 +	[ -f /lib/modules/$(uname -r)/vport-vxlan.ko ] && add_protocol ovs_vxlan
 +}
 +
+Index: build_dir/package/network/config/netifd/patches/003-replace-bridge-with-ovs.patch
+===================================================================
 --- /dev/null
-+++ b/package/network/config/netifd/patches/003-replace-bridge-with-ovs.patch
-@@ -0,0 +1,338 @@
++++ build_dir/package/network/config/netifd/patches/003-replace-bridge-with-ovs.patch
+@@ -0,0 +1,339 @@
 +--- a/system-linux.c
 ++++ b/system-linux.c
-+@@ -619,13 +619,185 @@ static int system_rtnl_call(struct nl_ms
++@@ -619,13 +619,188 @@ static int system_rtnl_call(struct nl_ms
 + 	return nl_wait_for_ack(sock_rtnl);
 + }
 + 
-++#define OPENVSWITCH
-++#ifdef OPENVSWITCH
 ++#include <sys/wait.h>
+++#include <unistd.h>
 ++
 ++#define run_prog(p, ...) ({ \
 ++        int rc = -1, status; \
@@ -265,35 +268,39 @@
 ++
 ++	return 0;
 ++}
-++#endif
+++
+++static int has_ovs(void)
+++{
+++	return ((access("/usr/bin/ovs-vsctl", X_OK)) == 0);
+++}
 ++
 + int system_bridge_delbr(struct device *bridge)
 + {
-++#ifdef OPENVSWITCH
-++	return ovs_br_del(bridge->ifname);
-++#endif
+++	if (has_ovs()) {
+++		return ovs_br_del(bridge->ifname);
+++	}
 ++
 + 	return ioctl(sock_ioctl, SIOCBRDELBR, bridge->ifname);
 + }
 + 
 + static int system_bridge_if(const char *bridge, struct device *dev, int cmd, void *data)
 + {
-++#ifdef OPENVSWITCH
-++	if (dev) {
-++		/* Tunnels are handled natively by ovs */
-++		if (dev->type == &tunnel_device_type)
-++			return 0;
-++		switch(cmd) {
-++			case SIOCBRADDIF:
-++				return ovs_br_add_if(bridge, dev->ifname);
-++			break;
-++			case SIOCBRDELIF:
-++				return ovs_br_del_if(dev->ifname);
-++			break;
+++	if (has_ovs()) {
+++		if (dev) {
+++			/* Tunnels are handled natively by ovs */
+++//			if (dev->type == &tunnel_device_type)
+++//				return 0;
+++			switch(cmd) {
+++				case SIOCBRADDIF:
+++					return ovs_br_add_if(bridge, dev->ifname);
+++				break;
+++				case SIOCBRDELIF:
+++					return ovs_br_del_if(dev->ifname);
+++				break;
+++			}
 ++		}
+++		return 0;
 ++	}
-++	return 0;
-++#endif
 + 	struct ifreq ifr;
 + 
 + 	memset(&ifr, 0, sizeof(ifr));
@@ -301,9 +308,9 @@
 + 
 + static bool system_is_bridge(const char *name, char *buf, int buflen)
 + {
-++#ifdef OPENVSWITCH
-++	return ovs_br_exists(name);
-++#endif
+++	if (has_ovs()) {
+++		return ovs_br_exists(name);
+++	}
 + 	struct stat st;
 + 
 + 	snprintf(buf, buflen, "/sys/devices/virtual/net/%s/bridge", name);
@@ -311,9 +318,9 @@
 + 
 + static char *system_get_bridge(const char *name, char *buf, int buflen)
 + {
-++#ifdef OPENVSWITCH
-++	return ovs_br_get(buf, name, buflen);
-++#endif
+++	if (has_ovs()) {
+++		return ovs_br_get(buf, name, buflen);
+++	}
 + 	char *path;
 + 	ssize_t len = -1;
 + 	glob_t gl;
@@ -321,9 +328,9 @@
 + 					 char *buf,
 + 					 int buf_len)
 + {
-++#ifdef OPENVSWITCH
-++	return;
-++#endif
+++	if (has_ovs()) {
+++		return;
+++	}
 + 	system_set_dev_sysctl("/sys/devices/virtual/net/%s/bridge/multicast_snooping",
 + 		bridge->ifname, cfg->igmp_snoop ? "1" : "0");
 + 
@@ -331,17 +338,16 @@
 + 
 + int system_bridge_addbr(struct device *bridge, struct bridge_config *cfg)
 + {
-++#ifdef OPENVSWITCH
-++	return ovs_br_add(bridge->ifname);
-++#endif
+++	if (has_ovs()) {
+++		return ovs_br_add(bridge->ifname);
+++	}
 + 	char buf[64];
 + 	unsigned long args[4] = {};
 + 
-+@@ -2255,6 +2439,47 @@ static int tunnel_ioctl(const char *name
++@@ -2255,6 +2439,45 @@ static int tunnel_ioctl(const char *name
 + 	return ioctl(sock_ioctl, cmd, &ifr);
 + }
 + 
-++#ifdef OPENVSWITCH
 ++static int system_add_ovs_vxlan_tunnel(const char *name, struct blob_attr **tb)
 ++{
 ++	struct blob_attr *cur;
@@ -380,7 +386,6 @@
 ++{
 ++	return ovs_br_del_vxlan_tunnel(name);
 ++}
-++#endif
 ++
 + #ifdef IFLA_IPTUN_MAX
 + #define IP6_FLOWINFO_TCLASS	htonl(0x0FF00000)
@@ -447,9 +452,11 @@
 + extern const struct uci_blob_param_list vxlan_data_attr_list;
 + extern const struct uci_blob_param_list gre_data_attr_list;
 + extern const struct uci_blob_param_list vti_data_attr_list;
---- a/package/network/config/netifd/Makefile
-+++ b/package/network/config/netifd/Makefile
-@@ -38,6 +38,7 @@ define Package/netifd/install
+Index: build_dir/package/network/config/netifd/Makefile
+===================================================================
+--- build_dir.orig/package/network/config/netifd/Makefile
++++ build_dir/package/network/config/netifd/Makefile
+@@ -41,6 +41,7 @@ define Package/netifd/install
  	$(INSTALL_BIN) $(PKG_BUILD_DIR)/netifd $(1)/sbin/
  	$(CP) ./files/* $(1)/
  	$(CP) $(PKG_BUILD_DIR)/scripts/* $(1)/lib/netifd/

@@ -1,5 +1,6 @@
 OPENWRT_GIT:=https://github.com/openwrt/openwrt.git
-OPENWRT_COMMIT:=5ef9e4f107a94c502908403fdf56cf6bcdc08dd2
+OPENWRT_COMMIT:=cb289777ca3554e21cd64d738a56aa97e76af4f9
+#OPENWRT_COMMIT:=5ef9e4f107a94c502908403fdf56cf6bcdc08dd2 = 4.8.14
 #OPENWRT_COMMIT:=7ec092e64125b920aee6d1767dacea3f61b2fa6f = 4.8.13
 #OPENWRT_COMMIT:=d6643aca34cb2f425ea7c5d7a725c97166b3363d = 4.8.12
 #OPENWRT_COMMIT:=bd3a18bbe433cc53b6f86dd708477f97ac406abc = 4.8.12
@@ -73,13 +74,14 @@ install: $(built)
 	if [ ! -z $${factory} ]; then \
 		cp -f $${factory} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-factory.img; \
 	elif [ "$${combined}" != "" ] ; then \
-		gzip -dc $${combined} > $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-factory.img; \
+		cp -f $${combined} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-factory.img; \
 	fi; \
 	if [ "$${combined}" != "" ] ; then \
 		cp -f $${combined} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-sysupgrade.bin; \
 	elif [ "$${sysup}" != "" ] ; then \
 		cp -f $${sysup} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-sysupgrade.bin; \
 	fi
+#		gzip -dc $${combined} > $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-factory.img; \
 
 docker_build:
 	sudo apt-get update && sudo apt-get install -y docker.io && \

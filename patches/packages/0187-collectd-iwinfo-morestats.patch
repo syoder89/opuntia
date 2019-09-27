@@ -2,7 +2,7 @@ Index: build_dir/feeds/packages/utils/collectd/patches/999-scott-iwinfo-morestat
 ===================================================================
 --- /dev/null
 +++ build_dir/feeds/packages/utils/collectd/patches/999-scott-iwinfo-morestats.patch
-@@ -0,0 +1,201 @@
+@@ -0,0 +1,202 @@
 +Index: collectd-5.9.0/src/iwinfo.c
 +===================================================================
 +--- collectd-5.9.0.orig/src/iwinfo.c
@@ -59,7 +59,7 @@ Index: build_dir/feeds/packages/utils/collectd/patches/999-scott-iwinfo-morestat
 + 
 + 	plugin_dispatch_values(&vl);
 + }
-+@@ -76,30 +105,101 @@ static void iwinfo_process(const char *i
++@@ -76,30 +105,102 @@ static void iwinfo_process(const char *i
 + 	int val;
 + 	char buf[IWINFO_BUFSIZE];
 + 	const struct iwinfo_ops *iw = iwinfo_backend(ifname);
@@ -71,6 +71,7 @@ Index: build_dir/feeds/packages/utils/collectd/patches/999-scott-iwinfo-morestat
 + 	/* does appear to be a wifi iface */
 + 	if (iw)
 + 	{
+++		memset(buf, 0, sizeof(buf));
 ++		iw->ssid(ifname, buf);
 ++		if (iw->frequency(ifname, &val))
 ++			val = 0;

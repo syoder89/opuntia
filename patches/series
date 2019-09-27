@@ -109,11 +109,11 @@ packages/0232-decrease-ath10k-ct-buffers.patch
 packages/0235-ath10k-ct-firmware-rel22.patch
 packages/0236-batctl-fix-default-symlink.patch
 packages/0237-strongswan-increase-starter-timeout.patch
+packages/0238-nodogsplash-imagestream
 packages/ath10k-firmware-update.patch
 kernel/0084-ag71xx-fix-max-mtu.patch
 0230-lower-min-free-kbytes-avoid-oom.patch
 0229-ath79-add-compex-dts-support.patch
-packages/0238-nodogsplash-imagestream
 packages/0240-coova-chilli-fix-init-disabled.patch
 kernel/0086-compex-mips-support-multiple-machines.patch
 0165-Fix-compex-leds.patch
@@ -126,3 +126,4 @@ packages/0246-dnsmasq-add-subnet-feature.patch
 packages/0247-mwan3-check-if-enabled.patch
 packages/0248-netifd-proto-bonding-fixes.patch
 packages/0249-wireguard-fix-reload.patch
+kernel/0087-disable-mpls-routing.patch

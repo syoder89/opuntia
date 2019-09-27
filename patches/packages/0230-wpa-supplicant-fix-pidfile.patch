@@ -6,8 +6,8 @@ Index: build_dir/package/network/services/hostapd/patches/450-scan_wait.patch
   
   
   #ifndef CONFIG_NO_HOSTAPD_LOGGER
--@@ -148,6 +150,14 @@ static void hostapd_logger_cb(void *ctx,
-+@@ -148,6 +150,25 @@ static void hostapd_logger_cb(void *ctx,
+-@@ -149,6 +151,14 @@ static void hostapd_logger_cb(void *ctx,
++@@ -149,6 +151,25 @@ static void hostapd_logger_cb(void *ctx,
   }
   #endif /* CONFIG_NO_HOSTAPD_LOGGER */
   

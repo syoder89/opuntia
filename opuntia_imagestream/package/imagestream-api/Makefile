@@ -10,7 +10,7 @@ define Package/$(PKG_NAME)
   SECTION:=net
   CATEGORY:=ImageStream
   TITLE:=ImageStream Management REST API
-  DEPENDS:=+snmpd +php5 +php5-cli +php5-cgi
+  DEPENDS:=+snmpd +php7 +php7-cli
   DEFAULT:=y
 endef
 

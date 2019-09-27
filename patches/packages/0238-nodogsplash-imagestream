@@ -7,57 +7,16 @@ Index: build_dir/feeds/routing/nodogsplash/Makefile
  PKG_NAME:=nodogsplash
  PKG_FIXUP:=autoreconf
 -PKG_VERSION:=4.2.0
-+PKG_VERSION:=3.3.0
++PKG_VERSION:=4.2.1
  PKG_RELEASE:=1
  
 -PKG_SOURCE_URL:=https://codeload.github.com/nodogsplash/nodogsplash/tar.gz/v$(PKG_VERSION)?
 -PKG_SOURCE:=nodogsplash-$(PKG_VERSION).tar.gz
 -PKG_HASH:=75f559b28a1443b2ecaa95c0cb98610372d558324c8d2f003a8ebe22185b81c0
-+PKG_SOURCE_URL:=https://github.com/imagestream/nodogsplash.git
++PKG_SOURCE_URL:=https://github.com/nodogsplash/nodogsplash.git
 +PKG_SOURCE_PROTO:=git
-+PKG_SOURCE_DATE:=2019-03-22
-+PKG_SOURCE_VERSION:=333986ac69c603f733aa8309ccabe04176122c80
++PKG_SOURCE_DATE:=2019-09-23
++PKG_SOURCE_VERSION:=15333b1c7d7f9b642ef9f14416b56e23945e7e0e
  PKG_BUILD_DIR:=$(BUILD_DIR)/nodogsplash-$(PKG_VERSION)
  
  PKG_MAINTAINER:=Moritz Warning <moritzwarning@web.de>
-@@ -26,7 +27,7 @@ define Package/nodogsplash
- 	SUBMENU:=Captive Portals
- 	SECTION:=net
- 	CATEGORY:=Network
--	DEPENDS:=+libpthread +iptables-mod-ipopt +libmicrohttpd-no-ssl
-+	DEPENDS:=+libpthread +iptables-mod-ipopt +libmicrohttpd
- 	TITLE:=Open public network gateway daemon
- 	URL:=https://github.com/nodogsplash/nodogsplash
- 	CONFLICTS:=nodogsplash2
-@@ -55,12 +56,7 @@ define Package/nodogsplash/install
- 	$(CP) $(PKG_BUILD_DIR)/resources/splash.css $(1)/etc/nodogsplash/htdocs/
- 	$(CP) $(PKG_BUILD_DIR)/resources/status.html $(1)/etc/nodogsplash/htdocs/
- 	$(CP) $(PKG_BUILD_DIR)/resources/splash.jpg $(1)/etc/nodogsplash/htdocs/images/
--	$(CP) $(PKG_BUILD_DIR)/openwrt/nodogsplash/files/etc/config/nodogsplash $(1)/etc/config/
--	$(CP) $(PKG_BUILD_DIR)/openwrt/nodogsplash/files/etc/init.d/nodogsplash $(1)/etc/init.d/
--	$(CP) $(PKG_BUILD_DIR)/openwrt/nodogsplash/files/etc/uci-defaults/40_nodogsplash $(1)/etc/uci-defaults/
--	$(CP) $(PKG_BUILD_DIR)/openwrt/nodogsplash/files/usr/lib/nodogsplash/restart.sh $(1)/usr/lib/nodogsplash/
--	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/PreAuth/demo-preauth.sh $(1)/usr/lib/nodogsplash/login.sh
--	$(CP) $(PKG_BUILD_DIR)/forward_authentication_service/fas-aes/fas-aes.php $(1)/etc/nodogsplash/
-+	$(CP) $(PKG_BUILD_DIR)/openwrt/nodogsplash/files/* $(1)/
- endef
- 
- define Package/nodogsplash/postrm
-Index: build_dir/feeds/routing/nodogsplash/patches/999-scott-add-faskey.patch
-===================================================================
---- /dev/null
-+++ build_dir/feeds/routing/nodogsplash/patches/999-scott-add-faskey.patch
-@@ -0,0 +1,13 @@
-+Index: nodogsplash-3.3.0/openwrt/nodogsplash/files/etc/init.d/nodogsplash
-+===================================================================
-+--- nodogsplash-3.3.0.orig/openwrt/nodogsplash/files/etc/init.d/nodogsplash
-++++ nodogsplash-3.3.0/openwrt/nodogsplash/files/etc/init.d/nodogsplash
-+@@ -137,7 +137,7 @@ generate_uci_config() {
-+ 
-+   addline "GatewayInterface $ifname"
-+ 
-+-  for option in preauth binauth fasport fasremoteip faspath fas_secure_enabled \
-++  for option in preauth binauth fasport fasremoteip faspath fas_secure_enabled faskey \
-+     daemon debuglevel maxclients gatewayname gatewayinterface gatewayiprange \
-+     gatewayaddress gatewayport webroot splashpage statuspage imagesdir pagesdir \
-+     redirecturl sessiontimeout preauthidletimeout authidletimeout checkinterval \
