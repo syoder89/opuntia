@@ -1,0 +1,14 @@
+Index: build_dir.ev1000/package/network/services/dnsmasq/files/dnsmasq.init
+===================================================================
+--- build_dir.ev1000.orig/package/network/services/dnsmasq/files/dnsmasq.init
++++ build_dir.ev1000/package/network/services/dnsmasq/files/dnsmasq.init
+@@ -511,7 +511,8 @@ dhcp_add() {
+ 	network_get_protocol proto "$net" || return 0
+ 
+ 	# Do not support non-static interfaces for now
+-	[ static = "$proto" ] || return 0
++# Allow them all - Scott 09/27/2019
++#	[ static = "$proto" ] || return 0
+ 
+ 	# Override subnet and netmask with dhcp config if applicable
+ 	config_get _subnet "$cfg" subnet

@@ -128,3 +128,4 @@ packages/0248-netifd-proto-bonding-fixes.patch
 packages/0249-wireguard-fix-reload.patch
 kernel/0087-disable-mpls-routing.patch
 packages/0250-netifd-vxlan-support-addresses.patch
+packages/0251-dnsmasq-remove-static-proto-only-limitation.patch
