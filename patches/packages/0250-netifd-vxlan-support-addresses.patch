@@ -51,8 +51,8 @@ Index: build_dir.ev1000/package/network/config/vxlan/files/vxlan.sh
 +	local ipaddr peeraddr local remote
 +	json_get_vars ipaddr peeraddr tunlink local remote
 +
-+	[ -n "$local ] && ipaddr="$local"
-+	[ -n "$remote ] && peeraddr="$remote"
++	[ -n "$local" ] && ipaddr="$local"
++	[ -n "$remote" ] && peeraddr="$remote"
  
  	[ -z "$peeraddr" ] && {
  		proto_notify_error "$cfg" "MISSING_ADDRESS"
