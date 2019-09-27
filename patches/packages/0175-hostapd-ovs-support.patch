@@ -1,6 +1,8 @@
+Index: build_dir.ev1000/package/network/services/hostapd/patches/999-scott-ovs-support.patch
+===================================================================
 --- /dev/null
-+++ b/package/network/services/hostapd/patches/999-scott-ovs-support.patch
-@@ -0,0 +1,173 @@
++++ build_dir.ev1000/package/network/services/hostapd/patches/999-scott-ovs-support.patch
+@@ -0,0 +1,169 @@
 +From c89daaeca4ee90c8bc158e37acb1b679c823d7ab Mon Sep 17 00:00:00 2001
 +From: Helmut Schaa <helmut.schaa@googlemail.com>
 +Date: Tue, 3 Dec 2013 14:51:43 +0100
@@ -10,10 +12,12 @@
 + src/drivers/linux_ioctl.c | 67 ++++++++++++++++++++++++++++++++++++++++++++++-
 + 1 file changed, 66 insertions(+), 1 deletion(-)
 +
-+--- a/src/drivers/linux_ioctl.c
-++++ b/src/drivers/linux_ioctl.c
-+@@ -14,6 +14,76 @@
-+ #include "utils/common.h"
++Index: hostapd-2019-08-08-ca8c2bd2/src/drivers/linux_ioctl.c
++===================================================================
++--- hostapd-2019-08-08-ca8c2bd2.orig/src/drivers/linux_ioctl.c
+++++ hostapd-2019-08-08-ca8c2bd2/src/drivers/linux_ioctl.c
++@@ -15,6 +15,76 @@
++ #include "common/linux_bridge.h"
 + #include "linux_ioctl.h"
 + 
 ++#define OPENVSWITCH
@@ -89,15 +93,7 @@
 + 
 + int linux_set_iface_flags(int sock, const char *ifname, int dev_up)
 + {
-+@@ -118,7 +188,6 @@ int linux_set_ifhwaddr(int sock, const c
-+ 	return 0;
-+ }
-+ 
-+-
-+ #ifndef SIOCBRADDBR
-+ #define SIOCBRADDBR 0x89a0
-+ #endif
-+@@ -135,6 +204,9 @@ int linux_set_ifhwaddr(int sock, const c
++@@ -122,6 +192,9 @@ int linux_set_ifhwaddr(int sock, const c
 + 
 + int linux_br_add(int sock, const char *brname)
 + {
@@ -105,9 +101,9 @@
 ++		return 0;
 ++
 + 	if (ioctl(sock, SIOCBRADDBR, brname) < 0) {
-+ 		wpa_printf(MSG_DEBUG, "Could not add bridge %s: %s",
-+ 			   brname, strerror(errno));
-+@@ -147,6 +219,9 @@ int linux_br_add(int sock, const char *b
++ 		int saved_errno = errno;
++ 
++@@ -137,6 +210,9 @@ int linux_br_add(int sock, const char *b
 + 
 + int linux_br_del(int sock, const char *brname)
 + {
@@ -117,7 +113,7 @@
 + 	if (ioctl(sock, SIOCBRDELBR, brname) < 0) {
 + 		wpa_printf(MSG_DEBUG, "Could not remove bridge %s: %s",
 + 			   brname, strerror(errno));
-+@@ -162,6 +237,9 @@ int linux_br_add_if(int sock, const char
++@@ -152,6 +228,9 @@ int linux_br_add_if(int sock, const char
 + 	struct ifreq ifr;
 + 	int ifindex;
 + 
@@ -127,7 +123,7 @@
 + 	ifindex = if_nametoindex(ifname);
 + 	if (ifindex == 0)
 + 		return -1;
-+@@ -184,6 +262,9 @@ int linux_br_del_if(int sock, const char
++@@ -177,6 +256,9 @@ int linux_br_del_if(int sock, const char
 + 	struct ifreq ifr;
 + 	int ifindex;
 + 
@@ -137,7 +133,7 @@
 + 	ifindex = if_nametoindex(ifname);
 + 	if (ifindex == 0)
 + 		return -1;
-+@@ -206,6 +287,9 @@ int linux_br_get(char *brname, const cha
++@@ -199,6 +281,9 @@ int linux_br_get(char *brname, const cha
 + 	char path[128], brlink[128], *pos;
 + 	ssize_t res;
 + 
@@ -147,14 +143,16 @@
 + 	os_snprintf(path, sizeof(path), "/sys/class/net/%s/brport/bridge",
 + 		    ifname);
 + 	res = readlink(path, brlink, sizeof(brlink));
-+@@ -242,3 +326,4 @@ int linux_master_get(char *master_ifname
++@@ -235,3 +320,4 @@ int linux_master_get(char *master_ifname
 + 	os_strlcpy(master_ifname, pos, IFNAMSIZ);
 + 	return 0;
 + }
 ++
-+--- a/src/ap/vlan_full.c
-++++ b/src/ap/vlan_full.c
-+@@ -137,6 +137,9 @@ static int br_delif(const char *br_name,
++Index: hostapd-2019-08-08-ca8c2bd2/src/ap/vlan_full.c
++===================================================================
++--- hostapd-2019-08-08-ca8c2bd2.orig/src/ap/vlan_full.c
+++++ hostapd-2019-08-08-ca8c2bd2/src/ap/vlan_full.c
++@@ -138,6 +138,9 @@ static int br_delif(const char *br_name,
 + 	int if_index;
 + 
 + 	wpa_printf(MSG_DEBUG, "VLAN: br_delif(%s, %s)", br_name, if_name);
@@ -164,7 +162,7 @@
 + 	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 + 		wpa_printf(MSG_ERROR, "VLAN: %s: socket(AF_INET,SOCK_STREAM) "
 + 			   "failed: %s", __func__, strerror(errno));
-+@@ -188,6 +191,9 @@ static int br_addif(const char *br_name,
++@@ -193,6 +196,9 @@ static int br_addif(const char *br_name,
 + 	int if_index;
 + 
 + 	wpa_printf(MSG_DEBUG, "VLAN: br_addif(%s, %s)", br_name, if_name);

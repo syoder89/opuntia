@@ -1,0 +1,75 @@
+Index: build_dir.ev1000/package/network/config/vxlan/files/vxlan.sh
+===================================================================
+--- build_dir.ev1000.orig/package/network/config/vxlan/files/vxlan.sh
++++ build_dir.ev1000/package/network/config/vxlan/files/vxlan.sh
+@@ -16,8 +16,12 @@ vxlan_generic_setup() {
+ 	local link="$cfg"
+ 
+ 	local port vid ttl tos mtu macaddr zone rxcsum txcsum
++	local addresses ip6prefix
+ 	json_get_vars port vid ttl tos mtu macaddr zone rxcsum txcsum
+ 
++	config_load network
++	config_get addresses "${cfg}" "addresses"
++	config_get ip6prefix "${cfg}" "ip6prefix"
+ 
+ 	proto_init_update "$link" 1
+ 
+@@ -46,14 +50,38 @@ vxlan_generic_setup() {
+ 	[ -n "$zone" ] && json_add_string zone "$zone"
+ 	proto_close_data
+ 
++	logger "Addresses are $addresses"
++	for address in ${addresses}; do
++		case "${address}" in
++			*:*/*)
++				proto_add_ipv6_address "${address%%/*}" "${address##*/}"
++				;;
++			*.*/*)
++				proto_add_ipv4_address "${address%%/*}" "${address##*/}"
++				;;
++			*:*)
++				proto_add_ipv6_address "${address%%/*}" "128"
++				;;
++			*.*)
++				proto_add_ipv4_address "${address%%/*}" "32"
++				;;
++		esac
++	done
++
++	for prefix in ${ip6prefix}; do
++		proto_add_ipv6_prefix "$prefix"
++	done
+ 	proto_send_update "$cfg"
+ }
+ 
+ proto_vxlan_setup() {
+ 	local cfg="$1"
+ 
+-	local ipaddr peeraddr
+-	json_get_vars ipaddr peeraddr tunlink
++	local ipaddr peeraddr local remote
++	json_get_vars ipaddr peeraddr tunlink local remote
++
++	[ -n "$local ] && ipaddr="$local"
++	[ -n "$remote ] && peeraddr="$remote"
+ 
+ 	[ -z "$peeraddr" ] && {
+ 		proto_notify_error "$cfg" "MISSING_ADDRESS"
+@@ -130,12 +158,16 @@ vxlan_generic_init_config() {
+ 	proto_config_add_int "tos"
+ 	proto_config_add_int "mtu"
+ 	proto_config_add_string "macaddr"
++	proto_config_add_array "addresses:list(string)"
++	proto_config_add_string "ip6prefix"
+ }
+ 
+ proto_vxlan_init_config() {
+ 	vxlan_generic_init_config
+ 	proto_config_add_string "ipaddr"
+ 	proto_config_add_string "peeraddr"
++	proto_config_add_string "local"
++	proto_config_add_string "remote"
+ }
+ 
+ proto_vxlan6_init_config() {
