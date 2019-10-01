@@ -1,30 +1,8 @@
-Index: build_dir/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
+Index: build_dir.ap3100/package/network/services/hostapd/files/hostapd.sh
 ===================================================================
---- build_dir.orig/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-+++ build_dir/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-@@ -778,9 +778,6 @@ drv_mac80211_setup() {
- 	json_get_values basic_rate_list basic_rate
- 	json_select ..
- 
--	# Restart the watchdog to avoid false positive triggers during reload
--	/etc/init.d/wifi-watchdog restart || true
--
- 	find_phy || {
- 		echo "Could not find PHY for device '$1'"
- 		wireless_set_retry 0
-@@ -869,6 +866,7 @@ drv_mac80211_teardown() {
- 
-         . $IPKG_INSTROOT/lib/functions/procd.sh > /dev/null 2>&1
- 	procd_kill hostapd-$phy $phy
-+	procd_kill wpa_supplicant-$phy $phy
- 	mac80211_interface_cleanup "$phy"
- }
- 
-Index: build_dir/package/network/services/hostapd/files/hostapd.sh
-===================================================================
---- build_dir.orig/package/network/services/hostapd/files/hostapd.sh
-+++ build_dir/package/network/services/hostapd/files/hostapd.sh
-@@ -978,21 +978,32 @@ wpa_supplicant_run() {
+--- build_dir.ap3100.orig/package/network/services/hostapd/files/hostapd.sh
++++ build_dir.ap3100/package/network/services/hostapd/files/hostapd.sh
+@@ -988,21 +988,32 @@ wpa_supplicant_run() {
  
  	_wpa_supplicant_common "$ifname"
  

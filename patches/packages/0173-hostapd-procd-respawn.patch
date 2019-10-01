@@ -1,6 +1,8 @@
---- a/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-+++ b/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
-@@ -486,7 +486,7 @@ mac80211_prepare_vif() {
+Index: build_dir.ap3100/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
+===================================================================
+--- build_dir.ap3100.orig/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
++++ build_dir.ap3100/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
+@@ -519,7 +519,7 @@ mac80211_prepare_vif() {
  	esac
  
  	# Ensure the interface is down
@@ -9,7 +11,7 @@
  	if [ "$?" = "0" ] ; then
  		echo "Interface $ifname is up prematurely! Taking it back down..."
  		ip link set "$ifname" down
-@@ -608,7 +608,16 @@ mac80211_setup_vif() {
+@@ -696,7 +696,16 @@ mac80211_setup_vif() {
  	json_get_vars mode
  	json_get_var vif_txpower txpower
  
@@ -27,7 +29,7 @@
  		wireless_setup_vif_failed IFUP_ERROR
  		json_select ..
  		return
-@@ -709,7 +718,7 @@ mac80211_interface_cleanup() {
+@@ -756,7 +765,7 @@ mac80211_interface_cleanup() {
  
  	for wdev in $(list_phy_interfaces "$phy"); do
  		ip link set dev "$wdev" down 2>/dev/null
@@ -36,17 +38,17 @@
  	done
  }
  
-@@ -728,6 +737,9 @@ drv_mac80211_setup() {
+@@ -779,6 +788,9 @@ drv_mac80211_setup() {
  	json_get_values basic_rate_list basic_rate
  	json_select ..
  
 +	# Restart the watchdog to avoid false positive triggers during reload
-+	/etc/init.d/wifi-watchdog restart || true
++#	/etc/init.d/wifi-watchdog restart || true
 +
  	find_phy || {
  		echo "Could not find PHY for device '$1'"
  		wireless_set_retry 0
-@@ -782,15 +794,15 @@ drv_mac80211_setup() {
+@@ -839,15 +851,15 @@ drv_mac80211_setup() {
  	for_each_interface "ap" mac80211_prepare_vif
  
  	[ -n "$hostapd_ctrl" ] && {
@@ -71,7 +73,7 @@
  	}
  
  	for_each_interface "ap sta adhoc mesh monitor" mac80211_setup_vif
-@@ -814,6 +826,8 @@ drv_mac80211_teardown() {
+@@ -871,6 +883,8 @@ drv_mac80211_teardown() {
  	json_get_vars phy
  	json_select ..
  
