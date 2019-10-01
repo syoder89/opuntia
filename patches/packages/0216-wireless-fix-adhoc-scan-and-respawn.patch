@@ -1,7 +1,7 @@
-Index: build_dir.ap3100/package/network/services/hostapd/files/hostapd.sh
+Index: build_dir/package/network/services/hostapd/files/hostapd.sh
 ===================================================================
---- build_dir.ap3100.orig/package/network/services/hostapd/files/hostapd.sh
-+++ build_dir.ap3100/package/network/services/hostapd/files/hostapd.sh
+--- build_dir.orig/package/network/services/hostapd/files/hostapd.sh
++++ build_dir/package/network/services/hostapd/files/hostapd.sh
 @@ -988,21 +988,32 @@ wpa_supplicant_run() {
  
  	_wpa_supplicant_common "$ifname"
@@ -50,3 +50,15 @@ Index: build_dir.ap3100/package/network/services/hostapd/files/hostapd.sh
  }
  
  hostapd_common_cleanup() {
+Index: build_dir/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
+===================================================================
+--- build_dir.orig/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
++++ build_dir/package/kernel/mac80211/files/lib/netifd/wireless/mac80211.sh
+@@ -885,6 +885,7 @@ drv_mac80211_teardown() {
+ 
+         . $IPKG_INSTROOT/lib/functions/procd.sh > /dev/null 2>&1
+ 	procd_kill hostapd-$phy $phy
++	procd_kill wpa_supplicant-$phy $phy
+ 	mac80211_interface_cleanup "$phy"
+ }
+ 
