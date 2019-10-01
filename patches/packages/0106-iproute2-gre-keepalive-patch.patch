@@ -9,23 +9,24 @@ Subject: [PATCH] iproute2 gre keepalive patch
  2 files changed, 51 insertions(+), 4 deletions(-)
  create mode 100644 package/network/utils/iproute2/patches/901-scott-gre-keepalive.patch
 
-diff --git a/package/network/utils/iproute2/patches/901-scott-gre-keepalive.patch b/package/network/utils/iproute2/patches/901-scott-gre-keepalive.patch
-new file mode 100644
-index 0000000..566782a
+Index: build_dir/package/network/utils/iproute2/patches/901-scott-gre-keepalive.patch
+===================================================================
 --- /dev/null
-+++ b/package/network/utils/iproute2/patches/901-scott-gre-keepalive.patch
-@@ -0,0 +1,42 @@
-+--- a/ip/iptunnel.c
-++++ b/ip/iptunnel.c
-+@@ -38,6 +38,7 @@ static void usage(void)
-+ 	fprintf(stderr, "          [ prl-default ADDR ] [ prl-nodefault ADDR ] [ prl-delete ADDR ]\n");
-+ 	fprintf(stderr, "          [ 6rd-prefix ADDR ] [ 6rd-relay_prefix ADDR ] [ 6rd-reset ]\n");
-+ 	fprintf(stderr, "          [ ttl TTL ] [ tos TOS ] [ [no]pmtudisc ] [ dev PHYS_DEV ]\n");
-++        fprintf(stderr, "          [ keepalive NUMBER ] [ retries NUMBER ]\n");
-+ 	fprintf(stderr, "\n");
-+ 	fprintf(stderr, "Where: NAME := STRING\n");
-+ 	fprintf(stderr, "       ADDR := { IP_ADDRESS | any }\n");
-+@@ -203,6 +204,18 @@ static int parse_args(int argc, char **a
++++ build_dir/package/network/utils/iproute2/patches/901-scott-gre-keepalive.patch
+@@ -0,0 +1,46 @@
++Index: iproute2-5.3.0/ip/iptunnel.c
++===================================================================
++--- iproute2-5.3.0.orig/ip/iptunnel.c
+++++ iproute2-5.3.0/ip/iptunnel.c
++@@ -39,6 +39,7 @@ static void usage(void)
++ 		"	 [ prl-default ADDR ] [ prl-nodefault ADDR ] [ prl-delete ADDR ]\n"
++ 		"	 [ 6rd-prefix ADDR ] [ 6rd-relay_prefix ADDR ] [ 6rd-reset ]\n"
++ 		"	 [ ttl TTL ] [ tos TOS ] [ [no]pmtudisc ] [ dev PHYS_DEV ]\n"
+++		"        [ keepalive NUMBER ] [ retries NUMBER ]\n"
++ 		"\n"
++ 		"Where:	NAME := STRING\n"
++ 		"	ADDR := { IP_ADDRESS | any }\n"
++@@ -165,6 +166,18 @@ static int parse_args(int argc, char **a
 + 					invarg("bad TOS value", *argv);
 + 				p->iph.tos |= uval;
 + 			}
@@ -42,11 +43,13 @@ index 0000000..566782a
 ++                                invarg("invalid retries value\n", *argv);
 ++                        p->ka_retries = uval;
 + 		} else {
-+ 			if (strcmp(*argv, "name") == 0) {
++ 			if (strcmp(*argv, "name") == 0)
 + 				NEXT_ARG();
-+--- a/include/uapi/linux/if_tunnel.h
-++++ b/include/uapi/linux/if_tunnel.h
-+@@ -35,6 +35,10 @@ struct ip_tunnel_parm {
++Index: iproute2-5.3.0/include/uapi/linux/if_tunnel.h
++===================================================================
++--- iproute2-5.3.0.orig/include/uapi/linux/if_tunnel.h
+++++ iproute2-5.3.0/include/uapi/linux/if_tunnel.h
++@@ -53,6 +53,10 @@ struct ip_tunnel_parm {
 + 	__be32			i_key;
 + 	__be32			o_key;
 + 	struct iphdr		iph;
@@ -57,6 +60,3 @@ index 0000000..566782a
 + };
 + 
 + enum {
--- 
-2.0.0
-
