@@ -23,6 +23,10 @@ check_clients() {
 }
 
 let can_reset=0
-while sleep 30; do
-	check_clients $1 $2
+while sleep 600; do
+	:;
+# This is a bad idea for busy APs providing public wifi as procd will mark
+# the hostapd process as crash looping
+# I think the problem may be solved now with a missed IRQ patch 
+#	check_clients $1 $2
 done
