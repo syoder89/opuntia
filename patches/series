@@ -130,4 +130,3 @@ kernel/0087-disable-mpls-routing.patch
 packages/0250-netifd-vxlan-support-addresses.patch
 packages/0251-dnsmasq-remove-static-proto-only-limitation.patch
 0232-Add-rbm11g-support.patch
-0233-Change-default-qdisc-to-cake.patch
