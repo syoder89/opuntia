@@ -1,0 +1,31 @@
+Index: build_dir/package/kernel/ath10k-ct/patches/999-scott-remove-ibss-limit-avoid-register-failure.patch
+===================================================================
+--- /dev/null
++++ build_dir/package/kernel/ath10k-ct/patches/999-scott-remove-ibss-limit-avoid-register-failure.patch
+@@ -0,0 +1,26 @@
++Index: ath10k-ct-2019-09-09-5e8cd86f/ath10k-5.2/mac.c
++===================================================================
++--- ath10k-ct-2019-09-09-5e8cd86f.orig/ath10k-5.2/mac.c
+++++ ath10k-ct-2019-09-09-5e8cd86f/ath10k-5.2/mac.c
++@@ -9353,10 +9353,6 @@ static struct ieee80211_iface_limit ath1
++ 	.max	= 7,
++ 	.types	= BIT(NL80211_IFTYPE_AP)
++ 	},
++-	{
++-	.max	= 1,
++-	.types	= BIT(NL80211_IFTYPE_ADHOC)
++-	},
++ };
++ 
++ static struct ieee80211_iface_combination ath10k_if_comb[] = {
++@@ -9565,10 +9561,6 @@ static struct ieee80211_iface_limit ath1
++ 			| BIT(NL80211_IFTYPE_MESH_POINT)
++ #endif
++ 	},
++-	{
++-	.max	= 1,
++-	.types	= BIT(NL80211_IFTYPE_ADHOC)
++-	},
++ };
++ 
++ static struct ieee80211_iface_combination ath10k_10_4_ct_if_comb[] = {
