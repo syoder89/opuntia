@@ -39,5 +39,10 @@ start() {
                 uci set network.@switch[0].alias_lan='2'
                 uci commit network
                 ;;
+	mikrotik,rbm11g)
+                uci set network.@switch[0].alias_cpu='6'
+                uci set network.@switch[0].alias_lan='0'
+                uci commit network
+                ;;
         esac
 }
