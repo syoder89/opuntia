@@ -1,0 +1,5 @@
+#!/bin/sh
+
+if [ "$ACTION" == add ] && echo "$DEVICENAME" | grep '^wlan'; then
+	tc qdisc replace dev $DEVICENAME root fq_codel
+fi

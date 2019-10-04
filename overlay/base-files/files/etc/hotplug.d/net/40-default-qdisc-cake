@@ -1,5 +1,0 @@
-#!/bin/sh
-
-if [ "$ACTION" = add ]; then
-	tc qdisc replace dev $DEVICENAME root cake
-fi
