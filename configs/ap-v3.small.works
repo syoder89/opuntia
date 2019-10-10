@@ -2242,7 +2242,7 @@ CONFIG_PACKAGE_imagestream-overrides=y
 # CONFIG_PACKAGE_luci-app-ISismesh is not set
 # CONFIG_PACKAGE_luci-app-ipsec is not set
 CONFIG_PACKAGE_luci-app-isis-license=y
-CONFIG_PACKAGE_luci-app-isis-openvpn=y
+CONFIG_PACKAGE_luci-app-openvpn=y
 CONFIG_PACKAGE_luci-app-snmp=y
 CONFIG_PACKAGE_luci-theme-opuntia=y
 CONFIG_PACKAGE_stats=y

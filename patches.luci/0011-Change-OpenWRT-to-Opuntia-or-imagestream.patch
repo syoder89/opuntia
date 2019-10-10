@@ -35,19 +35,6 @@ Index: luci/modules/luci-base/src/mkversion.sh
  	distversion = "Development Snapshot"
  	distproduct = "Unknown"
  	distmanufacturer = "ISis ImageStream Internet Solutions"
-Index: luci/modules/luci-mod-network/luasrc/controller/admin/network.lua
-===================================================================
---- luci.orig/modules/luci-mod-network/luasrc/controller/admin/network.lua
-+++ luci/modules/luci-mod-network/luasrc/controller/admin/network.lua
-@@ -174,7 +174,7 @@ function wifi_add()
- 	if dev then
- 		local net = dev:add_wifinet({
- 			mode       = "ap",
--			ssid       = "OpenWrt",
-+			ssid       = "Opuntia",
- 			encryption = "none",
- 			disabled   = 1
- 		})
 Index: luci/modules/luci-mod-network/luasrc/view/admin_network/diagnostics.htm
 ===================================================================
 --- luci.orig/modules/luci-mod-network/luasrc/view/admin_network/diagnostics.htm

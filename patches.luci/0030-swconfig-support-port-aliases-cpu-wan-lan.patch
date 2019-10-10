@@ -10,52 +10,64 @@ Index: luci/modules/luci-base/luasrc/model/network.lua
  					port.index = nil
  				end
  
-Index: luci/modules/luci-mod-network/luasrc/model/cbi/admin_network/vlan.lua
+Index: luci/modules/luci-base/htdocs/luci-static/resources/network.js
 ===================================================================
---- luci.orig/modules/luci-mod-network/luasrc/model/cbi/admin_network/vlan.lua
-+++ luci/modules/luci-mod-network/luasrc/model/cbi/admin_network/vlan.lua
-@@ -234,11 +234,26 @@ m.uci:foreach("network", "switch",
- 		local port_opts = { }
- 		local untagged  = { }
+--- luci.orig/modules/luci-base/htdocs/luci-static/resources/network.js
++++ luci/modules/luci-base/htdocs/luci-static/resources/network.js
+@@ -564,7 +564,6 @@ function initNetworkState(refresh) {
+ 							else
+ 								port.label = role.toUpperCase();
  
-+		local getrole = function(pn)
-+			local pt
-+               		for _, pt in ipairs(topo.ports) do
-+				if tostring(pt.num) == pn then
-+					return pt.role
-+				end
-+			end
-+			return nil
-+		end
+-							delete port.role;
+ 							delete port.index;
+ 						}
+ 
+Index: luci/modules/luci-mod-network/htdocs/luci-static/resources/view/network/switch.js
+===================================================================
+--- luci.orig/modules/luci-mod-network/htdocs/luci-static/resources/view/network/switch.js
++++ luci/modules/luci-mod-network/htdocs/luci-static/resources/view/network/switch.js
+@@ -8,8 +8,11 @@ function parse_portvalue(section_id) {
+ 	var ports = L.toArray(uci.get('network', section_id, 'ports'));
+ 
+ 	for (var i = 0; i < ports.length; i++) {
++		var r = ports[i].match(/^([^t0-9]+)([t]?)/);
+ 		var m = ports[i].match(/^(\d+)([tu]?)/);
+ 
++		if (r && r[1] == this.role)
++			return r[2] || 'u';
+ 		if (m && m[1] == this.option)
+ 			return m[2] || 'u';
+ 	}
+@@ -295,16 +298,22 @@ return L.view.extend({
+ 
+ 			o.write = function(section_id, value) {
+ 				var topology = this.section.topology,
++				    port,
+ 				    values = [];
+ 
+ 				for (var i = 0; i < port_opts.length; i++) {
+ 					var tagging = port_opts[i].formvalue(section_id),
+ 					    portspec = Array.isArray(topology.ports) ? topology.ports[i] : null;
+ 
++					if (port_opts[i].role)
++						port = port_opts[i].role;
++					else
++						port = port_opts[i].option;
 +
- 		-- Parse current tagging state from the "ports" option.
- 		local portvalue = function(self, section)
- 			local pt
-+			local role = getrole(self.option)
- 			for pt in (m:get(section, "ports") or ""):gmatch("%w+") do
--				local pc, tu = pt:match("^(%d+)([tu]*)")
-+				local pr, tr = pt:match("^([^t%s]+)([t]*)")
-+				local pc, tu = pt:match("^([%d]+)([tu]*)")
-+				if pr then
-+					if pr == role then return (#tr > 0) and tr or "u" end
-+				end
- 				if pc == self.option then return (#tu > 0) and tu or "u" end
- 			end
- 			return ""
-@@ -294,10 +309,14 @@ m.uci:foreach("network", "switch",
- 			local p = { }
- 			for _, o in ipairs(port_opts) do
- 				local new_tag = o:formvalue(section)
-+				local pn = getrole(o.option)
-+				if not pn then
-+					pn = o.option
-+				end
- 				if new_tag == "t" then
--					p[#p+1] = o.option .. new_tag
-+					p[#p+1] = pn .. new_tag
- 				elseif new_tag == "u" then
--					p[#p+1] = o.option
-+					p[#p+1] = pn
- 				end
+ 					if (tagging == 't')
+-						values.push(port_opts[i].option + tagging);
++						values.push(port + tagging);
+ 					else if (tagging == 'u')
+-						values.push(port_opts[i].option);
++						values.push(port);
  
- 				if o.info and o.info.device then
+ 					if (portspec && portspec.device) {
+ 						var old_tag = port_opts[i].cfgvalue(section_id),
+@@ -347,6 +356,7 @@ return L.view.extend({
+ 
+ 				o.cfgvalue = parse_portvalue;
+ 				o.validate = validate_portvalue;
++				o.role = portspec.role;
+ 				o.write    = function() {};
+ 
+ 				o.description = render_port_status(E('small', {

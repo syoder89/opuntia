@@ -11,7 +11,6 @@ define Package/$(PKG_NAME)
   CATEGORY:=ImageStream
   TITLE:=LuCI OpenVPN
   DEPENDS:=+openvpn
-  DEFAULT:=y
 endef
 
 define Build/Configure

@@ -2128,7 +2128,6 @@ CONFIG_PACKAGE_imagestream-utm-configs=y
 # CONFIG_PACKAGE_luci-app-ISismesh is not set
 CONFIG_PACKAGE_luci-app-ipsec=y
 CONFIG_PACKAGE_luci-app-isis-license=y
-CONFIG_PACKAGE_luci-app-isis-openvpn=y
 CONFIG_PACKAGE_luci-app-snmp=y
 CONFIG_PACKAGE_luci-theme-opuntia=y
 CONFIG_PACKAGE_stats=y

@@ -263,7 +263,7 @@ CONFIG_PACKAGE_imagestream-wifi-ap-configs.ap3350=y
 # CONFIG_PACKAGE_ktt30-graphics is not set
 # CONFIG_PACKAGE_luci-app-ISismesh is not set
 CONFIG_PACKAGE_luci-app-ipsec=y
-CONFIG_PACKAGE_luci-app-isis-openvpn=y
+CONFIG_PACKAGE_luci-app-openvpn=y
 CONFIG_PACKAGE_luci-app-snmp=y
 CONFIG_PACKAGE_luci-theme-opuntia=y
 CONFIG_PACKAGE_stats=y
@@ -306,8 +306,11 @@ CONFIG_USE_UCLIBCXX=y
 CONFIG_PACKAGE_ATH_DEBUG=y
 CONFIG_PACKAGE_ATH_SPECTRAL=y
 # CONFIG_PACKAGE_kmod-shortcut_fe is not set
-CONFIG_PACKAGE_openvswitch=y
-CONFIG_PACKAGE_kmod-openvswitch=y
 CONFIG_PACKAGE_kmod-nft-offload=y
 CONFIG_PACKAGE_conntrack=y
 CONFIG_PACKAGE_conntrackd=y
+CONFIG_PACKAGE_wireguard=y
+CONFIG_PACKAGE_luci-proto-wireguard=y
+CONFIG_PACKAGE_luci-app-wireguard=y
+CONFIG_PACKAGE_libqrencode=y
+CONFIG_PACKAGE_qrencode=y

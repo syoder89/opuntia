@@ -1,20 +1,15 @@
-Index: luci/modules/luci-mod-network/luasrc/model/cbi/admin_network/ifaces.lua
+Index: luci/modules/luci-mod-network/htdocs/luci-static/resources/view/network/interfaces.js
 ===================================================================
---- luci.orig/modules/luci-mod-network/luasrc/model/cbi/admin_network/ifaces.lua
-+++ luci/modules/luci-mod-network/luasrc/model/cbi/admin_network/ifaces.lua
-@@ -502,6 +502,15 @@ if has_dnsmasq and net:proto() == "stati
- 		--s:taboption("advanced", Value, "name", translate("Name"),
- 		--	translate("Define a name for this network."))
+--- luci.orig/modules/luci-mod-network/htdocs/luci-static/resources/view/network/interfaces.js
++++ luci/modules/luci-mod-network/htdocs/luci-static/resources/view/network/interfaces.js
+@@ -552,6 +552,10 @@ return L.view.extend({
+ 					// XXX: is this actually useful?
+ 					//ss.taboption('advanced', form.Value, 'name', _('Name'), _('Define a name for this network.'));
  
-+		subnet = s:taboption("advanced", Value, "subnet",
-+			translate("<abbr title=\"Internet Protocol Version 4\">IPv4</abbr>-Subnet"),
-+			translate("Specify the subnet to serve in case multiple subnets are configured, " ..
-+				"for example \"192.168.5.0\". Can also specify the subnet mask in CIDR or dot notation, " ..
-+				"for example \"192.168.5.0/24\"."))
++					so = ss.taboption('advanced', form.Value, 'subnet', _('<abbr title="Internet Protocol Version 4">IPv4</abbr>-Subnet'), _('Specify the subnet to serve in case multiple subnets are configured, for example "<code>192.168.5.0</code>". Can also specify the subnet mask in CIDR or dot notation, for example "<code>192.168.5.0/24</code>"'));
++					so.optional = true;
++					so.datatype = 'or(cidr4,ipnet4,ip4addr)';
 +
-+		subnet.optional = true
-+		subnet.datatype = "or(cidr4,ipnet4,ip4addr)"
-+
- 		mask = s:taboption("advanced", Value, "netmask",
- 			translate("<abbr title=\"Internet Protocol Version 4\">IPv4</abbr>-Netmask"),
- 			translate("Override the netmask sent to clients. Normally it is calculated " ..
+ 					so = ss.taboption('advanced', form.Value, 'netmask', _('<abbr title="Internet Protocol Version 4">IPv4</abbr>-Netmask'), _('Override the netmask sent to clients. Normally it is calculated from the subnet that is served.'));
+ 					so.optional = true;
+ 					so.datatype = 'ip4addr';

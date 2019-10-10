@@ -7,7 +7,6 @@
 0019-use-iwinfo-not-iwdata.patch
 0022-json-rpc-add-wifistatus.patch
 0023-add-collectd-defaults.patch
-0024-allow-uncompressed-restore-archive.patch
 801-wifi-alliance-cert-defaults.patch
 0027-luci-app-statistics-disable-cpufreq.patch
 0030-swconfig-support-port-aliases-cpu-wan-lan.patch

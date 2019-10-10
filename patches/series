@@ -114,7 +114,6 @@ packages/ath10k-firmware-update.patch
 kernel/0084-ag71xx-fix-max-mtu.patch
 0230-lower-min-free-kbytes-avoid-oom.patch
 0229-ath79-add-compex-dts-support.patch
-packages/0240-coova-chilli-fix-init-disabled.patch
 kernel/0086-compex-mips-support-multiple-machines.patch
 0165-Fix-compex-leds.patch
 packages/0241-netifd-add-dhcp-fallback.patch

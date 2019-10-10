@@ -110,25 +110,12 @@ Index: luci/applications/luci-app-statistics/luasrc/model/cbi/luci_statistics/cp
 ===================================================================
 --- luci.orig/applications/luci-app-statistics/luasrc/model/cbi/luci_statistics/cpu.lua
 +++ luci/applications/luci-app-statistics/luasrc/model/cbi/luci_statistics/cpu.lua
-@@ -12,4 +12,8 @@ s = m:section( NamedSection, "collectd_c
- enable = s:option( Flag, "enable", translate("Enable this plugin") )
- enable.default = 0
+@@ -33,4 +33,8 @@ valuespercentage = s:option( Flag, "Valu
+ valuespercentage.default = 0
+ valuespercentage:depends({ enable = 1, ReportByCpu = 1, ReportByState = 1 })
  
 +valuespercentage = s:option( Flag, "ValuesPercentage", translate("Use percentages instead of jiffies") )
 +valuespercentage.default = 1
 +valuespercentage:depends( "enable", 1 )
 +
  return m
-Index: luci/applications/luci-app-statistics/luasrc/statistics/plugins/cpu.lua
-===================================================================
---- luci.orig/applications/luci-app-statistics/luasrc/statistics/plugins/cpu.lua
-+++ luci/applications/luci-app-statistics/luasrc/statistics/plugins/cpu.lua
-@@ -1,7 +1,7 @@
- return {
- 	legend = {
- 		{ },
--		{ },
-+		{ "ValuesPercentage" },
- 		{ }
- 	},
- 	label = _("Processor"),
