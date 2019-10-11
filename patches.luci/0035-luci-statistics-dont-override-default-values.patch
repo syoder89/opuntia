@@ -1,0 +1,34 @@
+Index: luci/applications/luci-app-statistics/root/usr/bin/stat-genconfig
+===================================================================
+--- luci.orig/applications/luci-app-statistics/root/usr/bin/stat-genconfig
++++ luci/applications/luci-app-statistics/root/usr/bin/stat-genconfig
+@@ -71,7 +71,9 @@ function config_generic( c, singles, boo
+ 					c[key] = preprocess[key](c[key])
+ 				end
+ 
+-				str = str .. _string( c[key], key, nopad )
++				if c[key] then
++					str = str .. _string( c[key], key, nopad )
++				end
+ 			end
+ 		end
+ 
+@@ -81,12 +83,16 @@ function config_generic( c, singles, boo
+ 					c[key] = preprocess[key](c[key])
+ 				end
+ 
+-				str = str .. _bool( c[key], key, nopad )
++				if c[key] then
++					str = str .. _bool( c[key], key, nopad )
++				end
+ 			end
+ 		end
+ 
+ 		if type(lists) == "table" then
+-			str = str .. _list_expand( c, lists, nopad )
++			if c[key] then
++				str = str .. _list_expand( c, lists, nopad )
++			end
+ 		end
+ 	end
+ 
