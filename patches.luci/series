@@ -15,3 +15,4 @@
 0033-dnsmasq-add-subnet-feature.patch
 0034-wireguard-enhancements.patch
 0035-luci-statistics-dont-override-default-values.patch
+0036-luci-bwc-fix-bitrate.patch

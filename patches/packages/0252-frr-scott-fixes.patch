@@ -1,0 +1,1387 @@
+Index: build_dir/feeds/packages/net/frr/Makefile
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/Makefile
++++ build_dir/feeds/packages/net/frr/Makefile
+@@ -1,5 +1,5 @@
+ #
+-# Copyright (C) 2019 Lucian Cristian <lucian.cristian@gmail.com>
++# Copyright (C) 2018 Lucian Cristian <lucian.cristian@gmail.com>
+ #
+ # This is free software, licensed under the GNU General Public License v2.
+ # See /LICENSE for more information.
+@@ -7,22 +7,18 @@
+ 
+ include $(TOPDIR)/rules.mk
+ PKG_NAME:=frr
+-PKG_VERSION:=7.1
+-PKG_RELEASE:=2
+-
+-PKG_SOURCE_URL:=https://github.com/FRRouting/frr/releases/download/$(PKG_NAME)-$(PKG_VERSION)/
+-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
+-PKG_HASH:=2a4210565e7b41d366f7b9f5f745917d67a0b159f3b6bd49d75f9e730557db2f
+-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+-PKG_MAINTAINER:=Lucian Cristian <lucian.cristian@gmail.com>
++PKG_SOURCE_URL:=https://github.com/FRRouting/frr
++PKG_SOURCE_PROTO:=git
++PKG_SOURCE_VERSION:=6453f430e62d5d716fd57b62a9f50d5ef32987d6
++PKG_VERSION:=7.1.0
++PKG_RELEASE:=1
++PKG_BUILD_DIR = $(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+ 
+ PKG_CONFIG_DEPENDS:= \
+ 	CONFIG_IPV6 \
+ 	CONFIG_PACKAGE_frr-babeld \
+-	CONFIG_PACKAGE_frr-bfdd \
+ 	CONFIG_PACKAGE_frr-bgpd \
+ 	CONFIG_PACKAGE_frr-eigrpd \
+-	CONFIG_PACKAGE_frr-fabricd \
+ 	CONFIG_PACKAGE_frr-isisd \
+ 	CONFIG_PACKAGE_frr-ldpd \
+ 	CONFIG_PACKAGE_frr-libfrr \
+@@ -39,12 +35,11 @@ PKG_CONFIG_DEPENDS:= \
+ 	CONFIG_PACKAGE_frr-zebra
+ 
+ PKG_BUILD_PARALLEL:=1
+-PKG_BUILD_DEPENDS:=python3/host
++PKG_BUILD_DEPENDS:=python/host
+ PKG_FIXUP:=autoreconf
+ PKG_LICENSE:=GPL-2.0
+ 
+ include $(INCLUDE_DIR)/package.mk
+-include $(INCLUDE_DIR)/host-build.mk
+ 
+ define Package/frr/Default
+   SECTION:=net
+@@ -53,11 +48,12 @@ define Package/frr/Default
+   DEPENDS:=frr
+   TITLE:=The FRRouting (FRR) Software Routing Suite
+   URL:=https://www.frrouting.org/
++  MAINTAINER:=Lucian Cristian <lucian.cristian@gmail.com>
+ endef
+ 
+ define Package/frr
+   $(call Package/frr/Default)
+-  DEPENDS:=+librt
++  DEPENDS:=+librt +libyang
+   MENU:=1
+ endef
+ 
+@@ -73,112 +69,91 @@ endef
+ define Package/frr-babeld
+   $(call Package/frr/Default)
+   DEPENDS+=+frr-libfrr
+-  TITLE:=BABEL routing engine
+-endef
+-
+-define Package/frr-bfdd
+-  $(call Package/frr/Default)
+-  DEPENDS+=+frr-libfrr
+-  TITLE:=BFD routing engine
+-  CONFLICTS:=bfdd
++  TITLE:=BABEL daemon
+ endef
+ 
+ define Package/frr-bgpd
+   $(call Package/frr/Default)
+   DEPENDS+=+frr-libfrr
+-  TITLE:=BGPv4, BGPv4+, BGPv4- routing engine
+-  CONFLICTS:=quagga-bgpd
++  TITLE:=BGPv4, BGPv4+, BGPv4- daemon
+ endef
+ 
+ define Package/frr-eigrpd
+   $(call Package/frr/Default)
+   DEPENDS+=+frr-libfrr
+-  TITLE:=EIGRPD routing engine
+-endef
+-
+-define Package/frr-fabricd
+-  $(call Package/frr/Default)
+-  DEPENDS+=+frr-libfrr
+-  TITLE:=OpenFabric routing engine
++  TITLE:=EIGRPD daemon
+ endef
+ 
+ define Package/frr-isisd
+   $(call Package/frr/Default)
+   DEPENDS+=+frr-libfrr
+-  TITLE:=IS-IS routing engine
+-  CONFLICTS:=quagga-isisd
++  TITLE:=IS-IS daemon
+ endef
+ 
+ define Package/frr-ldpd
+   $(call Package/frr/Default)
+   DEPENDS+=+frr-libfrr
+-  TITLE:=LDP routing engine
++  TITLE:=LDP daemon
+ endef
+ 
+ define Package/frr-libfrr
+   $(call Package/frr/Default)
+   TITLE:=zebra library
+-  DEPENDS+=+libjson-c +libyang
+-  CONFLICTS:=quagga-libzebra
++  DEPENDS+=+libjson-c
+ endef
+ 
+ define Package/frr-nhrpd
+   $(call Package/frr/Default)
+   DEPENDS+=+frr-libfrr +libcares
+-  TITLE:=NHRP routing engine
++  TITLE:=NHRP daemon
+ endef
+ 
+ define Package/frr-ospfd
+   $(call Package/frr/Default)
+   DEPENDS+=+frr-libfrr
+-  TITLE:=OSPFv2 routing engine
+-  CONFLICTS:=quagga-ospfd
++  TITLE:=OSPFv2 daemon
+ endef
+ 
+ define Package/frr-ospf6d
+   $(call Package/frr/Default)
+   DEPENDS+=+frr-libfrr @IPV6
+-  TITLE:=OSPFv3 routing engine
+-  CONFLICTS:=quagga-ospf6d
++  TITLE:=OSPFv3 daemon
+ endef
+ 
+ define Package/frr-pbrd
+   $(call Package/frr/Default)
+   DEPENDS+=+frr-libfrr
+-  TITLE:=PBRD routing daemon
++  TITLE:=PBRD daemon
+ endef
+ 
+ define Package/frr-pimd
+   $(call Package/frr/Default)
+   DEPENDS+=+frr-libfrr
+-  TITLE:=PIM routing engine
++  TITLE:=PIM daemon
+ endef
+ 
+ define Package/frr-ripd
+   $(call Package/frr/Default)
+   DEPENDS+=+frr-libfrr
+-  TITLE:=RIP routing engine
+-  CONFLICTS:=quagga-ripd
++  TITLE:=RIP daemon
+ endef
+ 
+ define Package/frr-ripngd
+   $(call Package/frr/Default)
+   DEPENDS+=+frr-libfrr @IPV6
+-  TITLE:=RIPNG routing engine
+-  CONFLICTS:=quagga-ripngd
++  TITLE:=RIPNG daemon
+ endef
+ 
+ define Package/frr-staticd
+   $(call Package/frr/Default)
+   DEPENDS+=+frr-libfrr
+-  TITLE:=STATICD routing engine
++  TITLE:=Static route daemon
+ endef
+ 
+ define Package/frr-vtysh
+   $(call Package/frr/Default)
+   DEPENDS+=+frr-libfrr +libreadline +libncurses
+   TITLE:=integrated shell for frr routing software
+-  CONFLICTS:=quagga-vtysh
+ endef
+ 
+ define Package/frr-watchfrr
+@@ -193,21 +168,72 @@ define Package/frr-zebra
+   TITLE:=Zebra daemon
+   DEPENDS+=+frr-libfrr
+   DEFAULT:=y if PACKAGE_frr
+-  CONFLICTS:=quagga-zebra
+ endef
+ 
+-define Package/frr-libfrr/conffiles
+-/etc/frr/
++define Package/frr-zebra/conffiles
++/etc/frr/zebra.conf
++endef
++
++
++define Package/frr-babeld/conffiles
++/etc/frr/babeld.conf
++endef
++
++define Package/frr-bgpd/conffiles
++/etc/frr/bgpd.conf
++endef
++
++define Package/frr-eigrpd/conffiles
++/etc/frr/eigrpd.conf
++endef
++
++define Package/frr-isisd/conffiles
++/etc/frr/isisd.conf
++endef
++
++define Package/frr-ldpd/conffiles
++/etc/frr/ldpd.conf
++endef
++
++define Package/frr-nhrpd/conffiles
++/etc/frr/nhrpd.conf
+ endef
+ 
+-define Build/Prepare
+-	$(Build/Prepare/Default)
+-	mkdir -p $(PKG_BUILD_DIR)/build/lib
+-	$(CP) $(PKG_BUILD_DIR)/lib/command.h $(PKG_BUILD_DIR)/build/lib/
++define Package/frr-ospfd/conffiles
++/etc/frr/ospfd.conf
++endef
++
++define Package/frr-ospf6d/conffiles
++/etc/frr/ospf6d.conf
++endef
++
++define Package/frr-pbrd/conffiles
++/etc/frr/pbrd.conf
++endef
++
++define Package/frr-pimd/conffiles
++/etc/frr/pimd.conf
++endef
++
++define Package/frr-ripd/conffiles
++/etc/frr/ripd.conf
++endef
++
++define Package/frr-ripngd/conffiles
++/etc/frr/ripngd.conf
++endef
++
++define Package/frr-staticd/conffiles
++/etc/frr/staticd.conf
++endef
++
++define Package/frr-vtysh/conffiles
++/etc/frr/vtysh.conf
+ endef
+ 
+ define Build/Configure
+-    ( cd $(PKG_BUILD_DIR)/build/ ; \
++    ( cd $(PKG_BUILD_DIR)/ ; \
++    mkdir build/ ; \
+     cd build ; \
+     ../configure \
+ 	--host="$(GNU_TARGET_NAME)" \
+@@ -220,24 +246,20 @@ define Build/Configure
+ 	BUILD_CPPFLAGS="$(TARGET_CPPLAGS)" \
+ 	BUILD_CFLAGS="$(TARGET_CFLAGS)" \
+ 	BUILD_LDFLAGS="$(TARGET_LDFLAGS)" \
+-	--prefix=/usr \
++	--localstatedir=/var/run/frr \
++	--sysconfdir=/etc/frr/ \
+ 	--enable-shared \
+ 	--disable-static \
+-	--enable-user=network \
+-	--enable-group=network \
+-	--enable-multipath=16 \
++	--enable-user=root \
++	--enable-group=root \
++	--enable-multipath=8 \
++	--with-vtysh-pager=cat \
+ 	--disable-capabilities \
+ 	--disable-ospfclient \
+ 	--disable-doc \
+-	--disable-backtrace \
+-	--with-vtysh-pager=cat \
+-	--localstatedir=/var/run/frr \
+-	--sysconfdir=/etc/frr/ \
+ 	$(call autoconf_bool,CONFIG_PACKAGE_frr-babeld,babeld) \
+-	$(call autoconf_bool,CONFIG_PACKAGE_frr-bfdd,bfdd) \
+ 	$(call autoconf_bool,CONFIG_PACKAGE_frr-bgpd,bgpd) \
+ 	$(call autoconf_bool,CONFIG_PACKAGE_frr-eigrpd,eigrpd) \
+-	$(call autoconf_bool,CONFIG_PACKAGE_frr-fabricd,fabricd) \
+ 	$(call autoconf_bool,CONFIG_PACKAGE_frr-isisd,isisd) \
+ 	$(call autoconf_bool,CONFIG_PACKAGE_frr-ldpd,ldpd) \
+ 	$(call autoconf_bool,CONFIG_PACKAGE_frr-nhrpd,nhrpd) \
+@@ -245,15 +267,15 @@ define Build/Configure
+ 	$(call autoconf_bool,CONFIG_PACKAGE_frr-ospf6d,ospf6d) \
+ 	$(call autoconf_bool,CONFIG_PACKAGE_frr-pbrd,pbrd) \
+ 	$(call autoconf_bool,CONFIG_PACKAGE_frr-pimd,pimd) \
+-	$(call autoconf_bool,CONFIG_PACKAGE_frr-staticd,staticd) \
+ 	$(call autoconf_bool,CONFIG_PACKAGE_frr-ripd,ripd) \
+ 	$(call autoconf_bool,CONFIG_PACKAGE_frr-ripngd,ripngd) \
++	$(call autoconf_bool,CONFIG_PACKAGE_frr-staticd,staticd) \
+ 	$(call autoconf_bool,CONFIG_PACKAGE_frr-vtysh,vtysh) \
+ 	$(call autoconf_bool,CONFIG_PACKAGE_frr-libfrr,zebra) \
+ )
+ endef
+ 
+-#	just speed it up
++#	just speed it up, maybe not a good approach ?
+ NUM_CORES ?= $(shell grep -c "vendor_id" /proc/cpuinfo)
+ 
+ define Build/Compile
+@@ -262,122 +284,145 @@ endef
+ 
+ define Package/frr/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+-	$(INSTALL_BIN) ./files/frrcommon.sh $(1)/usr/sbin/
++	$(INSTALL_BIN) ./files/frr $(1)/usr/sbin/frr.init
+ 	$(INSTALL_DIR) $(1)/etc/init.d
+-	$(INSTALL_BIN) ./files/frr $(1)/etc/init.d/
++	$(INSTALL_BIN) ./files/frr.init $(1)/etc/init.d/frr
+ endef
+ 
+ define Package/frr-watchfrr/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+-	$(INSTALL_BIN) ./files/watchfrr.sh $(1)/usr/sbin/
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/watchfrr/.libs/watchfrr $(1)/usr/sbin/
+ endef
+ 
+ define Package/frr-zebra/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/zebra/.libs/zebra $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/zebra.conf
+ endef
+ 
+ define Package/frr-babeld/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/babeld/.libs/babeld $(1)/usr/sbin/
+-endef
+-
+-define Package/frr-bfdd/install
+-	$(INSTALL_DIR) $(1)/usr/sbin
+-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/bfdd/.libs/bfdd $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/babeld.conf
+ endef
+ 
+ define Package/frr-bgpd/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/bgpd/.libs/bgpd $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/bgpd.conf
+ endef
+ 
+ define Package/frr-eigrpd/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/eigrpd/.libs/eigrpd $(1)/usr/sbin/
+-endef
+-
+-define Package/frr-fabricd/install
+-	$(INSTALL_DIR) $(1)/usr/sbin
+-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/isisd/.libs/fabricd $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/eigrpd.conf
+ endef
+ 
+ define Package/frr-isisd/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/isisd/.libs/isisd $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/isisd.conf
+ endef
+ 
+ define Package/frr-ldpd/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ldpd/.libs/ldpd $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/ldpd.conf
+ endef
+ 
+ define Package/frr-nhrpd/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/nhrpd/.libs/nhrpd $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/nhrpd.conf
+ endef
+ 
+ define Package/frr-ospfd/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ospfd/.libs/ospfd $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/ospfd.conf
+ endef
+ 
+ define Package/frr-ospf6d/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ospf6d/.libs/ospf6d $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/ospf6d.conf
+ endef
+ 
+ define Package/frr-pbrd/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/pbrd/.libs/pbrd $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/pbrd.conf
+ endef
+ 
+ define Package/frr-pimd/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/pimd/.libs/pimd $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/pimd.conf
+ endef
+ 
+ define Package/frr-ripd/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ripd/.libs/ripd $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/ripd.conf
+ endef
+ 
+ define Package/frr-ripngd/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ripngd/.libs/ripngd $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/ripngd.conf
+ endef
+ 
+ define Package/frr-staticd/install
+ 	$(INSTALL_DIR) $(1)/usr/sbin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/staticd/.libs/staticd $(1)/usr/sbin/
+-endef
+-
+-define Package/frr-vrrpd/install
+-	$(INSTALL_DIR) $(1)/usr/sbin
+-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/vrrpd/.libs/vrrpd $(1)/usr/sbin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/staticd.conf
+ endef
+ 
+ define Package/frr-vtysh/install
+ 	$(INSTALL_DIR) $(1)/usr/bin
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/vtysh/.libs/vtysh $(1)/usr/bin/
++	$(INSTALL_DIR) $(1)/etc/frr
++	chmod 0750 $(1)/etc/frr
++	$(INSTALL_CONF) ./files/vtysh.conf $(1)/etc/frr/vtysh.conf
+ endef
+ 
+ define Package/frr-libfrr/install
+ 	$(INSTALL_DIR) $(1)/usr/lib
+ 	$(CP) $(PKG_BUILD_DIR)/build/lib/.libs/libfrr.so* $(1)/usr/lib/
+-	$(INSTALL_DIR) $(1)/etc/frr
+-	chmod 0750 $(1)/etc/frr
+-	$(INSTALL_CONF) ./files/{frr.conf,daemons} $(1)/etc/frr/
+ endef
+ 
+-$(eval $(call HostBuild))
+ $(eval $(call BuildPackage,frr))
+ $(eval $(call BuildPackage,frr-babeld))
+-$(eval $(call BuildPackage,frr-bfdd))
+ $(eval $(call BuildPackage,frr-bgpd))
+ $(eval $(call BuildPackage,frr-eigrpd))
+-$(eval $(call BuildPackage,frr-fabricd))
+ $(eval $(call BuildPackage,frr-isisd))
+ $(eval $(call BuildPackage,frr-ldpd))
+ $(eval $(call BuildPackage,frr-libfrr))
+Index: build_dir/feeds/packages/net/frr/files/daemons
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/files/daemons
++++ /dev/null
+@@ -1,54 +0,0 @@
+-# The watchfrr and zebra daemons are always started.
+-#
+-bgpd=no
+-ospfd=no
+-#ospfd_instances=1,20
+-ospf6d=no
+-ripd=no
+-ripngd=no
+-isisd=no
+-pimd=no
+-ldpd=no
+-nhrpd=no
+-eigrpd=no
+-babeld=no
+-sharpd=no
+-pbrd=no
+-bfdd=no
+-fabricd=no
+-vrrpd=no
+-
+-#
+-# If this option is set the /etc/init.d/frr script automatically loads
+-# the config via "vtysh -b" when the servers are started.
+-# Check /etc/pam.d/frr if you intend to use "vtysh"!
+-#
+-vtysh_enable=yes
+-zebra_options="  -A 127.0.0.1 -s 90000000"
+-bgpd_options="   -A 127.0.0.1"
+-ospfd_options="  -A 127.0.0.1"
+-ospf6d_options=" -A ::1"
+-ripd_options="   -A 127.0.0.1"
+-ripngd_options=" -A ::1"
+-isisd_options="  -A 127.0.0.1"
+-pimd_options="   -A 127.0.0.1"
+-ldpd_options="   -A 127.0.0.1"
+-nhrpd_options="  -A 127.0.0.1"
+-eigrpd_options=" -A 127.0.0.1"
+-babeld_options=" -A 127.0.0.1"
+-sharpd_options=" -A 127.0.0.1"
+-pbrd_options="   -A 127.0.0.1"
+-staticd_options="-A 127.0.0.1"
+-bfdd_options="   -A 127.0.0.1"
+-fabricd_options="-A 127.0.0.1"
+-vrrpd_options="  -A 127.0.0.1"
+-
+-# The list of daemons to watch is automatically generated by the init script.
+-#watchfrr_options=""
+-
+-# for debugging purposes, you can specify a "wrap" command to start instead
+-# of starting the daemon directly, e.g. to use valgrind on ospfd:
+-#   ospfd_wrap="/usr/bin/valgrind"
+-# or you can use "all_wrap" for all daemons, e.g. to use perf record:
+-#   all_wrap="/usr/bin/perf record --call-graph -"
+-# the normal daemon command is added to this at the end.
+Index: build_dir/feeds/packages/net/frr/files/frr
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/files/frr
++++ build_dir/feeds/packages/net/frr/files/frr
+@@ -1,68 +1,331 @@
+-#!/bin/sh /etc/rc.common
+-
+-START=95
+-
+-log_success_msg() {
+-        echo "$@"
+-}
+-log_warning_msg() {
+-        echo "$@" >&2
+-}
+-log_failure_msg() {
+-        echo "$@" >&2
++#!/bin/sh
++#
++# frr		Starts/stops frr daemons and watchfrr.
++#		Create a daemon.conf file to have that routing daemon
++#		started/stopped automagically when using this script
++#		without any daemon names as args.
++#		If watchfrr is available, it will also be
++#		started/stopped if the script is called without
++#		any daemon names.
++#
++
++ME=$(basename $0)
++
++usage() {
++	echo "Usage: ${ME} {start|stop|restart} [daemon ...]"
++	exit 2
+ }
+ 
+-self="`dirname $0`"
+-if [ -r "$self/frrcommon.sh" ]; then
+-	. "$self/frrcommon.sh"
++if [ -z "$1" ]
++then
++	usage
+ else
+-	. "/usr/sbin/frrcommon.sh"
++	COMMAND=$1
++fi
++shift
++ARG_DAEMONS=$*
++BINDIR=/usr/sbin
++CONFDIR=/etc/frr
++STATEDIR=/var/run/frr
++RUNUSER=network
++RUNGROUP=$RUNUSER
++DAEMONS="zebra babeld bgpd eigrpd isisd ldpd nhrpd ospfd ospf6d pbrd pimd ripd ripngd staticd"
++DAEMON_FLAGS=-d
++WATCHFRR_FLAGS="-d -r /usr/sbin/frr.init_watchrestart_%s -s /usr/sbin/frr.init_start_%s -k /usr/sbin/frr.init_stop_%s -b _"
++if [ "${COMMAND}" != "watchrestart" -a -x "${BINDIR}/watchfrr" ]
++then
++	DAEMONS="${DAEMONS} watchfrr"
++fi
++if [ "${COMMAND}" = "watchrestart" -a "$ARG_DAEMONS" = "all" ]
++then
++	ARG_DAEMONS=""
+ fi
+ 
++DAEMONS_STARTSEQ=${DAEMONS}
+ 
+-start() {
+-	daemon_list daemons
+-	watchfrr_options="$watchfrr_options $daemons"
+-	daemon_start watchfrr
++reverse()
++{
++	local revlist r
++        revlist=
++        for r
++	do
++                revlist="$r $revlist"
++        done
++        echo $revlist
+ }
+-stop() {
+-	daemon_stop watchfrr
+-	all_stop --reallyall
+-	exit ${still_running:-0}
++
++DAEMONS_STOPSEQ=$(reverse ${DAEMONS_STARTSEQ})
++
++#pidof() {
++#	ps ax | awk 'match($5, "(^|/)'"$1"'$") > 0 { printf " %s", $1 }'
++#}
++
++quit() {
++	echo "${ME}: $1"
++	exit 0
+ }
+ 
+-restart() {
+-	daemon_stop watchfrr
+-	all_stop --reallyall
++die() {
++	echo "${ME}: $1"
++	exit 1
++}
+ 
+-	daemon_list daemons
+-	watchfrr_options="$watchfrr_options $daemons"
+-	daemon_start watchfrr
++is_in() {
++	local i
++	for i in $2
++	do
++		[ "$1" = "$i" ] && return 0
++	done
++	return 1
+ }
+ 
+-status() {
+-	fail=0
+-	print_status watchfrr || fail=1
+-	all_status || fail=1
+-	exit $fail
++select_subset() {
++	local unknown i j
++	unknown=
++	RESULT=
++	for i in $1
++	do
++		is_in $i "$2" || unknown="$unknown $i"
++	done
++	if [ -n "$unknown" ]
++	then
++		RESULT=$unknown
++		return 1
++	else
++		for j in $2
++		do
++			is_in $j "$1" && RESULT="$RESULT $j"
++		done
++		return 0
++	fi
+ }
+ 
+-reload() {
+-	if [ ! -x "$RELOAD_SCRIPT" ]; then
+-		log_failure_msg "The frr-pythontools package is required for reload functionality."
+-		exit 1
++# check command
++
++case ${COMMAND}
++in
++	start|stop|restart|watchrestart)
++		;;
++	*)
++		usage
++		;;
++esac
++
++# select daemons to start
++
++case ${COMMAND}
++in
++	start|restart|watchrestart)
++		START_DAEMONS=
++		for d in ${DAEMONS_STARTSEQ}
++		do
++			[ -x "${BINDIR}/${d}" -a -f "${CONFDIR}/${d}.conf" ] \
++			&& START_DAEMONS="${START_DAEMONS}${d} "
++		done
++		WATCHFRR_DAEMONS=${START_DAEMONS}
++		if is_in watchfrr "${DAEMONS_STARTSEQ}"
++		then
++			START_DAEMONS="${START_DAEMONS} watchfrr"
++		fi
++		if [ -n "${ARG_DAEMONS}" ]
++		then
++			if select_subset "${ARG_DAEMONS}" "${DAEMONS}"
++			then
++				if select_subset "${ARG_DAEMONS}" "${START_DAEMONS}"
++				then
++					START_DAEMONS=${RESULT}
++				else
++					die "these daemons are not startable:${RESULT}."
++				fi
++			else
++				die "unknown daemons:${RESULT}; choose from: ${DAEMONS}."
++			fi
++		fi
++		;;
++esac
++
++# select daemons to stop
++
++case ${COMMAND}
++in
++	stop|restart|watchrestart)
++		STOP_DAEMONS=${DAEMONS_STOPSEQ}
++		if [ -n "${ARG_DAEMONS}" ]
++		then
++			if select_subset "${ARG_DAEMONS}" "${STOP_DAEMONS}"
++			then
++				STOP_DAEMONS=${RESULT}
++			else
++				die "unknown daemons:${RESULT}; choose from: ${DAEMONS}."
++			fi
++		fi
++		stop_daemons=
++		for d in ${STOP_DAEMONS}
++		do
++			pidfile=${STATEDIR}/${d}.pid
++			if [ -f "${pidfile}" -o -n "$(pidof ${d})" ]
++			then
++				stop_daemons="${stop_daemons}${d} "
++			elif [ -n "${ARG_DAEMONS}" ]
++			then
++				echo "${ME}: found no ${d} process running."
++			fi
++		done
++		STOP_DAEMONS=${stop_daemons}
++		;;
++esac
++
++# stop daemons
++
++for d in $STOP_DAEMONS
++do
++	echo -n "${ME}: Stopping ${d} ... "
++	pidfile=${STATEDIR}/${d}.pid
++	if [ -f "${pidfile}" ]
++	then
++		file_pid=$(cat ${pidfile})
++		if [ -z "${file_pid}" ]
++		then
++			echo -n "no pid file entry found ... "
++		fi
++	else
++		file_pid=
++		echo -n "no pid file found ... "
++	fi
++	proc_pid=$(pidof ${d})
++	if [ -z "${proc_pid}" ]
++	then
++		echo -n "found no ${d} process running ... "
++	else
++		count=0
++		notinpidfile=
++		for p in ${proc_pid}
++		do
++			count=$((${count}+1))
++			if kill ${p}
++			then
++				echo -n "killed ${p} ... "
++			else
++				echo -n "failed to kill ${p} ... "
++			fi
++			[ "${p}" = "${file_pid}" ] \
++			|| notinpidfile="${notinpidfile} ${p}"
++		done
++		[ ${count} -le 1 ] \
++		|| echo -n "WARNING: ${count} ${d} processes were found running ... "
++		for n in ${notinpidfile}
++		do
++			echo -n "WARNING: process ${n} was not in pid file ... "
++		done
+ 	fi
++	count=0
++	survivors=$(pidof ${d})
++	while [ -n "${survivors}" ]
++	do
++		sleep 1
++		count=$((${count}+1))
++		survivors=$(pidof ${d})
++		[ -z "${survivors}" -o ${count} -gt 5 ] && break
++		for p in ${survivors}
++		do
++			sleep 1
++			echo -n "${p} "
++			kill ${p}
++		done
++	done
++	survivors=$(pidof ${d})
++	[ -n "${survivors}" ] && \
++	if kill -KILL ${survivors}
++	then
++		echo -n "KILLed ${survivors} ... "
++	else
++		echo -n "failed to KILL ${survivors} ... "
++	fi
++	sleep 1
++	survivors=$(pidof ${d})
++	if [ -z "${survivors}" ]
++	then
++		echo -n "done."
++		if [ -f "${pidfile}" ]
++		then
++			rm -f ${pidfile} \
++			|| echo -n " Failed to remove pidfile."
++		fi
++	else
++		echo -n "failed to stop ${survivors} - giving up."
++		if [ "${survivors}" != "${file_pid}" ]
++		then
++			if echo "${survivors}" > ${pidfile}
++			then
++				chown ${RUNUSER}:${RUNGROUP} ${pidfile}
++				echo -n " Wrote ${survivors} to pidfile."
++			else
++				echo -n " Failed to write ${survivors} to pidfile."
++			fi
++		fi
++	fi
++	echo
++done
+ 
+-	# restart watchfrr to pick up added daemons.
+-	# NB: This will NOT cause the other daemons to be restarted.
+-	daemon_list daemons
+-	watchfrr_options="$watchfrr_options $daemons"
+-	daemon_stop watchfrr && \
+-		daemon_start watchfrr
+-
+-	NEW_CONFIG_FILE="${2:-$C_PATH/frr.conf}"
+-	[ ! -r $NEW_CONFIG_FILE ] && log_failure_msg "Unable to read new configuration file $NEW_CONFIG_FILE" && exit 1
+-	"$RELOAD_SCRIPT" --reload "$NEW_CONFIG_FILE"
+-	exit $?
+-}
++# start daemons
+ 
++if [ -n "$START_DAEMONS" ]
++then
++	[ -d ${CONFDIR} ] \
++	|| quit "${ME}: no config directory ${CONFDIR} - exiting."
++	chown -R ${RUNUSER}:${RUNGROUP} ${CONFDIR}
++	[ -d ${STATEDIR} ] || mkdir -p ${STATEDIR} \
++	|| die "${ME}: could not create state directory ${STATEDIR} - exiting."
++	chown -R ${RUNUSER}:${RUNGROUP} ${STATEDIR}
++
++	for d in $START_DAEMONS
++	do
++		echo -n "${ME}: Starting ${d} ... "
++		proc_pid=$(pidof ${d})
++		pidfile=${STATEDIR}/${d}.pid
++		file_pid=
++		if [ -f "${pidfile}" ]
++		then
++			file_pid=$(cat ${pidfile})
++			if [ -n "${file_pid}" ]
++			then
++				echo -n "found old pid file entry ${file_pid} ... "
++			fi
++		fi
++		if [ -n "${proc_pid}" ]
++		then
++			echo -n "found ${d} running (${proc_pid}) - skipping ${d}."
++			if [ "${proc_pid}" != "${file_pid}" ]
++			then
++				if echo "${proc_pid}" > ${pidfile}
++				then
++					chown ${RUNUSER}:${RUNGROUP} ${pidfile}
++					echo -n " Wrote ${proc_pid} to pidfile."
++				else
++					echo -n " Failed to write ${proc_pid} to pidfile."
++				fi
++			fi
++		elif rm -f "${pidfile}"
++		then
++			if [ "${d}" = "watchfrr" ]
++			then
++				"${BINDIR}/${d}" \
++					${WATCHFRR_FLAGS} \
++					${WATCHFRR_DAEMONS}
++				status=$?
++			else
++				"${BINDIR}/${d}" ${DAEMON_FLAGS}
++				status=$?
++			fi
++			if [ $status -eq 0 ]
++			then
++				echo -n "done."
++			else
++				echo -n "failed."
++			fi
++		else
++			echo -n " failed to remove pidfile."
++		fi
++		echo
++	done
++fi
+Index: build_dir/feeds/packages/net/frr/files/frr.conf
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/files/frr.conf
++++ build_dir/feeds/packages/net/frr/files/frr.conf
+@@ -1,20 +1,5 @@
+ password zebra
+ !
+-!router eigrp 1
+-! network 10.0.0.0/8
+-! network 192.168.1.0/24
+-!
+-!router ospf
+-!ospf router-id 172.16.0.2
+-!network 192.168.1.0/24 area 0
+-!neighbor 172.16.0.1
+-!
+-!router rip
+-! network 10.0.0.0/8
+-! network 192.168.1.0/24
+-!
+-log syslog
+-!
+ access-list vty permit 127.0.0.0/8
+ access-list vty deny any
+ !
+Index: build_dir/feeds/packages/net/frr/files/frr.init
+===================================================================
+--- /dev/null
++++ build_dir/feeds/packages/net/frr/files/frr.init
+@@ -0,0 +1,24 @@
++#!/bin/sh /etc/rc.common
++
++START=60
++
++migrate_quagga_configs() {
++        if [ -d /etc/quagga ]; then
++                logger "Migrating Quagga configuration files to FRR..."
++                for file in /etc/quagga/*.conf ; do
++                        logger "Moving file $file"
++                        mv "$file" /etc/frr/
++                done
++                logger "Remaining Quagga files can be found in /etc/quagga.bak"
++                mv /etc/quagga /etc/quagga.bak
++        fi
++}
++
++start() {
++        migrate_quagga_configs
++        /usr/sbin/frr.init start
++}
++
++stop() {
++        /usr/sbin/frr.init stop
++}
+Index: build_dir/feeds/packages/net/frr/files/frrcommon.sh
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/files/frrcommon.sh
++++ /dev/null
+@@ -1,335 +0,0 @@
+-#!/bin/sh
+-#
+-#
+-# This is a "library" of sorts for use by the other FRR shell scripts.  It
+-# has most of the daemon start/stop logic, but expects the following shell
+-# functions/commands to be provided by the "calling" script:
+-#
+-#   log_success_msg
+-#   log_warning_msg
+-#   log_failure_msg
+-#
+-# (coincidentally, these are LSB standard functions.)
+-#
+-# Sourcing this file in a shell script will load FRR config variables but
+-# not perform any action.  Note there is an "exit 1" if the main config
+-# file does not exist.
+-#
+-# This script should be installed in  /usr/sbin/frrcommon.sh
+-
+-PATH=/bin:/usr/bin:/sbin:/usr/sbin
+-D_PATH="/usr/sbin" # /usr/lib/frr
+-C_PATH="/etc/frr" # /etc/frr
+-V_PATH="/var/run/frr" # /var/run/frr
+-VTYSH="/usr/bin/vtysh" # /usr/bin/vtysh
+-FRR_USER="network" # frr
+-FRR_GROUP="network" # frr
+-FRR_VTY_GROUP="" # frrvty
+-
+-# ORDER MATTERS FOR $DAEMONS!
+-# - keep zebra first
+-# - watchfrr does NOT belong in this list
+-
+-DAEMONS="zebra bgpd ripd ripngd ospfd ospf6d isisd babeld pimd ldpd nhrpd eigrpd sharpd pbrd staticd bfdd fabricd vrrpd"
+-RELOAD_SCRIPT="$D_PATH/frr-reload.py"
+-
+-#
+-# general helpers
+-#
+-
+-debug() {
+-	[ -n "$watchfrr_debug" ] || return 0
+-
+-	printf '%s %s(%s):' "`date +%Y-%m-%dT%H:%M:%S.%N`" "$0" $$ >&2
+-	# this is to show how arguments are split regarding whitespace & co.
+-	# (e.g. for use with `debug "message" "$@"`)
+-	while [ $# -gt 0 ]; do
+-		printf ' "%s"' "$1" >&2
+-		shift
+-	done
+-	printf '\n' >&2
+-}
+-
+-chownfrr() {
+-	[ -n "$FRR_USER" ] && chown "$FRR_USER" "$1"
+-	[ -n "$FRR_GROUP" ] && chgrp "$FRR_GROUP" "$1"
+-}
+-
+-vtysh_b () {
+-	[ "$1" = "watchfrr" ] && return 0
+-	[ -r "$C_PATH/frr.conf" ] || return 0
+-	if [ -n "$1" ]; then
+-		"$VTYSH" -b -n -d "$1"
+-	else
+-		"$VTYSH" -b -n
+-	fi
+-}
+-
+-daemon_inst() {
+-	# note this sets global variables ($dmninst, $daemon, $inst)
+-	dmninst="$1"
+-	daemon="${dmninst%-*}"
+-	inst=""
+-	[ "$daemon" != "$dmninst" ] && inst="${dmninst#*-}"
+-}
+-
+-daemon_list() {
+-	# note $1 and $2 specify names for global variables to be set
+-	local enabled disabled evar dvar
+-	enabled=""
+-	disabled=""
+-	evar="$1"
+-	dvar="$2"
+-
+-	for daemon in $DAEMONS; do
+-		eval cfg=\$$daemon
+-		eval inst=\$${daemon}_instances
+-		[ "$daemon" = zebra -o "$daemon" = staticd ] && cfg=yes
+-		if [ -n "$cfg" -a "$cfg" != "no" -a "$cfg" != "0" ]; then
+-			if ! daemon_prep "$daemon" "$inst"; then
+-				continue
+-			fi
+-			debug "$daemon enabled"
+-			enabled="$enabled $daemon"
+-			if [ -n "$inst" ]; then
+-				debug "$daemon multi-instance $inst"
+-				oldifs="${IFS}"
+-				IFS="${IFS},"
+-				for i in $inst; do
+-					enabled="$enabled $daemon-$i"
+-				done
+-				IFS="${oldifs}"
+-			fi
+-		else
+-			debug "$daemon disabled"
+-			disabled="$disabled $daemon"
+-		fi
+-	done
+-
+-	enabled="${enabled# }"
+-	disabled="${disabled# }"
+-	[ -z "$evar" ] && echo "$enabled"
+-	[ -n "$evar" ] && eval $evar="\"$enabled\""
+-	[ -n "$dvar" ] && eval $dvar="\"$disabled\""
+-}
+-
+-#
+-# individual daemon management
+-#
+-
+-daemon_prep() {
+-	local daemon inst cfg
+-	daemon="$1"
+-	inst="$2"
+-	[ "$daemon" = "watchfrr" ] && return 0
+-	[ -x "$D_PATH/$daemon" ] || {
+-		log_failure_msg "cannot start $daemon${inst:+ (instance $inst)}: daemon binary not installed"
+-		return 1
+-	}
+-	[ -r "$C_PATH/frr.conf" ] && return 0
+-
+-	cfg="$C_PATH/$daemon${inst:+-$inst}.conf"
+-	if [ ! -r "$cfg" ]; then
+-		touch "$cfg"
+-		chownfrr "$cfg"
+-	fi
+-	return 0
+-}
+-
+-daemon_start() {
+-	local dmninst daemon inst args instopt wrap bin
+-	daemon_inst "$1"
+-
+-	ulimit -n $MAX_FDS > /dev/null 2> /dev/null
+-	daemon_prep "$daemon" "$inst" || return 1
+-	if test ! -d "$V_PATH"; then
+-		mkdir -p "$V_PATH"
+-		chown frr "$V_PATH"
+-	fi
+-
+-	eval wrap="\$${daemon}_wrap"
+-	bin="$D_PATH/$daemon"
+-	instopt="${inst:+-n $inst}"
+-	eval args="\$${daemon}_options"
+-
+-	if eval "$all_wrap $wrap $bin -d $instopt $args"; then
+-		log_success_msg "Started $dmninst"
+-		vtysh_b "$daemon"
+-	else
+-		log_failure_msg "Failed to start $dmninst!"
+-	fi
+-}
+-
+-daemon_stop() {
+-	local dmninst daemon inst pidfile vtyfile pid cnt fail
+-	daemon_inst "$1"
+-
+-	pidfile="$V_PATH/$daemon${inst:+-$inst}.pid"
+-	vtyfile="$V_PATH/$daemon${inst:+-$inst}.vty"
+-
+-	[ -r "$pidfile" ] || fail="pid file not found"
+-	[ -z "$fail" ] && pid="`cat \"$pidfile\"`"
+-	[ -z "$fail" -a -z "$pid" ] && fail="pid file is empty"
+-	[ -n "$fail" ] || kill -0 "$pid" 2>/dev/null || fail="pid $pid not running"
+-
+-	if [ -n "$fail" ]; then
+-		log_failure_msg "Cannot stop $dmninst: $fail"
+-		return 1
+-	fi
+-
+-	debug "kill -2 $pid"
+-	kill -2 "$pid"
+-	cnt=1200
+-	while kill -0 "$pid" 2>/dev/null; do
+-		sleep 1
+-		[ $(( cnt -= 1 )) -gt 0 ] || break
+-	done
+-	if kill -0 "$pid" 2>/dev/null; then
+-		log_failure_msg "Failed to stop $dmninst, pid $pid still running"
+-		still_running=1
+-		return 1
+-	else
+-		log_success_msg "Stopped $dmninst"
+-		rm -f "$pidfile"
+-		return 0
+-	fi
+-}
+-
+-daemon_status() {
+-	local dmninst daemon inst pidfile pid fail
+-	daemon_inst "$1"
+-
+-	pidfile="$V_PATH/$daemon${inst:+-$inst}.pid"
+-
+-	[ -r "$pidfile" ] || return 3
+-	pid="`cat \"$pidfile\"`"
+-	[ -z "$pid" ] && return 1
+-	kill -0 "$pid" 2>/dev/null || return 1
+-	return 0
+-}
+-
+-print_status() {
+-	daemon_status "$1"
+-	rv=$?
+-	if [ "$rv" -eq 0 ]; then
+-		log_success_msg "Status of $1: running"
+-	else
+-		log_failure_msg "Status of $1: FAILED"
+-	fi
+-	return $rv
+-}
+-
+-#
+-# all-daemon commands
+-#
+-
+-all_start() {
+-	daemon_list daemons
+-	for dmninst in $daemons; do
+-		daemon_start "$dmninst"
+-	done
+-}
+-
+-all_stop() {
+-	local pids reversed
+-
+-	daemon_list daemons disabled
+-	[ "$1" = "--reallyall" ] && daemons="$daemons $disabled"
+-
+-	reversed=""
+-	for dmninst in $daemons; do
+-		reversed="$dmninst $reversed"
+-	done
+-
+-	for dmninst in $reversed; do
+-		daemon_stop "$dmninst" &
+-		pids="$pids $!"
+-	done
+-	for pid in $pids; do
+-		wait $pid
+-	done
+-}
+-
+-all_status() {
+-	local fail
+-
+-	daemon_list daemons
+-	fail=0
+-	for dmninst in $daemons; do
+-		print_status "$dmninst" || fail=1
+-	done
+-	return $fail
+-}
+-
+-#
+-# config sourcing
+-#
+-
+-load_old_config() {
+-	oldcfg="$1"
+-	[ -r "$oldcfg" ] || return 0
+-	[ -s "$oldcfg" ] || return 0
+-	grep -v '^[[:blank:]]*\(#\|$\)' "$oldcfg" > /dev/null || return 0
+-
+-	log_warning_msg "Reading deprecated $oldcfg.  Please move its settings to $C_PATH/daemons and remove it."
+-
+-	# save off settings from daemons for the OR below
+-	for dmn in $DAEMONS; do eval "_new_$dmn=\${$dmn:-no}"; done
+-
+-	. "$oldcfg"
+-
+-	# OR together the daemon enabling options between config files
+-	for dmn in $DAEMONS; do eval "test \$_new_$dmn != no && $dmn=\$_new_$dmn; unset _new_$dmn"; done
+-}
+-
+-[ -r "$C_PATH/daemons" ] || {
+-	log_failure_msg "cannot run $@: $C_PATH/daemons does not exist"
+-	exit 1
+-}
+-. "$C_PATH/daemons"
+-
+-load_old_config "$C_PATH/daemons.conf"
+-load_old_config "/etc/default/frr"
+-load_old_config "/etc/sysconfig/frr"
+-
+-if { declare -p watchfrr_options 2>/dev/null || true; } | grep -q '^declare \-a'; then
+-	log_warning_msg "watchfrr_options contains a bash array value." \
+-		"The configured value is intentionally ignored since it is likely wrong." \
+-		"Please remove or fix the setting."
+-	unset watchfrr_options
+-fi
+-
+-#
+-# other defaults and dispatch
+-#
+-
+-frrcommon_main() {
+-	local cmd
+-
+-	debug "frrcommon_main" "$@"
+-
+-	cmd="$1"
+-	shift
+-
+-	if [ "$1" = "all" -o -z "$1" ]; then
+-		case "$cmd" in
+-		start)	all_start;;
+-		stop)	all_stop;;
+-		restart)
+-			all_stop
+-			all_start
+-			;;
+-		*)	$cmd "$@";;
+-		esac
+-	else
+-		case "$cmd" in
+-		start)	daemon_start "$@";;
+-		stop)	daemon_stop "$@";;
+-		restart)
+-			daemon_stop "$@"
+-			daemon_start "$@"
+-			;;
+-		*)	$cmd "$@";;
+-		esac
+-	fi
+-}
+Index: build_dir/feeds/packages/net/frr/files/vtysh.conf
+===================================================================
+--- /dev/null
++++ build_dir/feeds/packages/net/frr/files/vtysh.conf
+@@ -0,0 +1,7 @@
++!
++! Sample configuration file for vtysh.
++!
++!service integrated-vtysh-config
++!hostname quagga-router
++!username root nopassword
++!
+Index: build_dir/feeds/packages/net/frr/files/watchfrr.sh
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/files/watchfrr.sh
++++ /dev/null
+@@ -1,35 +0,0 @@
+-#!/bin/sh
+-#
+-# This is NOT the init script!  This is the watchfrr start/stop/restart
+-# command handler, passed to watchfrr with the -s/-r/-k commands.  It is used
+-# internally by watchfrr to start the protocol daemons with the appropriate
+-# options.
+-#
+-# This script should be installed in  /usr/sbin/watchfrr.sh
+-
+-log_success_msg() {
+-	:
+-}
+-
+-log_warning_msg() {
+-	echo "$@" >&2
+-	[ -x /usr/bin/logger ] && echo "$@" \
+-		| /usr/bin/logger -t watchfrr.sh -p daemon.warn
+-}
+-
+-log_failure_msg() {
+-	echo "$@" >&2
+-	[ -x /usr/bin/logger ] && echo "$@" \
+-		| /usr/bin/logger -t watchfrr.sh -p daemon.err
+-}
+-
+-self="`dirname $0`"
+-if [ -r "$self/frrcommon.sh" ]; then
+-	. "$self/frrcommon.sh"
+-else
+-	. "/usr/sbin/frrcommon.sh"
+-fi
+-
+-chownfrr $V_PATH
+-
+-frrcommon_main "$@"

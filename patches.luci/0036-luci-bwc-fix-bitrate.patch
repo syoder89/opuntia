@@ -1,0 +1,58 @@
+Index: luci/modules/luci-mod-status/src/luci-bwc.c
+===================================================================
+--- luci.orig/modules/luci-mod-status/src/luci-bwc.c
++++ luci/modules/luci-mod-status/src/luci-bwc.c
+@@ -88,7 +88,7 @@ struct load_entry {
+ 
+ struct radio_entry {
+ 	uint32_t time;
+-	uint16_t rate;
++	uint32_t rate;
+ 	uint8_t  rssi;
+ 	uint8_t  noise;
+ };
+@@ -260,7 +260,7 @@ static void * iw_open(void)
+ }
+ 
+ static int iw_update(
+-	void *iw, const char *ifname, uint16_t *rate, uint8_t *rssi, uint8_t *noise
++	void *iw, const char *ifname, uint32_t *rate, uint8_t *rssi, uint8_t *noise
+ ) {
+ 	struct iwinfo_ops *(*probe)(const char *);
+ 	int val;
+@@ -329,7 +329,7 @@ static int update_ifstat(
+ }
+ 
+ static int update_radiostat(
+-	const char *ifname, uint16_t rate, uint8_t rssi, uint8_t noise
++	const char *ifname, uint32_t rate, uint8_t rssi, uint8_t noise
+ ) {
+ 	char path[1024];
+ 
+@@ -350,7 +350,7 @@ static int update_radiostat(
+ 	}
+ 
+ 	e.time  = htobe32(time(NULL));
+-	e.rate  = htobe16(rate);
++	e.rate  = htobe32(rate);
+ 	e.rssi  = rssi;
+ 	e.noise = noise;
+ 
+@@ -418,7 +418,7 @@ static int run_daemon(void)
+ 	FILE *info;
+ 	uint64_t rxb, txb, rxp, txp;
+ 	uint32_t udp, tcp, other;
+-	uint16_t rate;
++	uint32_t rate;
+ 	uint8_t rssi, noise;
+ 	float lf1, lf5, lf15;
+ 	char line[1024];
+@@ -651,7 +651,7 @@ static int run_dump_radio(const char *if
+ 
+ 		printf("[ %" PRIu32 ", %" PRIu16 ", %" PRIu8 ", %" PRIu8 " ]%s\n",
+ 			be32toh(e->time),
+-			be16toh(e->rate), e->rssi, e->noise,
++			be32toh(e->rate), e->rssi, e->noise,
+ 			((i + sizeof(struct radio_entry)) < m.size) ? "," : "");
+ 	}
+ 
