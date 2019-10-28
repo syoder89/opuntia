@@ -1,7 +1,7 @@
-Index: build_dir/target/linux/ath79/dts/qca9558_compex_wpj558.dts
+Index: build_dir.ap2100/target/linux/ath79/dts/qca9558_compex_wpj558.dts
 ===================================================================
 --- /dev/null
-+++ build_dir/target/linux/ath79/dts/qca9558_compex_wpj558.dts
++++ build_dir.ap2100/target/linux/ath79/dts/qca9558_compex_wpj558.dts
 @@ -0,0 +1,152 @@
 +// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
 +/dts-v1/;
@@ -155,20 +155,21 @@ Index: build_dir/target/linux/ath79/dts/qca9558_compex_wpj558.dts
 +        mtd-mac-address = <&uboot 0x2e010>;
 +        mtd-mac-address-increment = <3>;
 +};
-Index: build_dir/target/linux/ath79/image/generic.mk
+Index: build_dir.ap2100/target/linux/ath79/image/generic.mk
 ===================================================================
---- build_dir.orig/target/linux/ath79/image/generic.mk
-+++ build_dir/target/linux/ath79/image/generic.mk
-@@ -266,6 +266,74 @@ define Device/comfast_cf-e5
+--- build_dir.ap2100.orig/target/linux/ath79/image/generic.mk
++++ build_dir.ap2100/target/linux/ath79/image/generic.mk
+@@ -298,6 +298,74 @@ define Device/comfast_cf-wr650ac-v2
  endef
- TARGET_DEVICES += comfast_cf-e5
+ TARGET_DEVICES += comfast_cf-wr650ac-v2
  
 +define Device/wpj-16m
 +  $(Device/CpxImageParams16M)
 +  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-usb-ledtrig-usbport
 +  MTDPARTS := spi0.0:192k(u-boot)ro,16128k(firmware),64k(art)ro
 +  IMAGE_SIZE := 16128k
-+  IMAGES := sysupgrade.bin factory.img
++  IMAGES := sysupgrade.bin
++#  IMAGES := sysupgrade.bin factory.img
 +  IMAGE/sysupgrade.bin = append-kernel | pad-to $$$$(BLOCKSIZE) | append-rootfs | pad-rootfs | check-size $$$$(IMAGE_SIZE)
 +  IMAGE/factory.img = Cpxfactory16M
 +endef
@@ -214,15 +215,14 @@ Index: build_dir/target/linux/ath79/image/generic.mk
 +#endef
 +#TARGET_DEVICES += wpj531
 +
-+define Device/compex_wpj558
++define Device/compex_imagestream
 +  $(Device/wpj-16m)
-+  DEVICE_TITLE := Compex WPJ558 (16MB flash)
-+  ATH_SOC := qca9558
-+  BOARDID := WPJ558
++  DEVICE_TITLE := Compex WPJ344/558/563 (16MB flash)
++  DEVICE_DTS := compex_imagestream
 +  IMAGE/sysupgrade.bin := append-kernel | pad-to $$$$(BLOCKSIZE) | \
 +	append-rootfs | pad-rootfs | append-metadata | check-size $$$$(IMAGE_SIZE)
 +endef
-+TARGET_DEVICES += compex_wpj558
++TARGET_DEVICES += compex_imagestream
 +
 +#define Device/wpj563
 +#  $(Device/wpj-16m)
@@ -234,10 +234,10 @@ Index: build_dir/target/linux/ath79/image/generic.mk
  define Device/devolo_dvl1200e
    ATH_SOC := qca9558
    DEVICE_VENDOR := devolo
-Index: build_dir/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
+Index: build_dir.ap2100/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
 ===================================================================
---- build_dir.orig/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
-+++ build_dir/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
+--- build_dir.ap2100.orig/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
++++ build_dir.ap2100/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
 @@ -34,6 +34,21 @@ case "$board" in
  		[ "$PHYNBR" -eq 1 ] && \
  			k2t_get_mac "lan_mac" > /sys${DEVPATH}/macaddress
@@ -260,3 +260,163 @@ Index: build_dir/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wi
  	trendnet,tew-823dru)
  	        # set the 2.4G interface mac address to LAN MAC
  	        [ "$PHYNBR" -eq 1 ] && \
+Index: build_dir.ap2100/target/linux/ath79/dts/compex_imagestream.dts
+===================================================================
+--- /dev/null
++++ build_dir.ap2100/target/linux/ath79/dts/compex_imagestream.dts
+@@ -0,0 +1,155 @@
++// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
++/dts-v1/;
++
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/input/input.h>
++
++#include "qca9557.dtsi"
++//#include "qca956x.dtsi"
++
++/ {
++	compatible = "compex,wpj558", "qca,qca9558";
++	model = "Compex WPJ558";
++
++        chosen {
++                bootargs = "console=ttyS0,115200n8";
++        };
++
++	extosc: ref {
++		compatible = "fixed-clock";
++		#clock-cells = <0>;
++		clock-output-names = "ref";
++		clock-frequency = <40000000>;
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		wifi_red {
++			label = "wpj344:red:sig1";
++			gpios = <&gpio 14 GPIO_ACTIVE_LOW>;
++		};
++
++		wifi_yellow {
++			label = "wpj344:yellow:sig2";
++			gpios = <&gpio 15 GPIO_ACTIVE_LOW>;
++		};
++
++		wifi_green {
++			label = "wpj344:green:sig3";
++			gpios = <&gpio 22 GPIO_ACTIVE_LOW>;
++		};
++
++		wifi_green2 {
++			label = "wpj344:green:sig4";
++			gpios = <&gpio 23 GPIO_ACTIVE_LOW>;
++		};
++
++		buzzer {
++			label = "wpj344:buzzer";
++			gpios = <&gpio 4 GPIO_ACTIVE_HIGH>;
++		};
++	};
++
++	keys {
++		compatible = "gpio-keys-polled";
++		poll-interval = <20>;
++
++		button0 {
++			label = "reset";
++			linux,code = <KEY_RESTART>;
++			gpios = <&gpio 17 GPIO_ACTIVE_LOW>;
++                        debounce-interval = <60>;
++		};
++	};
++};
++
++&pcie0 {
++	status = "okay";
++};
++
++&uart {
++	status = "okay";
++};
++
++&pll {
++	clocks = <&extosc>;
++};
++
++&spi {
++	status = "okay";
++	num-cs = <1>;
++
++	flash@0 {
++		compatible = "jedec,spi-nor";
++		reg = <0>;
++		spi-max-frequency = <25000000>;
++
++		partitions {
++			compatible = "fixed-partitions";
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			uboot: u-boot@0 {
++				label = "u-boot";
++				reg = <0x000000 0x030000>;
++				read-only;
++			};
++
++			firmware@30000 {
++				compatible = "denx,uimage";
++				label = "firmware";
++				reg = <0x030000 0xfc0000>;
++			};
++
++			art: art@ff0000 {
++				label = "ART";
++				reg = <0xff0000 0x010000>;
++				read-only;
++			};
++		};
++	};
++};
++
++&mdio0 {
++	compatible = "qca,ar9340-mdio";
++	status = "okay";
++
++        phy0: ethernet-phy@0 {
++                reg = <0>;
++
++                qca,ar8327-initvals = <
++                        0x04 0x00080080 /* PORT0 PAD MODE CTRL */
++                        0x0c 0x07600000 /* PORT6 PAD MODE CTRL */
++                        0x10 0x81000080 /* POWER_ON_STRAP */
++                        0x50 0xc737c737 /* LED_CTRL0 */
++                        0x54 0xc737c737 /* LED_CTRL1 */
++                        0x58 0xc737c737 /* LED_CTRL2 */
++                        0x5c 0x3ffff000 /* LED_CTRL3 */
++                        0x7c 0x0000007e /* PORT0_STATUS */
++                        0x94 0x0000007e /* PORT6 STATUS */
++                        >;
++        };
++};
++
++&eth0 {
++        compatible = "qca,qca9550-eth", "syscon";
++	status = "okay";
++
++        mtd-mac-address = <&uboot 0x2e010>;
++
++	phy-handle = <&phy0>;
++        pll-data = <0x56000000 0x00000101 0x00001616>;
++        gmac-config {
++                device = <&gmac>;
++                rgmii-enabled = <1>;
++        };
++};
++
++&wmac {
++        status = "okay";
++        mtd-cal-data = <&art 0x1000>;
++        mtd-mac-address = <&uboot 0x2e010>;
++        mtd-mac-address-increment = <3>;
++};
++

@@ -2,7 +2,7 @@ Index: build_dir.ap3500/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
 ===================================================================
 --- build_dir.ap3500.orig/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
 +++ build_dir.ap3500/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
-@@ -133,14 +133,19 @@
+@@ -133,15 +133,19 @@
  			partition@40000 {
  				compatible = "mikrotik,minor";
  				label = "firmware";
@@ -20,9 +20,10 @@ Index: build_dir.ap3500/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
  
  &ethernet {
 -	mtd-mac-address = <&hard_config 0x0010>;
+-	mtd-mac-address-increment = <1>;
 +	mtd-mac-address = <&imagestream 0x0010>;
- 	mtd-mac-address-increment = <1>;
  };
+ 
  
 Index: build_dir.ap3500/target/linux/ramips/image/mt7621.mk
 ===================================================================
