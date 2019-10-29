@@ -1,0 +1,27 @@
+Index: build_dir/package/network/services/uhttpd/files/uhttpd.init
+===================================================================
+--- build_dir.orig/package/network/services/uhttpd/files/uhttpd.init
++++ build_dir/package/network/services/uhttpd/files/uhttpd.init
+@@ -198,12 +198,22 @@ start_instance()
+ 	procd_close_instance
+ }
+ 
++check_ubus() {
++	if [ -f /usr/lib/uhttpd_ubus.so ]; then
++		if [ -z "$(uci -q get uhttpd.main.ubus_prefix)" ]; then
++			uci set uhttpd.main.ubus_prefix=/ubus
++			uci commit uhttpd
++		fi
++	fi
++}
++
+ service_triggers()
+ {
+ 	procd_add_reload_trigger "uhttpd"
+ }
+ 
+ start_service() {
++	check_ubus
+ 	config_load uhttpd
+ 	config_foreach start_instance uhttpd
+ }

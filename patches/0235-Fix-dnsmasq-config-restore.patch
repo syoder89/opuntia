@@ -1,0 +1,13 @@
+Index: build_dir/package/network/services/dnsmasq/files/dnsmasq.init
+===================================================================
+--- build_dir.orig/package/network/services/dnsmasq/files/dnsmasq.init
++++ build_dir/package/network/services/dnsmasq/files/dnsmasq.init
+@@ -817,7 +817,7 @@ dnsmasq_start()
+ 	BASEDHCPSTAMPFILE_CFG="${BASEDHCPSTAMPFILE}.${cfg}"
+ 
+ 	# Always check that the user/group exists for upgrades or old configs
+-        add_group_and_user "dnsmasq"
++        add_group_and_user "dnsmasq-full"
+ 
+ 	# before we can call xappend
+ 	mkdir -p /var/run/dnsmasq/
