@@ -64,7 +64,7 @@ char build_date[64] = { 0, };
 	for (i=0;i<mac_addrs_to_allocate;i++) {
 		if (i > 0)
 			fprintf(fp, ", ");
-		fprintf(fp, "\"%x:%x:%x:%x:%x:%x\"", hdr.mac_addrs[i].mac_addr[0], 
+		fprintf(fp, "\"%02x:%02x:%02x:%02x:%02x:%02x\"", hdr.mac_addrs[i].mac_addr[0], 
 			hdr.mac_addrs[i].mac_addr[1], hdr.mac_addrs[i].mac_addr[2], 
 			hdr.mac_addrs[i].mac_addr[3], hdr.mac_addrs[i].mac_addr[4], 
 			hdr.mac_addrs[i].mac_addr[5]);
@@ -74,8 +74,10 @@ char build_date[64] = { 0, };
 	fprintf(fp, "\"build_date\": \"%s\", ", build_date);
 	fprintf(fp, "\"product_id\": \"%s\", ", model);
 	fprintf(fp, "\"product_rev\": \"%s\", ", revision);
-	fprintf(fp, "\"product_name\": \"%s\", ", name);
+	fprintf(fp, "\"product_name\": \"%s\"", name);
 	fprintf(fp, "}");
+	buf = 0;
+	fwrite(&buf, 1, 1, fp);
 }
 
 void main(int argc, char **argv) {
