@@ -42,13 +42,14 @@ Index: build_dir.ap3500/target/linux/ar71xx/image/generic.mk
 ===================================================================
 --- build_dir.ap3500.orig/target/linux/ar71xx/image/generic.mk
 +++ build_dir.ap3500/target/linux/ar71xx/image/generic.mk
-@@ -1259,7 +1259,7 @@ TARGET_DEVICES += wlr8100
+@@ -1259,8 +1259,8 @@ TARGET_DEVICES += wlr8100
  define Device/wpj-16m
    $(Device/CpxImageParams16M)
    DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-usb-ledtrig-usbport
 -  MTDPARTS := spi0.0:192k(u-boot)ro,16128k(firmware),64k(art)ro
-+  MTDPARTS := spi0.0:192k(u-boot)ro,16124k(firmware),4k(imagestream),64k(art)ro
-   IMAGE_SIZE := 16128k
+-  IMAGE_SIZE := 16128k
++  MTDPARTS := spi0.0:192k(u-boot)ro,16064k(firmware),64k@0xFE0000(imagestream),64k(art)ro
++  IMAGE_SIZE := 16064k
    IMAGES := sysupgrade.bin factory.img
    IMAGE/sysupgrade.bin = append-kernel | pad-to $$$$(BLOCKSIZE) | append-rootfs | pad-rootfs | check-size $$$$(IMAGE_SIZE)
 @@ -1269,19 +1269,15 @@ endef
