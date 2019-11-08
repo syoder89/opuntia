@@ -42,7 +42,7 @@ Index: build_dir.ap3500/target/linux/ar71xx/image/generic.mk
 ===================================================================
 --- build_dir.ap3500.orig/target/linux/ar71xx/image/generic.mk
 +++ build_dir.ap3500/target/linux/ar71xx/image/generic.mk
-@@ -1259,8 +1259,8 @@ TARGET_DEVICES += wlr8100
+@@ -1259,7 +1259,7 @@ TARGET_DEVICES += wlr8100
  define Device/wpj-16m
    $(Device/CpxImageParams16M)
    DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-usb-ledtrig-usbport
