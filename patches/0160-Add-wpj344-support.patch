@@ -1,5 +1,7 @@
---- a/tools/firmware-utils/src/mkmylofw.c
-+++ b/tools/firmware-utils/src/mkmylofw.c
+Index: build_dir/tools/firmware-utils/src/mkmylofw.c
+===================================================================
+--- build_dir.orig/tools/firmware-utils/src/mkmylofw.c
++++ build_dir/tools/firmware-utils/src/mkmylofw.c
 @@ -158,6 +158,10 @@ struct cpx_board boards[] = {
  		"WPE72", "Compex WPE72",
  		"BareBoard"),
@@ -11,8 +13,10 @@
  	CPX_BOARD_AR23XX(DEVID_COMPEX_NP25G, 4,
  		"NP25G", "Compex NetPassage 25G",
  		"Wireless 54Mbps XR Router"),
---- a/tools/firmware-utils/src/myloader.h
-+++ b/tools/firmware-utils/src/myloader.h
+Index: build_dir/tools/firmware-utils/src/myloader.h
+===================================================================
+--- build_dir.orig/tools/firmware-utils/src/myloader.h
++++ build_dir/tools/firmware-utils/src/myloader.h
 @@ -63,6 +63,7 @@
  /* Devices based on the Atheros AR71xx */
  #define DEVID_COMPEX_WP543	0x0640
@@ -21,9 +25,11 @@
  
  /* Devices based on the IXP422 */
  #define DEVID_COMPEX_WP18	0x047E
---- a/target/linux/ar71xx/base-files/etc/board.d/02_network
-+++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
-@@ -473,9 +473,13 @@ ar71xx_setup_interfaces()
+Index: build_dir/target/linux/ar71xx/base-files/etc/board.d/02_network
+===================================================================
+--- build_dir.orig/target/linux/ar71xx/base-files/etc/board.d/02_network
++++ build_dir/target/linux/ar71xx/base-files/etc/board.d/02_network
+@@ -561,9 +561,13 @@ ar71xx_setup_interfaces()
  		ucidef_add_switch_port_attr "switch0" 5 led 2
  		;;
  	wpj344)
@@ -40,9 +46,11 @@
  	wpj558)
  		ucidef_add_switch "switch0" \
  			"5:lan" "1:wan" "6@eth0"
---- a/target/linux/ar71xx/image/legacy.mk
-+++ b/target/linux/ar71xx/image/legacy.mk
-@@ -646,7 +646,6 @@ Image/Build/CyberTANGZIP=$(call Image/Bu
+Index: build_dir/target/linux/ar71xx/image/legacy.mk
+===================================================================
+--- build_dir.orig/target/linux/ar71xx/image/legacy.mk
++++ build_dir/target/linux/ar71xx/image/legacy.mk
+@@ -643,7 +643,6 @@ Image/Build/CyberTANGZIP=$(call Image/Bu
  Image/Build/CyberTANLZMA/buildkernel=$(call MkuImageLzma,$(2),$(3) $(4))
  Image/Build/CyberTANLZMA=$(call Image/Build/CyberTAN,$(1),$(2),$(3),$(4),$(5))
  
@@ -50,14 +58,16 @@
  Image/Build/Netgear/initramfs=$(call MkuImageLzma/initramfs,$(2),$(3) $(4),,-M $(5))
  
  define Image/Build/Netgear/buildkernel
---- a/target/linux/ar71xx/image/generic.mk
-+++ b/target/linux/ar71xx/image/generic.mk
-@@ -824,9 +824,32 @@ endef
- TARGET_DEVICES += bhr-4grv2
+Index: build_dir/target/linux/ar71xx/image/generic.mk
+===================================================================
+--- build_dir.orig/target/linux/ar71xx/image/generic.mk
++++ build_dir/target/linux/ar71xx/image/generic.mk
+@@ -1257,9 +1257,32 @@ endef
+ TARGET_DEVICES += wlr8100
  
  define Device/wpj-16m
 +  $(Device/CpxImageParams16M)
-   DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-usb-ledtrig-usbport
+   DEVICE_PACKAGES := kmod-usb2 kmod-usb-ledtrig-usbport
    MTDPARTS := spi0.0:192k(u-boot)ro,16128k(firmware),64k(art)ro
    IMAGE_SIZE := 16128k
 +  IMAGES := sysupgrade.bin factory.img

@@ -35,20 +35,3 @@ Index: luci/modules/luci-base/src/mkversion.sh
  	distversion = "Development Snapshot"
  	distproduct = "Unknown"
  	distmanufacturer = "ISis ImageStream Internet Solutions"
-Index: luci/modules/luci-mod-network/luasrc/view/admin_network/diagnostics.htm
-===================================================================
---- luci.orig/modules/luci-mod-network/luasrc/view/admin_network/diagnostics.htm
-+++ luci/modules/luci-mod-network/luasrc/view/admin_network/diagnostics.htm
-@@ -10,9 +10,9 @@ local fs   = require "nixio.fs"
- local has_ping6 = fs.access("/bin/ping6") or fs.access("/usr/bin/ping6")
- local has_traceroute6 = fs.access("/bin/traceroute6") or fs.access("/usr/bin/traceroute6")
- 
--local dns_host = luci.config.diag and luci.config.diag.dns or "dev.openwrt.org"
--local ping_host = luci.config.diag and luci.config.diag.ping or "dev.openwrt.org"
--local route_host = luci.config.diag and luci.config.diag.route or "dev.openwrt.org"
-+local dns_host = luci.config.diag and luci.config.diag.dns or "imagestream.com"
-+local ping_host = luci.config.diag and luci.config.diag.ping or "imagestream.com"
-+local route_host = luci.config.diag and luci.config.diag.route or "imagestream.com"
- %>
- 
- <script type="text/javascript">//<![CDATA[

@@ -1,20 +1,12 @@
-Index: build_dir.ap3500/target/linux/ramips/base-files/etc/board.d/02_network
+Index: build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
 ===================================================================
---- build_dir.ap3500.orig/target/linux/ramips/base-files/etc/board.d/02_network
-+++ build_dir.ap3500/target/linux/ramips/base-files/etc/board.d/02_network
-@@ -154,7 +154,6 @@ ramips_setup_interfaces()
- 	kimax,u35wf|\
- 	mediatek,linkit-smart-7688|\
- 	microduino,microwrt|\
--	mikrotik,rbm11g|\
- 	netgear,wnce2001|\
- 	onion,omega2p|\
- 	onion,omega2|\
-@@ -412,6 +411,14 @@ ramips_setup_interfaces()
+--- build_dir.orig/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
++++ build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
+@@ -108,7 +108,13 @@ ramips_setup_interfaces()
  		ucidef_add_switch "switch0" \
  			"0:lan:1" "1:lan:2" "2:lan:3" "3:lan:4" "6@eth0"
  		;;
-+
+-	mikrotik,rbm11g|\
 +	mikrotik,rbm11g)
 +		ucidef_set_interface_lan "eth0.4001"
 +        	ucidef_add_switch "switch0" \
@@ -22,14 +14,14 @@ Index: build_dir.ap3500/target/linux/ramips/base-files/etc/board.d/02_network
 +        	ucidef_add_switch_extra_attr "switch0" "alias_cpu" "6"
 +        	ucidef_add_switch_extra_attr "switch0" "alias_lan" "0"
 +        	;;
- 	netgear,r6120|\
- 	netgear,r6220|\
- 	netgear,r6260|\
-Index: build_dir.ap3500/target/linux/ramips/base-files/etc/board.d/01_leds
+ 	thunder,timecloud)
+ 		ucidef_add_switch "switch0"
+ 		ucidef_add_switch_attr "switch0" "enable" "false"
+Index: build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
 ===================================================================
---- build_dir.ap3500.orig/target/linux/ramips/base-files/etc/board.d/01_leds
-+++ build_dir.ap3500/target/linux/ramips/base-files/etc/board.d/01_leds
-@@ -275,10 +275,10 @@ mediatek,linkit-smart-7688)
+--- build_dir.orig/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
++++ build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
+@@ -37,10 +37,10 @@ gnubee,gb-pc2)
  mikrotik,rbm11g)
  	ucidef_set_rssimon "wlan0" "200000" "1"
  	ucidef_set_led_rssi "rssilow" "RSSILOW" "$boardname:green:rssi0" "wlan0" "1" "100"

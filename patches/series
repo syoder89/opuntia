@@ -46,7 +46,6 @@ packages/0189-iwinfo-collectd-64-bit-byte-counters.patch
 801-wifi-alliance-cert-mods.patch
 kernel/0060-wpj558-switch-cpu-port-6.patch
 packages/0159-swconfig-support-port-aliases-cpu-wan-lan.patch
-packages/0173-hostapd-procd-respawn.patch
 packages/0174-netifd-support-hostapd-radius-extra-attrs.patch
 packages/0175-netifd-multiple-radius-servers.patch
 packages/0176-Add-candela-tech-ath10k-firmware-10.1.patch
@@ -92,7 +91,6 @@ packages/0211-firewall-allow-web-ssh-snmp-default-ports.patch
 packages/0212-ath10k-ct-update-version.patch
 packages/0214-ath10k-ct-update-coverage-class-on-fw-reset.patch
 packages/0215-batman-adv-lower-node-timeout.patch
-packages/0216-wireless-fix-adhoc-scan-and-respawn.patch
 packages/0217-wireless-adhoc-workaround-race.patch
 0164-Add-wpj563-support.patch
 packages/0219-ath10k-ct-remove-debug-from-coverage.patch
@@ -117,7 +115,6 @@ kernel/0084-ag71xx-fix-max-mtu.patch
 kernel/0086-compex-mips-support-multiple-machines.patch
 0165-Fix-compex-leds.patch
 packages/0241-netifd-add-dhcp-fallback.patch
-packages/0242-mac80211-add-new-client-check-watchdog.patch
 packages/0243-lldpd-add-missing-limits-include.patch
 packages/0244-openvswitch-remove-l3-routing-table-full-bgp-feed.patch
 packages/0245-keepalived-fix-pid-path.patch

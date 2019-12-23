@@ -17,7 +17,7 @@ Index: build_dir/include/package.mk
 ===================================================================
 --- build_dir.orig/include/package.mk
 +++ build_dir/include/package.mk
-@@ -242,7 +242,14 @@ define Build/DefaultTargets
+@@ -271,7 +271,14 @@ define Build/DefaultTargets
    endef
  endef
  
@@ -36,12 +36,12 @@ Index: build_dir/include/scan.mk
 ===================================================================
 --- build_dir.orig/include/scan.mk
 +++ build_dir/include/scan.mk
-@@ -15,7 +15,7 @@ export PATH:=$(TOPDIR)/staging_dir/host/
+@@ -19,7 +19,7 @@ endef
  ifeq ($(SCAN_NAME),target)
    SCAN_DEPS=image/Makefile profiles/*.mk $(TOPDIR)/include/kernel*.mk $(TOPDIR)/include/target.mk image/*.mk
  else
 -  SCAN_DEPS=$(TOPDIR)/include/package*.mk
 +  SCAN_DEPS=$(TOPDIR)/include/package*.mk $(TOPDIR)/overlay/*/*.mk
+ ifneq ($(call feedname,$(SCAN_DIR)),)
+   SCAN_DEPS += $(TOPDIR)/feeds/$(call feedname,$(SCAN_DIR))/*.mk
  endif
- 
- ifeq ($(IS_TTY),1)

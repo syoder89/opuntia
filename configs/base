@@ -3094,7 +3094,8 @@ CONFIG_LIBCURL_NO_SMB="!"
 # CONFIG_PACKAGE_libevent2-core is not set
 # CONFIG_PACKAGE_libevent2-extra is not set
 # CONFIG_PACKAGE_libevent2-openssl is not set
-# CONFIG_PACKAGE_libevent2-pthreads is not set
+# Needed for ntpd now?
+CONFIG_PACKAGE_libevent2-pthreads=y
 # CONFIG_PACKAGE_libeventlog is not set
 # CONFIG_PACKAGE_libevhtp is not set
 # CONFIG_PACKAGE_libevhtp-1.1 is not set

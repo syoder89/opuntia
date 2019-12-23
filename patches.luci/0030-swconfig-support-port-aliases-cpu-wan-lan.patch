@@ -1,7 +1,7 @@
-Index: luci/modules/luci-base/luasrc/model/network.lua
+Index: luci/modules/luci-compat/luasrc/model/network.lua
 ===================================================================
---- luci.orig/modules/luci-base/luasrc/model/network.lua
-+++ luci/modules/luci-base/luasrc/model/network.lua
+--- luci.orig/modules/luci-compat/luasrc/model/network.lua
++++ luci/modules/luci-compat/luasrc/model/network.lua
 @@ -439,7 +439,6 @@ function init(cursor)
  						port.label = role:upper()
  					end
