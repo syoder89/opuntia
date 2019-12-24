@@ -13,7 +13,7 @@ Index: luci/applications/luci-app-statistics/root/usr/bin/stat-genconfig
  			end
  		end
  
-@@ -81,12 +83,16 @@ function config_generic( c, singles, boo
+@@ -81,8 +83,10 @@ function config_generic( c, singles, boo
  					c[key] = preprocess[key](c[key])
  				end
  
@@ -25,10 +25,3 @@ Index: luci/applications/luci-app-statistics/root/usr/bin/stat-genconfig
  		end
  
  		if type(lists) == "table" then
--			str = str .. _list_expand( c, lists, nopad )
-+			if c[key] then
-+				str = str .. _list_expand( c, lists, nopad )
-+			end
- 		end
- 	end
- 

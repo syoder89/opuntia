@@ -134,3 +134,4 @@ packages/0252-frr-scott-fixes.patch
 0234-Add-ImageStream-license-partition.patch
 0235-Fix-dnsmasq-config-restore.patch
 0236-Fix-uhttpd-config-restore.patch
+packages/0253-collectd-stop-logging-stderr.patch

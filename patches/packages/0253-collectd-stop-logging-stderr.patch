@@ -1,0 +1,13 @@
+Index: build_dir/feeds/packages/utils/collectd/files/collectd.init
+===================================================================
+--- build_dir.orig/feeds/packages/utils/collectd/files/collectd.init
++++ build_dir/feeds/packages/utils/collectd/files/collectd.init
+@@ -346,7 +346,7 @@ start_service() {
+ 	procd_append_param command -C "$COLLECTD_CONF"
+ 	procd_append_param command -f # don't daemonize
+ 	procd_set_param nice "$NICEPRIO"
+-	procd_set_param stderr 1
++	procd_set_param stderr 0
+ 	procd_set_param respawn
+ 	procd_close_instance
+ }
