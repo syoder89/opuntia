@@ -120,7 +120,6 @@ packages/0241-netifd-add-dhcp-fallback.patch
 packages/0242-mac80211-add-new-client-check-watchdog.patch
 packages/0243-lldpd-add-missing-limits-include.patch
 packages/0244-openvswitch-remove-l3-routing-table-full-bgp-feed.patch
-packages/0245-keepalived-fix-pid-path.patch
 packages/0246-dnsmasq-add-subnet-feature.patch
 packages/0247-mwan3-check-if-enabled.patch
 packages/0248-netifd-proto-bonding-fixes.patch

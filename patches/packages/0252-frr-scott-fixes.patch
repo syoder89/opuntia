@@ -9,18 +9,36 @@ Index: build_dir/feeds/packages/net/frr/Makefile
  #
  # This is free software, licensed under the GNU General Public License v2.
  # See /LICENSE for more information.
-@@ -7,22 +7,18 @@
+@@ -7,67 +7,53 @@
  
  include $(TOPDIR)/rules.mk
  PKG_NAME:=frr
--PKG_VERSION:=7.1
+-PKG_VERSION:=7.2
 -PKG_RELEASE:=2
 -
 -PKG_SOURCE_URL:=https://github.com/FRRouting/frr/releases/download/$(PKG_NAME)-$(PKG_VERSION)/
 -PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
--PKG_HASH:=2a4210565e7b41d366f7b9f5f745917d67a0b159f3b6bd49d75f9e730557db2f
--PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+-PKG_HASH:=6cd5bfb6975133ccf23cc3f3a1c1c9a3f6d6a6c792c763b3ea010db75b3de5b3
 -PKG_MAINTAINER:=Lucian Cristian <lucian.cristian@gmail.com>
+-
+-PKG_DAEMON_AVAILABLE:= \
+-	babeld \
+-	bfdd \
+-	bgpd \
+-	eigrpd \
+-	fabricd \
+-	isisd \
+-	ldpd \
+-	nhrpd \
+-	ospfd \
+-	ospf6d \
+-	pbrd \
+-	pimd \
+-	ripd \
+-	ripngd \
+-	staticd \
+-	vrrpd
+-
 +PKG_SOURCE_URL:=https://github.com/FRRouting/frr
 +PKG_SOURCE_PROTO:=git
 +PKG_SOURCE_VERSION:=6453f430e62d5d716fd57b62a9f50d5ef32987d6
@@ -30,16 +48,27 @@ Index: build_dir/feeds/packages/net/frr/Makefile
  
  PKG_CONFIG_DEPENDS:= \
  	CONFIG_IPV6 \
- 	CONFIG_PACKAGE_frr-babeld \
--	CONFIG_PACKAGE_frr-bfdd \
- 	CONFIG_PACKAGE_frr-bgpd \
- 	CONFIG_PACKAGE_frr-eigrpd \
--	CONFIG_PACKAGE_frr-fabricd \
- 	CONFIG_PACKAGE_frr-isisd \
- 	CONFIG_PACKAGE_frr-ldpd \
+-	CONFIG_FRR_OPENSSL \
+-	CONFIG_FRR_INTERNAL \
++	CONFIG_PACKAGE_frr-babeld \
++	CONFIG_PACKAGE_frr-bgpd \
++	CONFIG_PACKAGE_frr-eigrpd \
++	CONFIG_PACKAGE_frr-isisd \
++	CONFIG_PACKAGE_frr-ldpd \
  	CONFIG_PACKAGE_frr-libfrr \
-@@ -39,12 +35,11 @@ PKG_CONFIG_DEPENDS:= \
- 	CONFIG_PACKAGE_frr-zebra
++	CONFIG_PACKAGE_frr-nhrpd \
++	CONFIG_PACKAGE_frr-ospfd \
++	CONFIG_PACKAGE_frr-ospf6d \
++	CONFIG_PACKAGE_frr-pbrd \
++	CONFIG_PACKAGE_frr-pimd \
++	CONFIG_PACKAGE_frr-ripd \
++	CONFIG_PACKAGE_frr-ripngd \
++	CONFIG_PACKAGE_frr-staticd \
+ 	CONFIG_PACKAGE_frr-vtysh \
+ 	CONFIG_PACKAGE_frr-watchfrr \
+-	CONFIG_PACKAGE_frr-zebra \
+-	$(patsubst %,CONFIG_PACKAGE_frr-%,$(PKG_DAEMON_AVAILABLE)) \
++	CONFIG_PACKAGE_frr-zebra
  
  PKG_BUILD_PARALLEL:=1
 -PKG_BUILD_DEPENDS:=python3/host
@@ -49,159 +78,180 @@ Index: build_dir/feeds/packages/net/frr/Makefile
  
  include $(INCLUDE_DIR)/package.mk
 -include $(INCLUDE_DIR)/host-build.mk
+-
+-define Package/frr-libfrr/config
+-  source "$(SOURCE)/Config.in"
+-endef
  
  define Package/frr/Default
    SECTION:=net
-@@ -53,11 +48,12 @@ define Package/frr/Default
+   CATEGORY:=Network
+   SUBMENU:=Routing and Redirection
+-  URL:=https://www.frrouting.org/
    DEPENDS:=frr
-   TITLE:=The FRRouting (FRR) Software Routing Suite
-   URL:=https://www.frrouting.org/
++  TITLE:=The FRRouting (FRR) Software Routing Suite
++  URL:=https://www.frrouting.org/
 +  MAINTAINER:=Lucian Cristian <lucian.cristian@gmail.com>
  endef
  
  define Package/frr
    $(call Package/frr/Default)
 -  DEPENDS:=+librt
+-  TITLE:=The FRRouting (FRR) Software Routing Suite
 +  DEPENDS:=+librt +libyang
    MENU:=1
  endef
  
-@@ -73,112 +69,91 @@ endef
- define Package/frr-babeld
-   $(call Package/frr/Default)
-   DEPENDS+=+frr-libfrr
--  TITLE:=BABEL routing engine
--endef
--
--define Package/frr-bfdd
--  $(call Package/frr/Default)
--  DEPENDS+=+frr-libfrr
--  TITLE:=BFD routing engine
--  CONFLICTS:=bfdd
+@@ -76,22 +62,98 @@ define Package/frr/description
+   routing protocols.
+ 
+   Currently FRRouting supports BGP4, BGP4+, OSPFv2, OSPFv3, RIPv1, RIPv2, RIPng,
+-  IS-IS, PIM-SM/MSDP, LDP, VRRP and Babel as well as very early support for EIGRP and
++  IS-IS, PIM-SM/MSDP, LDP and Babel as well as very early support for EIGRP and
+   NHRP.
+ endef
+ 
++define Package/frr-babeld
++  $(call Package/frr/Default)
++  DEPENDS+=+frr-libfrr
 +  TITLE:=BABEL daemon
- endef
- 
- define Package/frr-bgpd
-   $(call Package/frr/Default)
-   DEPENDS+=+frr-libfrr
--  TITLE:=BGPv4, BGPv4+, BGPv4- routing engine
--  CONFLICTS:=quagga-bgpd
++endef
++
++define Package/frr-bgpd
++  $(call Package/frr/Default)
++  DEPENDS+=+frr-libfrr
 +  TITLE:=BGPv4, BGPv4+, BGPv4- daemon
- endef
- 
- define Package/frr-eigrpd
-   $(call Package/frr/Default)
-   DEPENDS+=+frr-libfrr
--  TITLE:=EIGRPD routing engine
--endef
--
--define Package/frr-fabricd
--  $(call Package/frr/Default)
--  DEPENDS+=+frr-libfrr
--  TITLE:=OpenFabric routing engine
++endef
++
++define Package/frr-eigrpd
++  $(call Package/frr/Default)
++  DEPENDS+=+frr-libfrr
 +  TITLE:=EIGRPD daemon
- endef
- 
- define Package/frr-isisd
-   $(call Package/frr/Default)
-   DEPENDS+=+frr-libfrr
--  TITLE:=IS-IS routing engine
--  CONFLICTS:=quagga-isisd
++endef
++
++define Package/frr-isisd
++  $(call Package/frr/Default)
++  DEPENDS+=+frr-libfrr
 +  TITLE:=IS-IS daemon
- endef
- 
- define Package/frr-ldpd
-   $(call Package/frr/Default)
-   DEPENDS+=+frr-libfrr
--  TITLE:=LDP routing engine
++endef
++
++define Package/frr-ldpd
++  $(call Package/frr/Default)
++  DEPENDS+=+frr-libfrr
 +  TITLE:=LDP daemon
- endef
- 
++endef
++
  define Package/frr-libfrr
    $(call Package/frr/Default)
    TITLE:=zebra library
--  DEPENDS+=+libjson-c +libyang
+-  DEPENDS+=+librt +libjson-c +libyang +FRR_OPENSSL:libopenssl
 -  CONFLICTS:=quagga-libzebra
 +  DEPENDS+=+libjson-c
- endef
- 
- define Package/frr-nhrpd
-   $(call Package/frr/Default)
-   DEPENDS+=+frr-libfrr +libcares
--  TITLE:=NHRP routing engine
++endef
++
++define Package/frr-nhrpd
++  $(call Package/frr/Default)
++  DEPENDS+=+frr-libfrr +libcares
 +  TITLE:=NHRP daemon
- endef
- 
- define Package/frr-ospfd
-   $(call Package/frr/Default)
-   DEPENDS+=+frr-libfrr
--  TITLE:=OSPFv2 routing engine
--  CONFLICTS:=quagga-ospfd
++endef
++
++define Package/frr-ospfd
++  $(call Package/frr/Default)
++  DEPENDS+=+frr-libfrr
 +  TITLE:=OSPFv2 daemon
- endef
- 
- define Package/frr-ospf6d
-   $(call Package/frr/Default)
-   DEPENDS+=+frr-libfrr @IPV6
--  TITLE:=OSPFv3 routing engine
--  CONFLICTS:=quagga-ospf6d
++endef
++
++define Package/frr-ospf6d
++  $(call Package/frr/Default)
++  DEPENDS+=+frr-libfrr @IPV6
 +  TITLE:=OSPFv3 daemon
- endef
- 
- define Package/frr-pbrd
-   $(call Package/frr/Default)
-   DEPENDS+=+frr-libfrr
--  TITLE:=PBRD routing daemon
++endef
++
++define Package/frr-pbrd
++  $(call Package/frr/Default)
++  DEPENDS+=+frr-libfrr
 +  TITLE:=PBRD daemon
- endef
- 
- define Package/frr-pimd
-   $(call Package/frr/Default)
-   DEPENDS+=+frr-libfrr
--  TITLE:=PIM routing engine
++endef
++
++define Package/frr-pimd
++  $(call Package/frr/Default)
++  DEPENDS+=+frr-libfrr
 +  TITLE:=PIM daemon
- endef
- 
- define Package/frr-ripd
-   $(call Package/frr/Default)
-   DEPENDS+=+frr-libfrr
--  TITLE:=RIP routing engine
--  CONFLICTS:=quagga-ripd
++endef
++
++define Package/frr-ripd
++  $(call Package/frr/Default)
++  DEPENDS+=+frr-libfrr
 +  TITLE:=RIP daemon
- endef
- 
- define Package/frr-ripngd
-   $(call Package/frr/Default)
-   DEPENDS+=+frr-libfrr @IPV6
--  TITLE:=RIPNG routing engine
--  CONFLICTS:=quagga-ripngd
++endef
++
++define Package/frr-ripngd
++  $(call Package/frr/Default)
++  DEPENDS+=+frr-libfrr @IPV6
 +  TITLE:=RIPNG daemon
- endef
- 
- define Package/frr-staticd
-   $(call Package/frr/Default)
-   DEPENDS+=+frr-libfrr
--  TITLE:=STATICD routing engine
++endef
++
++define Package/frr-staticd
++  $(call Package/frr/Default)
++  DEPENDS+=+frr-libfrr
 +  TITLE:=Static route daemon
  endef
  
  define Package/frr-vtysh
    $(call Package/frr/Default)
-   DEPENDS+=+frr-libfrr +libreadline +libncurses
+-  DEPENDS+=+frr-libfrr +libreadline +libncurses +more
++  DEPENDS+=+frr-libfrr +libreadline +libncurses
    TITLE:=integrated shell for frr routing software
 -  CONFLICTS:=quagga-vtysh
  endef
  
  define Package/frr-watchfrr
-@@ -193,21 +168,72 @@ define Package/frr-zebra
+@@ -106,52 +168,73 @@ define Package/frr-zebra
    TITLE:=Zebra daemon
    DEPENDS+=+frr-libfrr
    DEFAULT:=y if PACKAGE_frr
 -  CONFLICTS:=quagga-zebra
  endef
  
+-##Migrate from quagga
+-##should test file exists and link in frr folder
+-#define Package/frr/postinst
+-##!/bin/sh
+-#if [ -f /etc/quagga/ospfd.conf ]; then
+-#    ls to /etc/frr
+-#    sed enable ospfd daemon
+-#fi
+-#exit 0
+-#endef
+-
+-define BuildDaemon
+-    define Package/frr-$(1)
+-	$$(call Package/frr/Default)
+-	TITLE:= $(1) routing engine
+-	DEPENDS+=frr-libfrr $(2)
+-    endef
+-
+-    define Package/frr-$(1)/install
+-	$(INSTALL_DIR) $$(1)/usr/sbin
+-	if [ "$(1)" != "fabricd" ]; then \
+-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/$(1)/.libs/$(1) $$(1)/usr/sbin/; \
+-	else \
+-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/isisd/.libs/$(1) $$(1)/usr/sbin/; fi
+-	if [ "$(1)" == "nhrpd" ]; then \
+-	$(INSTALL_DIR) $$(1)/usr/lib; \
+-	$(CP) $(PKG_BUILD_DIR)/build/lib/.libs/libfrrcares.so* $$(1)/usr/lib/; fi
+-    endef
+-
+-    $$(eval $$(call BuildPackage,frr-$(1)))
+-endef
+-
 -define Package/frr-libfrr/conffiles
 -/etc/frr/
+-endef
+-
+-define Build/Prepare
+-	$(Build/Prepare/Default)
+-	mkdir -p $(PKG_BUILD_DIR)/build
 +define Package/frr-zebra/conffiles
 +/etc/frr/zebra.conf
 +endef
@@ -229,12 +279,8 @@ Index: build_dir/feeds/packages/net/frr/Makefile
 +
 +define Package/frr-nhrpd/conffiles
 +/etc/frr/nhrpd.conf
- endef
- 
--define Build/Prepare
--	$(Build/Prepare/Default)
--	mkdir -p $(PKG_BUILD_DIR)/build/lib
--	$(CP) $(PKG_BUILD_DIR)/lib/command.h $(PKG_BUILD_DIR)/build/lib/
++endef
++
 +define Package/frr-ospfd/conffiles
 +/etc/frr/ospfd.conf
 +endef
@@ -271,10 +317,11 @@ Index: build_dir/feeds/packages/net/frr/Makefile
 -    ( cd $(PKG_BUILD_DIR)/build/ ; \
 +    ( cd $(PKG_BUILD_DIR)/ ; \
 +    mkdir build/ ; \
-     cd build ; \
++    cd build ; \
      ../configure \
  	--host="$(GNU_TARGET_NAME)" \
-@@ -220,24 +246,20 @@ define Build/Configure
+ 	--build="$(GNU_HOST_NAME)" \
+@@ -163,27 +246,36 @@ define Build/Configure
  	BUILD_CPPFLAGS="$(TARGET_CPPLAGS)" \
  	BUILD_CFLAGS="$(TARGET_CFLAGS)" \
  	BUILD_LDFLAGS="$(TARGET_LDFLAGS)" \
@@ -294,24 +341,23 @@ Index: build_dir/feeds/packages/net/frr/Makefile
  	--disable-ospfclient \
  	--disable-doc \
 -	--disable-backtrace \
--	--with-vtysh-pager=cat \
 -	--localstatedir=/var/run/frr \
 -	--sysconfdir=/etc/frr/ \
- 	$(call autoconf_bool,CONFIG_PACKAGE_frr-babeld,babeld) \
--	$(call autoconf_bool,CONFIG_PACKAGE_frr-bfdd,bfdd) \
- 	$(call autoconf_bool,CONFIG_PACKAGE_frr-bgpd,bgpd) \
- 	$(call autoconf_bool,CONFIG_PACKAGE_frr-eigrpd,eigrpd) \
--	$(call autoconf_bool,CONFIG_PACKAGE_frr-fabricd,fabricd) \
- 	$(call autoconf_bool,CONFIG_PACKAGE_frr-isisd,isisd) \
- 	$(call autoconf_bool,CONFIG_PACKAGE_frr-ldpd,ldpd) \
- 	$(call autoconf_bool,CONFIG_PACKAGE_frr-nhrpd,nhrpd) \
-@@ -245,15 +267,15 @@ define Build/Configure
- 	$(call autoconf_bool,CONFIG_PACKAGE_frr-ospf6d,ospf6d) \
- 	$(call autoconf_bool,CONFIG_PACKAGE_frr-pbrd,pbrd) \
- 	$(call autoconf_bool,CONFIG_PACKAGE_frr-pimd,pimd) \
--	$(call autoconf_bool,CONFIG_PACKAGE_frr-staticd,staticd) \
- 	$(call autoconf_bool,CONFIG_PACKAGE_frr-ripd,ripd) \
- 	$(call autoconf_bool,CONFIG_PACKAGE_frr-ripngd,ripngd) \
+-	$(if $(CONFIG_FRR_OPENSSL),--with-crypto=openssl,) \
+-	$(foreach m,$(PKG_DAEMON_AVAILABLE), \
+-	$(call autoconf_bool,CONFIG_PACKAGE_frr-$(m),$(m)) ) \
++	$(call autoconf_bool,CONFIG_PACKAGE_frr-babeld,babeld) \
++	$(call autoconf_bool,CONFIG_PACKAGE_frr-bgpd,bgpd) \
++	$(call autoconf_bool,CONFIG_PACKAGE_frr-eigrpd,eigrpd) \
++	$(call autoconf_bool,CONFIG_PACKAGE_frr-isisd,isisd) \
++	$(call autoconf_bool,CONFIG_PACKAGE_frr-ldpd,ldpd) \
++	$(call autoconf_bool,CONFIG_PACKAGE_frr-nhrpd,nhrpd) \
++	$(call autoconf_bool,CONFIG_PACKAGE_frr-ospfd,ospfd) \
++	$(call autoconf_bool,CONFIG_PACKAGE_frr-ospf6d,ospf6d) \
++	$(call autoconf_bool,CONFIG_PACKAGE_frr-pbrd,pbrd) \
++	$(call autoconf_bool,CONFIG_PACKAGE_frr-pimd,pimd) \
++	$(call autoconf_bool,CONFIG_PACKAGE_frr-ripd,ripd) \
++	$(call autoconf_bool,CONFIG_PACKAGE_frr-ripngd,ripngd) \
 +	$(call autoconf_bool,CONFIG_PACKAGE_frr-staticd,staticd) \
  	$(call autoconf_bool,CONFIG_PACKAGE_frr-vtysh,vtysh) \
  	$(call autoconf_bool,CONFIG_PACKAGE_frr-libfrr,zebra) \
@@ -323,7 +369,7 @@ Index: build_dir/feeds/packages/net/frr/Makefile
  NUM_CORES ?= $(shell grep -c "vendor_id" /proc/cpuinfo)
  
  define Build/Compile
-@@ -262,122 +284,145 @@ endef
+@@ -192,54 +284,156 @@ endef
  
  define Package/frr/install
  	$(INSTALL_DIR) $(1)/usr/sbin
@@ -348,120 +394,109 @@ Index: build_dir/feeds/packages/net/frr/Makefile
 +	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/zebra.conf
  endef
  
- define Package/frr-babeld/install
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/babeld/.libs/babeld $(1)/usr/sbin/
--endef
--
--define Package/frr-bfdd/install
--	$(INSTALL_DIR) $(1)/usr/sbin
--	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/bfdd/.libs/bfdd $(1)/usr/sbin/
+-define Package/frr-libfrr/install
+-	$(INSTALL_DIR) $(1)/usr/lib
+-	$(CP) $(PKG_BUILD_DIR)/build/lib/.libs/libfrr.so* $(1)/usr/lib/
++define Package/frr-babeld/install
++	$(INSTALL_DIR) $(1)/usr/sbin
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/babeld/.libs/babeld $(1)/usr/sbin/
 +	$(INSTALL_DIR) $(1)/etc/frr
 +	chmod 0750 $(1)/etc/frr
 +	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/babeld.conf
- endef
- 
- define Package/frr-bgpd/install
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/bgpd/.libs/bgpd $(1)/usr/sbin/
++endef
++
++define Package/frr-bgpd/install
++	$(INSTALL_DIR) $(1)/usr/sbin
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/bgpd/.libs/bgpd $(1)/usr/sbin/
 +	$(INSTALL_DIR) $(1)/etc/frr
 +	chmod 0750 $(1)/etc/frr
 +	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/bgpd.conf
- endef
- 
- define Package/frr-eigrpd/install
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/eigrpd/.libs/eigrpd $(1)/usr/sbin/
--endef
--
--define Package/frr-fabricd/install
--	$(INSTALL_DIR) $(1)/usr/sbin
--	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/isisd/.libs/fabricd $(1)/usr/sbin/
++endef
++
++define Package/frr-eigrpd/install
++	$(INSTALL_DIR) $(1)/usr/sbin
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/eigrpd/.libs/eigrpd $(1)/usr/sbin/
 +	$(INSTALL_DIR) $(1)/etc/frr
 +	chmod 0750 $(1)/etc/frr
 +	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/eigrpd.conf
- endef
- 
- define Package/frr-isisd/install
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/isisd/.libs/isisd $(1)/usr/sbin/
++endef
++
++define Package/frr-isisd/install
++	$(INSTALL_DIR) $(1)/usr/sbin
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/isisd/.libs/isisd $(1)/usr/sbin/
 +	$(INSTALL_DIR) $(1)/etc/frr
 +	chmod 0750 $(1)/etc/frr
 +	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/isisd.conf
- endef
- 
- define Package/frr-ldpd/install
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ldpd/.libs/ldpd $(1)/usr/sbin/
++endef
++
++define Package/frr-ldpd/install
++	$(INSTALL_DIR) $(1)/usr/sbin
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ldpd/.libs/ldpd $(1)/usr/sbin/
 +	$(INSTALL_DIR) $(1)/etc/frr
 +	chmod 0750 $(1)/etc/frr
 +	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/ldpd.conf
- endef
- 
- define Package/frr-nhrpd/install
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/nhrpd/.libs/nhrpd $(1)/usr/sbin/
++endef
++
++define Package/frr-nhrpd/install
++	$(INSTALL_DIR) $(1)/usr/sbin
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/nhrpd/.libs/nhrpd $(1)/usr/sbin/
 +	$(INSTALL_DIR) $(1)/etc/frr
 +	chmod 0750 $(1)/etc/frr
 +	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/nhrpd.conf
- endef
- 
- define Package/frr-ospfd/install
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ospfd/.libs/ospfd $(1)/usr/sbin/
-+	$(INSTALL_DIR) $(1)/etc/frr
-+	chmod 0750 $(1)/etc/frr
++endef
++
++define Package/frr-ospfd/install
++	$(INSTALL_DIR) $(1)/usr/sbin
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ospfd/.libs/ospfd $(1)/usr/sbin/
+ 	$(INSTALL_DIR) $(1)/etc/frr
+ 	chmod 0750 $(1)/etc/frr
+-	$(INSTALL_CONF) ./files/{frr.conf,daemons} $(1)/etc/frr/
 +	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/ospfd.conf
- endef
- 
- define Package/frr-ospf6d/install
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ospf6d/.libs/ospf6d $(1)/usr/sbin/
++endef
++
++define Package/frr-ospf6d/install
++	$(INSTALL_DIR) $(1)/usr/sbin
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ospf6d/.libs/ospf6d $(1)/usr/sbin/
 +	$(INSTALL_DIR) $(1)/etc/frr
 +	chmod 0750 $(1)/etc/frr
 +	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/ospf6d.conf
- endef
- 
- define Package/frr-pbrd/install
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/pbrd/.libs/pbrd $(1)/usr/sbin/
++endef
++
++define Package/frr-pbrd/install
++	$(INSTALL_DIR) $(1)/usr/sbin
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/pbrd/.libs/pbrd $(1)/usr/sbin/
 +	$(INSTALL_DIR) $(1)/etc/frr
 +	chmod 0750 $(1)/etc/frr
 +	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/pbrd.conf
- endef
- 
- define Package/frr-pimd/install
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/pimd/.libs/pimd $(1)/usr/sbin/
++endef
++
++define Package/frr-pimd/install
++	$(INSTALL_DIR) $(1)/usr/sbin
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/pimd/.libs/pimd $(1)/usr/sbin/
 +	$(INSTALL_DIR) $(1)/etc/frr
 +	chmod 0750 $(1)/etc/frr
 +	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/pimd.conf
- endef
- 
- define Package/frr-ripd/install
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ripd/.libs/ripd $(1)/usr/sbin/
++endef
++
++define Package/frr-ripd/install
++	$(INSTALL_DIR) $(1)/usr/sbin
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ripd/.libs/ripd $(1)/usr/sbin/
 +	$(INSTALL_DIR) $(1)/etc/frr
 +	chmod 0750 $(1)/etc/frr
 +	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/ripd.conf
- endef
- 
- define Package/frr-ripngd/install
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ripngd/.libs/ripngd $(1)/usr/sbin/
++endef
++
++define Package/frr-ripngd/install
++	$(INSTALL_DIR) $(1)/usr/sbin
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/ripngd/.libs/ripngd $(1)/usr/sbin/
 +	$(INSTALL_DIR) $(1)/etc/frr
 +	chmod 0750 $(1)/etc/frr
 +	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/ripngd.conf
- endef
- 
- define Package/frr-staticd/install
- 	$(INSTALL_DIR) $(1)/usr/sbin
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/staticd/.libs/staticd $(1)/usr/sbin/
--endef
--
--define Package/frr-vrrpd/install
--	$(INSTALL_DIR) $(1)/usr/sbin
--	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/vrrpd/.libs/vrrpd $(1)/usr/sbin/
++endef
++
++define Package/frr-staticd/install
++	$(INSTALL_DIR) $(1)/usr/sbin
++	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build/staticd/.libs/staticd $(1)/usr/sbin/
 +	$(INSTALL_DIR) $(1)/etc/frr
 +	chmod 0750 $(1)/etc/frr
 +	$(INSTALL_CONF) ./files/frr.conf $(1)/etc/frr/staticd.conf
@@ -473,26 +508,49 @@ Index: build_dir/feeds/packages/net/frr/Makefile
 +	$(INSTALL_DIR) $(1)/etc/frr
 +	chmod 0750 $(1)/etc/frr
 +	$(INSTALL_CONF) ./files/vtysh.conf $(1)/etc/frr/vtysh.conf
- endef
- 
- define Package/frr-libfrr/install
- 	$(INSTALL_DIR) $(1)/usr/lib
- 	$(CP) $(PKG_BUILD_DIR)/build/lib/.libs/libfrr.so* $(1)/usr/lib/
--	$(INSTALL_DIR) $(1)/etc/frr
--	chmod 0750 $(1)/etc/frr
--	$(INSTALL_CONF) ./files/{frr.conf,daemons} $(1)/etc/frr/
++endef
++
++define Package/frr-libfrr/install
++	$(INSTALL_DIR) $(1)/usr/lib
++	$(CP) $(PKG_BUILD_DIR)/build/lib/.libs/libfrr.so* $(1)/usr/lib/
  endef
  
 -$(eval $(call HostBuild))
  $(eval $(call BuildPackage,frr))
- $(eval $(call BuildPackage,frr-babeld))
--$(eval $(call BuildPackage,frr-bfdd))
- $(eval $(call BuildPackage,frr-bgpd))
- $(eval $(call BuildPackage,frr-eigrpd))
--$(eval $(call BuildPackage,frr-fabricd))
- $(eval $(call BuildPackage,frr-isisd))
- $(eval $(call BuildPackage,frr-ldpd))
++$(eval $(call BuildPackage,frr-babeld))
++$(eval $(call BuildPackage,frr-bgpd))
++$(eval $(call BuildPackage,frr-eigrpd))
++$(eval $(call BuildPackage,frr-isisd))
++$(eval $(call BuildPackage,frr-ldpd))
  $(eval $(call BuildPackage,frr-libfrr))
++$(eval $(call BuildPackage,frr-nhrpd))
++$(eval $(call BuildPackage,frr-ospfd))
++$(eval $(call BuildPackage,frr-ospf6d))
++$(eval $(call BuildPackage,frr-pbrd))
++$(eval $(call BuildPackage,frr-pimd))
++$(eval $(call BuildPackage,frr-ripd))
++$(eval $(call BuildPackage,frr-ripngd))
++$(eval $(call BuildPackage,frr-staticd))
++$(eval $(call BuildPackage,frr-vtysh))
+ $(eval $(call BuildPackage,frr-watchfrr))
+ $(eval $(call BuildPackage,frr-zebra))
+-$(eval $(call BuildPackage,frr-vtysh))
+-$(eval $(call BuildDaemon,babeld,))
+-$(eval $(call BuildDaemon,bfdd,))
+-$(eval $(call BuildDaemon,bgpd,))
+-$(eval $(call BuildDaemon,eigrpd,))
+-$(eval $(call BuildDaemon,fabricd,))
+-$(eval $(call BuildDaemon,isisd,))
+-$(eval $(call BuildDaemon,ldpd,))
+-$(eval $(call BuildDaemon,nhrpd,+libcares))
+-$(eval $(call BuildDaemon,ospfd,))
+-$(eval $(call BuildDaemon,ospf6d,@IPV6))
+-$(eval $(call BuildDaemon,pbrd,))
+-$(eval $(call BuildDaemon,pimd,))
+-$(eval $(call BuildDaemon,ripd,))
+-$(eval $(call BuildDaemon,ripngd,@IPV6))
+-$(eval $(call BuildDaemon,staticd,))
+-$(eval $(call BuildDaemon,vrrpd,))
 Index: build_dir/feeds/packages/net/frr/files/daemons
 ===================================================================
 --- build_dir.orig/feeds/packages/net/frr/files/daemons
@@ -1144,7 +1202,7 @@ Index: build_dir/feeds/packages/net/frr/files/frrcommon.sh
 -	daemon_prep "$daemon" "$inst" || return 1
 -	if test ! -d "$V_PATH"; then
 -		mkdir -p "$V_PATH"
--		chown frr "$V_PATH"
+-		chown $FRR_USER "$V_PATH"
 -	fi
 -
 -	eval wrap="\$${daemon}_wrap"
@@ -1385,3 +1443,691 @@ Index: build_dir/feeds/packages/net/frr/files/watchfrr.sh
 -chownfrr $V_PATH
 -
 -frrcommon_main "$@"
+Index: build_dir/feeds/packages/net/frr/Config.in
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/Config.in
++++ /dev/null
+@@ -1,18 +0,0 @@
+-
+-if PACKAGE_frr
+-comment "SSL support"
+-
+-choice
+-        prompt "Selected SSL MD5 library"
+-        default FRR_INTERNAL
+-
+-        config FRR_OPENSSL
+-                bool "OpenSSL"
+-
+-        config FRR_INTERNAL
+-                bool "internal SSL support"
+-endchoice
+-
+-comment Packages
+-
+-endif
+Index: build_dir/feeds/packages/net/frr/files/frrcommon.sh.rej
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/files/frrcommon.sh.rej
++++ /dev/null
+@@ -1,338 +0,0 @@
+---- feeds/packages/net/frr/files/frrcommon.sh
+-+++ /dev/null
+-@@ -1,335 +0,0 @@
+--#!/bin/sh
+--#
+--#
+--# This is a "library" of sorts for use by the other FRR shell scripts.  It
+--# has most of the daemon start/stop logic, but expects the following shell
+--# functions/commands to be provided by the "calling" script:
+--#
+--#   log_success_msg
+--#   log_warning_msg
+--#   log_failure_msg
+--#
+--# (coincidentally, these are LSB standard functions.)
+--#
+--# Sourcing this file in a shell script will load FRR config variables but
+--# not perform any action.  Note there is an "exit 1" if the main config
+--# file does not exist.
+--#
+--# This script should be installed in  /usr/sbin/frrcommon.sh
+--
+--PATH=/bin:/usr/bin:/sbin:/usr/sbin
+--D_PATH="/usr/sbin" # /usr/lib/frr
+--C_PATH="/etc/frr" # /etc/frr
+--V_PATH="/var/run/frr" # /var/run/frr
+--VTYSH="/usr/bin/vtysh" # /usr/bin/vtysh
+--FRR_USER="network" # frr
+--FRR_GROUP="network" # frr
+--FRR_VTY_GROUP="" # frrvty
+--
+--# ORDER MATTERS FOR $DAEMONS!
+--# - keep zebra first
+--# - watchfrr does NOT belong in this list
+--
+--DAEMONS="zebra bgpd ripd ripngd ospfd ospf6d isisd babeld pimd ldpd nhrpd eigrpd sharpd pbrd staticd bfdd fabricd vrrpd"
+--RELOAD_SCRIPT="$D_PATH/frr-reload.py"
+--
+--#
+--# general helpers
+--#
+--
+--debug() {
+--	[ -n "$watchfrr_debug" ] || return 0
+--
+--	printf '%s %s(%s):' "`date +%Y-%m-%dT%H:%M:%S.%N`" "$0" $$ >&2
+--	# this is to show how arguments are split regarding whitespace & co.
+--	# (e.g. for use with `debug "message" "$@"`)
+--	while [ $# -gt 0 ]; do
+--		printf ' "%s"' "$1" >&2
+--		shift
+--	done
+--	printf '\n' >&2
+--}
+--
+--chownfrr() {
+--	[ -n "$FRR_USER" ] && chown "$FRR_USER" "$1"
+--	[ -n "$FRR_GROUP" ] && chgrp "$FRR_GROUP" "$1"
+--}
+--
+--vtysh_b () {
+--	[ "$1" = "watchfrr" ] && return 0
+--	[ -r "$C_PATH/frr.conf" ] || return 0
+--	if [ -n "$1" ]; then
+--		"$VTYSH" -b -n -d "$1"
+--	else
+--		"$VTYSH" -b -n
+--	fi
+--}
+--
+--daemon_inst() {
+--	# note this sets global variables ($dmninst, $daemon, $inst)
+--	dmninst="$1"
+--	daemon="${dmninst%-*}"
+--	inst=""
+--	[ "$daemon" != "$dmninst" ] && inst="${dmninst#*-}"
+--}
+--
+--daemon_list() {
+--	# note $1 and $2 specify names for global variables to be set
+--	local enabled disabled evar dvar
+--	enabled=""
+--	disabled=""
+--	evar="$1"
+--	dvar="$2"
+--
+--	for daemon in $DAEMONS; do
+--		eval cfg=\$$daemon
+--		eval inst=\$${daemon}_instances
+--		[ "$daemon" = zebra -o "$daemon" = staticd ] && cfg=yes
+--		if [ -n "$cfg" -a "$cfg" != "no" -a "$cfg" != "0" ]; then
+--			if ! daemon_prep "$daemon" "$inst"; then
+--				continue
+--			fi
+--			debug "$daemon enabled"
+--			enabled="$enabled $daemon"
+--			if [ -n "$inst" ]; then
+--				debug "$daemon multi-instance $inst"
+--				oldifs="${IFS}"
+--				IFS="${IFS},"
+--				for i in $inst; do
+--					enabled="$enabled $daemon-$i"
+--				done
+--				IFS="${oldifs}"
+--			fi
+--		else
+--			debug "$daemon disabled"
+--			disabled="$disabled $daemon"
+--		fi
+--	done
+--
+--	enabled="${enabled# }"
+--	disabled="${disabled# }"
+--	[ -z "$evar" ] && echo "$enabled"
+--	[ -n "$evar" ] && eval $evar="\"$enabled\""
+--	[ -n "$dvar" ] && eval $dvar="\"$disabled\""
+--}
+--
+--#
+--# individual daemon management
+--#
+--
+--daemon_prep() {
+--	local daemon inst cfg
+--	daemon="$1"
+--	inst="$2"
+--	[ "$daemon" = "watchfrr" ] && return 0
+--	[ -x "$D_PATH/$daemon" ] || {
+--		log_failure_msg "cannot start $daemon${inst:+ (instance $inst)}: daemon binary not installed"
+--		return 1
+--	}
+--	[ -r "$C_PATH/frr.conf" ] && return 0
+--
+--	cfg="$C_PATH/$daemon${inst:+-$inst}.conf"
+--	if [ ! -r "$cfg" ]; then
+--		touch "$cfg"
+--		chownfrr "$cfg"
+--	fi
+--	return 0
+--}
+--
+--daemon_start() {
+--	local dmninst daemon inst args instopt wrap bin
+--	daemon_inst "$1"
+--
+--	ulimit -n $MAX_FDS > /dev/null 2> /dev/null
+--	daemon_prep "$daemon" "$inst" || return 1
+--	if test ! -d "$V_PATH"; then
+--		mkdir -p "$V_PATH"
+--		chown frr "$V_PATH"
+--	fi
+--
+--	eval wrap="\$${daemon}_wrap"
+--	bin="$D_PATH/$daemon"
+--	instopt="${inst:+-n $inst}"
+--	eval args="\$${daemon}_options"
+--
+--	if eval "$all_wrap $wrap $bin -d $instopt $args"; then
+--		log_success_msg "Started $dmninst"
+--		vtysh_b "$daemon"
+--	else
+--		log_failure_msg "Failed to start $dmninst!"
+--	fi
+--}
+--
+--daemon_stop() {
+--	local dmninst daemon inst pidfile vtyfile pid cnt fail
+--	daemon_inst "$1"
+--
+--	pidfile="$V_PATH/$daemon${inst:+-$inst}.pid"
+--	vtyfile="$V_PATH/$daemon${inst:+-$inst}.vty"
+--
+--	[ -r "$pidfile" ] || fail="pid file not found"
+--	[ -z "$fail" ] && pid="`cat \"$pidfile\"`"
+--	[ -z "$fail" -a -z "$pid" ] && fail="pid file is empty"
+--	[ -n "$fail" ] || kill -0 "$pid" 2>/dev/null || fail="pid $pid not running"
+--
+--	if [ -n "$fail" ]; then
+--		log_failure_msg "Cannot stop $dmninst: $fail"
+--		return 1
+--	fi
+--
+--	debug "kill -2 $pid"
+--	kill -2 "$pid"
+--	cnt=1200
+--	while kill -0 "$pid" 2>/dev/null; do
+--		sleep 1
+--		[ $(( cnt -= 1 )) -gt 0 ] || break
+--	done
+--	if kill -0 "$pid" 2>/dev/null; then
+--		log_failure_msg "Failed to stop $dmninst, pid $pid still running"
+--		still_running=1
+--		return 1
+--	else
+--		log_success_msg "Stopped $dmninst"
+--		rm -f "$pidfile"
+--		return 0
+--	fi
+--}
+--
+--daemon_status() {
+--	local dmninst daemon inst pidfile pid fail
+--	daemon_inst "$1"
+--
+--	pidfile="$V_PATH/$daemon${inst:+-$inst}.pid"
+--
+--	[ -r "$pidfile" ] || return 3
+--	pid="`cat \"$pidfile\"`"
+--	[ -z "$pid" ] && return 1
+--	kill -0 "$pid" 2>/dev/null || return 1
+--	return 0
+--}
+--
+--print_status() {
+--	daemon_status "$1"
+--	rv=$?
+--	if [ "$rv" -eq 0 ]; then
+--		log_success_msg "Status of $1: running"
+--	else
+--		log_failure_msg "Status of $1: FAILED"
+--	fi
+--	return $rv
+--}
+--
+--#
+--# all-daemon commands
+--#
+--
+--all_start() {
+--	daemon_list daemons
+--	for dmninst in $daemons; do
+--		daemon_start "$dmninst"
+--	done
+--}
+--
+--all_stop() {
+--	local pids reversed
+--
+--	daemon_list daemons disabled
+--	[ "$1" = "--reallyall" ] && daemons="$daemons $disabled"
+--
+--	reversed=""
+--	for dmninst in $daemons; do
+--		reversed="$dmninst $reversed"
+--	done
+--
+--	for dmninst in $reversed; do
+--		daemon_stop "$dmninst" &
+--		pids="$pids $!"
+--	done
+--	for pid in $pids; do
+--		wait $pid
+--	done
+--}
+--
+--all_status() {
+--	local fail
+--
+--	daemon_list daemons
+--	fail=0
+--	for dmninst in $daemons; do
+--		print_status "$dmninst" || fail=1
+--	done
+--	return $fail
+--}
+--
+--#
+--# config sourcing
+--#
+--
+--load_old_config() {
+--	oldcfg="$1"
+--	[ -r "$oldcfg" ] || return 0
+--	[ -s "$oldcfg" ] || return 0
+--	grep -v '^[[:blank:]]*\(#\|$\)' "$oldcfg" > /dev/null || return 0
+--
+--	log_warning_msg "Reading deprecated $oldcfg.  Please move its settings to $C_PATH/daemons and remove it."
+--
+--	# save off settings from daemons for the OR below
+--	for dmn in $DAEMONS; do eval "_new_$dmn=\${$dmn:-no}"; done
+--
+--	. "$oldcfg"
+--
+--	# OR together the daemon enabling options between config files
+--	for dmn in $DAEMONS; do eval "test \$_new_$dmn != no && $dmn=\$_new_$dmn; unset _new_$dmn"; done
+--}
+--
+--[ -r "$C_PATH/daemons" ] || {
+--	log_failure_msg "cannot run $@: $C_PATH/daemons does not exist"
+--	exit 1
+--}
+--. "$C_PATH/daemons"
+--
+--load_old_config "$C_PATH/daemons.conf"
+--load_old_config "/etc/default/frr"
+--load_old_config "/etc/sysconfig/frr"
+--
+--if { declare -p watchfrr_options 2>/dev/null || true; } | grep -q '^declare \-a'; then
+--	log_warning_msg "watchfrr_options contains a bash array value." \
+--		"The configured value is intentionally ignored since it is likely wrong." \
+--		"Please remove or fix the setting."
+--	unset watchfrr_options
+--fi
+--
+--#
+--# other defaults and dispatch
+--#
+--
+--frrcommon_main() {
+--	local cmd
+--
+--	debug "frrcommon_main" "$@"
+--
+--	cmd="$1"
+--	shift
+--
+--	if [ "$1" = "all" -o -z "$1" ]; then
+--		case "$cmd" in
+--		start)	all_start;;
+--		stop)	all_stop;;
+--		restart)
+--			all_stop
+--			all_start
+--			;;
+--		*)	$cmd "$@";;
+--		esac
+--	else
+--		case "$cmd" in
+--		start)	daemon_start "$@";;
+--		stop)	daemon_stop "$@";;
+--		restart)
+--			daemon_stop "$@"
+--			daemon_start "$@"
+--			;;
+--		*)	$cmd "$@";;
+--		esac
+--	fi
+--}
+Index: build_dir/feeds/packages/net/frr/patches/001-vti_interface_fix.patch
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/patches/001-vti_interface_fix.patch
++++ /dev/null
+@@ -1,26 +0,0 @@
+---- a/zebra/zebra_nhg.c	2019-10-18 01:59:17.582282539 +0300
+-+++ b/zebra/zebra_nhg.c	2019-10-18 02:00:17.501997253 +0300
+-@@ -253,20 +253,9 @@
+- 	while (rn) {
+- 		route_unlock_node(rn);
+- 
+--		/* Lookup should halt if we've matched against ourselves ('top',
+--		 * if specified) - i.e., we cannot have a nexthop NH1 is
+--		 * resolved by a route NH1. The exception is if the route is a
+--		 * host route.
+--		 */
+--		if (top && rn == top)
+--			if (((afi == AFI_IP) && (rn->p.prefixlen != 32))
+--			    || ((afi == AFI_IP6) && (rn->p.prefixlen != 128))) {
+--				if (IS_ZEBRA_DEBUG_RIB_DETAILED)
+--					zlog_debug(
+--						"\t%s: Matched against ourself and prefix length is not max bit length",
+--						__PRETTY_FUNCTION__);
+--				return 0;
+--			}
+-+		/* If lookup self prefix return immediately. */
+-+		if (rn == top)
+-+		    return 0;
+- 
+- 		/* Pick up selected route. */
+- 		/* However, do not resolve over default route unless explicitly
+Index: build_dir/feeds/packages/net/frr/patches/002-bgp_clippy_typo.patch
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/patches/002-bgp_clippy_typo.patch
++++ /dev/null
+@@ -1,11 +0,0 @@
+---- a/bgpd/bgp_bmp.c	2019-10-19 00:10:05.038017045 +0300
+-+++ b/bgpd/bgp_bmp.c	2019-10-19 00:10:46.661847536 +0300
+-@@ -1762,7 +1762,7 @@
+- #define BMP_STR "BGP Monitoring Protocol\n"
+- 
+- #ifndef VTYSH_EXTRACT_PL
+--#include "bgp_bmp_clippy.c"
+-+#include "bgpd/bgp_bmp_clippy.c"
+- #endif
+- 
+- DEFPY_NOSH(bmp_targets_main,
+Index: build_dir/feeds/packages/net/frr/patches/003-corss_cares_fix.patch
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/patches/003-corss_cares_fix.patch
++++ /dev/null
+@@ -1,53 +0,0 @@
+-From 2163a630eb737b9afe3277dccf44070ef55dea12 Mon Sep 17 00:00:00 2001
+-From: Lucian Cristian <lucian.cristian@gmail.com>
+-Date: Fri, 13 Sep 2019 07:12:34 +0300
+-Subject: [PATCH] clippy: CARES fail only if !enable_clippy_only test for CARES
+- otherwise config will fail with conditional "CARES" not defined
+-
+-Signed-off-by: Lucian Cristian <lucian.cristian@gmail.com>
+----
+- configure.ac | 14 ++++++++------
+- 1 file changed, 8 insertions(+), 6 deletions(-)
+-
+-diff --git a/configure.ac b/configure.ac
+-index 6c1b35b5f2..9f37b3e9a9 100755
+---- a/configure.ac
+-+++ b/configure.ac
+-@@ -1452,6 +1452,12 @@ if test "x$enable_pcreposix" = "xyes"; then
+- fi
+- AC_SUBST([HAVE_LIBPCREPOSIX])
+- 
+-+dnl ##########################################################################
+-+dnl test "${enable_clippy_only}" != "yes"
+-+fi
+-+dnl END OF LARGE if block
+-+dnl ##########################################################################
+-+
+- dnl ------------------
+- dnl check C-Ares library
+- dnl ------------------
+-@@ -1462,12 +1468,6 @@ PKG_CHECK_MODULES([CARES], [libcares], [
+- ])
+- AM_CONDITIONAL([CARES], [$c_ares_found])
+- 
+--dnl ##########################################################################
+--dnl test "${enable_clippy_only}" != "yes"
+--fi
+--dnl END OF LARGE if block
+--dnl ##########################################################################
+--
+- 
+- dnl ----------------------------------------------------------------------------
+- dnl figure out if domainname is available in the utsname struct (GNU extension).
+-@@ -1535,9 +1535,11 @@ case "$host_os" in
+-       no)
+-         ;;
+-       yes)
+-+	if test "${enable_clippy_only}" != "yes"; then
+-         if test "$c_ares_found" != "true" ; then
+-           AC_MSG_ERROR([nhrpd requires libcares.  Please install c-ares and its -dev headers.])
+-         fi
+-+	fi
+-         NHRPD="nhrpd"
+-         ;;
+-       *)
+Index: build_dir/feeds/packages/net/frr/patches/004-cross_libcap_fix.patch
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/patches/004-cross_libcap_fix.patch
++++ /dev/null
+@@ -1,27 +0,0 @@
+-From 2cd3abe419dab2ee32227c0870f96f805d870fe6 Mon Sep 17 00:00:00 2001
+-From: Lucian Cristian <lucian.cristian@gmail.com>
+-Date: Fri, 13 Sep 2019 07:16:18 +0300
+-Subject: [PATCH] clippy: fail libcap test only when !enable_clippy_only when
+- building native clippy we don't need libcap
+-
+-Signed-off-by: Lucian Cristian <lucian.cristian@gmail.com>
+----
+- configure.ac | 2 ++
+- 1 file changed, 2 insertions(+)
+-
+-diff --git a/configure.ac b/configure.ac
+-index 9f37b3e9a9..be3a9c763d 100755
+---- a/configure.ac
+-+++ b/configure.ac
+-@@ -2043,9 +2043,11 @@ if test "${enable_capabilities}" != "no"; then
+- 
+-   case "$host_os" in
+-   linux*)
+-+    if test "${enable_clippy_only}" != "yes"; then
+-     if test "$frr_ac_lcaps" != "yes"; then
+-       AC_MSG_ERROR([libcap and/or its headers were not found.  Running FRR without libcap support built in causes a huge performance penalty.])
+-     fi
+-+    fi
+-     ;;
+-   esac
+- else
+Index: build_dir/feeds/packages/net/frr/patches/005-fix_OSPF_BFD.patch
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/patches/005-fix_OSPF_BFD.patch
++++ /dev/null
+@@ -1,71 +0,0 @@
+-From eb3e472904e30f35825f08319608217082d4af21 Mon Sep 17 00:00:00 2001
+-From: Radhika Mahankali <radhika@cumulusnetworks.com>
+-Date: Mon, 9 Apr 2018 15:30:32 -0700
+-Subject: [PATCH] ospf: BFD down not tearing down OSPF adjacency for
+- point-to-point network
+-MIME-Version: 1.0
+-Content-Type: text/plain; charset=UTF-8
+-Content-Transfer-Encoding: 8bit
+-
+-Root Cause:
+-Lookup for the point-to-point neighbor was failing because the neighbor
+-lookup was based on neighbor interface IP address. But, for point-to-point
+-neighbor the key is router-id for lookup. Lookup failure was causing the
+-BFD updates from PTM to get dropped.
+-
+-Fix:
+-Added walk of the neighbor list if the network type is point-to-point to
+-find the appropriate neighbor. The match is based on source IP address of
+-the neighbor since that’s the address registered with BFD for monitoring.
+-
+-Ticket: CM-20411
+-Signed-off-by: Radhika Mahankali <radhika@cumulusnetworks.com>
+----
+- ospfd/ospf_bfd.c | 26 ++++++++++++++++++++++++--
+- 1 file changed, 24 insertions(+), 2 deletions(-)
+-
+-diff --git a/ospfd/ospf_bfd.c b/ospfd/ospf_bfd.c
+-index a17975270a..05ec4991e5 100644
+---- a/ospfd/ospf_bfd.c
+-+++ b/ospfd/ospf_bfd.c
+-@@ -202,8 +202,9 @@ static int ospf_bfd_interface_dest_update(ZAPI_CALLBACK_ARGS)
+- 	struct interface *ifp;
+- 	struct ospf_interface *oi;
+- 	struct ospf_if_params *params;
+--	struct ospf_neighbor *nbr;
+-+	struct ospf_neighbor *nbr = NULL;
+- 	struct route_node *node;
+-+	struct route_node *n_node;
+- 	struct prefix p;
+- 	int status;
+- 	int old_status;
+-@@ -231,7 +232,28 @@ static int ospf_bfd_interface_dest_update(ZAPI_CALLBACK_ARGS)
+- 		if ((oi = node->info) == NULL)
+- 			continue;
+- 
+--		nbr = ospf_nbr_lookup_by_addr(oi->nbrs, &p.u.prefix4);
+-+		/* walk the neighbor list for point-to-point network */
+-+		if (oi->type == OSPF_IFTYPE_POINTOPOINT) {
+-+			for (n_node = route_top(oi->nbrs); n_node;
+-+				n_node = route_next(n_node)) {
+-+				nbr = n_node->info;
+-+				if (nbr) {
+-+					/* skip myself */
+-+					if (nbr == oi->nbr_self) {
+-+						nbr = NULL;
+-+						continue;
+-+					}
+-+
+-+					/* Found the matching neighbor */
+-+					if (nbr->src.s_addr ==
+-+						p.u.prefix4.s_addr)
+-+						break;
+-+				}
+-+			}
+-+		} else {
+-+			nbr = ospf_nbr_lookup_by_addr(oi->nbrs, &p.u.prefix4);
+-+		}
+-+
+- 		if (!nbr || !nbr->bfd_info)
+- 			continue;
+- 
+Index: build_dir/feeds/packages/net/frr/patches/006-Revert_usage_of_asm-code.patch
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/patches/006-Revert_usage_of_asm-code.patch
++++ /dev/null
+@@ -1,71 +0,0 @@
+-From 4d8ebeddc56f49aa0b4d7cec506cab14320e1bb4 Mon Sep 17 00:00:00 2001
+-From: Juergen Werner <juergen@opensourcerouting.org>
+-Date: Tue, 1 Oct 2019 14:24:20 +0200
+-Subject: [PATCH] lib: Revert usage of asm-code in MTYPE definitions
+-
+-The asm-code was interpreted inconsistently for different platforms.
+-In particular for AArch64 this caused UB, if multiple static MTYPEs
+-where defined in one file. All static MTYPE_* could point to the same
+-memory location (namely the first defined MTYPE) OR to their respective
+-(correct) locations depending on the context of their usage.
+-
+-Signed-off-by: Juergen Werner <juergen@opensourcerouting.org>
+----
+- doc/developer/memtypes.rst |  2 +-
+- lib/memory.h               | 16 ++++------------
+- 2 files changed, 5 insertions(+), 13 deletions(-)
+-
+-diff --git a/doc/developer/memtypes.rst b/doc/developer/memtypes.rst
+-index 13f6b43bbf..1af871963a 100644
+---- a/doc/developer/memtypes.rst
+-+++ b/doc/developer/memtypes.rst
+-@@ -48,7 +48,7 @@ Definition
+-    should be used to create these, but in some cases it is useful to pass a
+-    ``struct memtype *`` pointer to some helper function.
+- 
+--   The ``MTYPE_name`` created by the macros is declared as an array, i.e.
+-+   The ``MTYPE_name`` created by the macros is declared as a pointer, i.e.
+-    a function taking a ``struct memtype *`` argument can be called with an
+-    ``MTYPE_name`` argument (as opposed to ``&MTYPE_name``.)
+- 
+-diff --git a/lib/memory.h b/lib/memory.h
+-index 14cd76f2f5..8de5c4c2bf 100644
+---- a/lib/memory.h
+-+++ b/lib/memory.h
+-@@ -101,14 +101,9 @@ struct memgroup {
+- 		*_mg_##mname.ref = _mg_##mname.next;                           \
+- 	}
+- 
+--
+--/* the array is a trick to make the "MTYPE_FOO" name work as a pointer without
+-- * putting a & in front of it, so we can do "XMALLOC(MTYPE_FOO, ...)" instead
+-- * of "XMALLOC(&MTYPE_FOO, ...)".
+-- */
+- #define DECLARE_MTYPE(name)                                                    \
+- 	extern struct memtype _mt_##name;                                      \
+--	extern struct memtype MTYPE_##name[1];                                 \
+-+	extern struct memtype *const MTYPE_##name;                             \
+- 	/* end */
+- 
+- #define DEFINE_MTYPE_ATTR(group, mname, attr, desc)                            \
+-@@ -138,17 +133,14 @@ struct memgroup {
+- 	}                                                                      \
+- 	/* end */
+- 
+--/* can't quite get gcc to emit the alias correctly, so asm-alias it is :/ */
+- #define DEFINE_MTYPE(group, name, desc)                                        \
+- 	DEFINE_MTYPE_ATTR(group, name, , desc)                                 \
+--	__asm__(".equiv MTYPE_" #name ", _mt_" #name "\n\t"                    \
+--		".global MTYPE_" #name "\n");                                  \
+-+	struct memtype *const MTYPE_##name = &_mt_##name;                      \
+- 	/* end */
+--/* and this one's borked on clang, it drops static on aliases :/, so... asm */
+-+
+- #define DEFINE_MTYPE_STATIC(group, name, desc)                                 \
+- 	DEFINE_MTYPE_ATTR(group, name, static, desc)                           \
+--	extern struct memtype MTYPE_##name[1];                                 \
+--	__asm__(".equiv MTYPE_" #name ", _mt_" #name "\n");                    \
+-+	static struct memtype *const MTYPE_##name = &_mt_##name;               \
+- 	/* end */
+- 
+- DECLARE_MGROUP(LIB)
+Index: build_dir/feeds/packages/net/frr/patches/007-fix_memory_sanitizer_test.patch
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/patches/007-fix_memory_sanitizer_test.patch
++++ /dev/null
+@@ -1,28 +0,0 @@
+-From 65209e4fbf30d09dda89aa4b1d831461506848d7 Mon Sep 17 00:00:00 2001
+-From: Rafael Zalamena <rzalamena@opensourcerouting.org>
+-Date: Tue, 8 Oct 2019 20:47:38 -0300
+-Subject: [PATCH] configure.ac: fix memory sanitizer test
+-
+-We should test for `-fsanitize=memory` instead of `-fsanitize=thread`
+-when enabling memory sanitizer. While here, fix the error message.
+-
+-Signed-off-by: Rafael Zalamena <rzalamena@opensourcerouting.org>
+----
+- configure.ac | 4 ++--
+- 1 file changed, 2 insertions(+), 2 deletions(-)
+-
+-diff --git a/configure.ac b/configure.ac
+-index 88f1c4f627..730e2ae6f0 100755
+---- a/configure.ac
+-+++ b/configure.ac
+-@@ -328,8 +328,8 @@ if test "$enable_thread_sanitizer" = "yes"; then
+-   ])
+- fi
+- if test "$enable_memory_sanitizer" = "yes"; then
+--  AC_C_FLAG([-fsanitize=thread -fPIE -pie], [
+--    AC_MSG_ERROR([$CC does not support Thread Sanitizer.])
+-+  AC_C_FLAG([-fsanitize=memory -fPIE -pie], [
+-+    AC_MSG_ERROR([$CC does not support Memory Sanitizer.])
+-   ], [
+-     SAN_FLAGS="-fsanitize=memory -fPIE -pie"
+-   ])
