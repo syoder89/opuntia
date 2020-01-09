@@ -148,6 +148,69 @@ CONFIG_VERSION_PRODUCT="EV1000-LTE"
 CONFIG_VERSION_HWREV="4"
 
 #
+# Kernel build options for k3s
+#
+CONFIG_KERNEL_BLK_CGROUP=y
+CONFIG_KERNEL_CGROUPS=y
+CONFIG_KERNEL_NAMESPACES=y
+CONFIG_KERNEL_CGROUP_CPUACCT=y
+CONFIG_KERNEL_CGROUP_DEVICE=y
+CONFIG_KERNEL_CGROUP_FREEZER=y
+CONFIG_KERNEL_CGROUP_SCHED=y
+CONFIG_KERNEL_CPUSETS=y
+CONFIG_KERNEL_DEVPTS_MULTIPLE_INSTANCES=y
+CONFIG_KERNEL_FAIR_GROUP_SCHED=y
+CONFIG_KERNEL_FREEZER=y
+CONFIG_KERNEL_IOSCHED_DEADLINE=m
+CONFIG_KERNEL_IPC_NS=y
+CONFIG_KERNEL_KEYS=y
+# CONFIG_KERNEL_KALLSYMS is not set
+CONFIG_KERNEL_LXC_MISC=y
+CONFIG_KERNEL_MEMCG=y
+CONFIG_KERNEL_MEMCG_SWAP=y
+CONFIG_KERNEL_MM_OWNER=y
+CONFIG_KERNEL_NETPRIO_CGROUP=y
+CONFIG_KERNEL_NET_CLS_CGROUP=y
+CONFIG_KERNEL_NET_NS=y
+CONFIG_KERNEL_PID_NS=y
+CONFIG_KERNEL_POSIX_MQUEUE=y
+CONFIG_KERNEL_PROC_PID_CPUSET=y
+CONFIG_KERNEL_RESOURCE_COUNTERS=y
+CONFIG_KERNEL_SECCOMP=y
+CONFIG_KERNEL_SECCOMP_FILTER=y
+CONFIG_KERNEL_USER_NS=y
+CONFIG_KERNEL_UTS_NS=y
+CONFIG_KERNEL_AUFS_FS=y
+#
+# Package options for k3s
+#
+CONFIG_PACKAGE_ip-bridge=y
+CONFIG_PACKAGE_ip-full=y
+CONFIG_PACKAGE_ipset=y
+CONFIG_PACKAGE_iptables-mod-conntrack-extra=y
+CONFIG_PACKAGE_iptables-mod-extra=y
+CONFIG_PACKAGE_iptables-mod-ipopt=y
+CONFIG_PACKAGE_kmod-asn1-decoder=y
+CONFIG_PACKAGE_kmod-br-netfilter=y
+CONFIG_PACKAGE_kmod-ikconfig=y
+CONFIG_PACKAGE_kmod-ipt-conntrack-extra=y
+CONFIG_PACKAGE_kmod-ipt-extra=y
+CONFIG_PACKAGE_kmod-ipt-ipopt=y
+CONFIG_PACKAGE_kmod-ipt-ipset=y
+CONFIG_PACKAGE_kmod-ipt-raw=y
+CONFIG_PACKAGE_kmod-iptunnel=y
+CONFIG_PACKAGE_kmod-nf-conntrack-netlink=y
+CONFIG_PACKAGE_kmod-nf-ipvs=y
+CONFIG_PACKAGE_kmod-nfnetlink=y
+CONFIG_PACKAGE_kmod-nls-base=y
+CONFIG_PACKAGE_kmod-udptunnel4=y
+CONFIG_PACKAGE_kmod-udptunnel6=y
+CONFIG_PACKAGE_kmod-veth=y
+CONFIG_PACKAGE_kmod-vxlan=y
+CONFIG_PACKAGE_libnetfilter-conntrack=y
+CONFIG_PACKAGE_libnfnetlink=y
+
+#
 # ImageStream
 #
 # CONFIG_PACKAGE_gobi3k is not set
@@ -162,7 +225,6 @@ CONFIG_PACKAGE_imagestream-snmp-mibs=y
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs is not set
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs-i is not set
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs-i.v3 is not set
-# CONFIG_PACKAGE_imagestream-envoy-configs is not set
 CONFIG_PACKAGE_imagestream-envoy-lte-configs=y
 CONFIG_PACKAGE_imagestream-wifi-ap-bootstrap=y
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs.v3 is not set
@@ -182,11 +244,10 @@ CONFIG_PACKAGE_stats=y
 CONFIG_PACKAGE_kmod-ath10k-ct=y
 # CONFIG_PACKAGE_ath10k-firmware-qca988x is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca988x-ct is not set
-CONFIG_PACKAGE_ath10k-firmware-qca988x-ct-htt-beta=y
-
-CONFIG_PACKAGE_ath10k-firmware-qca9888-ct=y
-CONFIG_PACKAGE_ath10k-firmware-qca9984-ct=y
-CONFIG_PACKAGE_ath10k-firmware-qca99x0-ct=y
+CONFIG_PACKAGE_ath10k-firmware-qca9888-ct-htt=y
+CONFIG_PACKAGE_ath10k-firmware-qca988x-ct-htt=y
+CONFIG_PACKAGE_ath10k-firmware-qca9984-ct-htt=y
+CONFIG_PACKAGE_ath10k-firmware-qca99x0-ct-htt=y
 
 CONFIG_PACKAGE_kmod-usb-acm=y
 # CONFIG_PACKAGE_kmod-usb-atm is not set
@@ -268,6 +329,7 @@ CONFIG_PACKAGE_frr-isisd=y
 CONFIG_PACKAGE_frr-ospf6d=y
 CONFIG_PACKAGE_frr-ospfd=y
 CONFIG_PACKAGE_frr-vtysh=y
+CONFIG_PACKAGE_frr-staticd=y
 # CONFIG_PACKAGE_quagga is not set
 CONFIG_PACKAGE_conntrack=y
 CONFIG_PACKAGE_conntrackd=y
@@ -291,3 +353,29 @@ CONFIG_PACKAGE_comgt-ncm=y
 CONFIG_PACKAGE_usbutils=y
 CONFIG_PACKAGE_modemmanager=y
 CONFIG_PACKAGE_lldpd=y
+CONFIG_PACKAGE_wireguard=y
+CONFIG_PACKAGE_luci-proto-wireguard=y
+CONFIG_PACKAGE_luci-app-wireguard=y
+CONFIG_PACKAGE_libqrencode=y
+CONFIG_PACKAGE_qrencode=y
+CONFIG_PACKAGE_kmod-gpio-nct5104d=y
+
+CONFIG_PACKAGE_kmod-openvswitch=y
+CONFIG_PACKAGE_openvswitch=y
+CONFIG_PACKAGE_openvswitch-base=y
+CONFIG_PACKAGE_openvswitch-benchmark=y
+# CONFIG_PACKAGE_openvswitch-ipsec is not set
+CONFIG_PACKAGE_openvswitch-ovs-appctl=y
+CONFIG_PACKAGE_openvswitch-ovs-dpctl=y
+CONFIG_PACKAGE_openvswitch-ovs-ofctl=y
+CONFIG_PACKAGE_openvswitch-ovs-vsctl=y
+CONFIG_PACKAGE_openvswitch-ovsdb-client=y
+CONFIG_PACKAGE_kmod-openvswitch-vxlan=y
+# CONFIG_PACKAGE_openvswitch-python is not set
+CONFIG_PACKAGE_kmod-fs-ext4=y
+CONFIG_PACKAGE_kmod-fs-f2fs=y
+# CONFIG_PACKAGE_openssh-client is not set
+# CONFIG_PACKAGE_openssh-server is not set
+CONFIG_PACKAGE_e2fsprogs=y
+CONFIG_PACKAGE_f2fs-tools=y
+CONFIG_PACKAGE_f2fsck=y
