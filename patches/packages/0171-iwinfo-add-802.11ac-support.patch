@@ -1,27 +1,3 @@
-Index: build_dir/package/network/config/netifd/patches/002-initial-802.11ac-support.patch
-===================================================================
---- /dev/null
-+++ build_dir/package/network/config/netifd/patches/002-initial-802.11ac-support.patch
-@@ -0,0 +1,19 @@
-+Index: netifd-2019-04-15-666c14f9/scripts/netifd-wireless.sh
-+===================================================================
-+--- netifd-2019-04-15-666c14f9.orig/scripts/netifd-wireless.sh
-++++ netifd-2019-04-15-666c14f9/scripts/netifd-wireless.sh
-+@@ -65,12 +65,14 @@ _wdev_prepare_channel() {
-+ 		json_get_vars htmode
-+ 		case "$htmode" in
-+ 			HT20|HT40+|HT40-);;
-++			VHT20|VHT40|VHT80|VHT160);;
-+ 			*) htmode= ;;
-+ 		esac
-+ 	}
-+ 
-+ 	case "$hwmode" in
-+ 		a|b|g|ad) ;;
-++		ac) hwmode=a ;;
-+ 		*)
-+ 			if [ "$channel" -gt 14 ]; then
-+ 				hwmode=a
 Index: build_dir/package/network/utils/iwinfo/patches/001-initial-802.11ac-support.patch
 ===================================================================
 --- /dev/null

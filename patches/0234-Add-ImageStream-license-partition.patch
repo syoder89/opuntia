@@ -1,8 +1,8 @@
-Index: build_dir.ap3500/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
+Index: build_dir/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
 ===================================================================
---- build_dir.ap3500.orig/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
-+++ build_dir.ap3500/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
-@@ -133,15 +133,19 @@
+--- build_dir.orig/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
++++ build_dir/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
+@@ -132,15 +132,19 @@
  			partition@40000 {
  				compatible = "mikrotik,minor";
  				label = "firmware";
@@ -24,13 +24,13 @@ Index: build_dir.ap3500/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
 +	mtd-mac-address = <&imagestream 0x0010>;
  };
  
- 
-Index: build_dir.ap3500/target/linux/ramips/image/mt7621.mk
+ &state_default {
+Index: build_dir/target/linux/ramips/image/mt7621.mk
 ===================================================================
---- build_dir.ap3500.orig/target/linux/ramips/image/mt7621.mk
-+++ build_dir.ap3500/target/linux/ramips/image/mt7621.mk
-@@ -379,7 +379,7 @@ define Device/MikroTik
-   MTK_SOC := mt7621
+--- build_dir.orig/target/linux/ramips/image/mt7621.mk
++++ build_dir/target/linux/ramips/image/mt7621.mk
+@@ -451,7 +451,7 @@ define Device/MikroTik
+   SOC := mt7621
    DEVICE_VENDOR := MikroTik
    BLOCKSIZE := 64k
 -  IMAGE_SIZE := 16128k
@@ -38,20 +38,21 @@ Index: build_dir.ap3500/target/linux/ramips/image/mt7621.mk
    DEVICE_PACKAGES := kmod-usb3
    LOADER_TYPE := elf
    PLATFORM := mt7621
-Index: build_dir.ap3500/target/linux/ar71xx/image/generic.mk
+Index: build_dir/target/linux/ar71xx/image/generic.mk
 ===================================================================
---- build_dir.ap3500.orig/target/linux/ar71xx/image/generic.mk
-+++ build_dir.ap3500/target/linux/ar71xx/image/generic.mk
-@@ -1259,7 +1259,7 @@ TARGET_DEVICES += wlr8100
+--- build_dir.orig/target/linux/ar71xx/image/generic.mk
++++ build_dir/target/linux/ar71xx/image/generic.mk
+@@ -1259,8 +1259,8 @@ TARGET_DEVICES += wlr8100
  define Device/wpj-16m
    $(Device/CpxImageParams16M)
-   DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-usb-ledtrig-usbport
+   DEVICE_PACKAGES := kmod-usb2 kmod-usb-ledtrig-usbport
 -  MTDPARTS := spi0.0:192k(u-boot)ro,16128k(firmware),64k(art)ro
 -  IMAGE_SIZE := 16128k
 +  MTDPARTS := spi0.0:192k(u-boot)ro,16064k(firmware),64k@0xFE0000(imagestream),64k(art)ro
 +  IMAGE_SIZE := 16064k
    IMAGES := sysupgrade.bin factory.img
    IMAGE/sysupgrade.bin = append-kernel | pad-to $$$$(BLOCKSIZE) | append-rootfs | pad-rootfs | check-size $$$$(IMAGE_SIZE)
+   IMAGE/factory.img = Cpxfactory16M
 @@ -1269,19 +1269,15 @@ endef
  define Device/CpxImageParams16M
    KSTART := 30000
@@ -73,10 +74,10 @@ Index: build_dir.ap3500/target/linux/ar71xx/image/generic.mk
                  $@
  endef
  
-Index: build_dir.ap3500/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
+Index: build_dir/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
 ===================================================================
---- build_dir.ap3500.orig/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
-+++ build_dir.ap3500/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
+--- build_dir.orig/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
++++ build_dir/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
 @@ -8,6 +8,24 @@ PHYNBR=${DEVPATH##*/phy}
  
  . /lib/functions.sh
@@ -102,9 +103,9 @@ Index: build_dir.ap3500/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/1
  
  board=$(board_name)
  
-@@ -34,6 +52,19 @@ case "$board" in
- 		[ "$PHYNBR" -eq 1 ] && \
- 			echo $(mtd_get_mac_binary u-boot 188448) > /sys${DEVPATH}/macaddress
+@@ -19,6 +37,19 @@ case "$board" in
+ 	archer-c60-v2)
+ 		echo $(macaddr_add $(mtd_get_mac_binary mac 0x8)  $(($PHYNBR - 1)) ) > /sys${DEVPATH}/macaddress
  		;;
 +	wpj344|wpj558|wpj563)
 +		# Use our reserved MAC address instead of the card's MAC
@@ -122,10 +123,10 @@ Index: build_dir.ap3500/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/1
  	*)
  		;;
  esac
-Index: build_dir.ap3500/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
+Index: build_dir/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
 ===================================================================
---- build_dir.ap3500.orig/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
-+++ build_dir.ap3500/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
+--- build_dir.orig/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
++++ build_dir/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
 @@ -52,6 +52,8 @@
  
  #define WPJ558_MAC_OFFSET		0x10
@@ -169,10 +170,10 @@ Index: build_dir.ap3500/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
  
  	ath79_setup_qca955x_eth_cfg(QCA955X_ETH_CFG_RGMII_EN);
  
-Index: build_dir.ap3500/target/linux/ramips/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
+Index: build_dir/target/linux/ramips/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
 ===================================================================
 --- /dev/null
-+++ build_dir.ap3500/target/linux/ramips/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
++++ build_dir/target/linux/ramips/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
 @@ -0,0 +1,47 @@
 +#!/bin/ash
 +

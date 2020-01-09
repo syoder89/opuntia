@@ -1,7 +1,7 @@
-Index: build_dir.ap2100/target/linux/ath79/dts/qca9558_compex_wpj558.dts
+Index: build_dir/target/linux/ath79/dts/qca9558_compex_wpj558.dts
 ===================================================================
 --- /dev/null
-+++ build_dir.ap2100/target/linux/ath79/dts/qca9558_compex_wpj558.dts
++++ build_dir/target/linux/ath79/dts/qca9558_compex_wpj558.dts
 @@ -0,0 +1,152 @@
 +// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
 +/dts-v1/;
@@ -155,11 +155,11 @@ Index: build_dir.ap2100/target/linux/ath79/dts/qca9558_compex_wpj558.dts
 +        mtd-mac-address = <&uboot 0x2e010>;
 +        mtd-mac-address-increment = <3>;
 +};
-Index: build_dir.ap2100/target/linux/ath79/image/generic.mk
+Index: build_dir/target/linux/ath79/image/generic.mk
 ===================================================================
---- build_dir.ap2100.orig/target/linux/ath79/image/generic.mk
-+++ build_dir.ap2100/target/linux/ath79/image/generic.mk
-@@ -298,6 +298,74 @@ define Device/comfast_cf-wr650ac-v2
+--- build_dir.orig/target/linux/ath79/image/generic.mk
++++ build_dir/target/linux/ath79/image/generic.mk
+@@ -319,6 +319,74 @@ define Device/comfast_cf-wr650ac-v2
  endef
  TARGET_DEVICES += comfast_cf-wr650ac-v2
  
@@ -232,38 +232,12 @@ Index: build_dir.ap2100/target/linux/ath79/image/generic.mk
 +#TARGET_DEVICES += wpj563
 +
  define Device/devolo_dvl1200e
-   ATH_SOC := qca9558
+   SOC := qca9558
    DEVICE_VENDOR := devolo
-Index: build_dir.ap2100/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
-===================================================================
---- build_dir.ap2100.orig/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
-+++ build_dir.ap2100/target/linux/ath79/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
-@@ -34,6 +34,21 @@ case "$board" in
- 		[ "$PHYNBR" -eq 1 ] && \
- 			k2t_get_mac "lan_mac" > /sys${DEVPATH}/macaddress
- 		;;
-+	compex,wpj344)
-+		# Use our reserved MAC address instead of the card's MAC
-+		[ "$PHYNBR" -eq 1 ] && \
-+			echo $(mtd_get_mac_binary u-boot 188448) > /sys${DEVPATH}/macaddress
-+		;;
-+	compex,wpj558)
-+		# Use our reserved MAC address instead of the card's MAC
-+		[ "$PHYNBR" -eq 1 ] && \
-+			echo $(mtd_get_mac_binary u-boot 188448) > /sys${DEVPATH}/macaddress
-+		;;
-+	compex,wpj563)
-+		# Use our reserved MAC address instead of the card's MAC
-+		[ "$PHYNBR" -eq 1 ] && \
-+			echo $(mtd_get_mac_binary u-boot 188448) > /sys${DEVPATH}/macaddress
-+		;;
- 	trendnet,tew-823dru)
- 	        # set the 2.4G interface mac address to LAN MAC
- 	        [ "$PHYNBR" -eq 1 ] && \
-Index: build_dir.ap2100/target/linux/ath79/dts/compex_imagestream.dts
+Index: build_dir/target/linux/ath79/dts/compex_imagestream.dts
 ===================================================================
 --- /dev/null
-+++ build_dir.ap2100/target/linux/ath79/dts/compex_imagestream.dts
++++ build_dir/target/linux/ath79/dts/compex_imagestream.dts
 @@ -0,0 +1,155 @@
 +// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
 +/dts-v1/;

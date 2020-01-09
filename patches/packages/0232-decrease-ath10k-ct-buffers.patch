@@ -3,10 +3,10 @@ Index: build_dir/package/kernel/ath10k-ct/patches/1014-scott-ath10k-ct-reduce-nu
 --- /dev/null
 +++ build_dir/package/kernel/ath10k-ct/patches/1014-scott-ath10k-ct-reduce-num-buffs.patch
 @@ -0,0 +1,14 @@
-+Index: ath10k-ct-2018-11-02-6c3a6262/ath10k-4.19/hw.h
++Index: ath10k-ct-2018-11-02-6c3a6262/ath10k-5.2/hw.h
 +===================================================================
-+--- ath10k-ct-2018-11-02-6c3a6262.orig/ath10k-4.19/hw.h
-++++ ath10k-ct-2018-11-02-6c3a6262/ath10k-4.19/hw.h
++--- ath10k-ct-2018-11-02-6c3a6262.orig/ath10k-5.2/hw.h
+++++ ath10k-ct-2018-11-02-6c3a6262/ath10k-5.2/hw.h
 +@@ -709,7 +709,8 @@ ath10k_rx_desc_get_l3_pad_bytes(struct a
 + #define TARGET_10X_TX_DBG_LOG_SIZE		1024
 + #define TARGET_10X_RX_SKIP_DEFRAG_TIMEOUT_DUP_DETECTION_CHECK 1

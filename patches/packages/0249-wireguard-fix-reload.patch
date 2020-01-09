@@ -1,7 +1,7 @@
-Index: build_dir/package/network/services/wireguard/files/wireguard.sh
+Index: build_dir/package/network/utils/wireguard-tools/files/wireguard.sh
 ===================================================================
---- build_dir.orig/package/network/services/wireguard/files/wireguard.sh
-+++ build_dir/package/network/services/wireguard/files/wireguard.sh
+--- build_dir.orig/package/network/utils/wireguard-tools/files/wireguard.sh
++++ build_dir/package/package/network/utils/wireguard-tools/files/wireguard.sh
 @@ -19,6 +19,8 @@ proto_wireguard_init_config() {
  	proto_config_add_int "listen_port"
  	proto_config_add_int "mtu"
