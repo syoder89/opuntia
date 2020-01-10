@@ -2,7 +2,7 @@ Index: luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-advanced.lua
 ===================================================================
 --- luci.orig/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-advanced.lua
 +++ luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-advanced.lua
-@@ -562,6 +562,14 @@ local knownParams = {
+@@ -561,6 +561,14 @@ local knownParams = {
  	} },
  
  	{ "Cryptography", {
@@ -74,14 +74,14 @@ Index: luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-basic.lua
  	{ Value,
  		"keepalive",
  		"10 60",
-@@ -59,10 +83,14 @@ local basicParams = {
+@@ -55,10 +79,14 @@ local basicParams = {
  		"client_to_client",
  		0,
  		translate("Allow client-to-client traffic") },
 -	{ DynamicList,
 -		"remote",
 -		"vpnserver.example.org",
--		translate("Remote host name or ip address") },
+-		translate("Remote host name or IP address") },
 +	{ ListValue,
 +		"secret_type",
 +		{ "passphrase", "file" },
