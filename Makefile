@@ -52,12 +52,15 @@ PARALLEL_MAKE=-j $(shell echo $$(( $(NUM_CPU) * 2 )))
 CACHE_DIR?=$(shell pwd)/ccache
 BUILD_OPTS=
 
+# Currently iputils / meson fails to build with ccache enabled so if the build fails try building it without ccache
 build: prepare setup_cache $(built)
 	@if [ ! -d $(CACHE_DIR) ] ; then \
 		mkdir $(CACHE_DIR); \
 	fi; \
-	(export CCACHE_DIR=$(CACHE_DIR) && make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) defconfig world || \
-		make -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) world V=s) \
+	(export CCACHE_DIR=$(CACHE_DIR) && make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) defconfig world || (\
+		make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) CONFIG_CCACHE= package/iputils/compile && \
+		make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) world || \
+		make -C $(BUILD_DIR) DESTDIR= $(BUILD_OPTS) world V=s )) \
 		&& touch $(built)
 	make setup_cache
 #	(make $(PARALLEL_MAKE) -C $(BUILD_DIR) DESTDIR= defconfig world || make -C $(BUILD_DIR) DESTDIR= world V=s) && touch $(built)
