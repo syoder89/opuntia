@@ -34,7 +34,7 @@ Index: build_dir/package/base-files/Makefile
 ===================================================================
 --- build_dir.orig/package/base-files/Makefile
 +++ build_dir/package/base-files/Makefile
-@@ -139,11 +139,11 @@ define Package/base-files/install
+@@ -148,11 +148,11 @@ define Package/base-files/install
  
  	$(VERSION_SED_SCRIPT) \
  		$(1)/etc/banner \
@@ -99,7 +99,7 @@ Index: build_dir/package/base-files/files/bin/config_generate
  generate_network() {
  	local ifname macaddr protocol type ipaddr netmask
  
-@@ -96,8 +96,8 @@ generate_network() {
+@@ -100,8 +100,8 @@ generate_network() {
  		static)
  			local ipad
  			case "$1" in
@@ -110,7 +110,7 @@ Index: build_dir/package/base-files/files/bin/config_generate
  			esac
  
  			netm=${netmask:-"255.255.255.0"}
-@@ -234,8 +234,8 @@ generate_static_system() {
+@@ -241,8 +241,8 @@ generate_static_system() {
  	uci -q batch <<-EOF
  		delete system.@system[0]
  		add system system
@@ -125,7 +125,7 @@ Index: build_dir/config/Config-images.in
 ===================================================================
 --- build_dir.orig/config/Config-images.in
 +++ build_dir/config/Config-images.in
-@@ -234,7 +234,7 @@ menu "Target Images"
+@@ -232,7 +232,7 @@ menu "Target Images"
  	config GRUB_TITLE
  		string "Title for the menu entry in GRUB"
  		depends on GRUB_IMAGES
@@ -134,3 +134,34 @@ Index: build_dir/config/Config-images.in
  		help
  		  This is the title of the GRUB menu entry.
  		  If unspecified, it defaults to OpenWrt.
+Index: build_dir/package/system/procd/patches/0001-opuntia-support.patch
+===================================================================
+--- /dev/null
++++ build_dir/package/system/procd/patches/0001-opuntia-support.patch
+@@ -0,0 +1,26 @@
++Index: procd-2020-01-04-a5af33ce/system.c
++===================================================================
++--- procd-2020-01-04-a5af33ce.orig/system.c
+++++ procd-2020-01-04-a5af33ce/system.c
++@@ -157,7 +157,7 @@ static int system_board(struct ubus_cont
++ 		fclose(f);
++ 	}
++ 
++-	if ((f = fopen("/etc/openwrt_release", "r")) != NULL)
+++	if ((f = fopen("/etc/opuntia_release", "r")) != NULL)
++ 	{
++ 		c = blobmsg_open_table(&b, "release");
++ 
++@@ -185,6 +185,12 @@ static int system_board(struct ubus_cont
++ 				key = "target";
++ 			else if (!strcasecmp(key, "DISTRIB_DESCRIPTION"))
++ 				key = "description";
+++			else if (!strcasecmp(key, "DISTRIB_PRODUCT"))
+++				key = "product";
+++			else if (!strcasecmp(key, "DISTRIB_MANUFACTURER"))
+++				key = "manufacturer";
+++			else if (!strcasecmp(key, "DISTRIB_HWREV"))
+++				key = "hwrev";
++ 			else
++ 				continue;
++ 
