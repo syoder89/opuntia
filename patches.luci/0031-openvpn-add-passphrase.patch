@@ -2,10 +2,10 @@ Index: luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-advanced.lua
 ===================================================================
 --- luci.orig/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-advanced.lua
 +++ luci/applications/luci-app-openvpn/luasrc/model/cbi/openvpn-advanced.lua
-@@ -561,6 +561,14 @@ local knownParams = {
+@@ -562,6 +562,14 @@ local knownParams = {
  	} },
  
- 	{ "Cryptography", {
+ 	{ "cryptography", translate("Cryptography"), {
 +		{ ListValue,
 +			"secret_type",
 +			{ "passphrase", "file" },
