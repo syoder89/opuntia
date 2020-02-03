@@ -84,3 +84,6 @@ packages/ath10k-ct-remove-ibss-limit-avoid-register-failure.patch
 packages/0235-Fix-dnsmasq-config-restore.patch
 packages/0236-Fix-uhttpd-config-restore.patch
 packages/0253-collectd-stop-logging-stderr.patch
+packages/0254-modemmanager-release-1.12.4.patch
+packages/0255-protobuf-c-hostbuild.patch
+packages/0252-frr-scott-fixes.patch

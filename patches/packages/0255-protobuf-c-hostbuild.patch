@@ -1,0 +1,12 @@
+Index: build_dir/feeds/packages/libs/protobuf-c/Makefile
+===================================================================
+--- build_dir.orig/feeds/packages/libs/protobuf-c/Makefile
++++ build_dir/feeds/packages/libs/protobuf-c/Makefile
+@@ -23,6 +23,7 @@ PKG_LICENSE_FILES:=LICENSE
+ 
+ HOST_BUILD_DEPENDS:=protobuf/host
+ PKG_BUILD_DEPENDS:=protobuf
++PKG_BUILD_DEPENDS:=protobuf-c/host
+ 
+ CMAKE_INSTALL:=1
+ PKG_BUILD_PARALLEL:=1

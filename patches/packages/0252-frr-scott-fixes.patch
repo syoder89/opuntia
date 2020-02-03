@@ -1,0 +1,54 @@
+Index: build_dir/feeds/packages/net/frr/files/daemons
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/files/daemons
++++ build_dir/feeds/packages/net/frr/files/daemons
+@@ -1,9 +1,9 @@
+ # The watchfrr and zebra daemons are always started.
+ #
+-bgpd=no
+-ospfd=no
++bgpd=yes
++ospfd=yes
+ #ospfd_instances=1,20
+-ospf6d=no
++ospf6d=yes
+ ripd=no
+ ripngd=no
+ isisd=no
+@@ -14,9 +14,9 @@ eigrpd=no
+ babeld=no
+ sharpd=no
+ pbrd=no
+-bfdd=no
++bfdd=yes
+ fabricd=no
+-vrrpd=no
++vrrpd=yes
+ 
+ #
+ # If this option is set the /etc/init.d/frr script automatically loads
+Index: build_dir/feeds/packages/net/frr/files/frr
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/files/frr
++++ build_dir/feeds/packages/net/frr/files/frr
+@@ -19,8 +19,20 @@ else
+ 	. "/usr/sbin/frrcommon.sh"
+ fi
+ 
++migrate_quagga_configs() {
++	if [ -d /etc/quagga ]; then
++		logger "Migrating Quagga configuration files to FRR..."
++		for file in /etc/quagga/*.conf ; do
++			logger "Moving file $file"
++			mv "$file" /etc/frr/
++		done
++		logger "Remaining Quagga files can be found in /etc/quagga.bak"
++		mv /etc/quagga /etc/quagga.bak
++	fi
++}
+ 
+ start() {
++        migrate_quagga_configs
+ 	daemon_list daemons
+ 	watchfrr_options="$watchfrr_options $daemons"
+ 	daemon_start watchfrr
