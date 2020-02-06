@@ -1,0 +1,70 @@
+Index: build_dir/feeds/packages/net/modemmanager/files/modemmanager.common
+===================================================================
+--- build_dir.orig/feeds/packages/net/modemmanager/files/modemmanager.common
++++ build_dir/feeds/packages/net/modemmanager/files/modemmanager.common
+@@ -155,7 +155,7 @@ mm_wait_for_modem() {
+ 	local sysfspath="$2"
+ 
+ 	# TODO: config max wait
+-	local n=45
++	local n=120
+ 	local step=5
+ 
+ 	while [ $n -ge 0 ]; do
+@@ -166,10 +166,8 @@ mm_wait_for_modem() {
+ 		}
+ 
+ 		# Check if the modem exists at the given sysfs path
+-		if ! mmcli -m "${sysfspath}" > /dev/null 2>&1
++		if mmcli -m "${sysfspath}" > /dev/null 2>&1
+ 		then
+-			mm_log "error: modem not detected at sysfs path"
+-		else
+ 			mm_log "modem exported successfully at ${sysfspath}"
+ 			mm_log "setting interface '${cfg}' as available"
+ 			proto_set_available "${cfg}" 1
+@@ -182,6 +180,7 @@ mm_wait_for_modem() {
+ 
+ 	mm_log "error: timed out waiting for the modem to get exported at ${sysfspath}"
+ 	proto_set_available "${cfg}" 0
++	mmcli -m "${sysfspath}" -r
+ 	return 2
+ }
+ 
+@@ -192,7 +191,6 @@ mm_report_modem_wait() {
+ 
+ 	parent_sysfspath=$(mm_find_physdev_sysfs_path "$sysfspath")
+ 	[ -n "${parent_sysfspath}" ] || {
+-		mm_log "error: parent device sysfspath not found"
+ 		return
+ 	}
+ 
+@@ -209,12 +207,10 @@ mm_report_modem_wait() {
+ 				# Launch subshell for the explicit wait
+ 				( mm_wait_for_modem "${cfg}" "${parent_sysfspath}" ) > /dev/null 2>&1 &
+ 			else
+-				mm_log "no need to wait for modem at sysfs path ${parent_sysfspath}"
+ 				mm_set_modem_wait_status "${parent_sysfspath}" "ignored"
+ 			fi
+ 			;;
+ 		"processed")
+-			mm_log "already waiting for modem at sysfs path ${parent_sysfspath}"
+ 			;;
+ 		"ignored")
+ 			;;
+@@ -277,7 +273,6 @@ mm_report_event() {
+ 	esac
+ 
+ 	# Report the event
+-	mm_log "event reported: action=${action}, name=${name}, subsystem=${subsystem}"
+ 	mmcli --report-kernel-event="action=${action},name=${name},subsystem=${subsystem}" 1>/dev/null 2>&1 &
+ 
+ 	# Wait for added modem if a sysfspath is given
+@@ -293,7 +288,6 @@ mm_report_event_from_cache_line() {
+ 	subsystem=$(echo "${event_line}" | awk -F ',' '{ print $3 }')
+ 	sysfspath=$(echo "${event_line}" | awk -F ',' '{ print $4 }')
+ 
+-	mm_log "cached event found: action=${action}, name=${name}, subsystem=${subsystem}, sysfspath=${sysfspath}"
+ 	mm_report_event "${action}" "${name}" "${subsystem}" "${sysfspath}"
+ }
+ 
