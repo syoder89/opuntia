@@ -52,3 +52,23 @@ Index: build_dir/feeds/packages/net/frr/files/frr
  	daemon_list daemons
  	watchfrr_options="$watchfrr_options $daemons"
  	daemon_start watchfrr
+Index: build_dir/feeds/packages/net/frr/patches/0001-convert-wtf-message.patch
+===================================================================
+--- /dev/null
++++ build_dir/feeds/packages/net/frr/patches/0001-convert-wtf-message.patch
+@@ -0,0 +1,15 @@
++Index: frr-7.2.1/watchfrr/watchfrr.c
++===================================================================
++--- frr-7.2.1.orig/watchfrr/watchfrr.c
+++++ frr-7.2.1/watchfrr/watchfrr.c
++@@ -533,7 +533,9 @@ static int wakeup_init(struct thread *t_
++ static void restart_done(struct daemon *dmn)
++ {
++ 	if (dmn->state != DAEMON_DOWN) {
++-		zlog_warn("wtf?");
+++		zlog_warn(
+++			"Daemon: %s: is in %s state but expected it to be in DAEMON_DOWN state",
+++			dmn->name, state_str[dmn->state]);
++ 		return;
++ 	}
++ 	if (dmn->t_wakeup)
