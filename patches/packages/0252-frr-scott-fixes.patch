@@ -72,3 +72,56 @@ Index: build_dir/feeds/packages/net/frr/patches/0001-convert-wtf-message.patch
 + 		return;
 + 	}
 + 	if (dmn->t_wakeup)
+Index: build_dir/feeds/packages/net/frr/Makefile
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/Makefile
++++ build_dir/feeds/packages/net/frr/Makefile
+@@ -213,7 +213,7 @@ define Package/frr-libfrr/install
+ 	$(CP) $(PKG_BUILD_DIR)/build/lib/.libs/libfrr.so* $(1)/usr/lib/
+ 	$(INSTALL_DIR) $(1)/etc/frr
+ 	chmod 0750 $(1)/etc/frr
+-	$(INSTALL_CONF) ./files/{frr.conf,daemons} $(1)/etc/frr/
++	$(INSTALL_CONF) ./files/daemons $(1)/etc/frr/
+ endef
+ 
+ define Package/frr-vtysh/install
+Index: build_dir/feeds/packages/net/frr/files/frr.conf
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/files/frr.conf
++++ /dev/null
+@@ -1,22 +0,0 @@
+-password zebra
+-!
+-!router eigrp 1
+-! network 10.0.0.0/8
+-! network 192.168.1.0/24
+-!
+-!router ospf
+-!ospf router-id 172.16.0.2
+-!network 192.168.1.0/24 area 0
+-!neighbor 172.16.0.1
+-!
+-!router rip
+-! network 10.0.0.0/8
+-! network 192.168.1.0/24
+-!
+-log syslog
+-!
+-access-list vty permit 127.0.0.0/8
+-access-list vty deny any
+-!
+-line vty
+- access-class vty
+Index: build_dir/feeds/packages/net/frr/files/frrcommon.sh
+===================================================================
+--- build_dir.orig/feeds/packages/net/frr/files/frrcommon.sh
++++ build_dir/feeds/packages/net/frr/files/frrcommon.sh
+@@ -282,6 +282,8 @@ load_old_config() {
+ 	for dmn in $DAEMONS; do eval "test \$_new_$dmn != no && $dmn=\$_new_$dmn; unset _new_$dmn"; done
+ }
+ 
++chownfrr "$C_PATH"
++
+ [ -r "$C_PATH/daemons" ] || {
+ 	log_failure_msg "cannot run $@: $C_PATH/daemons does not exist"
+ 	exit 1

@@ -1,13 +1,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=kismet-remotecap
-PKG_VERSION:=2020-02-13
+PKG_VERSION:=2020-02-20
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/kismetwireless/kismet.git
-PKG_SOURCE_VERSION:=de4869a41d86ab189fe7a5bcdf9496b27ec20f38
+PKG_SOURCE_URL:=https://github.com/imagestream/kismet.git
+PKG_SOURCE_VERSION:=ac98b69b239e2e7ad15e17e9a93659b2d33d03cf
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 
