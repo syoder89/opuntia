@@ -34,7 +34,7 @@ Index: build_dir/package/base-files/Makefile
 ===================================================================
 --- build_dir.orig/package/base-files/Makefile
 +++ build_dir/package/base-files/Makefile
-@@ -148,11 +148,11 @@ define Package/base-files/install
+@@ -151,11 +151,11 @@ define Package/base-files/install
  
  	$(VERSION_SED_SCRIPT) \
  		$(1)/etc/banner \
@@ -125,15 +125,19 @@ Index: build_dir/config/Config-images.in
 ===================================================================
 --- build_dir.orig/config/Config-images.in
 +++ build_dir/config/Config-images.in
-@@ -232,7 +232,7 @@ menu "Target Images"
+@@ -234,10 +234,10 @@ menu "Target Images"
  	config GRUB_TITLE
  		string "Title for the menu entry in GRUB"
- 		depends on GRUB_IMAGES
+ 		depends on GRUB_IMAGES || GRUB_EFI_IMAGES
 -		default "OpenWrt"
 +		default "Opuntia"
  		help
  		  This is the title of the GRUB menu entry.
- 		  If unspecified, it defaults to OpenWrt.
+-		  If unspecified, it defaults to OpenWrt.
++		  If unspecified, it defaults to Opuntia.
+ 
+ 	config ISO_IMAGES
+ 		bool "Build LiveCD image (ISO)"
 Index: build_dir/package/system/procd/patches/0001-opuntia-support.patch
 ===================================================================
 --- /dev/null

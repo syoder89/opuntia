@@ -2,27 +2,36 @@ Index: build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
 ===================================================================
 --- build_dir.orig/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
 +++ build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
-@@ -110,7 +110,13 @@ ramips_setup_interfaces()
- 		ucidef_add_switch "switch0" \
- 			"0:lan:1" "1:lan:2" "2:lan:3" "3:lan:4" "6@eth0"
+@@ -31,7 +31,13 @@ ramips_setup_interfaces()
+ 	linksys,re6500)
+ 		ucidef_set_interface_lan "lan1 lan2 lan3 lan4"
  		;;
--	mikrotik,rbm11g|\
-+	mikrotik,rbm11g)
+-	mikrotik,routerboard-m11g|\
++	mikrotik,routerboard-m11g)\
 +		ucidef_set_interface_lan "eth0.4001"
 +        	ucidef_add_switch "switch0" \
 +                	"0:lan:1:4001" "6@eth0"
 +        	ucidef_add_switch_extra_attr "switch0" "alias_cpu" "6"
 +        	ucidef_add_switch_extra_attr "switch0" "alias_lan" "0"
 +        	;;
- 	thunder,timecloud)
- 		ucidef_add_switch "switch0"
- 		ucidef_add_switch_attr "switch0" "enable" "false"
+ 	netgear,ex6150|\
+ 	thunder,timecloud|\
+ 	tplink,re350-v1|\
+@@ -93,7 +99,7 @@ ramips_setup_macs()
+ 		;;
+ 	mikrotik,routerboard-m11g|\
+ 	mikrotik,routerboard-m33g)
+-		label_mac=$(mtd_get_mac_binary hard_config 0x10)
++		label_mac=$(mtd_get_mac_binary imagestream 0x10)
+ 		;;
+ 	zbtlink,zbt-we1326|\
+ 	zbtlink,zbt-wg3526-16m|\
 Index: build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
 ===================================================================
 --- build_dir.orig/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
 +++ build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
 @@ -37,10 +37,10 @@ gnubee,gb-pc2)
- mikrotik,rbm11g)
+ mikrotik,routerboard-m11g)
  	ucidef_set_rssimon "wlan0" "200000" "1"
  	ucidef_set_led_rssi "rssilow" "RSSILOW" "$boardname:green:rssi0" "wlan0" "1" "100"
 -	ucidef_set_led_rssi "rssimediumlow" "RSSIMEDIUMLOW" "$boardname:green:rssi1" "wlan0" "20" "100"
@@ -35,4 +44,4 @@ Index: build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
 +	ucidef_set_led_rssi "rssiveryhigh" "RSSIVERYHIGH" "$boardname:green:rssi4" "wlan0" "90" "100"
  	;;
  mtc,wr1201)
- 	ucidef_set_led_switch "eth_link" "LAN link" "$boardname:green:eth_link" "switch0" "0x0f"
+ 	ucidef_set_led_netdev "eth_link" "LAN link" "$boardname:green:eth_link" "br-lan"

@@ -1,7 +1,7 @@
-Index: build_dir/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
+Index: build_dir/target/linux/ramips/dts/mt7621_mikrotik_routerboard-m11g.dts
 ===================================================================
---- build_dir.orig/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
-+++ build_dir/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
+--- build_dir.orig/target/linux/ramips/dts/mt7621_mikrotik_routerboard-m11g.dts
++++ build_dir/target/linux/ramips/dts/mt7621_mikrotik_routerboard-m11g.dts
 @@ -132,15 +132,19 @@
  			partition@40000 {
  				compatible = "mikrotik,minor";
@@ -18,26 +18,26 @@ Index: build_dir/target/linux/ramips/dts/mt7621_mikrotik_rbm11g.dts
  	};
  };
  
- &ethernet {
+ &gmac0 {
 -	mtd-mac-address = <&hard_config 0x0010>;
 -	mtd-mac-address-increment = <1>;
 +	mtd-mac-address = <&imagestream 0x0010>;
  };
  
- &state_default {
+ &switch0 {
 Index: build_dir/target/linux/ramips/image/mt7621.mk
 ===================================================================
 --- build_dir.orig/target/linux/ramips/image/mt7621.mk
 +++ build_dir/target/linux/ramips/image/mt7621.mk
-@@ -451,7 +451,7 @@ define Device/MikroTik
-   SOC := mt7621
+@@ -503,7 +503,7 @@ TARGET_DEVICES += mediatek_mt7621-eval-b
+ define Device/MikroTik
    DEVICE_VENDOR := MikroTik
    BLOCKSIZE := 64k
 -  IMAGE_SIZE := 16128k
 +  IMAGE_SIZE := 16124k
    DEVICE_PACKAGES := kmod-usb3
    LOADER_TYPE := elf
-   PLATFORM := mt7621
+   KERNEL := $(KERNEL_DTB) | loader-kernel
 Index: build_dir/target/linux/ar71xx/image/generic.mk
 ===================================================================
 --- build_dir.orig/target/linux/ar71xx/image/generic.mk
@@ -103,8 +103,8 @@ Index: build_dir/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/10_fix_w
  
  board=$(board_name)
  
-@@ -19,6 +37,19 @@ case "$board" in
- 	archer-c60-v2)
+@@ -18,6 +36,19 @@ case "$board" in
+ 	archer-c60-v1)
  		echo $(macaddr_add $(mtd_get_mac_binary mac 0x8)  $(($PHYNBR - 1)) ) > /sys${DEVPATH}/macaddress
  		;;
 +	wpj344|wpj558|wpj563)
@@ -207,7 +207,7 @@ Index: build_dir/target/linux/ramips/base-files/etc/hotplug.d/ieee80211/10_fix_w
 +board=$(board_name)
 +
 +case "$board" in
-+	mikrotik,rbm11g)
++	mikrotik,routerboard-m11g)
 +		# Use our reserved MAC address instead of the card's MAC
 +		process_imagestream
 +		if [ "$PHYNBR" -eq 1 ]; then

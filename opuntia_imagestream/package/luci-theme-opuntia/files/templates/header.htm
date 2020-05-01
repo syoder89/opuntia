@@ -39,7 +39,7 @@
 			background-size: contain;
 			background-repeat: repeat-x;
 			min-height: 100vh;
-			padding: 44px 5px 5px;
+			padding: 4px 5px 5px;
 		}
 		#maincontent {
 			background: #fff;
@@ -54,23 +54,15 @@
 		</style>
 		<script src="<%=url('admin/translations', luci.i18n.context.lang)%><%# ?v=PKG_VERSION %>"></script>
 		<script src="<%=resource%>/cbi.js"></script>
-		<script src="<%=resource%>/xhr.js"></script>
-
-		<% include("themes/bootstrap/json-menu") %>
 	</head>
 
-	<body class="lang_<%=luci.i18n.context.lang%> <% if node then %><%= striptags( node.title ) %><%- end %>" data-page="<%= table.concat(disp.context.requestpath, "-") %>">
+	<body class="lang_<%=luci.i18n.context.lang%> <% if node then %><%= striptags( node.title ) %><%- end %>" data-page="<%= pcdata(table.concat(disp.context.requestpath, "-")) %>">
 		<header>
 			<div class="fill">
 				<div class="container">
 					<a class="brand" href="#"><%=boardinfo.hostname or "?"%></a>
 					<ul class="nav" id="topmenu" style="display:none"></ul>
-					<div class="pull-right">
-						<span id="xhr_poll_status" style="display:none" onclick="XHR.running() ? XHR.halt() : XHR.run()">
-							<span class="label success" id="xhr_poll_status_on"><%:Auto Refresh%> <%:on%></span>
-							<span class="label" id="xhr_poll_status_off" style="display:none"><%:Auto Refresh%> <%:off%></span>
-						</span>
-					</div>
+					<div id="indicators" class="pull-right"></div>
 				</div>
 			</div>
 		</header>
@@ -95,3 +87,4 @@
 			</noscript>
 
 			<div id="tabmenu" style="display:none"></div>
+

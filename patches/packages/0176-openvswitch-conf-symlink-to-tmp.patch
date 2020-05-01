@@ -2,15 +2,14 @@ Index: build_dir/feeds/packages/net/openvswitch/files/openvswitch.init
 ===================================================================
 --- build_dir.orig/feeds/packages/net/openvswitch/files/openvswitch.init
 +++ build_dir/feeds/packages/net/openvswitch/files/openvswitch.init
-@@ -4,65 +4,43 @@
+@@ -4,64 +4,43 @@
  # Copyright (C) 2018 Yousong Zhou <yszhou4tech@gmail.com>
  
  START=15
 +USE_PROCD=1
  
--ovs_script_dir=/usr/share/openvswitch/scripts
--ovs_ctl="$ovs_script_dir/ovs-ctl"; [ -x "$ovs_ctl" ] || ovs_ctl=:
--ovn_ctl="$ovs_script_dir/ovn-ctl"; [ -x "$ovn_ctl" ] || ovn_ctl=:
+-ovs_ctl="/usr/share/openvswitch/scripts/ovs-ctl"; [ -x "$ovs_ctl" ] || ovs_ctl=:
+-ovn_ctl="/usr/share/ovn/scripts/ovn-ctl"; [ -x "$ovn_ctl" ] || ovn_ctl=:
 -
 -EXTRA_COMMANDS=status
 -
@@ -110,7 +109,7 @@ Index: build_dir/feeds/packages/net/openvswitch/Makefile
 ===================================================================
 --- build_dir.orig/feeds/packages/net/openvswitch/Makefile
 +++ build_dir/feeds/packages/net/openvswitch/Makefile
-@@ -216,7 +216,6 @@ ovs_common_files:= \
+@@ -209,7 +209,6 @@ ovs_common_files:= \
  	usr/share/openvswitch/scripts/ovs-save \
  	$(foreach b,ovs-appctl ovs-dpctl ovs-ofctl ovs-vsctl ovsdb-client ovsdb-tool,usr/bin/$(b))
  define ovs_common_install
@@ -118,7 +117,7 @@ Index: build_dir/feeds/packages/net/openvswitch/Makefile
  	$$(INSTALL_DIR) $$(1)/etc/init.d
  	$$(INSTALL_BIN) ./files/openvswitch.init $$(1)/etc/init.d/openvswitch
  	$$(INSTALL_DIR) $$(1)/etc/config
-@@ -226,9 +225,6 @@ define ovs_common_install
+@@ -219,9 +218,6 @@ define ovs_common_install
  	$$(LN) /usr/share/openvswitch/scripts/ovs-ctl-wrapper $$(1)/usr/bin/ovs-ctl
  	$$(LN) /usr/share/openvswitch/scripts/ovs-ctl-wrapper $$(1)/usr/bin/ovs-kmod-ctl
  endef

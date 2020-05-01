@@ -21,7 +21,7 @@ Index: build_dir/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
  		;;
  
  		balance-rr)
-@@ -158,13 +161,15 @@ proto_bonding_setup() {
+@@ -167,13 +170,15 @@ proto_bonding_setup() {
  			return
  		fi
  
@@ -43,25 +43,26 @@ Index: build_dir/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
  	done
  
  	[ -n "$all_slaves_active" ] && echo "$all_slaves_active" > /sys/class/net/"$link"/bonding/all_slaves_active
-@@ -180,15 +185,9 @@ proto_bonding_setup() {
+@@ -188,16 +193,10 @@ proto_bonding_setup() {
+ 
  	proto_init_update "$link" 1
  
- 	# For static configuration we _MUST_ have an IP address
+-	# For static configuration we _MUST_ have an IP address
 -	[ -z "$ipaddr" ] && {
--		echo "$cfg" "INVALID LOCAL ADDRESS"
--		proto_notify_error "$cfg" "INVALID_LOCAL_ADDRESS"
+-		echo "$cfg" "No local IP address defined"
+-		proto_notify_error "$cfg" INVALID_LOCAL_ADDRESS
 -		proto_block_restart "$cfg"
 -		return
 +	[ -z "$ipaddr" ] || {
 +		proto_add_ipv4_address "$ipaddr" "$netmask"
  	}
--
+ 
 -	proto_add_ipv4_address "$ipaddr" "$netmask"
 -
  	proto_send_update "$cfg"
  }
  
-@@ -196,6 +195,9 @@ proto_bonding_teardown() {
+@@ -205,6 +204,9 @@ proto_bonding_teardown() {
  	local cfg="$1"
  	local link="bonding-$cfg"
  

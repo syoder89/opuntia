@@ -2,36 +2,29 @@ Index: build_dir/feeds/routing/batman-adv/patches/0100-scott-ath10k-fix-expected
 ===================================================================
 --- /dev/null
 +++ build_dir/feeds/routing/batman-adv/patches/0100-scott-ath10k-fix-expected-throughput.patch
-@@ -0,0 +1,32 @@
-+--- a/net/batman-adv/bat_v_elp.c
-++++ b/net/batman-adv/bat_v_elp.c
-+@@ -101,6 +101,7 @@ static u32 batadv_v_elp_get_throughput(s
+@@ -0,0 +1,25 @@
++Index: batman-adv-2020.1/net/batman-adv/bat_v_elp.c
++===================================================================
++--- batman-adv-2020.1.orig/net/batman-adv/bat_v_elp.c
+++++ batman-adv-2020.1/net/batman-adv/bat_v_elp.c
++@@ -90,6 +90,7 @@ static u32 batadv_v_elp_get_throughput(s
 + 		if (!real_netdev)
 + 			goto default_throughput;
 + 
 ++		memset(&sinfo, 0, sizeof(sinfo));
 + 		ret = cfg80211_get_station(real_netdev, neigh->addr, &sinfo);
 + 
-+ 		dev_put(real_netdev);
-+@@ -113,10 +114,18 @@ static u32 batadv_v_elp_get_throughput(s
-+ 		}
-+ 		if (ret)
-+ 			goto default_throughput;
-+-		if (!(sinfo.filled & BIT(NL80211_STA_INFO_EXPECTED_THROUGHPUT)))
-+-			goto default_throughput;
-++		if (!(sinfo.filled & BIT(NL80211_STA_INFO_EXPECTED_THROUGHPUT))) {
-++			if (sinfo.filled & BIT(NL80211_STA_INFO_RX_BITRATE)) {
-++				/* cfg80211_calculate_bitrate will return 0 for mcs >= 32 */
-++				throughput = cfg80211_calculate_bitrate(&sinfo.rxrate);
-++			}
-++			else
-++				goto default_throughput;
-++		}
-++		else
-++			throughput = sinfo.expected_throughput / 100;
++ 		if (!ret) {
++@@ -117,6 +118,12 @@ static u32 batadv_v_elp_get_throughput(s
++ 		if (sinfo.filled & BIT(NL80211_STA_INFO_TX_BITRATE))
++ 			return cfg80211_calculate_bitrate(&sinfo.txrate) / 3;
 + 
-+-		return sinfo.expected_throughput / 100;
-++		return throughput;
+++		/* try to estimate the expected throughput based on reported rx
+++		 * rates
+++		 */
+++		if (sinfo.filled & BIT(NL80211_STA_INFO_RX_BITRATE))
+++			return cfg80211_calculate_bitrate(&sinfo.rxrate) / 3;
+++
++ 		goto default_throughput;
 + 	}
 + 
-+ 	/* if not a wifi interface, check if this device provides data via
