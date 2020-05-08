@@ -46,7 +46,7 @@ Index: build_dir/feeds/packages/utils/collectd/patches/999-scott-add-hwmon-temps
 + }
 + 
 + static int thermal_sysfs_read(void) {
-++  if (access(dirname_hwmon, R_OK | X_OK))
+++  if (access(dirname_hwmon, R_OK | X_OK) == 0)
 ++      walk_directory(dirname_hwmon, thermal_hwmon_device_read, NULL, 0);
 +   return walk_directory(dirname_sysfs, thermal_sysfs_device_read, NULL, 0);
 + }
