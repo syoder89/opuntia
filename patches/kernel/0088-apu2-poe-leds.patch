@@ -1,0 +1,91 @@
+Index: build_dir/package/kernel/leds-apu2/src/leds-apu2.c
+===================================================================
+--- build_dir.orig/package/kernel/leds-apu2/src/leds-apu2.c
++++ build_dir/package/kernel/leds-apu2/src/leds-apu2.c
+@@ -243,8 +243,77 @@ static struct gpio_led apu2_leds_gpio[]
+ 		.gpio           = 511,
+ 		.active_low     = 1,
+ 	},
++	{
++		.name           = "poe:rgb:led2:red",
++		.gpio           = 11,
++		.active_low     = 1,
++	},
++	{
++		.name           = "poe:rgb:led2:green",
++		.gpio           = 13,
++		.active_low     = 1,
++	},
++	{
++		.name           = "poe:rgb:led2:blue",
++		.gpio           = 15,
++		.active_low     = 1,
++	},
++	{
++		.name           = "poe:green:led3",
++		.gpio           = 7,
++		.active_low     = 1,
++	},
++	{
++		.name           = "poe:green:led4",
++		.gpio           = 5,
++		.active_low     = 1,
++	},
++	{
++		.name           = "poe:green:led5",
++		.gpio           = 3,
++		.active_low     = 1,
++	},
++	{
++		.name           = "poe:green:led6",
++		.gpio           = 1,
++		.active_low     = 1,
++	},
++	{
++		.name           = "poe:green:eth0",
++		.gpio           = 10,
++		.active_low     = 1,
++	},
++	{
++		.name           = "poe:yellow:eth0",
++		.gpio           = 12,
++		.active_low     = 1,
++	},
++	{
++		.name           = "poe:green:eth1",
++		.gpio           = 14,
++		.active_low     = 1,
++	},
++	{
++		.name           = "poe:yellow:eth1",
++		.gpio           = 16,
++		.active_low     = 1,
++	},
+ };
+ 
++/*
++GP10	11	eth0 G
++GP12	13	eth0 Y
++GP14	15	eth1 G
++GP16	17	eth1 Y
++GP01	4	LED 6
++GP03	6	LED 5
++GP05	8	LED 4
++GP07	10	LED 3
++GP09	12	RGB
++GP013	14	RGB
++GP017	16	RGB
++*/
++
+ static struct gpio_keys_button apu2_gpio_keys[] = {
+ 	{
+ 		.desc           = "Reset button",
+@@ -331,7 +400,7 @@ static int __init gpio_apu2_init (void)
+ 	const char *board_vendor = dmi_get_system_info(DMI_BOARD_VENDOR);
+ 	const char *board_name = dmi_get_system_info(DMI_BOARD_NAME);
+ 
+-	pr_info ("%s: load APU2/LED GPIO driver module\n", DEVNAME);
++	pr_info ("%s: load APU2/PoE/LED GPIO driver module\n", DEVNAME);
+ 
+ 	err = platform_driver_register (&gpio_apu2_driver);
+ 	if (err)

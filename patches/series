@@ -87,3 +87,5 @@ packages/0253-collectd-stop-logging-stderr.patch
 packages/0254-modemmanager-scott-fixes.patch
 packages/0255-protobuf-c-hostbuild.patch
 packages/0252-frr-scott-fixes.patch
+kernel/0088-apu2-poe-leds.patch
+packages/0256-collectd-add-hwmon-temps.patch

@@ -1,0 +1,53 @@
+Index: build_dir/feeds/packages/utils/collectd/patches/999-scott-add-hwmon-temps.patch
+===================================================================
+--- /dev/null
++++ build_dir/feeds/packages/utils/collectd/patches/999-scott-add-hwmon-temps.patch
+@@ -0,0 +1,48 @@
++Index: collectd-5.11.0/src/thermal.c
++===================================================================
++--- collectd-5.11.0.orig/src/thermal.c
+++++ collectd-5.11.0/src/thermal.c
++@@ -32,6 +32,7 @@
++ static const char *config_keys[] = {"Device", "IgnoreSelected",
++                                     "ForceUseProcfs"};
++ 
+++static const char *const dirname_hwmon = "/sys/class/hwmon";
++ static const char *const dirname_sysfs = "/sys/class/thermal";
++ static const char *const dirname_procfs = "/proc/acpi/thermal_zone";
++ 
++@@ -55,6 +56,26 @@ static void thermal_submit(const char *p
++   plugin_dispatch_values(&vl);
++ }
++ 
+++static int thermal_hwmon_device_read(const char __attribute__((unused)) * dir,
+++                                     const char *name,
+++                                     void __attribute__((unused)) * user_data) {
+++  char filename[PATH_MAX];
+++  bool success = false;
+++  value_t value;
+++
+++  if (device_list && ignorelist_match(device_list, name))
+++    return -1;
+++
+++  snprintf(filename, sizeof(filename), "%s/%s/temp1_input", dirname_hwmon, name);
+++  if (parse_value_file(filename, &value, DS_TYPE_GAUGE) == 0) {
+++    value.gauge /= 1000.0;
+++    thermal_submit(name, TEMP, value);
+++    success = true;
+++  }
+++
+++  return success ? 0 : -1;
+++}
+++
++ static int thermal_sysfs_device_read(const char __attribute__((unused)) * dir,
++                                      const char *name,
++                                      void __attribute__((unused)) * user_data) {
++@@ -168,6 +189,8 @@ static int thermal_config(const char *ke
++ }
++ 
++ static int thermal_sysfs_read(void) {
+++  if (access(dirname_hwmon, R_OK | X_OK))
+++      walk_directory(dirname_hwmon, thermal_hwmon_device_read, NULL, 0);
++   return walk_directory(dirname_sysfs, thermal_sysfs_device_read, NULL, 0);
++ }
++ 
