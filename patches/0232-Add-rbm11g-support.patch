@@ -2,7 +2,7 @@ Index: build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
 ===================================================================
 --- build_dir.orig/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
 +++ build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
-@@ -31,7 +31,13 @@ ramips_setup_interfaces()
+@@ -32,7 +32,13 @@ ramips_setup_interfaces()
  	linksys,re6500)
  		ucidef_set_interface_lan "lan1 lan2 lan3 lan4"
  		;;
@@ -17,20 +17,20 @@ Index: build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
  	netgear,ex6150|\
  	thunder,timecloud|\
  	tplink,re350-v1|\
-@@ -93,7 +99,7 @@ ramips_setup_macs()
- 		;;
+@@ -100,7 +106,7 @@ ramips_setup_macs()
+ 	mikrotik,routerboard-750gr3|\
  	mikrotik,routerboard-m11g|\
  	mikrotik,routerboard-m33g)
--		label_mac=$(mtd_get_mac_binary hard_config 0x10)
+-		label_mac=$(cat "/sys/firmware/mikrotik/hard_config/mac_base")
 +		label_mac=$(mtd_get_mac_binary imagestream 0x10)
+ 		wan_mac=$label_mac
+ 		lan_mac=$(macaddr_add $label_mac 1)
  		;;
- 	zbtlink,zbt-we1326|\
- 	zbtlink,zbt-wg3526-16m|\
 Index: build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
 ===================================================================
 --- build_dir.orig/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
 +++ build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
-@@ -37,10 +37,10 @@ gnubee,gb-pc2)
+@@ -44,10 +44,10 @@ linksys,ea7500-v2)
  mikrotik,routerboard-m11g)
  	ucidef_set_rssimon "wlan0" "200000" "1"
  	ucidef_set_led_rssi "rssilow" "RSSILOW" "$boardname:green:rssi0" "wlan0" "1" "100"

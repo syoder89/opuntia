@@ -117,11 +117,12 @@ Index: build_dir/feeds/packages/net/openvswitch/Makefile
  	$$(INSTALL_DIR) $$(1)/etc/init.d
  	$$(INSTALL_BIN) ./files/openvswitch.init $$(1)/etc/init.d/openvswitch
  	$$(INSTALL_DIR) $$(1)/etc/config
-@@ -219,9 +218,6 @@ define ovs_common_install
+@@ -219,10 +218,6 @@ define ovs_common_install
  	$$(LN) /usr/share/openvswitch/scripts/ovs-ctl-wrapper $$(1)/usr/bin/ovs-ctl
  	$$(LN) /usr/share/openvswitch/scripts/ovs-ctl-wrapper $$(1)/usr/bin/ovs-kmod-ctl
  endef
 -define Package/openvswitch-common/conffiles
+-/etc/config/openvswitch
 -/etc/openvswitch
 -endef
  $(eval $(call OvsPackageTemplate,common))

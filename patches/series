@@ -57,8 +57,6 @@ packages/0221-add-telit-lte-modem-support.patch
 packages/0222-remove-broken-mbim-pin-required-check.patch
 packages/0224-mwan3-check-dynamic-interfaces.patch
 packages/0225-gcom-ndis-check-no-carrier.patch
-packages/0229-wpa_supplicant-terminate-after-disconnect.patch
-packages/0230-wpa-supplicant-fix-pidfile.patch
 packages/0231-netifd-infinite-wireless-retries.patch
 packages/0232-decrease-ath10k-ct-buffers.patch
 packages/0237-strongswan-increase-starter-timeout.patch

@@ -56,10 +56,10 @@ Index: build_dir/feeds/packages/net/frr/Makefile
 ===================================================================
 --- build_dir.orig/feeds/packages/net/frr/Makefile
 +++ build_dir/feeds/packages/net/frr/Makefile
-@@ -213,7 +213,7 @@ define Package/frr-libfrr/install
- 	$(CP) $(PKG_BUILD_DIR)/build/lib/.libs/libfrr.so* $(1)/usr/lib/
- 	$(INSTALL_DIR) $(1)/etc/frr
- 	chmod 0750 $(1)/etc/frr
+@@ -207,7 +207,7 @@ define Package/frr-libfrr/install
+ 	$(INSTALL_DIR) $(1)/usr/lib $(1)/etc/frr
+ 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libfrr.so* $(1)/usr/lib/
+ 	$(if $(CONFIG_FRR_SNMP),$(CP) $(PKG_INSTALL_DIR)/usr/lib/libfrrsnmp.so* $(1)/usr/lib/,)
 -	$(INSTALL_CONF) ./files/{frr.conf,daemons} $(1)/etc/frr/
 +	$(INSTALL_CONF) ./files/daemons $(1)/etc/frr/
  endef

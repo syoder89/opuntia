@@ -603,7 +603,7 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  	[ -n "$profile" ] || profile=1
 +	[ -n "$delay" ] || delay=1
  
- 	pdptype=`echo "$pdptype" | awk '{print toupper($0)}'`
+ 	pdptype=$(echo "$pdptype" | awk '{print toupper($0)}')
  	[ "$pdptype" = "IP" -o "$pdptype" = "IPV6" -o "$pdptype" = "IPV4V6" ] || pdptype="IP"
 @@ -57,11 +58,21 @@ proto_ncm_setup() {
  	case "$devname" in
@@ -633,9 +633,12 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  	[ -n "$delay" ] && sleep "$delay"
  
 +	do_lock
- 	manufacturer=`gcom -d "$device" -s /etc/gcom/getcardinfo.gcom | awk 'NF && $0 !~ /AT\+CGMI/ { sub(/\+CGMI: /,""); print tolower($1); exit; }'`
+ 	manufacturer=$(gcom -d "$device" -s /etc/gcom/getcardinfo.gcom | awk 'NF && $0 !~ /AT\+CGMI/ { sub(/\+CGMI: /,""); print tolower($1); exit; }')
 -	[ $? -ne 0 ] && {
 -		echo "Failed to get modem information"
+-		proto_notify_error "$interface" GETINFO_FAILED
+-		return 1
+-	}
 +	[ -n "$manufacturer" ] || {
 +		old_device="$device"
 +		idx=$(echo device | awk '{print substr($0,length($0),1)}')
@@ -647,9 +650,9 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
 +	[ -n "$manufacturer" ] || {
 +		do_unlock
 +		echo "Failed to get modem information from $device"
- 		proto_notify_error "$interface" GETINFO_FAILED
- 		return 1
- 	}
++ 		proto_notify_error "$interface" GETINFO_FAILED
++ 		return 1
++ 	}
 +	echo "Manufacturer is \"$manufacturer\""
  
  	json_load "$(cat /etc/gcom/ncm.json)"
@@ -741,7 +744,10 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
 +			echo "Failed to get IP address information"
 +			proto_notify_error "$interface" GETADDRS_FAILED
 +			return 1
-+		}
+ 		}
+-		json_close_object
+-		ubus call network add_dynamic "$(json_dump)"
+-	}
 +
 +		proto_add_ipv4_address "$ip" "$subnet"
 +                [ "$defaultroute" = 0 ] || proto_add_ipv4_route "0.0.0.0" 0 "$gateway" "" "$metric"
@@ -762,10 +768,7 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
 +				json_add_string zone "$zone"
 +			}
 +			ubus call network add_dynamic "$(json_dump)"
- 		}
--		json_close_object
--		ubus call network add_dynamic "$(json_dump)"
--	}
++		}
 +
 +		[ "$pdptype" = "IPV6" -o "$pdptype" = "IPV4V6" ] && {
 +			json_init
