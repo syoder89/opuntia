@@ -5113,19 +5113,6 @@ CONFIG_PACKAGE_minicom=y
 # disc
 #
 CONFIG_PACKAGE_blkid=y
-# CONFIG_PACKAGE_cfdisk is not set
-# CONFIG_PACKAGE_devio is not set
-# CONFIG_PACKAGE_fdisk is not set
-# CONFIG_PACKAGE_findfs is not set
-# CONFIG_PACKAGE_hd-idle is not set
-# CONFIG_PACKAGE_hdparm is not set
-# CONFIG_PACKAGE_lsblk is not set
-# CONFIG_PACKAGE_lvm2 is not set
-# CONFIG_PACKAGE_partx-utils is not set
-# CONFIG_PACKAGE_sdparm is not set
-# CONFIG_PACKAGE_sfdisk is not set
-# CONFIG_PACKAGE_swap-utils is not set
-# CONFIG_PACKAGE_wipefs is not set
 
 #
 # filemanager
@@ -5147,38 +5134,8 @@ CONFIG_PACKAGE_zoneinfo-core=y
 # CONFIG_PACKAGE_zoneinfo-poles is not set
 # CONFIG_PACKAGE_zoneinfo-simple is not set
 # CONFIG_PACKAGE_zoneinfo-southamerica is not set
-# CONFIG_PACKAGE_alsa-utils is not set
-# CONFIG_PACKAGE_alsa-utils-seq is not set
-# CONFIG_PACKAGE_alsa-utils-tests is not set
-# CONFIG_PACKAGE_anyremote is not set
-# CONFIG_PACKAGE_ap51-flash is not set
-# CONFIG_PACKAGE_at is not set
-# CONFIG_PACKAGE_avrdude is not set
-# CONFIG_PACKAGE_avrusbboot is not set
-# CONFIG_PACKAGE_bandwidthd is not set
-# CONFIG_PACKAGE_banhostlist is not set
 CONFIG_PACKAGE_bash=y
 CONFIG_PACKAGE_bash-completion=y
-# CONFIG_PACKAGE_bc is not set
-# CONFIG_PACKAGE_bluelog is not set
-# CONFIG_PACKAGE_bluez-daemon is not set
-# CONFIG_PACKAGE_bluez-examples is not set
-# CONFIG_PACKAGE_bluez-hcidump is not set
-# CONFIG_PACKAGE_bluez-utils is not set
-# CONFIG_PACKAGE_boblight-client is not set
-# CONFIG_PACKAGE_boblight-daemon is not set
-# CONFIG_PACKAGE_bonniexx is not set
-# CONFIG_PACKAGE_bsdiff is not set
-# CONFIG_PACKAGE_byobu is not set
-# CONFIG_PACKAGE_cal is not set
-# CONFIG_PACKAGE_calcurse is not set
-# CONFIG_PACKAGE_calvaria is not set
-# CONFIG_PACKAGE_canutils is not set
-# CONFIG_PACKAGE_ccrypt is not set
-# CONFIG_PACKAGE_cdparanoia is not set
-# CONFIG_PACKAGE_cksfv is not set
-# CONFIG_PACKAGE_clish is not set
-# CONFIG_PACKAGE_cmdpad is not set
 CONFIG_PACKAGE_collectd=y
 # CONFIG_PACKAGE_collectd-mod-apache is not set
 # CONFIG_PACKAGE_collectd-mod-apcups is not set
