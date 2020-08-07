@@ -628,13 +628,13 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  		;;
  	esac
  	[ -n "$ifname" ] || {
-@@ -73,16 +84,28 @@ proto_ncm_setup() {
+@@ -73,25 +84,37 @@ proto_ncm_setup() {
  
  	[ -n "$delay" ] && sleep "$delay"
  
 +	do_lock
  	manufacturer=$(gcom -d "$device" -s /etc/gcom/getcardinfo.gcom | awk 'NF && $0 !~ /AT\+CGMI/ { sub(/\+CGMI: /,""); print tolower($1); exit; }')
--	[ $? -ne 0 ] && {
+-	[ $? -ne 0 -o -z "$manufacturer" ] && {
 -		echo "Failed to get modem information"
 -		proto_notify_error "$interface" GETINFO_FAILED
 -		return 1
@@ -662,7 +662,9 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  		echo "Unsupported modem"
  		proto_notify_error "$interface" UNSUPPORTED_MODEM
  		proto_set_available "$interface" 0
-@@ -91,6 +114,7 @@ proto_ncm_setup() {
+ 		return 1
+ 	}
+-
  	json_get_values initialize initialize
  	for i in $initialize; do
  		eval COMMAND="$i" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
@@ -670,7 +672,7 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  			echo "Failed to initialize modem"
  			proto_notify_error "$interface" INITIALIZE_FAILED
  			return 1
-@@ -99,6 +123,7 @@ proto_ncm_setup() {
+@@ -100,6 +123,7 @@ proto_ncm_setup() {
  
  	[ -n "$pincode" ] && {
  		PINCODE="$pincode" gcom -d "$device" -s /etc/gcom/setpin.gcom || {
@@ -678,7 +680,7 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  			echo "Unable to verify PIN"
  			proto_notify_error "$interface" PIN_FAILED
  			proto_block_restart "$interface"
-@@ -110,6 +135,7 @@ proto_ncm_setup() {
+@@ -111,6 +135,7 @@ proto_ncm_setup() {
  	echo "Configuring modem"
  	for i in $configure; do
  		eval COMMAND="$i" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
@@ -686,22 +688,42 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  			echo "Failed to configure modem"
  			proto_notify_error "$interface" CONFIGURE_FAILED
  			return 1
-@@ -121,6 +147,7 @@ proto_ncm_setup() {
+@@ -120,73 +145,89 @@ proto_ncm_setup() {
+ 	[ -n "$mode" ] && {
+ 		json_select modes
  		json_get_var setmode "$mode"
- 		echo "Setting mode"
- 		eval COMMAND="$setmode" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
+-		[ -n "$setmode" ] && {
+-			echo "Setting mode"
+-			eval COMMAND="$setmode" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
+-				echo "Failed to set operating mode"
+-				proto_notify_error "$interface" SETMODE_FAILED
+-				return 1
+-			}
++		echo "Setting mode"
++		eval COMMAND="$setmode" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
 +			do_unlock
- 			echo "Failed to set operating mode"
- 			proto_notify_error "$interface" SETMODE_FAILED
- 			return 1
-@@ -132,57 +159,75 @@ proto_ncm_setup() {
++			echo "Failed to set operating mode"
++			proto_notify_error "$interface" SETMODE_FAILED
++			return 1
+ 		}
+ 		json_select ..
+ 	}
+ 
+ 	echo "Starting network $interface"
  	json_get_vars connect
- 	echo "Connecting modem"
- 	eval COMMAND="$connect" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
+-	[ -n "$connect" ] && {
+-		echo "Connecting modem"
+-		eval COMMAND="$connect" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
+-			echo "Failed to connect"
+-			proto_notify_error "$interface" CONNECT_FAILED
+-			return 1
+-		}
++	echo "Connecting modem"
++	eval COMMAND="$connect" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
 +		do_unlock
- 		echo "Failed to connect"
- 		proto_notify_error "$interface" CONNECT_FAILED
- 		return 1
++		echo "Failed to connect"
++		proto_notify_error "$interface" CONNECT_FAILED
++		return 1
  	}
  
  	json_get_vars finalize
@@ -744,10 +766,7 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
 +			echo "Failed to get IP address information"
 +			proto_notify_error "$interface" GETADDRS_FAILED
 +			return 1
- 		}
--		json_close_object
--		ubus call network add_dynamic "$(json_dump)"
--	}
++		}
 +
 +		proto_add_ipv4_address "$ip" "$subnet"
 +                [ "$defaultroute" = 0 ] || proto_add_ipv4_route "0.0.0.0" 0 "$gateway" "" "$metric"
@@ -768,7 +787,10 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
 +				json_add_string zone "$zone"
 +			}
 +			ubus call network add_dynamic "$(json_dump)"
-+		}
+ 		}
+-		json_close_object
+-		ubus call network add_dynamic "$(json_dump)"
+-	}
 +
 +		[ "$pdptype" = "IPV6" -o "$pdptype" = "IPV4V6" ] && {
 +			json_init
@@ -792,21 +814,64 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  			return 1
  		}
  	}
--
 +	do_unlock
  }
  
  proto_ncm_teardown() {
-@@ -211,15 +256,68 @@ proto_ncm_teardown() {
+@@ -199,20 +240,6 @@ proto_ncm_teardown() {
+ 
+ 	[ -n "$ctl_device" ] && device=$ctl_device
+ 
+-	[ -n "$device" ] || {
+-		echo "No control device specified"
+-		proto_notify_error "$interface" NO_DEVICE
+-		proto_set_available "$interface" 0
+-		return 1
+-	}
+-
+-	device="$(readlink -f $device)"
+-	[ -e "$device" ] || {
+-		echo "Control device not valid"
+-		proto_set_available "$interface" 0
+-		return 1
+-	}
+-
+ 	[ -n "$profile" ] || profile=1
+ 
+ 	echo "Stopping network $interface"
+@@ -220,16 +247,6 @@ proto_ncm_teardown() {
+ 	json_load "$(ubus call network.interface.$interface status)"
+ 	json_select data
+ 	json_get_vars manufacturer
+-	[ $? -ne 0 -o -z "$manufacturer" ] && {
+-		# Fallback to direct detect, for proper handle device replug.
+-		manufacturer=$(gcom -d "$device" -s /etc/gcom/getcardinfo.gcom | awk 'NF && $0 !~ /AT\+CGMI/ { sub(/\+CGMI: /,""); print tolower($1); exit; }')
+-		[ $? -ne 0 -o -z "$manufacturer" ] && {
+-			echo "Failed to get modem information"
+-			proto_notify_error "$interface" GETINFO_FAILED
+-			return 1
+-		}
+-		json_add_string "manufacturer" "$manufacturer"
+-	}
+ 
+ 	json_load "$(cat /etc/gcom/ncm.json)"
+ 	json_select "$manufacturer" || {
+@@ -239,17 +256,68 @@ proto_ncm_teardown() {
  	}
  
  	json_get_vars disconnect
+-	[ -n "$disconnect" ] && {
+-		eval COMMAND="$disconnect" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
+-			echo "Failed to disconnect"
+-			proto_notify_error "$interface" DISCONNECT_FAILED
+-			return 1
+-		}
 +	do_lock
- 	eval COMMAND="$disconnect" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
++	eval COMMAND="$disconnect" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
 +		do_unlock
- 		echo "Failed to disconnect"
- 		proto_notify_error "$interface" DISCONNECT_FAILED
- 		return 1
++		echo "Failed to disconnect"
++		proto_notify_error "$interface" DISCONNECT_FAILED
++		return 1
  	}
 +	do_unlock
  

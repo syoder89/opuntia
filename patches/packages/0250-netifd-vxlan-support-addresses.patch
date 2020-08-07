@@ -1,8 +1,8 @@
-Index: build_dir.ev1000/package/network/config/vxlan/files/vxlan.sh
+Index: build_dir/package/network/config/vxlan/files/vxlan.sh
 ===================================================================
---- build_dir.ev1000.orig/package/network/config/vxlan/files/vxlan.sh
-+++ build_dir.ev1000/package/network/config/vxlan/files/vxlan.sh
-@@ -16,8 +16,12 @@ vxlan_generic_setup() {
+--- build_dir.orig/package/network/config/vxlan/files/vxlan.sh
++++ build_dir/package/network/config/vxlan/files/vxlan.sh
+@@ -60,8 +60,13 @@ vxlan_generic_setup() {
  	local link="$cfg"
  
  	local port vid ttl tos mtu macaddr zone rxcsum txcsum
@@ -12,14 +12,14 @@ Index: build_dir.ev1000/package/network/config/vxlan/files/vxlan.sh
 +	config_load network
 +	config_get addresses "${cfg}" "addresses"
 +	config_get ip6prefix "${cfg}" "ip6prefix"
- 
++
  	proto_init_update "$link" 1
  
-@@ -46,14 +50,38 @@ vxlan_generic_setup() {
+ 	proto_add_tunnel
+@@ -89,6 +94,26 @@ vxlan_generic_setup() {
  	[ -n "$zone" ] && json_add_string zone "$zone"
  	proto_close_data
  
-+	logger "Addresses are $addresses"
 +	for address in ${addresses}; do
 +		case "${address}" in
 +			*:*/*)
@@ -41,8 +41,9 @@ Index: build_dir.ev1000/package/network/config/vxlan/files/vxlan.sh
 +		proto_add_ipv6_prefix "$prefix"
 +	done
  	proto_send_update "$cfg"
- }
  
+ 	config_load network
+@@ -98,8 +123,11 @@ vxlan_generic_setup() {
  proto_vxlan_setup() {
  	local cfg="$1"
  
@@ -54,11 +55,11 @@ Index: build_dir.ev1000/package/network/config/vxlan/files/vxlan.sh
 +	[ -n "$local" ] && ipaddr="$local"
 +	[ -n "$remote" ] && peeraddr="$remote"
  
- 	[ -z "$peeraddr" ] && {
- 		proto_notify_error "$cfg" "MISSING_ADDRESS"
-@@ -130,12 +158,16 @@ vxlan_generic_init_config() {
- 	proto_config_add_int "tos"
- 	proto_config_add_int "mtu"
+ 	( proto_add_host_dependency "$cfg" '' "$tunlink" )
+ 
+@@ -166,12 +194,16 @@ vxlan_generic_init_config() {
+ 	proto_config_add_boolean "rxcsum"
+ 	proto_config_add_boolean "txcsum"
  	proto_config_add_string "macaddr"
 +	proto_config_add_array "addresses:list(string)"
 +	proto_config_add_string "ip6prefix"

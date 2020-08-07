@@ -2,22 +2,23 @@ Index: build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
 ===================================================================
 --- build_dir.orig/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
 +++ build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
-@@ -32,7 +32,13 @@ ramips_setup_interfaces()
- 	linksys,re6500)
- 		ucidef_set_interface_lan "lan1 lan2 lan3 lan4"
+@@ -20,8 +20,14 @@ ramips_setup_interfaces()
+ 	xiaomi,mir3g-v2)
+ 		ucidef_set_interfaces_lan_wan "lan1 lan2" "wan"
  		;;
--	mikrotik,routerboard-m11g|\
-+	mikrotik,routerboard-m11g)\
++	mikrotik,routerboard-m11g)
 +		ucidef_set_interface_lan "eth0.4001"
 +        	ucidef_add_switch "switch0" \
 +                	"0:lan:1:4001" "6@eth0"
 +        	ucidef_add_switch_extra_attr "switch0" "alias_cpu" "6"
 +        	ucidef_add_switch_extra_attr "switch0" "alias_lan" "0"
 +        	;;
+ 	edimax,re23s|\
+-	mikrotik,routerboard-m11g|\
  	netgear,ex6150|\
  	thunder,timecloud|\
  	tplink,re350-v1|\
-@@ -100,7 +106,7 @@ ramips_setup_macs()
+@@ -110,7 +116,7 @@ ramips_setup_macs()
  	mikrotik,routerboard-750gr3|\
  	mikrotik,routerboard-m11g|\
  	mikrotik,routerboard-m33g)
@@ -30,7 +31,7 @@ Index: build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
 ===================================================================
 --- build_dir.orig/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
 +++ build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
-@@ -44,10 +44,10 @@ linksys,ea7500-v2)
+@@ -51,10 +51,10 @@ linksys,ea7500-v2)
  mikrotik,routerboard-m11g)
  	ucidef_set_rssimon "wlan0" "200000" "1"
  	ucidef_set_led_rssi "rssilow" "RSSILOW" "$boardname:green:rssi0" "wlan0" "1" "100"

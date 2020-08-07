@@ -1,0 +1,8 @@
+config LEDS_APU2
+        tristate "ImageStream APU2 / PoE Board LED support"
+        depends on LEDS_CLASS
+        depends on LEDS_GPIO
+        depends on GPIOLIB
+        help
+          Say yes here to enable support for the CPU GPIO pins on the ImageStream
+          AP2100 PoE board, which enables the LEDs.
