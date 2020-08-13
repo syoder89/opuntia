@@ -2,35 +2,31 @@ Index: build_dir/target/linux/ramips/dts/mt7621_mikrotik_routerboard-m11g.dts
 ===================================================================
 --- build_dir.orig/target/linux/ramips/dts/mt7621_mikrotik_routerboard-m11g.dts
 +++ build_dir/target/linux/ramips/dts/mt7621_mikrotik_routerboard-m11g.dts
-@@ -128,12 +128,21 @@
- 			partition@40000 {
- 				compatible = "mikrotik,minor";
- 				label = "firmware";
--				reg = <0x040000 0xFC0000>;
-+				reg = <0x040000 0xFB0000>;
-+			};
-+
-+			imagestream: partition@FFF000 {
-+				label = "imagestream";
-+				reg = <0xFFF000 0x1000>;
- 			};
- 		};
+@@ -64,8 +64,17 @@
+ 	partition@40000 {
+ 		compatible = "mikrotik,minor";
+ 		label = "firmware";
+-		reg = <0x040000 0xfc0000>;
++		reg = <0x040000 0xfb0000>;
  	};
- };
- 
-+&gmac0 {
-+	mtd-mac-address = <&imagestream 0x0010>;
++
++	imagestream: partition@FFF000 {
++		label = "imagestream";
++		reg = <0xfff000 0x1000>;
++	};
 +};
 +
++&gmac0 {
++	mtd-mac-address = <&imagestream 0x0010>;
+ };
+ 
  &switch0 {
- 	ports {
- 		port@0 {
 Index: build_dir/target/linux/ramips/image/mt7621.mk
 ===================================================================
 --- build_dir.orig/target/linux/ramips/image/mt7621.mk
 +++ build_dir/target/linux/ramips/image/mt7621.mk
-@@ -516,7 +516,7 @@ TARGET_DEVICES += mediatek_mt7621-eval-b
- define Device/MikroTik
+@@ -691,7 +691,7 @@ define Device/MikroTik
+   $(Device/dsa-migration)
    DEVICE_VENDOR := MikroTik
    BLOCKSIZE := 64k
 -  IMAGE_SIZE := 16128k

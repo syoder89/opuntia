@@ -1,13 +1,15 @@
---- a/package/network/services/hostapd/files/hostapd.sh
-+++ b/package/network/services/hostapd/files/hostapd.sh
-@@ -124,10 +124,14 @@ hostapd_common_add_bss_config() {
+Index: build_dir/package/network/services/hostapd/files/hostapd.sh
+===================================================================
+--- build_dir.orig/package/network/services/hostapd/files/hostapd.sh
++++ build_dir/package/network/services/hostapd/files/hostapd.sh
+@@ -195,10 +195,14 @@ hostapd_common_add_bss_config() {
  	config_add_int ieee80211w
  	config_add_int eapol_version
  
 +	config_add_array auth_servers
 +
  	config_add_string 'auth_server:host' 'server:host'
- 	config_add_string auth_secret
+ 	config_add_string auth_secret key
  	config_add_int 'auth_port:port' 'port:port'
  
 +	config_add_array acct_servers
@@ -15,17 +17,17 @@
  	config_add_string acct_server
  	config_add_string acct_secret
  	config_add_int acct_port
-@@ -259,6 +263,7 @@ hostapd_set_bss_options() {
+@@ -425,6 +429,7 @@ hostapd_set_bss_options() {
  		;;
- 		eap)
+ 		eap|eap192|eap-eap192)
  			json_get_vars \
 +				auth_servers acct_servers \
  				auth_server auth_secret auth_port \
  				dae_client dae_secret dae_port \
- 				ownip \
-@@ -278,12 +283,59 @@ hostapd_set_bss_options() {
+ 				ownip radius_client_addr \
+@@ -443,12 +448,59 @@ hostapd_set_bss_options() {
+ 			set_default dae_port 3799
  
- 			set_default vlan_naming 1
  
 -			append bss_conf "auth_server_addr=$auth_server" "$N"
 -			append bss_conf "auth_server_port=$auth_port" "$N"

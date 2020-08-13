@@ -1,16 +1,3 @@
-Index: build_dir/package/network/services/hostapd/files/hostapd.sh
-===================================================================
---- build_dir.orig/package/network/services/hostapd/files/hostapd.sh
-+++ build_dir/package/network/services/hostapd/files/hostapd.sh
-@@ -342,7 +342,7 @@ hostapd_set_bss_options() {
- 			wps_not_configured=1
- 		;;
- 		psk|sae|psk-sae)
--			json_get_vars key wpa_psk_file
-+			json_get_vars key wpa_psk_file ieee80211w
- 			if [ ${#key} -lt 8 ]; then
- 				wireless_setup_vif_failed INVALID_WPA_PSK
- 				return 1
 Index: build_dir/package/network/utils/iwinfo/patches/003-scott-limit-regulatory-domains.patch
 ===================================================================
 --- /dev/null
