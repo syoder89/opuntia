@@ -1,0 +1,12 @@
+Index: build_dir/feeds/packages/utils/vim/Makefile
+===================================================================
+--- build_dir.orig/feeds/packages/utils/vim/Makefile
++++ build_dir/feeds/packages/utils/vim/Makefile
+@@ -130,6 +130,7 @@ CONFIGURE_ARGS += \
+ 	--disable-gpm \
+ 	--disable-acl \
+ 	--with-tlib=ncurses \
++	--disable-selinux \
+ 	--with-compiledby="non-existent-hostname-compiled"
+ 
+ CONFIGURE_VARS += \
