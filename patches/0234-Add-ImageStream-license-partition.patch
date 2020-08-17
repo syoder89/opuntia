@@ -246,9 +246,9 @@ Index: build_dir/target/linux/x86/base-files/etc/hotplug.d/ieee80211/10_fix_wifi
 +}
 +
 +function process_imagestream() {
-+       is_dev="mmcblk0p4"
++       is_dev="mmcblk0"
 +       grep $is_dev /proc/partitions > /dev/null 2>&1 || return 1
-+       json_load "$(dd if=/dev/$is_dev bs=1 skip=256 2>/dev/null)"
++       json_load "$(dd if=/dev/mmcblk0 bs=1k count=4 skip=$(($(awk '$4 == "mmcblk0" { print $3}' < /proc/partitions) - 4)) | dd bs=1 skip=256 2>/dev/null)"
 +       json_get_values _macs mac_addrs
 +       process_macs $_macs
 +       return 0
@@ -295,9 +295,9 @@ Index: build_dir/target/linux/x86/base-files/etc/init.d/fix_eth_mac
 +}
 +
 +function process_imagestream() {
-+	is_dev="mmcblk0p4"
++	is_dev="mmcblk0"
 +	grep $is_dev /proc/partitions > /dev/null 2>&1 || return 1
-+	json_load "$(dd if=/dev/$is_dev bs=1 skip=256 2>/dev/null)"
++	json_load "$(dd if=/dev/mmcblk0 bs=1k count=4 skip=$(($(awk '$4 == "mmcblk0" { print $3}' < /proc/partitions) - 4)) | dd bs=1 skip=256 2>/dev/null)"
 +	json_get_values _macs mac_addrs
 +	process_macs $_macs
 +	return 0
@@ -317,49 +317,3 @@ Index: build_dir/target/linux/x86/base-files/etc/init.d/fix_eth_mac
 +	;;
 +        esac
 +}
-Index: build_dir/scripts/gen_image_generic.sh
-===================================================================
---- build_dir.orig/scripts/gen_image_generic.sh
-+++ build_dir/scripts/gen_image_generic.sh
-@@ -1,8 +1,8 @@
- #!/bin/sh
- # Copyright (C) 2006-2012 OpenWrt.org
- set -e -x
--if [ $# -ne 5 ] && [ $# -ne 6 ]; then
--    echo "SYNTAX: $0 <file> <kernel size> <kernel directory> <rootfs size> <rootfs image> [<align>]"
-+if [ $# -ne 5 ] && [ $# -ne 6 ] && [ $# -ne 7 ]; then
-+    echo "SYNTAX: $0 <file> <kernel size> <kernel directory> <rootfs size> <rootfs image> [<align>] [ extra options ]"
-     exit 1
- fi
- 
-@@ -12,6 +12,7 @@ KERNELDIR="$3"
- ROOTFSSIZE="$4"
- ROOTFSIMAGE="$5"
- ALIGN="$6"
-+EXTRAOPTS="$7"
- 
- rm -f "$OUTPUT"
- 
-@@ -19,7 +20,7 @@ head=16
- sect=63
- 
- # create partition table
--set $(ptgen -o "$OUTPUT" -h $head -s $sect ${GUID:+-g} -p "${KERNELSIZE}m" -p "${ROOTFSSIZE}m" ${ALIGN:+-l $ALIGN} ${SIGNATURE:+-S 0x$SIGNATURE} ${GUID:+-G $GUID})
-+set $(ptgen -o "$OUTPUT" -h $head -s $sect ${GUID:+-g} -p "${KERNELSIZE}m" -p "${ROOTFSSIZE}m" ${ALIGN:+-l $ALIGN} ${SIGNATURE:+-S 0x$SIGNATURE} ${GUID:+-G $GUID} ${EXTRAOPTS:+ $EXTRAOPTS})
- 
- KERNELOFFSET="$(($1 / 512))"
- KERNELSIZE="$2"
-Index: build_dir/target/linux/x86/image/Makefile
-===================================================================
---- build_dir.orig/target/linux/x86/image/Makefile
-+++ build_dir/target/linux/x86/image/Makefile
-@@ -55,7 +55,8 @@ define Build/combined
- 		$@ \
- 		$(CONFIG_TARGET_KERNEL_PARTSIZE) $@.boot \
- 		$(CONFIG_TARGET_ROOTFS_PARTSIZE) $(IMAGE_ROOTFS) \
--		256
-+		256 \
-+		"-p 4k@3887100"
- endef
- 
- define Build/grub-config
