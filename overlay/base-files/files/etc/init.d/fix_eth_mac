@@ -1,0 +1,41 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006-2011 OpenWrt.org
+
+START=10
+STOP=90
+
+. /usr/share/libubox/jshn.sh
+
+function process_macs() {
+	let i=0
+	while [ ! -z $1 ]; do
+		var="mac${i}"
+		eval $var=$1
+		shift
+		let i=i+1
+	done
+}
+
+function process_imagestream() {
+	is_dev="mmcblk0"
+	grep $is_dev /proc/partitions > /dev/null 2>&1 || return 1
+	json_load "$(dd if=/dev/mmcblk0 bs=1k count=4 skip=$(($(awk '$4 == "mmcblk0" { print $3}' < /proc/partitions) - 4)) | dd bs=1 skip=256 2>/dev/null)"
+	json_get_values _macs mac_addrs
+	process_macs $_macs
+	return 0
+}
+
+boot() {
+        case $(board_name) in
+	pc-engines-apu2)
+		# Use our reserved MAC address instead of the card's MAC
+		process_imagestream || return 0
+		for i in 0 1 2; do
+			mac=$(eval echo \$mac${i})
+			if [ -n "${mac}" ]; then
+				ip link set dev eth${i} address ${mac}
+			fi
+		done
+	;;
+        esac
+}
