@@ -1,0 +1,65 @@
+#!/bin/sh
+# ImageStream Envoy netboot installer
+
+# This script doesn't work correctly from uci-defaults, so pop it into rc.local instead
+[ -f /etc/uci-defaults/99-imagestream-installer ] && {
+	cp /etc/uci-defaults/99-imagestream-installer /etc/rc.local
+	exit 0
+}
+
+. /lib/functions.sh
+. /lib/upgrade/platform.sh
+
+URL="http://router-updates.imagestream.com/opuntia/current/"
+INSTALL_URL="http://install1.imagestream.com/ap2100-installer/"
+RC_POSTINSTALL="rc.postinstall"
+PRODUCT_NAME="AP2100"
+
+do_fetch() {
+        fetch_url="$1"
+        desc="$2"
+        let retries=10
+        success=0
+        while [ $((retries)) -gt 0 ] ; do
+                wget "${fetch_url}"
+                if [ "$?" = "0" ] ; then
+                        success=1
+                        break
+                fi
+                let retries=retries-1
+                sleep 1
+        done
+        if [ "$success" != "1" ] ; then
+                logger "Failed to download ${desc}!"
+                exit 1
+        fi
+}
+
+# Start up the random number generator
+/etc/init.d/haveged start
+sleep 30
+logger "Installing $PRODUCT_NAME"
+mkdir /tmp/root
+cd /tmp
+
+# Find the latest AP1000 sysupgrade image
+# Ex: opuntia-AP2100-4.8.10-r41429-sysupgrade.bin
+IMAGE=$(wget -qO - ${URL} | grep -o 'opuntia-AP2100-[0-9]*\.[0-9]*\.[0-9]*-r[0-9]*-sysupgrade\.bin' | sort -rn | head -n 1)
+do_fetch "${URL}/${IMAGE}" "image"
+
+logger "Installing post-installation script..."
+cd /tmp
+do_fetch "${INSTALL_URL}/${RC_POSTINSTALL}" "post-installation script"
+chmod +x ${RC_POSTINSTALL}
+mv ${RC_POSTINSTALL} /etc/rc.local
+
+# Create the product_id.txt from the firmware release
+. /etc/opuntia_release 
+cat << EOM > /etc/product_id.txt
+$PRODUCT_NAME
+$DISTRIB_PRODUCT
+$DISTRIB_HWREV
+EOM
+
+logger "Installing operating system..."
+sysupgrade ${IMAGE}
