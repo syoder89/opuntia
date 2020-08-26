@@ -10,7 +10,15 @@
 . /lib/functions.sh
 . /lib/upgrade/platform.sh
 
-URL="http://router-updates.imagestream.com/opuntia/current/"
+# Create the product_id.txt from the firmware release
+. /etc/opuntia_release 
+cat << EOM > /etc/product_id.txt
+$PRODUCT_NAME
+$DISTRIB_PRODUCT
+$DISTRIB_HWREV
+EOM
+
+URL="http://router-updates.imagestream.com/opuntia/${DISTRIB_PRODUCT}-v${DISTRIB_HWREV}/"
 INSTALL_URL="http://install1.imagestream.com/ap2100-installer/"
 RC_POSTINSTALL="rc.postinstall"
 PRODUCT_NAME="AP2100"
@@ -44,7 +52,7 @@ cd /tmp
 
 # Find the latest AP1000 sysupgrade image
 # Ex: opuntia-AP2100-4.8.10-r41429-sysupgrade.bin
-IMAGE=$(wget -qO - ${URL} | grep -o 'opuntia-AP2100-[0-9]*\.[0-9]*\.[0-9]*-r[0-9]*-sysupgrade\.bin' | sort -rn | head -n 1)
+IMAGE=$(wget -qO - ${URL} | grep -o "opuntia-${DISTRIB_PRODUCT}-v${DISTRIB_HWREV}-[0-9]*\.[0-9]*\.[0-9]*-r[0-9]*-sysupgrade\.bin" | sort -rn | head -n 1)
 do_fetch "${URL}/${IMAGE}" "image"
 
 logger "Installing post-installation script..."
@@ -52,14 +60,6 @@ cd /tmp
 do_fetch "${INSTALL_URL}/${RC_POSTINSTALL}" "post-installation script"
 chmod +x ${RC_POSTINSTALL}
 mv ${RC_POSTINSTALL} /etc/rc.local
-
-# Create the product_id.txt from the firmware release
-. /etc/opuntia_release 
-cat << EOM > /etc/product_id.txt
-$PRODUCT_NAME
-$DISTRIB_PRODUCT
-$DISTRIB_HWREV
-EOM
 
 logger "Installing operating system..."
 sysupgrade ${IMAGE}
