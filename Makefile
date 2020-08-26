@@ -74,18 +74,19 @@ install: $(built)
 	conf=`cat $(configured) | awk '{print toupper($$0)}'`; \
 	combined=`find ${BUILD_DIR}/bin/ -name '*combined*' | head -n 1`; \
 	sysup=`find ${BUILD_DIR}/bin/ -name '*sysupgrade*' | head -n 1`; \
+	hwver=`grep CONFIG_VERSION_HWREV $(BUILD_DIR)/.config | cut -d '"' -f 2`; \
 	ver=`grep CONFIG_VERSION_NUMBER $(BUILD_DIR)/.config | cut -d '"' -f 2`; \
 	rel=`cd ${BUILD_DIR} && ./scripts/getver.sh`; \
 	factory=`find ${BUILD_DIR}/bin/ -name '*factory*' | head -n 1`; \
 	if [ ! -z $${factory} ]; then \
-		cp -f $${factory} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-factory.img; \
+		cp -f $${factory} $(DESTDIR)/opuntia-$${conf}-v$${hwver}-$${ver}-$${rel}-factory.img; \
 	elif [ "$${combined}" != "" ] ; then \
-		cp -f $${combined} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-factory.img; \
+		cp -f $${combined} $(DESTDIR)/opuntia-$${conf}-v$${hwver}-$${ver}-$${rel}-factory.img; \
 	fi; \
 	if [ "$${combined}" != "" ] ; then \
-		cp -f $${combined} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-sysupgrade.bin; \
+		cp -f $${combined} $(DESTDIR)/opuntia-$${conf}-v$${hwver}-$${ver}-$${rel}-sysupgrade.bin; \
 	elif [ "$${sysup}" != "" ] ; then \
-		cp -f $${sysup} $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-sysupgrade.bin; \
+		cp -f $${sysup} $(DESTDIR)/opuntia-$${conf}-v$${hwver}-$${ver}-$${rel}-sysupgrade.bin; \
 	fi
 #		gzip -dc $${combined} > $(DESTDIR)/opuntia-$${conf}-$${ver}-$${rel}-factory.img; \
 
