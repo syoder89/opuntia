@@ -11,8 +11,13 @@ define custom_install_commands_rebel
 endef
 
 PRODUCT_VER := $(firstword $(subst -, ,$(CONFIG_VERSION_PRODUCT)))
+HWREV := $(firstword $(subst -, ,$(CONFIG_VERSION_HWREV)))
 ifeq ($(PRODUCT_VER), "RR1000")
 Package/firewall/install += $(newline)$(custom_install_commands_rebel)
 else ifeq ($(PRODUCT_VER), "EV1000")
 Package/firewall/install += $(newline)$(custom_install_commands_envoy)
+else ifeq ($(PRODUCT_VER), "AP2100")
+ifeq ($(HWREV), "3")
+Package/firewall/install += $(newline)$(custom_install_commands_envoy)
+endif
 endif
