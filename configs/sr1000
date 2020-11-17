@@ -61,7 +61,6 @@ CONFIG_TARGET_PROFILE="Generic"
 CONFIG_TARGET_ARCH_PACKAGES="x86_64"
 CONFIG_DEFAULT_TARGET_OPTIMIZATION="-Os -pipe"
 CONFIG_CPU_TYPE=" "
-CONFIG_LINUX_4_9=y
 CONFIG_DEFAULT_base-files=y
 CONFIG_DEFAULT_busybox=y
 CONFIG_DEFAULT_dnsmasq=y
@@ -75,6 +74,7 @@ CONFIG_DEFAULT_kmod-button-hotplug=y
 CONFIG_DEFAULT_kmod-e1000=y
 CONFIG_DEFAULT_kmod-e1000e=y
 CONFIG_DEFAULT_kmod-igb=y
+CONFIG_DEFAULT_kmod-i40e=y
 CONFIG_DEFAULT_kmod-r8169=y
 CONFIG_DEFAULT_libc=y
 CONFIG_DEFAULT_libgcc=y
@@ -127,6 +127,7 @@ CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=256
 CONFIG_TARGET_UBIFS_FREE_SPACE_FIXUP=y
 CONFIG_TARGET_UBIFS_JOURNAL_SIZE=""
 CONFIG_GRUB_IMAGES=y
+# CONFIG_GRUB_EFI_IMAGES is not set
 CONFIG_GRUB_CONSOLE=y
 CONFIG_GRUB_SERIAL="ttyS0"
 CONFIG_GRUB_BAUDRATE=115200
@@ -137,20 +138,20 @@ CONFIG_GRUB_TIMEOUT="5"
 # CONFIG_VMDK_IMAGES is not set
 # CONFIG_TARGET_IMAGES_PAD is not set
 
+# 
+# Editors
+# 
+CONFIG_PACKAGE_vim-full=y
+
 #
 # Image Options
 #
 CONFIG_TARGET_KERNEL_PARTSIZE=16
-CONFIG_TARGET_ROOTFS_PARTSIZE=256
+CONFIG_TARGET_ROOTFS_PARTSIZE=512
 CONFIG_TARGET_ROOTFS_PARTNAME=""
 
-CONFIG_VERSION_PRODUCT="RR1000"
-CONFIG_VERSION_HWREV="12"
-
-#
-# Editors
-#
-CONFIG_PACKAGE_vim-full=y
+CONFIG_VERSION_PRODUCT="SR1000"
+CONFIG_VERSION_HWREV="3"
 
 #
 # Kernel build options for k3s
@@ -230,7 +231,7 @@ CONFIG_PACKAGE_imagestream-snmp-mibs=y
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs is not set
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs-i is not set
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs-i.v3 is not set
-CONFIG_PACKAGE_imagestream-rebel-configs=y
+CONFIG_PACKAGE_imagestream-envoy-configs=y
 CONFIG_PACKAGE_imagestream-wifi-ap-bootstrap=y
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs.v3 is not set
 # CONFIG_PACKAGE_imagestream-wifi-ap-installer is not set
@@ -246,11 +247,10 @@ CONFIG_PACKAGE_stats=y
 # CONFIG_PACKAGE_netifd-qmi is not set
 
 # CONFIG_PACKAGE_kmod-ath10k is not set
-CONFIG_PACKAGE_kmod-ath10k-ct=y
+# CONFIG_PACKAGE_kmod-ath10k-ct is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca988x is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca988x-ct is not set
-CONFIG_PACKAGE_ath10k-firmware-qca9888-ct-htt=y
-CONFIG_PACKAGE_ath10k-firmware-qca988x-ct-htt=y
+CONFIG_PACKAGE_ath10k-firmware-qca988x-ct-full-htt=y
 CONFIG_PACKAGE_ath10k-firmware-qca9984-ct-htt=y
 CONFIG_PACKAGE_ath10k-firmware-qca99x0-ct-htt=y
 
@@ -328,11 +328,13 @@ CONFIG_PACKAGE_keepalived=y
 CONFIG_PACKAGE_kmod-ipt-conntrack-extra=y
 CONFIG_PACKAGE_kmod-nft-offload=y
 CONFIG_PACKAGE_frr=y
+CONFIG_PACKAGE_frr-bfdd=y
 CONFIG_PACKAGE_frr-bgpd=y
 CONFIG_PACKAGE_frr-eigrpd=y
 CONFIG_PACKAGE_frr-isisd=y
 CONFIG_PACKAGE_frr-ospf6d=y
 CONFIG_PACKAGE_frr-ospfd=y
+CONFIG_PACKAGE_frr-vrrpd=y
 CONFIG_PACKAGE_frr-vtysh=y
 CONFIG_PACKAGE_frr-staticd=y
 # CONFIG_PACKAGE_quagga is not set
@@ -340,6 +342,7 @@ CONFIG_PACKAGE_conntrack=y
 CONFIG_PACKAGE_conntrackd=y
 CONFIG_PACKAGE_nodogsplash=y
 
+CONFIG_PACKAGE_coova-chilli=y
 CONFIG_PACKAGE_coova-chilli=y
 # CONFIG_COOVACHILLI_PROXY is not set
 # CONFIG_COOVACHILLI_REDIR is not set
@@ -357,6 +360,7 @@ CONFIG_PACKAGE_luci-proto-wireguard=y
 CONFIG_PACKAGE_luci-app-wireguard=y
 CONFIG_PACKAGE_libqrencode=y
 CONFIG_PACKAGE_qrencode=y
+CONFIG_PACKAGE_kmod-gpio-nct5104d=y
 
 CONFIG_PACKAGE_kmod-openvswitch=y
 CONFIG_PACKAGE_openvswitch=y
@@ -370,3 +374,17 @@ CONFIG_PACKAGE_openvswitch-ovs-vsctl=y
 CONFIG_PACKAGE_openvswitch-ovsdb-client=y
 CONFIG_PACKAGE_kmod-openvswitch-vxlan=y
 # CONFIG_PACKAGE_openvswitch-python is not set
+CONFIG_PACKAGE_kmod-fs-ext4=y
+CONFIG_PACKAGE_kmod-fs-f2fs=y
+# CONFIG_PACKAGE_openssh-client is not set
+# CONFIG_PACKAGE_openssh-server is not set
+CONFIG_PACKAGE_e2fsprogs=y
+CONFIG_PACKAGE_f2fs-tools=y
+CONFIG_PACKAGE_f2fsck=y
+CONFIG_PACKAGE_collectd-mod-thermal=y
+CONFIG_PACKAGE_flashrom=y
+CONFIG_PACKAGE_dmidecode=y
+CONFIG_KERNEL_DEVMEM=y
+CONFIG_KERNEL_DEVKMEM=y
+CONFIG_PACKAGE_kmod-ipt-netflow=y
+CONFIG_PACKAGE_iptables-mod-netflow=y
