@@ -149,6 +149,11 @@ CONFIG_VERSION_PRODUCT="AP2100"
 CONFIG_VERSION_HWREV="3"
 
 #
+# Editors
+#
+CONFIG_PACKAGE_vim-full=y
+
+#
 # Kernel build options for k3s
 #
 CONFIG_KERNEL_BLK_CGROUP=y

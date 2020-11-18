@@ -149,6 +149,11 @@ CONFIG_VERSION_PRODUCT="EV1000"
 CONFIG_VERSION_HWREV="4"
 
 #
+# Editors
+#
+CONFIG_PACKAGE_vim-full=y
+
+#
 # Kernel build options for k3s
 #
 CONFIG_KERNEL_BLK_CGROUP=y
