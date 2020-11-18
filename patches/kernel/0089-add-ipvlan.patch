@@ -1,0 +1,26 @@
+Index: build_dir/package/kernel/linux/modules/netsupport.mk
+===================================================================
+--- build_dir.orig/package/kernel/linux/modules/netsupport.mk
++++ build_dir/package/kernel/linux/modules/netsupport.mk
+@@ -1249,6 +1249,21 @@ endef
+ 
+ $(eval $(call KernelPackage,macsec))
+ 
++define KernalPackage/ipvlan
++  SUBMENU:=$(NETWORK_SUPPORT_MENU)
++  TITLE:=Ipvlan Support
++  KCONFIG:= \
++       CONFIG_IPVLAN \
++       CONFIG_NET_L3_MASTER_DEV
++  FILES:=$(LINUX_DIR)/drivers/net/ipvlan.ko
++  AUTOLOAD:=$(call AutoLoad,13,ipvlan)
++endef
++
++define KernelPackage/ipvlan/description
++ IPVLAN is a IP Namespace virutalization Interface
++endef
++
++$(eval $(call KernelPackage,ipvlan))
+ 
+ define KernelPackage/netlink-diag
+   SUBMENU:=$(NETWORK_SUPPORT_MENU)
