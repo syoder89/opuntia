@@ -6,7 +6,7 @@ Index: build_dir/package/kernel/linux/modules/netsupport.mk
  
  $(eval $(call KernelPackage,macsec))
  
-+define KernalPackage/ipvlan
++define KernelPackage/ipvlan
 +  SUBMENU:=$(NETWORK_SUPPORT_MENU)
 +  TITLE:=Ipvlan Support
 +  KCONFIG:= \

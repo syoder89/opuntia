@@ -154,6 +154,12 @@ CONFIG_VERSION_PRODUCT="SR1000"
 CONFIG_VERSION_HWREV="3"
 
 #
+# Kernel options for SR1000 hardware options
+#
+CONFIG_PACKAGE_kmod-i40e=y
+CONFIG_KERNEL_NR_CPUS=16
+
+#
 # Kernel build options for k3s
 #
 CONFIG_KERNEL_BLK_CGROUP=y
