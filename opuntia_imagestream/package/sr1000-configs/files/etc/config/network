@@ -1,0 +1,34 @@
+config interface 'loopback'
+        option ifname 'lo'
+        option proto 'static'
+        option ipaddr '127.0.0.1'
+        option netmask '255.0.0.0'
+
+config globals 'globals'
+        option ula_prefix 'auto'
+
+config interface 'Managment'
+        option type 'bridge'
+        option ifname 'enp2s0'
+        option proto 'static'
+        option netmask '255.255.255.0'
+        option ip6assign '60'
+        option ipaddr '10.10.199.1'
+
+config interface 'eth2'
+        option ifname 'enp183s0f3'
+        option proto 'dhcp'
+
+config interface 'eth2_6'
+        option ifname 'enp183s0f3'
+        option proto 'dhcpv6'
+
+config interface 'eth1'
+        option ifname 'eth1'
+	option metric '20'
+        option proto 'dhcp'
+
+config interface 'eth1_6'
+        option ifname 'eth1'
+	option metric '20'
+        option proto 'dhcpv6'

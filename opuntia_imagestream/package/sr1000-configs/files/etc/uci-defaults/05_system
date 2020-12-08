@@ -1,0 +1,65 @@
+#!/bin/sh
+#
+# Copyright (C) 2013 ImageStream Internet Solutions, Inc.
+#
+
+#uci batch <<EOF
+#set system.@system[0]=system
+#set system.@system[0].hostname=Opuntia
+#set system.@system[0].zonename=America/Chicago
+#set system.@system[0].timezone=CST6CDT,M3.2.0,M11.1.0
+#set system.@system[0].conloglevel=8
+#set system.@system[0].cronloglevel=8
+#delete system.ntp.server
+#add_list system.ntp.server='0.pool.ntp.org'
+#add_list system.ntp.server='1.pool.ntp.org'
+#add_list system.ntp.server='2.pool.ntp.org'
+#add_list system.ntp.server='3.pool.ntp.org'
+#set system.rssid_ath=rssid
+#set system.rssid_ath.refresh=1000000
+#set system.rssid_ath.threshold=1
+#set system.rssid_ath.dev=wlan0
+#set system.led_sig1=led
+#set system.led_sig1.name=SIG1
+#set system.led_sig1.sysfs=wpj344:red:sig1
+#set system.led_sig1.trigger=rssi
+#set system.led_sig1.iface=rssid_ath
+#set system.led_sig1.minq=25
+#set system.led_sig1.maxq=100
+#set system.led_sig1.offset=0
+#set system.led_sig1.factor=1
+#set system.led_sig2=led
+#set system.led_sig2.name=SIG2
+#set system.led_sig2.sysfs=wpj344:yellow:sig2
+#set system.led_sig2.trigger=rssi
+#set system.led_sig2.iface=rssid_ath
+#set system.led_sig2.minq=50
+#set system.led_sig2.maxq=100
+#set system.led_sig2.offset=0
+#set system.led_sig2.factor=1
+#set system.led_sig3=led
+#set system.led_sig3.name=SIG3
+#set system.led_sig3.sysfs=wpj344:green:sig3
+#set system.led_sig3.trigger=rssi
+#set system.led_sig3.iface=rssid_ath
+#set system.led_sig3.minq=75
+#set system.led_sig3.maxq=100
+#set system.led_sig3.offset=0
+#set system.led_sig3.factor=1
+#set system.led_sig4=led
+#set system.led_sig4.name=SIG4
+#set system.led_sig4.sysfs=wpj344:green:sig4
+#set system.led_sig4.trigger=rssi
+#set system.led_sig4.iface=rssid_ath
+#set system.led_sig4.minq=90
+#set system.led_sig4.maxq=100
+#set system.led_sig4.offset=0
+#set system.led_sig4.factor=1
+#set system.sysbuzzer=buzzer
+#set system.sysbuzzer.sysfs=wpj344:buzzer
+#EOF
+#
+#uci commit system
+
+exit 0
+
