@@ -1,0 +1,13 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006-2011 OpenWrt.org
+
+START=05
+STOP=90
+
+boot() {
+	/bin/mkdir /run
+        /bin/mount -t tmpfs -o size=5M tmpfs /run
+        /bin/mkdir /run/udev
+        /sbin/udevadm hwdb -u
+        /sbin/udevd -d
+}
