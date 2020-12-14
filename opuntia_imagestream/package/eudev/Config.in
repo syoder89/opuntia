@@ -51,6 +51,7 @@ config EUDEV_EXTRA_rule_generator
 	bool "Install (legacy) eudev rule_generator"
 	default n
 	help
+	  rule_generator - It's rules
 
 config EUDEV_EXTRA_scsi_id
 	bool "Install eudev scsi_id callout"
