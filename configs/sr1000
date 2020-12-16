@@ -368,6 +368,7 @@ CONFIG_PACKAGE_luci-proto-wireguard=y
 CONFIG_PACKAGE_luci-app-wireguard=y
 CONFIG_PACKAGE_libqrencode=y
 CONFIG_PACKAGE_qrencode=y
+CONFIG_PACKAGE_kmod-ipmi-smbus=y
 CONFIG_PACKAGE_kmod-gpio-nct5104d=y
 
 CONFIG_PACKAGE_kmod-openvswitch=y
