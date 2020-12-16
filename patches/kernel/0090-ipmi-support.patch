@@ -1,0 +1,25 @@
+Index: build_dir/package/kernel/linux/modules/other.mk
+===================================================================
+--- build_dir.orig/package/kernel/linux/modules/other.mk
++++ build_dir/package/kernel/linux/modules/other.mk
+@@ -926,6 +926,20 @@
+ 
+ $(eval $(call KernelPackage,ikconfig))
+ 
++define KernelPackage/ipmi-smbus
++  SUBMENU:=$(OTHER_MENU)
++  TITLE:=Ipmi Smbus support
++  KCONFIG:=CONFIG_IPMI_HANDLER=y \
++	   CONFIG_IPMI_SI=m
++  FILES:=$(LINUX_DIR)/kernel/configs.ko
++  AUTOLOAD:=$(call AutoLoad,70,configs)
++endef
++
++define KernelPackage/ipmi-sbus/description
++ Kernel configuration Ipmi-Smbus support
++endef
++
++$(eval $(call KernelPackage,ipmi-sbus))
+ 
+ define KernelPackage/zram
+   SUBMENU:=$(OTHER_MENU)
