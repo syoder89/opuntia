@@ -27,13 +27,14 @@ function process_imagestream() {
 
 boot() {
         case $(board_name) in
-	pc-engines-apu2)
+	pc-engines-apu2 |\
+	raspberrypi,4-model-b)
 		# Use our reserved MAC address instead of the card's MAC
 		process_imagestream || return 0
 		for i in 0 1 2; do
 			mac=$(eval echo \$mac${i})
 			if [ -n "${mac}" ]; then
-				ip link set dev eth${i} address ${mac}
+				ip link set dev eth${i} address ${mac} 2>/dev/null
 			fi
 		done
 	;;

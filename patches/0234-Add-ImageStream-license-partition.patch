@@ -271,3 +271,56 @@ Index: build_dir/target/linux/x86/base-files/etc/hotplug.d/ieee80211/10_fix_wifi
 +esac
 +
 +
+Index: build_dir/target/linux/bcm27xx/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
+===================================================================
+--- /dev/null
++++ build_dir/target/linux/bcm27xx/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
+@@ -0,0 +1,48 @@
++#!/bin/ash
++
++[ "$ACTION" == "add" ] || exit 0
++
++PHYNBR=${DEVPATH##*/phy}
++
++[ -n $PHYNBR ] || exit 0
++
++. /lib/functions.sh
++. /lib/functions/system.sh
++. /usr/share/libubox/jshn.sh
++
++function process_macs() {
++       let i=0
++       while [ ! -z $1 ]; do
++               var="mac${i}"
++               eval $var=$1
++               shift
++               let i=i+1
++       done
++}
++
++function process_imagestream() {
++       is_dev="mmcblk0"
++       grep $is_dev /proc/partitions > /dev/null 2>&1 || return 1
++       json_load "$(dd if=/dev/mmcblk0 bs=1k count=4 skip=$(($(awk '$4 == "mmcblk0" { print $3}' < /proc/partitions) - 4)) | dd bs=1 skip=256 2>/dev/null)"
++       json_get_values _macs mac_addrs
++       process_macs $_macs
++       return 0
++}
++
++board=$(board_name)
++
++case "$board" in
++       raspberrypi,4-model-b)
++               # Use our reserved MAC address instead of the card's MAC
++               process_imagestream || return 0
++
++	       mac=$(eval echo \$mac$((PHYNBR+3)))
++               if [ -n "${mac}" ]; then
++			echo "${mac}" > /sys${DEVPATH}/macaddress
++		fi
++               ;;
++       *)
++               ;;
++esac
++
++

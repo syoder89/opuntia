@@ -15,6 +15,15 @@ char *model = "AP3500";
 char *name = "AP3500";
 char *revision = "1";
 int mac_addrs_to_allocate = 2;
+char *root_pw = "imagestream";
+char *radio0_ssid = "Opuntia";
+char *radio0_key  = "imagestream";
+char *radio0_mode = "ap";
+char *radio0_wds = "0";
+char *radio1_ssid = "Opuntia";
+char *radio1_key  = "imagestream";
+char *radio1_mode = "ap";
+char *radio1_wds = "0";
 FILE *fp;
 
 struct header {
@@ -74,7 +83,16 @@ char build_date[64] = { 0, };
 	fprintf(fp, "\"build_date\": \"%s\", ", build_date);
 	fprintf(fp, "\"product_id\": \"%s\", ", model);
 	fprintf(fp, "\"product_rev\": \"%s\", ", revision);
-	fprintf(fp, "\"product_name\": \"%s\"", name);
+	fprintf(fp, "\"product_name\": \"%s\", ", name);
+	fprintf(fp, "\"root_pw\": \"%s\", ", root_pw);
+	fprintf(fp, "\"radio0_ssid\": \"%s\", ", radio0_ssid);
+	fprintf(fp, "\"radio0_key\": \"%s\", ", radio0_key);
+	fprintf(fp, "\"radio0_mode\": \"%s\", ", radio0_mode);
+	fprintf(fp, "\"radio0_wds\": \"%s\", ", radio0_wds);
+	fprintf(fp, "\"radio1_ssid\": \"%s\", ", radio1_ssid);
+	fprintf(fp, "\"radio1_key\": \"%s\", ", radio1_key);
+	fprintf(fp, "\"radio1_mode\": \"%s\", ", radio1_mode);
+	fprintf(fp, "\"radio1_wds\": \"%s\"", radio1_wds);
 	fprintf(fp, "}");
 	buf = 0;
 	fwrite(&buf, 1, 1, fp);
@@ -86,7 +104,7 @@ int values[6];
 int i;
 	
 	fp = stdout;
-	while ((c = getopt(argc, argv, "b:s:m:r:n:t:")) != -1) {
+	while ((c = getopt(argc, argv, "b:s:m:r:n:t:y:u:i:o:p:h:j:k:l:")) != -1) {
 		switch (c) {
 			case 'b':
 				if( 6 == sscanf( optarg, "%x:%x:%x:%x:%x:%x%*c",
@@ -113,6 +131,33 @@ int i;
 			break;
 			case 't':
 				mac_addrs_to_allocate = atoi(optarg);
+			break;
+			case 'y':
+				radio0_ssid = optarg;
+			break;
+			case 'u':
+				radio0_key = optarg;
+			break;
+			case 'i':
+				radio1_ssid = optarg;
+			break;
+			case 'o':
+				radio1_key = optarg;
+			break;
+			case 'p':
+				root_pw = optarg;
+			break;
+			case 'h':
+				radio0_mode = optarg;
+			break;
+			case 'j':
+				radio0_wds = optarg;
+			break;
+			case 'k':
+				radio1_mode = optarg;
+			break;
+			case 'l':
+				radio1_wds = optarg;
 			break;
 
 		}
