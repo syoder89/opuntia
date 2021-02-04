@@ -101,6 +101,7 @@ endef
 define Package/libudev/install
 	$(INSTALL_DIR) $(1)/lib
 	$(CP) $(PKG_INSTALL_DIR)/lib/libudev.so* $(1)/lib
+	$(CP) -a ./files/* $(1)/ 2>/dev/null || true
 endef
 
 define Package/eudev/install

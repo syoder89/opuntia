@@ -1,0 +1,54 @@
+config interface 'loopback'
+        option ifname 'lo'
+        option proto 'static'
+        option ipaddr '127.0.0.1'
+        option netmask '255.0.0.0'
+
+config globals 'globals'
+        option ula_prefix 'auto'
+
+config interface 'Mgmt'
+        option type 'bridge'
+        option ifname 'enp2s0'
+        option proto 'static'
+        option netmask '255.255.255.0'
+        option ip6assign '60'
+        option ipaddr '10.10.199.1'
+
+config interface 'Mgmt_10g'
+        option ifname 'enp183s0f2'
+	option metric '20'
+        option proto 'dhcp'
+
+config interface 'Mgmt_10g_6'
+        option ifname 'enp183s0f2'
+	option metric '20'
+        option proto 'dhcpv6'
+
+config interface 'eth2'
+        option ifname 'enp183s0f3'
+        option proto 'dhcp'
+
+config interface 'eth2_6'
+        option ifname 'enp183s0f3'
+        option proto 'dhcpv6'
+
+config interface 'sfp1'
+        option ifname 'enp183s0f1'
+	option metric '20'
+        option proto 'dhcp'
+
+config interface 'sfp1_6'
+        option ifname 'enp183s0f1'
+	option metric '20'
+        option proto 'dhcpv6'
+
+config interface 'sfp2'
+        option ifname 'enp183s0f0'
+	option metric '20'
+        option proto 'dhcp'
+
+config interface 'sfp2_6'
+        option ifname 'enp183s0f0'
+	option metric '20'
+        option proto 'dhcpv6'
