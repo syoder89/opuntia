@@ -88,3 +88,4 @@ packages/0252-frr-scott-fixes.patch
 packages/0256-collectd-add-hwmon-temps.patch
 packages/0257-vim-disable-selinux.patch
 kernel/0089-add-ipvlan.patch
+0235-Add-APB3500.patch
