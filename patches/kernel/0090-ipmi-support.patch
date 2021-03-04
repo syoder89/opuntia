@@ -15,11 +15,11 @@ Index: build_dir/package/kernel/linux/modules/other.mk
 +  AUTOLOAD:=$(call AutoLoad,70,configs)
 +endef
 +
-+define KernelPackage/ipmi-sbus/description
++define KernelPackage/ipmi-smbus/description
 + Kernel configuration Ipmi-Smbus support
 +endef
 +
-+$(eval $(call KernelPackage,ipmi-sbus))
++$(eval $(call KernelPackage,ipmi-smbus))
  
  define KernelPackage/zram
    SUBMENU:=$(OTHER_MENU)
