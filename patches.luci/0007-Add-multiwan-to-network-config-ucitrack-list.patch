@@ -7,18 +7,15 @@ Subject: [PATCH 07/14] Add multiwan to network config ucitrack list
  modules/luci-base/root/etc/config/ucitrack | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/modules/luci-base/root/etc/config/ucitrack b/modules/luci-base/root/etc/config/ucitrack
-index 04467f4..e2549c1 100644
---- a/modules/luci-base/root/etc/config/ucitrack
-+++ b/modules/luci-base/root/etc/config/ucitrack
-@@ -2,6 +2,7 @@ config network
+Index: luci/modules/luci-base/root/etc/config/ucitrack
+===================================================================
+--- luci.orig/modules/luci-base/root/etc/config/ucitrack
++++ luci/modules/luci-base/root/etc/config/ucitrack
+@@ -1,6 +1,7 @@
+ config network
  	option init network
  	list affects dhcp
- 	list affects radvd
 +	list affects multiwan
  
  config wireless
  	list affects network
--- 
-2.0.0
-

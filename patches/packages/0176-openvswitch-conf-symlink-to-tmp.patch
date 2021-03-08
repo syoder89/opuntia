@@ -11,7 +11,7 @@ Index: build_dir/feeds/packages/net/openvswitch/files/openvswitch.init
 -ovs_ctl="/usr/share/openvswitch/scripts/ovs-ctl"; [ -x "$ovs_ctl" ] || ovs_ctl=:
 -ovn_ctl="/usr/share/ovn/scripts/ovn-ctl"; [ -x "$ovn_ctl" ] || ovn_ctl=:
 -
--EXTRA_COMMANDS=status
+-extra_command "status" "Get status information"
 -
 -start() {
 -	ovs_action start "$@"
@@ -129,7 +129,7 @@ Index: build_dir/feeds/packages/net/openvswitch/Makefile
 ===================================================================
 --- build_dir.orig/feeds/packages/net/openvswitch/Makefile
 +++ build_dir/feeds/packages/net/openvswitch/Makefile
-@@ -209,7 +209,6 @@ ovs_common_files:= \
+@@ -197,7 +197,6 @@ ovs_common_files:= \
  	usr/share/openvswitch/scripts/ovs-save \
  	$(foreach b,ovs-appctl ovs-dpctl ovs-ofctl ovs-vsctl ovsdb-client ovsdb-tool,usr/bin/$(b))
  define ovs_common_install
@@ -137,7 +137,7 @@ Index: build_dir/feeds/packages/net/openvswitch/Makefile
  	$$(INSTALL_DIR) $$(1)/etc/init.d
  	$$(INSTALL_BIN) ./files/openvswitch.init $$(1)/etc/init.d/openvswitch
  	$$(INSTALL_DIR) $$(1)/etc/config
-@@ -219,10 +218,6 @@ define ovs_common_install
+@@ -207,10 +206,6 @@ define ovs_common_install
  	$$(LN) /usr/share/openvswitch/scripts/ovs-ctl-wrapper $$(1)/usr/bin/ovs-ctl
  	$$(LN) /usr/share/openvswitch/scripts/ovs-ctl-wrapper $$(1)/usr/bin/ovs-kmod-ctl
  endef

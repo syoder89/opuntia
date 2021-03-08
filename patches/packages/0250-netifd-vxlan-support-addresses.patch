@@ -5,9 +5,9 @@ Index: build_dir/package/network/config/vxlan/files/vxlan.sh
 @@ -60,8 +60,13 @@ vxlan_generic_setup() {
  	local link="$cfg"
  
- 	local port vid ttl tos mtu macaddr zone rxcsum txcsum
+ 	local port vid ttl tos mtu macaddr zone rxcsum txcsum srcportmin srcportmax ageing maxaddress learning rsc proxy l2miss l3miss gbp
 +	local addresses ip6prefix
- 	json_get_vars port vid ttl tos mtu macaddr zone rxcsum txcsum
+ 	json_get_vars port vid ttl tos mtu macaddr zone rxcsum txcsum srcportmin srcportmax ageing maxaddress learning rsc proxy l2miss l3miss gbp
  
 +	config_load network
 +	config_get addresses "${cfg}" "addresses"
@@ -16,7 +16,7 @@ Index: build_dir/package/network/config/vxlan/files/vxlan.sh
  	proto_init_update "$link" 1
  
  	proto_add_tunnel
-@@ -89,6 +94,26 @@ vxlan_generic_setup() {
+@@ -100,6 +105,26 @@ vxlan_generic_setup() {
  	[ -n "$zone" ] && json_add_string zone "$zone"
  	proto_close_data
  
@@ -43,7 +43,7 @@ Index: build_dir/package/network/config/vxlan/files/vxlan.sh
  	proto_send_update "$cfg"
  
  	config_load network
-@@ -98,8 +123,11 @@ vxlan_generic_setup() {
+@@ -109,8 +134,11 @@ vxlan_generic_setup() {
  proto_vxlan_setup() {
  	local cfg="$1"
  
@@ -57,10 +57,11 @@ Index: build_dir/package/network/config/vxlan/files/vxlan.sh
  
  	( proto_add_host_dependency "$cfg" '' "$tunlink" )
  
-@@ -166,12 +194,16 @@ vxlan_generic_init_config() {
- 	proto_config_add_boolean "rxcsum"
- 	proto_config_add_boolean "txcsum"
+@@ -174,13 +202,16 @@ vxlan_generic_init_config() {
+ 	proto_config_add_boolean "l3miss"
+ 	proto_config_add_boolean "gbp"
  	proto_config_add_string "macaddr"
+-
 +	proto_config_add_array "addresses:list(string)"
 +	proto_config_add_string "ip6prefix"
  }

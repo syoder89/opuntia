@@ -4,13 +4,13 @@ Date: Fri, 28 Mar 2014 10:37:59 -0500
 Subject: [PATCH] Update correct openvpn init script
 
 ---
- package/network/services/openvpn/files/openvpn.init | 2 ++
+ feeds/packages/net/openvpn/files/openvpn.init | 2 ++
  1 file changed, 2 insertions(+)
 
-Index: build_dir/package/network/services/openvpn/files/openvpn.init
+Index: build_dir/feeds/packages/net/openvpn/files/openvpn.init
 ===================================================================
---- build_dir.orig/package/network/services/openvpn/files/openvpn.init
-+++ build_dir/package/network/services/openvpn/files/openvpn.init
+--- build_dir.orig/feeds/packages/net/openvpn/files/openvpn.init
++++ build_dir/feeds/packages/net/openvpn/files/openvpn.init
 @@ -4,7 +4,7 @@
  # This is free software, licensed under the GNU General Public License v2.
  # See /LICENSE for more information.

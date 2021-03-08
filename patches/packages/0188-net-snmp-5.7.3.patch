@@ -8,28 +8,3 @@
    CATEGORY:=Libraries
    DEPENDS:=+libnl-tiny
    TITLE:=Open source SNMP implementation (libraries)
---- /dev/null
-+++ b/feeds/packages/net/net-snmp/patches/999-scott-sigmask.patch
-@@ -0,0 +1,22 @@
-+--- a/apps/snmpnetstat/if.c
-++++ b/apps/snmpnetstat/if.c
-+@@ -917,12 +917,15 @@ timerPause(void)
-+         sigpause(SIGALRM);
-+     }
-+ #else
-+-    int             oldmask;
-+-    oldmask = sigblock(sigmask(SIGALRM));
-++    sigset_t set, oldset;
-++
-++    sigemptyset(&set);
-++    sigaddset(&set, SIGALRM);
-++    sigprocmask(SIG_UNBLOCK, &set, &oldset);
-+     if (!signalled) {
-+-        sigpause(0);
-++        sigsuspend(&set);
-+     }
-+-    sigsetmask(oldmask);
-++    sigprocmask(SIG_UNBLOCK, &oldset, NULL);
-+ #endif
-+ }
-+ 

@@ -2,17 +2,17 @@ Index: build_dir/target/linux/bcm27xx/image/Makefile
 ===================================================================
 --- build_dir.orig/target/linux/bcm27xx/image/Makefile
 +++ build_dir/target/linux/bcm27xx/image/Makefile
-@@ -25,7 +25,8 @@ define Build/boot-common
+@@ -23,7 +23,8 @@ define Build/boot-common
  	mcopy -i $@.boot config.txt ::
  	mcopy -i $@.boot distroconfig.txt ::
  	mcopy -i $@.boot $(IMAGE_KERNEL) ::$(KERNEL_IMG)
 -	$(foreach dts,$(shell echo $(DEVICE_DTS)),mcopy -i $@.boot $(DTS_DIR)/$(dts).dtb ::;)
-+	$(foreach dts,$(shell echo $(DEVICE_DTS)),mcopy -i $@.boot $(KDIR)/image-$(notdir $(firstword $(dts))).dtb \
++	$(foreach dts,$(shell echo $(DEVICE_DTS)),mcopy -D o -i $@.boot $(KDIR)/image-$(notdir $(firstword $(dts))).dtb \
 +		::$(if $(DEVICE_RENAME_DTS),$(DEVICE_RENAME_DTS),$(notdir $(dts))).dtb;)
  	mmd -i $@.boot ::/overlays
  	mcopy -i $@.boot $(DTS_DIR)/overlays/*.dtbo ::/overlays/
  	mcopy -i $@.boot $(DTS_DIR)/overlays/README ::/overlays/
-@@ -63,6 +64,7 @@ define Device/Default
+@@ -61,6 +62,7 @@ define Device/Default
    IMAGES := factory.img.gz sysupgrade.img.gz
    IMAGE/sysupgrade.img.gz := boot-common | boot-2708 | sdcard-img | gzip | append-metadata
    IMAGE/factory.img.gz := boot-common | boot-2708 | sdcard-img | gzip
@@ -20,46 +20,29 @@ Index: build_dir/target/linux/bcm27xx/image/Makefile
  endef
  
  define Device/rpi
-@@ -134,21 +136,40 @@ ifeq ($(SUBTARGET),bcm2710)
-   TARGET_DEVICES += rpi-3
- endif
- 
-+
- define Device/rpi-4
-   DEVICE_MODEL := 4B
-   KERNEL_IMG := kernel8.img
-   DEVICE_DTS := broadcom/bcm2711-rpi-4-b
-   SUPPORTED_DEVICES := \
--	raspberrypi,4-model-b
-+        raspberrypi,4-model-b
-   DEVICE_PACKAGES := \
--	cypress-firmware-43455-sdio \
--	cypress-nvram-43455-sdio-rpi-4b \
--	kmod-brcmfmac wpad-basic-wolfssl
-+        cypress-firmware-43455-sdio \
-+        cypress-nvram-43455-sdio-rpi-4b \
-+        kmod-brcmfmac wpad-basic-wolfssl
-   IMAGE/sysupgrade.img.gz := boot-common | boot-2711 | sdcard-img | gzip | append-metadata
+@@ -163,7 +165,26 @@ define Device/rpi-4
    IMAGE/factory.img.gz := boot-common | boot-2711 | sdcard-img | gzip
  endef
  ifeq ($(SUBTARGET),bcm2711)
-   TARGET_DEVICES += rpi-4
+-  TARGET_DEVICES += rpi-4
 +  TARGET_DEVICES += apb3500
  endif
  
 +define Device/apb3500
 +  DEVICE_VENDOR := ImageStream
 +  DEVICE_MODEL := apb3500
++  DEVICE_VARIANT := (64bit)
 +  KERNEL_IMG := kernel8.img
 +  DEVICE_DTS := broadcom/bcm2711-is-apb3500
-+  DEVICE_RENAME_DTS := bcm2711-rpi-4-b
++  DEVICE_RENAME_DTS := bcm2711-rpi-cm4
 +  SUPPORTED_DEVICES := \
-+       imagestream,apb3500 \
-+       raspberrypi,4-model-b
++	imagestream,apb3500 \
++	raspberrypi,4-compute-module \
++	raspberrypi,4-model-b
 +  DEVICE_PACKAGES := \
-+       cypress-firmware-43455-sdio \
-+        cypress-nvram-43455-sdio-rpi-4b \
-+        kmod-brcmfmac wpad-basic-wolfssl
++	cypress-firmware-43455-sdio \
++	cypress-nvram-43455-sdio-rpi-4b \
++	kmod-brcmfmac wpad-basic-wolfssl
 +  IMAGE/sysupgrade.img.gz := boot-common | boot-2711 | sdcard-img | gzip | append-metadata
 +  IMAGE/factory.img.gz := boot-common | boot-2711 | sdcard-img | gzip
 +endef
@@ -69,14 +52,14 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 ===================================================================
 --- /dev/null
 +++ build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500.dts
-@@ -0,0 +1,652 @@
+@@ -0,0 +1,627 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/dts-v1/;
 +#include "bcm2711.dtsi"
 +#include "bcm2835-rpi.dtsi"
 +
 +/ {
-+	compatible = "raspberrypi,4-model-b", "brcm,bcm2711";
++	compatible = "raspberrypi,4-compute-module", "brcm,bcm2711";
 +	model = "ImageStream WiFi AP Board apb3500";
 +
 +	chosen {
@@ -91,7 +74,9 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +	};
 +
 +	aliases {
++		emmc2bus = &emmc2bus;
 +		ethernet0 = &genet;
++		pcie0 = &pcie0;
 +	};
 +
 +	leds {
@@ -102,6 +87,8 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +		pwr {
 +			label = "PWR";
 +			gpios = <&expgpio 2 GPIO_ACTIVE_LOW>;
++			default-state = "keep";
++			linux,default-trigger = "default-on";
 +		};
 +
 +		status {
@@ -133,8 +120,6 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +			label = "RSSI5";
 +			gpios = <&gpio 22 GPIO_ACTIVE_LOW>;
 +		};
-+
-+
 +	};
 +
 +	wifi_pwrseq: wifi-pwrseq {
@@ -165,12 +150,24 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +		gpio-line-names = "BT_ON",
 +				  "WL_ON",
 +				  "PWR_LED_OFF",
-+				  "GLOBAL_RESET",
++				  "ANT1",
 +				  "VDD_SD_IO_SEL",
 +				  "CAM_GPIO",
 +				  "SD_PWR_ON",
-+				  "SD_OC_N";
++				  "ANT2";
 +		status = "okay";
++
++		ant1: ant1 {
++			gpio-hog;
++			gpios = <3 GPIO_ACTIVE_HIGH>;
++			output-high;
++		};
++
++		ant2: ant2 {
++			gpio-hog;
++			gpios = <7 GPIO_ACTIVE_HIGH>;
++			output-low;
++		};
 +	};
 +};
 +
@@ -242,50 +239,11 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +	interrupts = <GIC_SPI 34 IRQ_TYPE_LEVEL_HIGH>;
 +};
 +
-+&vc4 {
-+	status = "okay";
-+};
-+
-+&pixelvalve0 {
-+	status = "okay";
-+};
-+
-+&pixelvalve1 {
-+	status = "okay";
-+};
-+
-+&pixelvalve2 {
-+	status = "okay";
-+};
-+
-+&pixelvalve3 {
-+	status = "okay";
-+};
-+
-+&pixelvalve4 {
-+	status = "okay";
-+};
-+
-+&hdmi0 {
-+	status = "okay";
-+};
-+
-+&ddc0 {
-+	status = "okay";
-+};
-+
-+&hdmi1 {
-+	status = "okay";
-+};
-+
-+&ddc1 {
-+	status = "okay";
-+};
-+
 +// =============================================
 +// Downstream rpi- changes
 +
 +#include "bcm270x.dtsi"
++#include "bcm271x-rpi-bt.dtsi"
 +
 +/ {
 +	soc {
@@ -295,14 +253,13 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +};
 +
 +#include "bcm2711-rpi.dtsi"
-+#include "bcm283x-rpi-csi1-2lane.dtsi"
++#include "bcm283x-rpi-csi0-2lane.dtsi"
++#include "bcm283x-rpi-csi1-4lane.dtsi"
 +#include "bcm283x-rpi-i2c0mux_0_44.dtsi"
-+
-+/delete-node/ &emmc2;
 +
 +/ {
 +	chosen {
-+		bootargs = "coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1 snd_bcm2835.enable_headphones=1";
++		bootargs = "coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1";
 +	};
 +
 +	aliases {
@@ -316,32 +273,14 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +		i2c4 = &i2c4;
 +		i2c5 = &i2c5;
 +		i2c6 = &i2c6;
-+		/delete-property/ ethernet;
 +		/delete-property/ intc;
-+		pcie0 = &pcie0;
-+		emmc2bus = &emmc2bus;
-+	};
-+
-+	emmc2bus: emmc2bus {
-+		compatible = "simple-bus";
-+		#address-cells = <2>;
-+		#size-cells = <1>;
-+
-+		ranges = <0x0 0x7e000000  0x0 0xfe000000  0x01800000>;
-+		dma-ranges = <0x0 0xc0000000  0x0 0x00000000  0x40000000>;
-+
-+		emmc2: emmc2@7e340000 {
-+			compatible = "brcm,bcm2711-emmc2";
-+			status = "okay";
-+			interrupts = <GIC_SPI 126 IRQ_TYPE_LEVEL_HIGH>;
-+			clocks = <&clocks BCM2711_CLOCK_EMMC2>;
-+			reg = <0x0 0x7e340000 0x100>;
-+			vqmmc-supply = <&sd_io_1v8_reg>;
-+			broken-cd;
-+		};
 +	};
 +
 +	/delete-node/ wifi-pwrseq;
++};
++
++&pcie0 {
++       brcm,enable-l1ss;
 +};
 +
 +&mmcnr {
@@ -354,8 +293,6 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +&uart0 {
 +	pinctrl-0 = <&uart0_pins &bt_pins>;
 +	status = "okay";
-+
-+	/delete-node/ bluetooth;
 +};
 +
 +&uart1 {
@@ -548,6 +485,10 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +	};
 +};
 +
++&firmwarekms {
++	compatible = "raspberrypi,rpi-firmware-kms-2711";
++};
++
 +// =============================================
 +// Board specific stuff here
 +
@@ -569,6 +510,7 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +
 +&emmc2 {
 +	vmmc-supply = <&sd_vcc_reg>;
++	bus-width = <8>;
 +};
 +
 +&phy1 {
@@ -577,8 +519,8 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +
 +&gpio {
 +	audio_pins: audio_pins {
-+		brcm,pins = <40 41>;
-+		brcm,function = <4>;
++		brcm,pins = <>;
++		brcm,function = <>;
 +	};
 +};
 +
@@ -639,6 +581,7 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +&audio {
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&audio_pins>;
++	brcm,disable-headphones = <1>;
 +};
 +
 +&vc4 {
@@ -682,6 +625,7 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +};
 +
 +/ {
++
 +	__overrides__ {
 +		act_led_gpio = <&act_led>,"gpios:4";
 +		act_led_activelow = <&act_led>,"gpios:8";
@@ -718,6 +662,20 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +		eth_led0 = <&phy1>,"led-modes:0";
 +		eth_led1 = <&phy1>,"led-modes:4";
 +
++		ant1 =  <&ant1>,"output-high?=on",
++			<&ant1>, "output-low?=off",
++			<&ant2>, "output-high?=off",
++			<&ant2>, "output-low?=on";
++		ant2 =  <&ant1>,"output-high?=off",
++			<&ant1>, "output-low?=on",
++			<&ant2>, "output-high?=on",
++			<&ant2>, "output-low?=off";
++		noant = <&ant1>,"output-high?=off",
++			<&ant1>, "output-low?=on",
++			<&ant2>, "output-high?=off",
++			<&ant2>, "output-low?=on";
++
++		sd_poll_once = <&emmc2>, "non-removable?";
 +		spi_dma4 = <&spi0>, "dmas:0=", <&dma40>,
 +			   <&spi0>, "dmas:8=", <&dma40>;
 +	};

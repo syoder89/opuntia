@@ -1,20 +1,8 @@
-Index: build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
-===================================================================
---- build_dir.orig/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
-+++ build_dir/target/linux/ar71xx/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
-@@ -1406,6 +1406,7 @@ static int ag71xx_probe(struct platform_
- 
- 	ag->max_frame_len = pdata->max_frame_len;
- 	ag->desc_pktlen_mask = pdata->desc_pktlen_mask;
-+	dev->max_mtu = ag->max_frame_len;
- 
- 	if (!pdata->is_ar724x && !pdata->is_ar91xx) {
- 		ag->tx_ring.desc_split = AG71XX_TX_RING_SPLIT;
 Index: build_dir/target/linux/ath79/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
 ===================================================================
 --- build_dir.orig/target/linux/ath79/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
 +++ build_dir/target/linux/ath79/files/drivers/net/ethernet/atheros/ag71xx/ag71xx_main.c
-@@ -1426,9 +1426,11 @@ static int ag71xx_probe(struct platform_
+@@ -1622,9 +1622,11 @@ static int ag71xx_probe(struct platform_
  	else
  		ag->desc_pktlen_mask = SZ_4K - 1;
  

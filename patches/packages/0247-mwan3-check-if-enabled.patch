@@ -2,15 +2,14 @@ Index: build_dir/feeds/packages/net/mwan3/files/usr/sbin/mwan3
 ===================================================================
 --- build_dir.orig/feeds/packages/net/mwan3/files/usr/sbin/mwan3
 +++ build_dir/feeds/packages/net/mwan3/files/usr/sbin/mwan3
-@@ -140,7 +140,10 @@ start()
- 	local enabled
+@@ -108,6 +108,10 @@ status()
+ }
  
- 	mwan3_lock "command" "mwan3"
--	uci_toggle_state mwan3 globals enabled "1"
+ start() {
 +	config_get_bool enabled globals 'enabled' 0
 +	[ ${enabled} -gt 0 ] || {
 +		exit 1
 +	}
- 	mwan3_unlock "command" "mwan3"
- 
- 	config_load mwan3
+ 	/etc/init.d/mwan3 enable
+ 	/etc/init.d/mwan3 start
+ }

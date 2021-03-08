@@ -1,0 +1,271 @@
+Index: build_dir/package/network/utils/iproute2/Makefile
+===================================================================
+--- build_dir.orig/package/network/utils/iproute2/Makefile
++++ build_dir/package/network/utils/iproute2/Makefile
+@@ -8,12 +8,12 @@
+ include $(TOPDIR)/rules.mk
+ 
+ PKG_NAME:=iproute2
+-PKG_VERSION:=5.11.0
++PKG_VERSION:=5.10.0
+ PKG_RELEASE:=1
+ 
+ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
+ PKG_SOURCE_URL:=@KERNEL/linux/utils/net/iproute2
+-PKG_HASH:=c5e2ea108212b3445051b35953ec267f9f3469e1d5c67ac034ab559849505c54
++PKG_HASH:=a54a34ae309c0406b2d1fb3a46158613ffb83d33fefd5d4a27f0010237ac53e9
+ PKG_BUILD_PARALLEL:=1
+ PKG_BUILD_DEPENDS:=iptables
+ PKG_LICENSE:=GPL-2.0
+@@ -47,7 +47,7 @@ $(call Package/iproute2/Default)
+  VARIANT:=full
+  PROVIDES:=ip
+  ALTERNATIVES:=300:/sbin/ip:/usr/libexec/ip-full
+- DEPENDS:=+libnl-tiny +libbpf +(PACKAGE_devlink||PACKAGE_rdma):libmnl
++ DEPENDS:=+libnl-tiny +libelf +(PACKAGE_devlink||PACKAGE_rdma):libmnl
+ endef
+ 
+ define Package/tc
+@@ -55,59 +55,56 @@ $(call Package/iproute2/Default)
+   TITLE:=Traffic control utility
+   VARIANT:=tc
+   PROVIDES:=tc
+-  DEPENDS:=+kmod-sched-core +libxtables +libbpf +(PACKAGE_devlink||PACKAGE_rdma):libmnl
++  DEPENDS:=+kmod-sched-core +libxtables +libelf +(PACKAGE_devlink||PACKAGE_rdma):libmnl
+ endef
+ 
+ define Package/genl
+ $(call Package/iproute2/Default)
+   TITLE:=General netlink utility frontend
+-  DEPENDS:=+libnl-tiny +(PACKAGE_devlink||PACKAGE_rdma):libmnl
++  DEPENDS:=+libnl-tiny +(PACKAGE_devlink||PACKAGE_rdma):libmnl +(PACKAGE_tc||PACKAGE_ip-full):libelf
+ endef
+ 
+ define Package/ip-bridge
+ $(call Package/iproute2/Default)
+   TITLE:=Bridge configuration utility from iproute2
+-  DEPENDS:=+libnl-tiny +(PACKAGE_devlink||PACKAGE_rdma):libmnl
++  DEPENDS:=+libnl-tiny +(PACKAGE_devlink||PACKAGE_rdma):libmnl +(PACKAGE_tc||PACKAGE_ip-full):libelf
+ endef
+ 
+ define Package/ss
+ $(call Package/iproute2/Default)
+   TITLE:=Socket statistics utility
+-  DEPENDS:=+libnl-tiny +(PACKAGE_devlink||PACKAGE_rdma):libmnl +kmod-netlink-diag
++  DEPENDS:=+libnl-tiny +(PACKAGE_devlink||PACKAGE_rdma):libmnl +(PACKAGE_tc||PACKAGE_ip-full):libelf +kmod-netlink-diag
+ endef
+ 
+ define Package/nstat
+ $(call Package/iproute2/Default)
+   TITLE:=Network statistics utility
+-  DEPENDS:=+libnl-tiny +(PACKAGE_devlink||PACKAGE_rdma):libmnl
++  DEPENDS:=+libnl-tiny +(PACKAGE_devlink||PACKAGE_rdma):libmnl +(PACKAGE_tc||PACKAGE_ip-full):libelf
+ endef
+ 
+ define Package/devlink
+ $(call Package/iproute2/Default)
+   TITLE:=Network devlink utility
+-  DEPENDS:=+libmnl
++  DEPENDS:=+libmnl +(PACKAGE_tc||PACKAGE_ip-full):libelf
+ endef
+ 
+ define Package/rdma
+ $(call Package/iproute2/Default)
+   TITLE:=Network rdma utility
+-  DEPENDS:=+libmnl
++  DEPENDS:=+libmnl +(PACKAGE_tc||PACKAGE_ip-full):libelf
+ endef
+ 
+ ifeq ($(BUILD_VARIANT),tiny)
+   IP_CONFIG_TINY:=y
+-  LIBBPF_FORCE:=off
+ endif
+ 
+ ifeq ($(BUILD_VARIANT),full)
+   HAVE_ELF:=y
+-  LIBBPF_FORCE:=on
+   HAVE_CAP:=n
+ endif
+ 
+ ifeq ($(BUILD_VARIANT),tc)
+   HAVE_ELF:=y
+-  LIBBPF_FORCE:=on
+   SHARED_LIBS:=y
+ endif
+ 
+@@ -125,29 +122,26 @@ define Build/Configure
+ endef
+ 
+ TARGET_CFLAGS += -ffunction-sections -fdata-sections -flto
+-TARGET_LDFLAGS += -Wl,--gc-sections -Wl,--as-needed
++TARGET_LDFLAGS += -Wl,--gc-sections
+ TARGET_CPPFLAGS += -I$(STAGING_DIR)/usr/include/libnl-tiny
+ 
+ MAKE_FLAGS += \
+ 	KERNEL_INCLUDE="$(LINUX_DIR)/user_headers/include" \
+ 	SHARED_LIBS=$(SHARED_LIBS) \
+ 	IP_CONFIG_TINY=$(IP_CONFIG_TINY) \
+-	LIBBPF_FORCE=$(LIBBPF_FORCE) \
+ 	HAVE_ELF=$(HAVE_ELF) \
+ 	HAVE_MNL=$(HAVE_MNL) \
+ 	HAVE_CAP=$(HAVE_CAP) \
+ 	IPT_LIB_DIR=/usr/lib/iptables \
+ 	XT_LIB_DIR=/usr/lib/iptables \
+-	FPIC="$(FPIC)" \
+-	$(if $(findstring c,$(OPENWRT_VERBOSE)),V=1,V='')
++	FPIC="$(FPIC)"
+ 
+ define Build/Compile
+ 	+$(MAKE_VARS) $(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR) $(MAKE_FLAGS)
+ endef
+ 
+ define Build/InstallDev
+-	$(INSTALL_DIR) $(1)/usr/include/iproute2
+-	$(CP) $(PKG_BUILD_DIR)/include/bpf_elf.h $(1)/usr/include/iproute2
++	$(INSTALL_DIR) $(1)/usr/include
+ 	$(CP) $(PKG_BUILD_DIR)/include/{libgenl,libnetlink}.h $(1)/usr/include/
+ 	$(INSTALL_DIR) $(1)/usr/lib
+ 	$(CP) $(PKG_BUILD_DIR)/lib/libnetlink.a $(1)/usr/lib/
+Index: build_dir/package/network/utils/iproute2/patches/100-configure.patch
+===================================================================
+--- build_dir.orig/package/network/utils/iproute2/patches/100-configure.patch
++++ build_dir/package/network/utils/iproute2/patches/100-configure.patch
+@@ -1,6 +1,6 @@
+ --- a/configure
+ +++ b/configure
+-@@ -39,7 +39,8 @@ int main(int argc, char **argv) {
++@@ -34,7 +34,8 @@ int main(int argc, char **argv) {
+  }
+  EOF
+  
+Index: build_dir/package/network/utils/iproute2/patches/130-no_netem.patch
+===================================================================
+--- build_dir.orig/package/network/utils/iproute2/patches/130-no_netem.patch
++++ build_dir/package/network/utils/iproute2/patches/130-no_netem.patch
+@@ -4,8 +4,8 @@
+  CFLAGS := $(WFLAGS) $(CCOPTS) -I../include -I../include/uapi $(DEFINES) $(CFLAGS)
+  YACCFLAGS = -d -t -v
+  
+--SUBDIRS=lib ip tc bridge misc netem genl tipc devlink rdma dcb man
+-+SUBDIRS=lib ip tc bridge misc genl tipc devlink rdma dcb man
++-SUBDIRS=lib ip tc bridge misc netem genl tipc devlink rdma man
+++SUBDIRS=lib ip tc bridge misc genl tipc devlink rdma man
+  
+  LIBNETLINK=../lib/libutil.a ../lib/libnetlink.a
+  LDLIBS += $(LIBNETLINK)
+Index: build_dir/package/network/utils/iproute2/patches/140-allow_pfifo_fast.patch
+===================================================================
+--- build_dir.orig/package/network/utils/iproute2/patches/140-allow_pfifo_fast.patch
++++ build_dir/package/network/utils/iproute2/patches/140-allow_pfifo_fast.patch
+@@ -1,6 +1,6 @@
+ --- a/tc/q_fifo.c
+ +++ b/tc/q_fifo.c
+-@@ -95,5 +95,6 @@ struct qdisc_util pfifo_head_drop_qdisc_
++@@ -99,5 +99,6 @@ struct qdisc_util pfifo_head_drop_qdisc_
+  
+  struct qdisc_util pfifo_fast_qdisc_util = {
+  	.id = "pfifo_fast",
+Index: build_dir/package/network/utils/iproute2/patches/140-keep_libmnl_optional.patch
+===================================================================
+--- build_dir.orig/package/network/utils/iproute2/patches/140-keep_libmnl_optional.patch
++++ build_dir/package/network/utils/iproute2/patches/140-keep_libmnl_optional.patch
+@@ -1,6 +1,6 @@
+ --- a/configure
+ +++ b/configure
+-@@ -367,7 +367,7 @@ check_selinux()
++@@ -257,7 +257,7 @@ check_selinux()
+  
+  check_mnl()
+  {
+Index: build_dir/package/network/utils/iproute2/patches/145-keep_libelf_optional.patch
+===================================================================
+--- build_dir.orig/package/network/utils/iproute2/patches/145-keep_libelf_optional.patch
++++ build_dir/package/network/utils/iproute2/patches/145-keep_libelf_optional.patch
+@@ -1,6 +1,6 @@
+ --- a/configure
+ +++ b/configure
+-@@ -235,7 +235,7 @@ EOF
++@@ -230,7 +230,7 @@ EOF
+  
+  check_elf()
+  {
+Index: build_dir/package/network/utils/iproute2/patches/150-keep_libcap_optional.patch
+===================================================================
+--- build_dir.orig/package/network/utils/iproute2/patches/150-keep_libcap_optional.patch
++++ build_dir/package/network/utils/iproute2/patches/150-keep_libcap_optional.patch
+@@ -1,6 +1,6 @@
+ --- a/configure
+ +++ b/configure
+-@@ -425,7 +425,7 @@ EOF
++@@ -315,7 +315,7 @@ EOF
+  
+  check_cap()
+  {
+Index: build_dir/package/network/utils/iproute2/patches/160-libnetlink-pic.patch
+===================================================================
+--- build_dir.orig/package/network/utils/iproute2/patches/160-libnetlink-pic.patch
++++ build_dir/package/network/utils/iproute2/patches/160-libnetlink-pic.patch
+@@ -7,5 +7,5 @@
+ -CFLAGS += -fPIC
+ +CFLAGS += $(FPIC)
+  
+- UTILOBJ = utils.o utils_math.o rt_names.o ll_map.o ll_types.o ll_proto.o ll_addr.o \
+- 	inet_proto.o namespace.o json_writer.o json_print.o json_print_math.o \
++ UTILOBJ = utils.o rt_names.o ll_map.o ll_types.o ll_proto.o ll_addr.o \
++ 	inet_proto.o namespace.o json_writer.o json_print.o \
+Index: build_dir/package/network/utils/iproute2/patches/170-ip_tiny.patch
+===================================================================
+--- build_dir.orig/package/network/utils/iproute2/patches/170-ip_tiny.patch
++++ build_dir/package/network/utils/iproute2/patches/170-ip_tiny.patch
+@@ -25,7 +25,7 @@
+  		sed -n '/'$$s'[^ ]* =/{s:.* \([^ ]*'$$s'[^ ]*\) .*:extern char \1[] __attribute__((weak)); if (!strcmp(sym, "\1")) return \1;:;p}' $$files ; \
+ --- a/ip/ip.c
+ +++ b/ip/ip.c
+-@@ -64,10 +64,16 @@ static void usage(void)
++@@ -48,10 +48,16 @@ static void usage(void)
+  	fprintf(stderr,
+  		"Usage: ip [ OPTIONS ] OBJECT { COMMAND | help }\n"
+  		"       ip [ -force ] -batch filename\n"
+@@ -42,7 +42,7 @@
+  		"       OPTIONS := { -V[ersion] | -s[tatistics] | -d[etails] | -r[esolve] |\n"
+  		"                    -h[uman-readable] | -iec | -j[son] | -p[retty] |\n"
+  		"                    -f[amily] { inet | inet6 | mpls | bridge | link } |\n"
+-@@ -90,36 +96,50 @@ static const struct cmd {
++@@ -74,36 +80,50 @@ static const struct cmd {
+  	int (*func)(int argc, char **argv);
+  } cmds[] = {
+  	{ "address",	do_ipaddr },
+@@ -103,6 +103,6 @@
+ +  CFLAGS += -DIPROUTE2_TINY
+ +endif
+ +
+- UTILOBJ = utils.o utils_math.o rt_names.o ll_map.o ll_types.o ll_proto.o ll_addr.o \
+- 	inet_proto.o namespace.o json_writer.o json_print.o json_print_math.o \
+- 	names.o color.o bpf_legacy.o bpf_glue.o exec.o fs.o cg_map.o
++ UTILOBJ = utils.o rt_names.o ll_map.o ll_types.o ll_proto.o ll_addr.o \
++ 	inet_proto.o namespace.o json_writer.o json_print.o \
++ 	names.o color.o bpf.o exec.o fs.o cg_map.o
+Index: build_dir/package/network/utils/iproute2/patches/200-drop_libbsd_dependency.patch
+===================================================================
+--- build_dir.orig/package/network/utils/iproute2/patches/200-drop_libbsd_dependency.patch
++++ build_dir/package/network/utils/iproute2/patches/200-drop_libbsd_dependency.patch
+@@ -1,6 +1,6 @@
+ --- a/configure
+ +++ b/configure
+-@@ -411,14 +411,8 @@ EOF
++@@ -301,14 +301,8 @@ EOF
+      if $CC -I$INCLUDE -o $TMPDIR/strtest $TMPDIR/strtest.c >/dev/null 2>&1; then
+  	echo "no"
+      else
+Index: build_dir/package/network/utils/iproute2/patches/300-selinux-configurable.patch
+===================================================================
+--- build_dir.orig/package/network/utils/iproute2/patches/300-selinux-configurable.patch
++++ build_dir/package/network/utils/iproute2/patches/300-selinux-configurable.patch
+@@ -1,6 +1,6 @@
+ --- a/configure
+ +++ b/configure
+-@@ -354,7 +354,7 @@ check_libbpf()
++@@ -244,7 +244,7 @@ check_elf()
+  check_selinux()
+  # SELinux is a compile time option in the ss utility
+  {

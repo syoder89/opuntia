@@ -2,7 +2,7 @@ Index: build_dir/target/linux/ramips/dts/mt7621_mikrotik_routerboard-m11g.dts
 ===================================================================
 --- build_dir.orig/target/linux/ramips/dts/mt7621_mikrotik_routerboard-m11g.dts
 +++ build_dir/target/linux/ramips/dts/mt7621_mikrotik_routerboard-m11g.dts
-@@ -64,8 +64,17 @@
+@@ -62,8 +62,17 @@
  	partition@40000 {
  		compatible = "mikrotik,minor";
  		label = "firmware";
@@ -25,147 +25,15 @@ Index: build_dir/target/linux/ramips/image/mt7621.mk
 ===================================================================
 --- build_dir.orig/target/linux/ramips/image/mt7621.mk
 +++ build_dir/target/linux/ramips/image/mt7621.mk
-@@ -691,7 +691,7 @@ define Device/MikroTik
+@@ -795,7 +795,7 @@ define Device/MikroTik
    $(Device/dsa-migration)
    DEVICE_VENDOR := MikroTik
    BLOCKSIZE := 64k
 -  IMAGE_SIZE := 16128k
 +  IMAGE_SIZE := 16124k
    DEVICE_PACKAGES := kmod-usb3
-   LOADER_TYPE := elf
-   KERNEL := $(KERNEL_DTB) | loader-kernel
-Index: build_dir/target/linux/ar71xx/image/generic.mk
-===================================================================
---- build_dir.orig/target/linux/ar71xx/image/generic.mk
-+++ build_dir/target/linux/ar71xx/image/generic.mk
-@@ -1259,8 +1259,8 @@ TARGET_DEVICES += wlr8100
- define Device/wpj-16m
-   $(Device/CpxImageParams16M)
-   DEVICE_PACKAGES := kmod-usb2 kmod-usb-ledtrig-usbport
--  MTDPARTS := spi0.0:192k(u-boot)ro,16128k(firmware),64k(art)ro
--  IMAGE_SIZE := 16128k
-+  MTDPARTS := spi0.0:192k(u-boot)ro,16064k(firmware),64k@0xFE0000(imagestream),64k(art)ro
-+  IMAGE_SIZE := 16064k
-   IMAGES := sysupgrade.bin factory.img
-   IMAGE/sysupgrade.bin = append-kernel | pad-to $$$$(BLOCKSIZE) | append-rootfs | pad-rootfs | check-size $$$$(IMAGE_SIZE)
-   IMAGE/factory.img = Cpxfactory16M
-@@ -1269,19 +1269,15 @@ endef
- define Device/CpxImageParams16M
-   KSTART := 30000
-   RSTART := 1b0000
--  P1START := fe0000
--  P2START := ff0000
-   FIRMWARE_SIZE := 0x1000000
-   KERNEL_SIZE := 1572864
--  ROOTFS_SIZE := 14876672
-+  ROOTFS_SIZE := 14938112
- endef
- 
- define Build/Cpxfactory16M
-         $(STAGING_DIR_HOST)/bin/mkmylofw -B $(CPXBOARD) -s $(FIRMWARE_SIZE) \
-                 -p0x$(KSTART):$(KERNEL_SIZE):al:0x80060000:$(CPXBOARD):$(IMAGE_KERNEL) \
-                 -p0x$(RSTART):$(ROOTFS_SIZE):::rootfs:$(IMAGE_ROOTFS) \
--                -p0x$(P1START):0x010000 \
--                -p0x$(P2START):0x010000 \
-                 $@
- endef
- 
-Index: build_dir/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
-===================================================================
---- build_dir.orig/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
-+++ build_dir/target/linux/ar71xx/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
-@@ -8,6 +8,24 @@ PHYNBR=${DEVPATH##*/phy}
- 
- . /lib/functions.sh
- . /lib/functions/system.sh
-+. /usr/share/libubox/jshn.sh
-+
-+function process_macs() {
-+	let i=0
-+	while [ ! -z $1 ]; do
-+		var="mac${i}"
-+		eval $var=$1
-+		shift
-+		let i=i+1
-+	done
-+}
-+
-+function process_imagestream() {
-+	mtd_dev=$(grep imagestream /proc/mtd | cut -d ':' -f 1)
-+	json_load "$(dd if=/dev/$mtd_dev bs=1 skip=256)"
-+	json_get_values _macs mac_addrs
-+	process_macs $_macs
-+}
- 
- board=$(board_name)
- 
-@@ -18,6 +36,19 @@ case "$board" in
- 	archer-c60-v1)
- 		echo $(macaddr_add $(mtd_get_mac_binary mac 0x8)  $(($PHYNBR - 1)) ) > /sys${DEVPATH}/macaddress
- 		;;
-+	wpj344|wpj558|wpj563)
-+		# Use our reserved MAC address instead of the card's MAC
-+		process_imagestream
-+		if [ "$PHYNBR" -eq 1 ]; then
-+			if [ -n "$mac2" ]; then
-+				echo $mac2 > /sys${DEVPATH}/macaddress
-+			else
-+				echo $(mtd_get_mac_binary u-boot 188448) > /sys${DEVPATH}/macaddress
-+			fi
-+		elif [ "$PHYNBR" -eq 0 ] && [ -n "$mac3" ]; then
-+			echo $mac3 > /sys${DEVPATH}/macaddress
-+		fi
-+		;;
- 	*)
- 		;;
- esac
-Index: build_dir/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
-===================================================================
---- build_dir.orig/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
-+++ build_dir/target/linux/ar71xx/files/arch/mips/ath79/mach-wpj558.c
-@@ -52,6 +52,8 @@
- 
- #define WPJ558_MAC_OFFSET		0x10
- #define WPJ558_WMAC_CALDATA_OFFSET	0x1000
-+#define IMAGESTREAM_OFFSET		0x1ffef000
-+#define IMAGESTREAM_MAC_OFFSET		0x10
- 
- static struct gpio_led wpj558_leds_gpio[] __initdata = {
- 	{
-@@ -148,6 +150,7 @@ static void __init wpj558_setup(void)
-         struct ath9k_platform_data *pdata;
- 	u8 mac[ETH_ALEN];
- 	u8 *art = (u8 *) KSEG1ADDR(0x1fff0000);
-+	u8 *mac_ptr = (u8 *) KSEG1ADDR(IMAGESTREAM_OFFSET + IMAGESTREAM_MAC_OFFSET);
- 
- 	ath79_register_m25p80(NULL);
- 	ath79_register_leds_gpio(-1, ARRAY_SIZE(wpj558_leds_gpio),
-@@ -158,10 +161,14 @@ static void __init wpj558_setup(void)
- 
- 	ath79_register_usb();
- 
-+	if (*(u32 *) KSEG1ADDR(IMAGESTREAM_OFFSET) != 0x49536973) {
-+		printk("Bad ImageStream Magic %x!!!\n", *(u32 *) KSEG1ADDR(IMAGESTREAM_OFFSET));
-+		mac_ptr = (u8 *) KSEG1ADDR(0x1f02e010);
-+	}
- 	/* Reserve one for LAN */
--        ath79_init_mac(mac, (u8 *) KSEG1ADDR(0x1f02e010), 3);
-+        ath79_init_mac(mac, mac_ptr, 3);
-         ath79_register_wmac(art + WPJ558_WMAC_CALDATA_OFFSET, mac);
--        ath79_init_mac(mac, (u8 *) KSEG1ADDR(0x1f02e010), 2);
-+        ath79_init_mac(mac, (u8 *) mac_ptr, 2);
- 	ath10k_macaddr = kmalloc(ETH_ALEN, GFP_KERNEL);
- 	memcpy(ath10k_macaddr, mac, ETH_ALEN);
- 	ap91_pci_init(NULL, mac);
-@@ -174,7 +181,7 @@ static void __init wpj558_setup(void)
- 					ARRAY_SIZE(wpj558_mdio0_info));
- 	ath79_register_mdio(0, 0x0);
- 
--	ath79_init_mac(ath79_eth0_data.mac_addr, (u8 *) KSEG1ADDR(0x1f02e010), 0);
-+	ath79_init_mac(ath79_eth0_data.mac_addr, mac_ptr, 0);
- 
- 	ath79_setup_qca955x_eth_cfg(QCA955X_ETH_CFG_RGMII_EN);
- 
+   KERNEL_NAME := vmlinuz
+   KERNEL := kernel-bin | append-dtb-elf
 Index: build_dir/target/linux/ramips/base-files/etc/hotplug.d/ieee80211/10_fix_wifi_mac
 ===================================================================
 --- /dev/null
@@ -310,7 +178,7 @@ Index: build_dir/target/linux/bcm27xx/base-files/etc/hotplug.d/ieee80211/10_fix_
 +board=$(board_name)
 +
 +case "$board" in
-+       raspberrypi,4-model-b)
++       raspberrypi,4-compute-module)
 +               # Use our reserved MAC address instead of the card's MAC
 +               process_imagestream || return 0
 +

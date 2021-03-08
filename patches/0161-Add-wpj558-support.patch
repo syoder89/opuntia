@@ -1,24 +1,7 @@
---- a/target/linux/ar71xx/base-files/etc/board.d/02_network
-+++ b/target/linux/ar71xx/base-files/etc/board.d/02_network
-@@ -481,9 +481,13 @@ ar71xx_setup_interfaces()
-         	ucidef_add_switch_extra_attr "switch0" "alias_lan" "3"
-         	;;
- 	wpj558)
--		ucidef_add_switch "switch0" \
--			"5:lan" "1:wan" "6@eth0"
--		;;
-+	        ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
-+        	ucidef_add_switch "switch0" \
-+                	"1:lan:1:4001" "5:wan:2:4000" "6@eth0"
-+        	ucidef_add_switch_extra_attr "switch0" "alias_cpu" "6"
-+        	ucidef_add_switch_extra_attr "switch0" "alias_wan" "5"
-+        	ucidef_add_switch_extra_attr "switch0" "alias_lan" "1"
-+        	;;
- 	wpj563)
- 		ucidef_add_switch "switch0" \
- 			"0@eth0" "2:lan" "3:wan"
---- a/tools/firmware-utils/src/mkmylofw.c
-+++ b/tools/firmware-utils/src/mkmylofw.c
+Index: build_dir/tools/firmware-utils/src/mkmylofw.c
+===================================================================
+--- build_dir.orig/tools/firmware-utils/src/mkmylofw.c
++++ build_dir/tools/firmware-utils/src/mkmylofw.c
 @@ -161,6 +161,9 @@ struct cpx_board boards[] = {
  	CPX_BOARD_AR71XX(DEVID_COMPEX_WPJ344, 16,
  		"WPJ344", "Compex WPJ344",
@@ -29,8 +12,10 @@
  
  	CPX_BOARD_AR23XX(DEVID_COMPEX_NP25G, 4,
  		"NP25G", "Compex NetPassage 25G",
---- a/tools/firmware-utils/src/myloader.h
-+++ b/tools/firmware-utils/src/myloader.h
+Index: build_dir/tools/firmware-utils/src/myloader.h
+===================================================================
+--- build_dir.orig/tools/firmware-utils/src/myloader.h
++++ build_dir/tools/firmware-utils/src/myloader.h
 @@ -64,6 +64,7 @@
  #define DEVID_COMPEX_WP543	0x0640
  #define DEVID_COMPEX_WPE72	0x0672
