@@ -76,7 +76,7 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +	aliases {
 +		emmc2bus = &emmc2bus;
 +		ethernet0 = &genet;
-+		pcie0 = &pcie0;
++		pcie0 = "";
 +	};
 +
 +	leds {
@@ -259,7 +259,7 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +
 +/ {
 +	chosen {
-+		bootargs = "coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1";
++		bootargs = "coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1 pci=nomsi";
 +	};
 +
 +	aliases {
