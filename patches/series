@@ -90,4 +90,4 @@ packages/0257-vim-disable-selinux.patch
 kernel/0089-add-ipvlan.patch
 kernel/0090-ipmi-support.patch
 0235-Add-APB3500.patch
-packages/0258-downgrade-iproute2-5.11-compile-problem.patch
+0236-Add-APB3350.patch
