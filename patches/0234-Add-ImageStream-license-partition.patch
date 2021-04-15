@@ -234,7 +234,7 @@ Index: build_dir/target/linux/bcm27xx/base-files/etc/init.d/default_ssid
 +	fi
 +
 +	# Also set the default fallback ip if sta mode 
-+	if [ "radio0_mode" == "sta" ] ; then
++	if [ "$radio0_mode" == "sta" ] ; then
 +		FB=$(uci get network.lan.fb_ipaddr)
 +		if [ "$FB" == "10.10.199.1" ] ; then
 +			logger "Changing default fallback ip"
