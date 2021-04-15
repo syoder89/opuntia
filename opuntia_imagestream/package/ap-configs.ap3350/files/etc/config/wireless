@@ -1,0 +1,9 @@
+config wifi-device 'radio0'
+	option type 'mac80211'
+	option channel 'auto'
+	option hwmode '11a'
+	option txpower '23'
+	option country 'MX'
+	option path 'scb/fd500000.pcie/pci0000:00/0000:00:00.0/0000:01:00.0'
+	option htmode 'HE20'
+

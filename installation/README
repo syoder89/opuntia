@@ -2,4 +2,4 @@ Read ImageStream information from last 4k of drive for x86_64
 To write use:
 dd if=AP2100-24803058 of=/dev/mmcblk0 bs=1k seek=$(($(awk '$4 == "mmcblk0" { print $3}' < /proc/partitions) - 4))
 
-dd if=license.bin of=/dev/mmcblk0 bs=1k seek=$(($(awk '$4 == "mmcblk0" { print $3}' < /proc/partitions) - 4))
+dd if=/tmp/license.bin of=/dev/mmcblk0 bs=1k seek=$(($(awk '$4 == "mmcblk0" { print $3}' < /proc/partitions) - 4))
