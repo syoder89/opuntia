@@ -1,0 +1,17 @@
+#!/bin/sh
+. /usr/share/libubox/jshn.sh
+case "$1" in
+	list)
+		echo '{ "hardwareinfo": { }}'
+	;;
+	call)
+		case "$2" in
+			hardwareinfo)
+				# return json object
+				is_dev="mmcblk0"
+				grep $is_dev /proc/partitions > /dev/null 2>&1 || return 1 
+				echo $(dd if=/dev/mmcblk0 bs=1k count=4 skip=$(($(awk '$4 == "mmcblk0" { print $3}' < /proc/partitions) - 4)) | dd bs=1 skip=256 2>/dev/null)
+			;;
+		esac
+	;;
+esac
