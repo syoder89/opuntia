@@ -91,3 +91,5 @@ kernel/0089-add-ipvlan.patch
 kernel/0090-ipmi-support.patch
 0235-Add-APB3500.patch
 0236-Add-APB3350.patch
+packages/0260-mt7915-resolve-wds-intermittent-on-ap.patch
+kernel/0091-mt7915-ack-status-unreliable.patch
