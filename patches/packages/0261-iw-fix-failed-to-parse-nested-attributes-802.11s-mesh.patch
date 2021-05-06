@@ -1,0 +1,18 @@
+Index: build_dir.ap3350/package/network/utils/iw/patches/999-iw-fix-failed-to-parse-nested-attributes-802.11s-mesh.patch
+===================================================================
+--- /dev/null
++++ build_dir.ap3350/package/network/utils/iw/patches/999-iw-fix-failed-to-parse-nested-attributes-802.11s-mesh.patch
+@@ -0,0 +1,13 @@
++--- a/station.c
+++++ b/station.c
++@@ -329,8 +329,8 @@ static int print_sta_handler(struct nl_msg *msg, void *arg)
++ 		[NL80211_STA_INFO_ACK_SIGNAL] = {.type = NLA_U8 },
++ 		[NL80211_STA_INFO_ACK_SIGNAL_AVG] = { .type = NLA_U8 },
++ 		[NL80211_STA_INFO_AIRTIME_LINK_METRIC] = { .type = NLA_U32 },
++-		[NL80211_STA_INFO_CONNECTED_TO_AS] = { .type = NLA_FLAG },
++-		[NL80211_STA_INFO_CONNECTED_TO_GATE] = { .type = NLA_FLAG },
+++		[NL80211_STA_INFO_CONNECTED_TO_AS] = { .type = NLA_U8 },
+++		[NL80211_STA_INFO_CONNECTED_TO_GATE] = { .type = NLA_U8 },
++ 	};
++ 	char *chain;
++ 	struct timeval now;

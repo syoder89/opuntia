@@ -2544,11 +2544,11 @@ CONFIG_ATH_USER_REGD=y
 # CONFIG_PACKAGE_ATH_DEBUG is not set
 CONFIG_PACKAGE_ATH_DFS=y
 # CONFIG_ATH9K_UBNTHSR is not set
-# CONFIG_PACKAGE_kmod-ath10k is not set
+CONFIG_PACKAGE_kmod-ath10k=y
 # CONFIG_PACKAGE_kmod-ath5k is not set
 CONFIG_PACKAGE_kmod-ath9k=y
 # CONFIG_PACKAGE_kmod-ath10k-ct is not set
-CONFIG_PACKAGE_kmod-ath10k-ct-smallbuffers=y
+# CONFIG_PACKAGE_kmod-ath10k-ct-smallbuffers is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca988x is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca988x-ct is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca9984-ct is not set
@@ -2714,7 +2714,7 @@ CONFIG_PACKAGE_php7-mod-json=y
 # CONFIG_PACKAGE_php7-mod-mcrypt is not set
 # CONFIG_PACKAGE_php7-mod-mysqli is not set
 # CONFIG_PACKAGE_php7-mod-opcache is not set
-CONFIG_PACKAGE_php7-mod-openssl=y
+# CONFIG_PACKAGE_php7-mod-openssl is not set
 # CONFIG_PACKAGE_php7-mod-pcntl is not set
 # CONFIG_PACKAGE_php7-mod-pdo is not set
 # CONFIG_PACKAGE_php7-mod-pdo-mysql is not set
@@ -3319,7 +3319,8 @@ CONFIG_PACKAGE_libuci-lua=y
 # CONFIG_PACKAGE_libusbmuxd is not set
 # CONFIG_PACKAGE_libustream-cyassl is not set
 # CONFIG_PACKAGE_libustream-mbedtls is not set
-# CONFIG_PACKAGE_libustream-openssl is not set
+CONFIG_PACKAGE_libustream-openssl=y
+# CONFIG_PACKAGE_libustream-wolfssl is not set
 # CONFIG_PACKAGE_libustream-polarssl is not set
 CONFIG_PACKAGE_libuuid=y
 # CONFIG_PACKAGE_libuv is not set
@@ -3383,8 +3384,8 @@ CONFIG_PACKAGE_zlib=y
 #
 CONFIG_PACKAGE_luci=y
 # CONFIG_PACKAGE_luci-light is not set
-CONFIG_PACKAGE_luci-ssl=y
-# CONFIG_PACKAGE_luci-ssl-openssl=y
+# CONFIG_PACKAGE_luci-ssl is not set
+CONFIG_PACKAGE_luci-ssl-openssl=y
 
 #
 # 2. Modules
@@ -4277,19 +4278,7 @@ CONFIG_PACKAGE_mwan3=y
 CONFIG_PACKAGE_nstat=y
 # CONFIG_PACKAGE_olsrd is not set
 # CONFIG_PACKAGE_parprouted is not set
-CONFIG_PACKAGE_quagga=y
-# CONFIG_PACKAGE_quagga-babeld is not set
-CONFIG_PACKAGE_quagga-bgpd=y
-# CONFIG_PACKAGE_quagga-isisd is not set
-CONFIG_PACKAGE_quagga-libospf=y
-CONFIG_PACKAGE_quagga-libzebra=y
-CONFIG_PACKAGE_quagga-ospf6d=y
-CONFIG_PACKAGE_quagga-ospfd=y
-CONFIG_PACKAGE_quagga-ripd=y
-CONFIG_PACKAGE_quagga-ripngd=y
-CONFIG_PACKAGE_quagga-vtysh=y
-CONFIG_PACKAGE_quagga-watchquagga=y
-CONFIG_PACKAGE_quagga-zebra=y
+# CONFIG_PACKAGE_quagga is not set
 # CONFIG_PACKAGE_redir is not set
 # CONFIG_PACKAGE_relayd is not set
 # CONFIG_PACKAGE_rinetd is not set
@@ -4434,88 +4423,6 @@ CONFIG_OPENVPN_openssl_ENABLE_SMALL=y
 # CONFIG_PACKAGE_pptpd is not set
 # CONFIG_PACKAGE_quicktun is not set
 # CONFIG_PACKAGE_ssltunnel is not set
-CONFIG_PACKAGE_strongswan=y
-
-#
-# Configuration
-#
-CONFIG_STRONGSWAN_ROUTING_TABLE="220"
-CONFIG_STRONGSWAN_ROUTING_TABLE_PRIO="220"
-CONFIG_PACKAGE_strongswan-charon=y
-CONFIG_PACKAGE_strongswan-default=y
-# CONFIG_PACKAGE_strongswan-full is not set
-# CONFIG_PACKAGE_strongswan-libtls is not set
-# CONFIG_PACKAGE_strongswan-minimal is not set
-# CONFIG_PACKAGE_strongswan-mod-addrblock is not set
-CONFIG_PACKAGE_strongswan-mod-aes=y
-CONFIG_PACKAGE_strongswan-mod-af-alg=y
-# CONFIG_PACKAGE_strongswan-mod-agent is not set
-CONFIG_PACKAGE_strongswan-mod-attr=y
-# CONFIG_PACKAGE_strongswan-mod-attr-sql is not set
-CONFIG_PACKAGE_strongswan-mod-blowfish=y
-CONFIG_PACKAGE_strongswan-mod-ccm=y
-CONFIG_PACKAGE_strongswan-mod-cmac=y
-CONFIG_PACKAGE_strongswan-mod-constraints=y
-# CONFIG_PACKAGE_strongswan-mod-coupling is not set
-# CONFIG_PACKAGE_strongswan-mod-ctr is not set
-CONFIG_PACKAGE_strongswan-mod-curl=y
-CONFIG_PACKAGE_strongswan-mod-des=y
-# CONFIG_PACKAGE_strongswan-mod-dhcp is not set
-CONFIG_PACKAGE_strongswan-mod-dnskey=y
-CONFIG_PACKAGE_strongswan-mod-duplicheck=y
-CONFIG_PACKAGE_strongswan-mod-eap-identity=y
-CONFIG_PACKAGE_strongswan-mod-eap-md5=y
-CONFIG_PACKAGE_strongswan-mod-eap-mschapv2=y
-# CONFIG_PACKAGE_strongswan-mod-eap-radius is not set
-# CONFIG_PACKAGE_strongswan-mod-eap-tls is not set
-# CONFIG_PACKAGE_strongswan-mod-farp is not set
-CONFIG_PACKAGE_strongswan-mod-fips-prf=y
-CONFIG_PACKAGE_strongswan-mod-gcm=y
-CONFIG_PACKAGE_strongswan-mod-gcrypt=y
-CONFIG_PACKAGE_strongswan-mod-gmp=y
-# CONFIG_PACKAGE_strongswan-mod-ha is not set
-CONFIG_PACKAGE_strongswan-mod-hmac=y
-# CONFIG_PACKAGE_strongswan-mod-kernel-libipsec is not set
-CONFIG_PACKAGE_strongswan-mod-kernel-netlink=y
-# CONFIG_PACKAGE_strongswan-mod-ldap is not set
-# CONFIG_PACKAGE_strongswan-mod-led is not set
-# CONFIG_PACKAGE_strongswan-mod-load-tester is not set
-CONFIG_PACKAGE_strongswan-mod-md4=y
-CONFIG_PACKAGE_strongswan-mod-md5=y
-# CONFIG_PACKAGE_strongswan-mod-mysql is not set
-CONFIG_PACKAGE_strongswan-mod-nonce=y
-CONFIG_PACKAGE_strongswan-mod-openssl=y
-CONFIG_PACKAGE_strongswan-mod-pem=y
-CONFIG_PACKAGE_strongswan-mod-pgp=y
-CONFIG_PACKAGE_strongswan-mod-pkcs1=y
-CONFIG_PACKAGE_strongswan-mod-pkcs11=y
-# CONFIG_PACKAGE_strongswan-mod-pkcs12 is not set
-# CONFIG_PACKAGE_strongswan-mod-pkcs7 is not set
-CONFIG_PACKAGE_strongswan-mod-pkcs8=y
-CONFIG_PACKAGE_strongswan-mod-pubkey=y
-CONFIG_PACKAGE_strongswan-mod-random=y
-CONFIG_PACKAGE_strongswan-mod-rc2=y
-CONFIG_PACKAGE_strongswan-mod-resolve=y
-CONFIG_PACKAGE_strongswan-mod-revocation=y
-CONFIG_PACKAGE_strongswan-mod-sha1=y
-CONFIG_PACKAGE_strongswan-mod-sha2=y
-CONFIG_PACKAGE_strongswan-mod-smp=y
-CONFIG_PACKAGE_strongswan-mod-socket-default=y
-# CONFIG_PACKAGE_strongswan-mod-socket-dynamic is not set
-# CONFIG_PACKAGE_strongswan-mod-sql is not set
-# CONFIG_PACKAGE_strongswan-mod-sqlite is not set
-CONFIG_PACKAGE_strongswan-mod-sshkey=y
-CONFIG_PACKAGE_strongswan-mod-stroke=y
-# CONFIG_PACKAGE_strongswan-mod-test-vectors is not set
-CONFIG_PACKAGE_strongswan-mod-uci=y
-# CONFIG_PACKAGE_strongswan-mod-unity is not set
-CONFIG_PACKAGE_strongswan-mod-updown=y
-CONFIG_PACKAGE_strongswan-mod-whitelist=y
-CONFIG_PACKAGE_strongswan-mod-x509=y
-CONFIG_PACKAGE_strongswan-mod-xauth-eap=y
-CONFIG_PACKAGE_strongswan-mod-xauth-generic=y
-CONFIG_PACKAGE_strongswan-mod-xcbc=y
-CONFIG_PACKAGE_strongswan-utils=y
 # CONFIG_PACKAGE_tinc is not set
 # CONFIG_PACKAGE_uanytun is not set
 # CONFIG_PACKAGE_uanytun-nettle is not set
@@ -4724,7 +4631,7 @@ CONFIG_PACKAGE_hostapd-utils=y
 # CONFIG_PACKAGE_ifstat is not set
 CONFIG_PACKAGE_iftop=y
 # CONFIG_PACKAGE_ipcad is not set
-CONFIG_PACKAGE_iperf=y
+# CONFIG_PACKAGE_iperf is not set
 # CONFIG_PACKAGE_iperf-mt is not set
 CONFIG_PACKAGE_iperf3=y
 # CONFIG_PACKAGE_ipip is not set
@@ -4940,7 +4847,8 @@ CONFIG_DRIVER_11W_SUPPORT=y
 # CONFIG_PACKAGE_wpa-supplicant-mesh is not set
 # CONFIG_PACKAGE_wpa-supplicant-mini is not set
 # CONFIG_PACKAGE_wpa-supplicant-p2p is not set
-CONFIG_PACKAGE_wpad=y
+# CONFIG_PACKAGE_wpad-basic-wolfssl is not set
+CONFIG_PACKAGE_wpad-mesh-openssl=y
 # CONFIG_PACKAGE_wpad-mesh is not set
 # CONFIG_PACKAGE_wpad-mini is not set
 # CONFIG_PACKAGE_wpan-tools is not set
@@ -5021,7 +4929,7 @@ CONFIG_PACKAGE_wpad=y
 # CONFIG_PACKAGE_mg is not set
 CONFIG_PACKAGE_nano=y
 # CONFIG_PACKAGE_vim is not set
-# CONFIG_PACKAGE_vim-full is not set
+CONFIG_PACKAGE_vim-full=y
 # CONFIG_PACKAGE_vim-help is not set
 # CONFIG_PACKAGE_vim-runtime is not set
 # CONFIG_PACKAGE_zile is not set
@@ -5588,3 +5496,14 @@ CONFIG_PACKAGE_px5g=y
 # libraries
 #
 # CONFIG_PACKAGE_orbit2 is not set
+# CONFIG_PACKAGE_strongswan is not set
+CONFIG_PACKAGE_kismet-remotecap=y
+CONFIG_PACKAGE_frr=y
+CONFIG_PACKAGE_frr-bfdd=y
+CONFIG_PACKAGE_frr-bgpd=y
+CONFIG_PACKAGE_frr-ospf6d=y
+CONFIG_PACKAGE_frr-ospfd=y
+CONFIG_PACKAGE_frr-vrrpd=y
+CONFIG_PACKAGE_frr-vtysh=y
+CONFIG_PACKAGE_frr-staticd=y
+# CONFIG_PACKAGE_quagga is not set

@@ -1,28 +1,38 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=kismet-remotecap
-PKG_VERSION:=2020-02-20
+PKG_VERSION:=2020-12-R3
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/imagestream/kismet.git
-PKG_SOURCE_VERSION:=ac98b69b239e2e7ad15e17e9a93659b2d33d03cf
+PKG_SOURCE_URL:=https://github.com/kismetwireless/kismet.git
+PKG_SOURCE_VERSION:=kismet-2020-12-R3
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 
-include $(INCLUDE_DIR)/package.mk
-
 PKG_USE_MIPS16:=0
 
-HOST_BUILD_DEPENDS:=protobuf/host 
+PKG_BUILD_DEPENDS:=protobuf/host \
+
+CONFIGURE_OPTS := \
+	--sysconfdir=/etc/kismet \
+	--bindir=/usr/bin \
+	--disable-python-tools \
+	--with-protoc=$(STAGING_DIR_HOSTPKG)/bin/protoc \
+	--enable-protobuflite \
+	--disable-element-typesafety \
+	--disable-debuglibs \
+	--disable-libcap 
+
+include $(INCLUDE_DIR)/package.mk
 
 define Package/kismet-remotecap
   SECTION:=net
   CATEGORY:=Network
   TITLE:=Kismet Remote Capture
   URL:=https://www.kismetwireless.net/
-  DEPENDS:=+libpthread +libpcap +libpcre +libmicrohttpd +libnl +libcap +libstdcpp +libncurses +libsqlite3 +zlib +protobuf-lite +libprotobuf-c +libdw +libusb-1.0
+  DEPENDS:=+libpthread +libpcap +libnl +libcap +protobuf-lite +libprotobuf-c +libwebsockets-full
   SUBMENU:=wireless
 endef
 
@@ -35,10 +45,8 @@ define Build/Configure
 endef
 
 CONFIGURE_ARGS += \
-	--sysconfdir=/etc/kismet \
-	--bindir=/usr/bin \
-	--disable-python-tools \
-	--with-protoc=$(STAGING_DIR_HOSTPKG)/bin/protoc \
+  	$(CONFIGURE_OPTS) \
+	--disable-libusb \
 	--enable-capture-tools-only
 
 # Override libs to force lpthread because we don't detect it properly on openwrt
@@ -48,8 +56,8 @@ CONFIGURE_VARS += \
 
 define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
-		LD="$(TARGET_CXX)" \
-		datasources
+	LD="$(TARGET_CXX)" \
+	capture_linux_wifi/kismet_cap_linux_wifi 
 endef
 
 define Package/kismet-remotecap/install
