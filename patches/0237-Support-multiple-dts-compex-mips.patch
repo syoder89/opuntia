@@ -749,3 +749,87 @@ Index: build_dir/target/linux/ath79/patches-5.4/999-scott-cpx-mips-multi-dtb.pat
 + 	ath79_ddr_ctrl_init();
 + 
 + 	detect_memory_region(0, ATH79_MEM_SIZE_MIN, ATH79_MEM_SIZE_MAX);
+Index: build_dir/target/linux/ath79/generic/base-files/etc/board.d/01_leds
+===================================================================
+--- build_dir.orig/target/linux/ath79/generic/base-files/etc/board.d/01_leds
++++ build_dir/target/linux/ath79/generic/base-files/etc/board.d/01_leds
+@@ -166,13 +166,16 @@ openmesh,mr1750-v1|\
+ openmesh,mr1750-v2)
+ 	ucidef_set_led_netdev "lan" "LAN" "blue:lan" "eth0"
+ 	;;
++compex,wpj344|\
++compex,wpj558|\
++compex,wpj563|\
+ compex,wpj344-16m|\
+ compex,wpj531-16m)
+-	ucidef_set_rssimon "wlan0" "200000" "1"
+-	ucidef_set_led_rssi "sig1" "SIG1" "red:sig1" "wlan0" "85" "100"
+-	ucidef_set_led_rssi "sig2" "SIG2" "yellow:sig2" "wlan0" "75" "100"
+-	ucidef_set_led_rssi "sig3" "SIG3" "green:sig3" "wlan0" "65" "100"
+-	ucidef_set_led_rssi "sig4" "SIG4" "green:sig4" "wlan0" "50" "100"
++	ucidef_set_rssimon "wlan1" "2000000" "1"
++	ucidef_set_led_rssi "rssilow" "RSSILOW" "wpj344:red:sig1" "wlan1" "1" "100"
++	ucidef_set_led_rssi "rssimediumlow" "RSSIMEDIUMLOW" "wpj344:yellow:sig2" "wlan1" "26" "100"
++	ucidef_set_led_rssi "rssimediumhigh" "RSSIMEDIUMHIGH" "wpj344:green:sig3" "wlan1" "51" "100"
++	ucidef_set_led_rssi "rssihigh" "RSSIHIGH" "wpj344:green:sig4" "wlan1" "76" "100"
+ 	;;
+ devolo,magic-2-wifi)
+ 	ucidef_set_led_netdev "plcw" "dLAN" "white:dlan" "eth0.1" "rx"
+Index: build_dir/target/linux/ath79/generic/base-files/etc/board.d/02_network
+===================================================================
+--- build_dir.orig/target/linux/ath79/generic/base-files/etc/board.d/02_network
++++ build_dir/target/linux/ath79/generic/base-files/etc/board.d/02_network
+@@ -169,6 +169,7 @@ ath79_setup_interfaces()
+ 	comfast,cf-e110n-v2|\
+ 	comfast,cf-e120a-v3|\
+ 	comfast,cf-e314n-v2|\
++	compex,wpj531|\
+ 	compex,wpj531-16m|\
+ 	openmesh,om2p-v4|\
+ 	openmesh,om2p-hs-v4|\
+@@ -197,11 +198,34 @@ ath79_setup_interfaces()
+ 		ucidef_add_switch "switch0" \
+ 			"0@eth0" "1:lan" "2:lan" "3:lan" "4:lan" "5:wan" "6@eth1"
+ 		;;
+-	compex,wpj344-16m|\
+-	compex,wpj563)
++	compex,wpj344-16m)
+ 		ucidef_add_switch "switch0" \
+ 			"0@eth0" "3:lan" "2:wan"
+ 		;;
++	compex,wpj344)
++		ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
++		ucidef_add_switch "switch0" \
++			"3:lan:1:4001" "2:wan:2:4000" "0@eth0"
++		ucidef_add_switch_extra_attr "switch0" "alias_cpu" "0"
++		ucidef_add_switch_extra_attr "switch0" "alias_wan" "2"
++		ucidef_add_switch_extra_attr "switch0" "alias_lan" "3"
++		;;
++	compex,wpj558)
++		ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
++		ucidef_add_switch "switch0" \
++			"1:lan:1:4001" "5:wan:2:4000" "6@eth0"
++		ucidef_add_switch_extra_attr "switch0" "alias_cpu" "6"
++		ucidef_add_switch_extra_attr "switch0" "alias_wan" "5"
++		ucidef_add_switch_extra_attr "switch0" "alias_lan" "1"
++		;;
++	compex,wpj563)
++		ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
++		ucidef_add_switch "switch0" \
++			"2:lan:1:4001" "3:wan:2:4000" "0@eth0"
++		ucidef_add_switch_extra_attr "switch0" "alias_cpu" "0"
++		ucidef_add_switch_extra_attr "switch0" "alias_wan" "3"
++		ucidef_add_switch_extra_attr "switch0" "alias_lan" "2"
++		;;
+ 	devolo,magic-2-wifi)
+ 		ucidef_add_switch "switch0" \
+ 			"0@eth0" "2:wan" "3:lan" "4:lan"
+@@ -488,6 +512,8 @@ ath79_setup_macs()
+ 		wan_mac=$(fritz_tffs -n macb -i $(find_mtd_part "tffs (1)"))
+ 		;;
+ 	compex,wpj344-16m|\
++	compex,wpj344|\
++	compex,wpj558|\
+ 	compex,wpj563)
+ 		wan_mac=$(mtd_get_mac_binary u-boot 0x2e018)
+ 		;;

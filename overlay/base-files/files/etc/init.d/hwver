@@ -23,14 +23,14 @@ start() {
         board=$(get_board_name)
 
         case "$board" in
-        wpj344)
+        compex,wpj344)
 		set_hw_rev 1
                 ;;
 
-        wpj558)
+        compex,wpj558)
 		set_hw_rev 1
                 ;;
-        wpj563)
+        compex,wpj563)
 		set_hw_rev 2
                 ;;
         esac

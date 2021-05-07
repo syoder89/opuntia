@@ -20,20 +20,20 @@ power2() {
 ethports_st() {
 	board=$(board_name)
 	case "$board" in
-		wpj563 |\
-		wpj344)
+		compex,wpj563 |\
+		compex,wpj344)
 			PORTNAMES="LAN0 LAN1"
 			PORTNUMS="3 2"
 			;;
-		wpj558)
+		compex,wpj558)
 			PORTNAMES="LAN0 LAN1"
 			PORTNUMS="5 1"
 			;;
-		wpj531)
+		compex,wpj531)
 			PORTNAMES="LAN0 LAN1"
 			PORTNUMS="5 3"
 			;;
-		wpj342)
+		compex,wpj342)
 			PORTNAMES="LAN0 LAN1"
 			PORTNUMS="2 1"
 			;;
