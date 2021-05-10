@@ -89,6 +89,7 @@ packages/0256-collectd-add-hwmon-temps.patch
 packages/0257-vim-disable-selinux.patch
 kernel/0089-add-ipvlan.patch
 kernel/0090-ipmi-support.patch
+kernel/0092-vrf.patch
 0235-Add-APB3500.patch
 0236-Add-APB3350.patch
 packages/0260-mt7915-resolve-wds-intermittent-on-ap.patch
