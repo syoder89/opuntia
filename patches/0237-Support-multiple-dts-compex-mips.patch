@@ -39,27 +39,27 @@ Index: build_dir/target/linux/ath79/dts/imagestream_wpj344.dts
 +		compatible = "gpio-leds";
 +
 +		led_status: status {
-+			label = "wpj344:green:status";
++			label = "green:status";
 +			gpios = <&gpio 14 GPIO_ACTIVE_LOW>;
 +		};
 +
 +		sig1 {
-+			label = "wpj344:red:sig1";
++			label = "red:sig1";
 +			gpios = <&gpio 15 GPIO_ACTIVE_LOW>;
 +		};
 +
 +		sig2 {
-+			label = "wpj344:yellow:sig2";
++			label = "yellow:sig2";
 +			gpios = <&gpio 20 GPIO_ACTIVE_LOW>;
 +		};
 +
 +		sig3 {
-+			label = "wpj344:green:sig3";
++			label = "green:sig3";
 +			gpios = <&gpio 21 GPIO_ACTIVE_LOW>;
 +		};
 +
 +		sig4 {
-+			label = "wpj344:green:sig4";
++			label = "green:sig4";
 +			gpios = <&gpio 22 GPIO_ACTIVE_LOW>;
 +		};
 +
@@ -200,27 +200,27 @@ Index: build_dir/target/linux/ath79/dts/imagestream_wpj558.dts
 +		compatible = "gpio-leds";
 +
 +		wifi_red {
-+			label = "wpj344:red:sig1";
++			label = "red:sig1";
 +			gpios = <&gpio 14 GPIO_ACTIVE_LOW>;
 +		};
 +
 +		wifi_yellow {
-+			label = "wpj344:yellow:sig2";
++			label = "yellow:sig2";
 +			gpios = <&gpio 15 GPIO_ACTIVE_LOW>;
 +		};
 +
 +		wifi_green {
-+			label = "wpj344:green:sig3";
++			label = "green:sig3";
 +			gpios = <&gpio 22 GPIO_ACTIVE_LOW>;
 +		};
 +
 +		wifi_green2 {
-+			label = "wpj344:green:sig4";
++			label = "green:sig4";
 +			gpios = <&gpio 23 GPIO_ACTIVE_LOW>;
 +		};
 +
 +		buzzer {
-+			label = "wpj344:buzzer";
++			label = "buzzer";
 +			gpios = <&gpio 4 GPIO_ACTIVE_HIGH>;
 +		};
 +	};
@@ -374,22 +374,22 @@ Index: build_dir/target/linux/ath79/dts/imagestream_wpj563.dts
 +		compatible = "gpio-leds";
 +
 +		sig1 {
-+			label = "wpj344:green:sig1";
++			label = "green:sig1";
 +			gpios = <&gpio 1 GPIO_ACTIVE_LOW>;
 +		};
 +
 +		sig2 {
-+			label = "wpj344:green:sig2";
++			label = "green:sig2";
 +			gpios = <&gpio 5 GPIO_ACTIVE_LOW>;
 +		};
 +
 +		sig3 {
-+			label = "wpj344:green:sig4";
++			label = "green:sig4";
 +			gpios = <&gpio 6 GPIO_ACTIVE_LOW>;
 +		};
 +
 +		led_sig4: sig4 {
-+			label = "wpj344:green:sig4";
++			label = "green:sig4";
 +			gpios = <&gpio 7 GPIO_ACTIVE_LOW>;
 +		};
 +	};
@@ -768,10 +768,10 @@ Index: build_dir/target/linux/ath79/generic/base-files/etc/board.d/01_leds
 -	ucidef_set_led_rssi "sig3" "SIG3" "green:sig3" "wlan0" "65" "100"
 -	ucidef_set_led_rssi "sig4" "SIG4" "green:sig4" "wlan0" "50" "100"
 +	ucidef_set_rssimon "wlan1" "2000000" "1"
-+	ucidef_set_led_rssi "rssilow" "RSSILOW" "wpj344:red:sig1" "wlan1" "1" "100"
-+	ucidef_set_led_rssi "rssimediumlow" "RSSIMEDIUMLOW" "wpj344:yellow:sig2" "wlan1" "26" "100"
-+	ucidef_set_led_rssi "rssimediumhigh" "RSSIMEDIUMHIGH" "wpj344:green:sig3" "wlan1" "51" "100"
-+	ucidef_set_led_rssi "rssihigh" "RSSIHIGH" "wpj344:green:sig4" "wlan1" "76" "100"
++	ucidef_set_led_rssi "rssilow" "RSSILOW" "red:sig1" "wlan1" "1" "100"
++	ucidef_set_led_rssi "rssimediumlow" "RSSIMEDIUMLOW" "yellow:sig2" "wlan1" "26" "100"
++	ucidef_set_led_rssi "rssimediumhigh" "RSSIMEDIUMHIGH" "green:sig3" "wlan1" "51" "100"
++	ucidef_set_led_rssi "rssihigh" "RSSIHIGH" "green:sig4" "wlan1" "76" "100"
  	;;
  devolo,magic-2-wifi)
  	ucidef_set_led_netdev "plcw" "dLAN" "white:dlan" "eth0.1" "rx"
