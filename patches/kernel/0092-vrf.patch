@@ -1,0 +1,24 @@
+Index: build_dir/package/kernel/linux/modules/netsupport.mk
+===================================================================
+--- build_dir.orig/package/kernel/linux/modules/netsupport.mk
++++ build_dir/package/kernel/linux/modules/netsupport.mk
+@@ -1217,6 +1217,19 @@
+
+ $(eval $(call KernelPackage,nlmon))
+
++define KernelPackage/vrf
++  SUBMENU:=$(NETWORK_SUPPPORT_MENU)
++  TITLE:=VRF Lite Support
++  KCONFIG:=CONFIG_NET_VRF=m
++  FILES:=$(LINUX_DIR)/drivers/net/vrf.ko
++  AUTOLOAD:=$(call AutoLaod,13,vrf)
++endef
++
++$(eval $(call KernelPackage,vrf))
++
++define KernelPackage/vrf/description
++  VRF Lite support for the Linux kernel
++endef
+
+ define KernelPackage/mdio
+   SUBMENU:=$(NETWORK_SUPPORT_MENU)
