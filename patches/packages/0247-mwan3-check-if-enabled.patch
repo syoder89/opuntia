@@ -13,3 +13,19 @@ Index: build_dir/feeds/packages/net/mwan3/files/usr/sbin/mwan3
  	/etc/init.d/mwan3 enable
  	/etc/init.d/mwan3 start
  }
+Index: build_dir/feeds/packages/net/mwan3/files/etc/init.d/mwan3
+===================================================================
+--- build_dir.orig/feeds/packages/net/mwan3/files/etc/init.d/mwan3
++++ build_dir/feeds/packages/net/mwan3/files/etc/init.d/mwan3
+@@ -28,6 +28,11 @@ start_tracker() {
+ start_service() {
+ 	local enabled hotplug_pids
+ 
++	config_get_bool enabled globals 'enabled' 0
++	[ ${enabled} -gt 0 ] || {
++		exit 1
++	}
++
+ 	mwan3_init
+ 	config_foreach start_tracker interface
+ 

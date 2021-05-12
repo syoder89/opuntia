@@ -1,0 +1,22 @@
+Index: build_dir/feeds/packages/net/strongswan/Makefile
+===================================================================
+--- build_dir.orig/feeds/packages/net/strongswan/Makefile
++++ build_dir/feeds/packages/net/strongswan/Makefile
+@@ -528,7 +528,6 @@ define Package/strongswan-ipsec/conffile
+ /etc/ipsec.d/
+ /etc/ipsec.conf
+ /etc/ipsec.secrets
+-/etc/ipsec.user
+ endef
+ 
+ define Package/strongswan-ipsec/install
+@@ -537,9 +536,6 @@ define Package/strongswan-ipsec/install
+ 	echo -e "\ninclude /var/ipsec/ipsec.conf" >> $(1)/etc/ipsec.conf
+ 	$(INSTALL_CONF) ./files/ipsec.secrets $(1)/etc/
+ 	echo -e "\ninclude /var/ipsec/ipsec.secrets" >> $(1)/etc/ipsec.secrets
+-	$(INSTALL_CONF) ./files/ipsec.user $(1)/etc/
+-	$(INSTALL_DIR) $(1)/etc/init.d
+-	$(INSTALL_BIN) ./files/ipsec.init $(1)/etc/init.d/ipsec
+ 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/ipsec $(1)/usr/sbin/
+ endef
+ 
