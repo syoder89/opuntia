@@ -2,11 +2,12 @@ Index: build_dir/include/image-commands.mk
 ===================================================================
 --- build_dir.orig/include/image-commands.mk
 +++ build_dir/include/image-commands.mk
-@@ -13,7 +13,7 @@ endef
+@@ -13,7 +13,8 @@ endef
  
  
  define Build/append-dtb
 -	cat $(KDIR)/image-$(firstword $(DEVICE_DTS)).dtb >> $@
++	$(foreach dts,$(DEVICE_DTS), $(call Image/pad-to,$(KDIR)/image-$(firstword $(dts)).dtb,4) ;)
 +	$(foreach dts,$(DEVICE_DTS), cat $(KDIR)/image-$(firstword $(dts)).dtb >> $@ ;)
  endef
  
@@ -334,17 +335,22 @@ Index: build_dir/target/linux/ath79/dts/imagestream_wpj563.dts
 ===================================================================
 --- /dev/null
 +++ build_dir/target/linux/ath79/dts/imagestream_wpj563.dts
-@@ -0,0 +1,143 @@
+@@ -0,0 +1,148 @@
 +// SPDX-License-Identifier: GPL-2.0-or-later OR MIT
-+
-+#include "qca956x.dtsi"
++/dts-v1/;
 +
 +#include <dt-bindings/gpio/gpio.h>
 +#include <dt-bindings/input/input.h>
 +
++#include "qca956x.dtsi"
++
 +/ {
-+	model = "Compex WPJ563";
 +	compatible = "compex,wpj563", "qca,qca9563";
++	model = "Compex WPJ563";
++
++        chosen {
++                bootargs = "console=ttyS0,115200n8";
++        };
 +
 +	aliases {
 +		label-mac-device = &eth0;
