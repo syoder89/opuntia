@@ -577,7 +577,7 @@ Index: build_dir/target/linux/ath79/patches-5.10/999-scott-cpx-mips-multi-dtb.pa
 ===================================================================
 --- /dev/null
 +++ build_dir/target/linux/ath79/patches-5.10/999-scott-cpx-mips-multi-dtb.patch
-@@ -0,0 +1,86 @@
+@@ -0,0 +1,91 @@
 +Index: linux-5.4.115/arch/mips/ath79/setup.c
 +===================================================================
 +--- linux-5.4.115.orig/arch/mips/ath79/setup.c
@@ -590,7 +590,7 @@ Index: build_dir/target/linux/ath79/patches-5.10/999-scott-cpx-mips-multi-dtb.pa
 + 
 + #include <asm/bootinfo.h>
 + #include <asm/idle.h>
-+@@ -213,24 +214,67 @@ unsigned int get_c0_compare_int(void)
++@@ -213,24 +214,72 @@ unsigned int get_c0_compare_int(void)
 + 	return CP0_LEGACY_COMPARE_IRQ;
 + }
 + 
@@ -646,13 +646,18 @@ Index: build_dir/target/linux/ath79/patches-5.10/999-scott-cpx-mips-multi-dtb.pa
 ++			pr_info("Checking address 0x%lx\n", dtb_src);
 ++			dtb_size = fdt_totalsize((void *)KSEG0ADDR(dtb_src));
 ++			pr_info("Got a valid DTB size %ld at 0x%lx\n", dtb_size, dtb_src);
-++			dtb_src += dtb_size;
+++			dtb_src += (dtb_size + 3) & ~3;
 ++			dtb_idx--;
 ++		}
 ++
+++		pr_info("Checking address 0x%lx\n", dtb_src);
 ++		/* One last check - shouldn't happen but if it does just use the first dtb */
-++		if (fdt_magic((void *)KSEG0ADDR(dtb_src)) != FDT_MAGIC)
+++		if (fdt_magic((void *)KSEG0ADDR(dtb_src)) != FDT_MAGIC) {
+++			pr_info("Failed magic at address 0x%lx!!! Defaulting to first dtb!\n", dtb_src);
 ++			dtb_src = fw_passed_dtb;
+++		}
+++		dtb_size = fdt_totalsize((void *)KSEG0ADDR(dtb_src));
+++		pr_info("Got a valid DTB size %ld at 0x%lx\n", dtb_size, dtb_src);
 ++		__dt_setup_arch((void *)KSEG0ADDR(dtb_src));
 ++	}
 + 
@@ -668,7 +673,7 @@ Index: build_dir/target/linux/ath79/patches-5.4/999-scott-cpx-mips-multi-dtb.pat
 ===================================================================
 --- /dev/null
 +++ build_dir/target/linux/ath79/patches-5.4/999-scott-cpx-mips-multi-dtb.patch
-@@ -0,0 +1,86 @@
+@@ -0,0 +1,91 @@
 +Index: linux-5.4.115/arch/mips/ath79/setup.c
 +===================================================================
 +--- linux-5.4.115.orig/arch/mips/ath79/setup.c
@@ -681,7 +686,7 @@ Index: build_dir/target/linux/ath79/patches-5.4/999-scott-cpx-mips-multi-dtb.pat
 + 
 + #include <asm/bootinfo.h>
 + #include <asm/idle.h>
-+@@ -213,24 +214,67 @@ unsigned int get_c0_compare_int(void)
++@@ -213,24 +214,72 @@ unsigned int get_c0_compare_int(void)
 + 	return CP0_LEGACY_COMPARE_IRQ;
 + }
 + 
@@ -737,13 +742,18 @@ Index: build_dir/target/linux/ath79/patches-5.4/999-scott-cpx-mips-multi-dtb.pat
 ++			pr_info("Checking address 0x%lx\n", dtb_src);
 ++			dtb_size = fdt_totalsize((void *)KSEG0ADDR(dtb_src));
 ++			pr_info("Got a valid DTB size %ld at 0x%lx\n", dtb_size, dtb_src);
-++			dtb_src += dtb_size;
+++			dtb_src += (dtb_size + 3) & ~3;
 ++			dtb_idx--;
 ++		}
 ++
+++		pr_info("Checking address 0x%lx\n", dtb_src);
 ++		/* One last check - shouldn't happen but if it does just use the first dtb */
-++		if (fdt_magic((void *)KSEG0ADDR(dtb_src)) != FDT_MAGIC)
+++		if (fdt_magic((void *)KSEG0ADDR(dtb_src)) != FDT_MAGIC) {
+++			pr_info("Failed magic at address 0x%lx!!! Defaulting to first dtb!\n", dtb_src);
 ++			dtb_src = fw_passed_dtb;
+++		}
+++		dtb_size = fdt_totalsize((void *)KSEG0ADDR(dtb_src));
+++		pr_info("Got a valid DTB size %ld at 0x%lx\n", dtb_size, dtb_src);
 ++		__dt_setup_arch((void *)KSEG0ADDR(dtb_src));
 ++	}
 + 
