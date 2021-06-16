@@ -1,4 +1,5 @@
 # Figure out the containing dir of this Makefile
+# TR1000 shares config with EV1000
 OVERLAY_DIR:=$(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 # Declare custom installation commands
@@ -15,6 +16,8 @@ HWREV := $(firstword $(subst -, ,$(CONFIG_VERSION_HWREV)))
 ifeq ($(PRODUCT_VER), "RR1000")
 Package/firewall/install += $(newline)$(custom_install_commands_rebel)
 else ifeq ($(PRODUCT_VER), "EV1000")
+Package/firewall/install += $(newline)$(custom_install_commands_envoy)
+else ifeq ($(PRODUCT_VER), "TR1000")
 Package/firewall/install += $(newline)$(custom_install_commands_envoy)
 else ifeq ($(PRODUCT_VER), "AP2100")
 ifeq ($(HWREV), "3")
