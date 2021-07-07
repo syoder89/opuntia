@@ -97,3 +97,4 @@ packages/0260-mt7915-resolve-wds-intermittent-on-ap.patch
 kernel/0091-mt7915-ack-status-unreliable.patch
 packages/0261-iw-fix-failed-to-parse-nested-attributes-802.11s-mesh.patch
 0237-Support-multiple-dts-compex-mips.patch
+kernel/0093-update-rpi-firmware.patch
