@@ -13,7 +13,7 @@ Index: build_dir/feeds/packages/net/openvpn/files/openvpn.config
 ===================================================================
 --- build_dir.orig/feeds/packages/net/openvpn/files/openvpn.config
 +++ build_dir/feeds/packages/net/openvpn/files/openvpn.config
-@@ -1,500 +1 @@
+@@ -1,506 +1 @@
  package openvpn
 -
 -#################################################
@@ -316,6 +316,9 @@ Index: build_dir/feeds/packages/net/openvpn/files/openvpn.config
 -	#
 -	# LZ4 requires OpenVPN 2.4+ client and server
 -#	option compress lz4
+-	# LZO is available by default only in openvpn-openssl variant
+-	# LZO is compatible with most OpenVPN versions
+-#	option compress lzo
 -	
 -	# Control how OpenVPN handles peers using compression
 -	#
@@ -508,6 +511,9 @@ Index: build_dir/feeds/packages/net/openvpn/files/openvpn.config
 -	#
 -	# LZ4 requires OpenVPN 2.4+ on server and client
 -#	option compress lz4
+-	# LZO is available by default only in openvpn-openssl variant
+-	# LZO is compatible with most OpenVPN versions
+-#	option compress lzo
 -
 -	# Set log file verbosity.
 -	option verb 3

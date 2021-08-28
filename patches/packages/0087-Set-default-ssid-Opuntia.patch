@@ -16,36 +16,22 @@ Index: build_dir/package/kernel/mac80211/files/lib/wifi/mac80211.sh
 ===================================================================
 --- build_dir.orig/package/kernel/mac80211/files/lib/wifi/mac80211.sh
 +++ build_dir/package/kernel/mac80211/files/lib/wifi/mac80211.sh
-@@ -76,7 +76,7 @@ detect_mac80211() {
- 		[ "$found" -gt 0 ] && continue
+@@ -130,7 +130,7 @@ get_band_defaults() {
+ 		[ -n "$mode_band" -a "$band" = "6g" ] && return
  
- 		mode_band="g"
--		channel="11"
+ 		mode_band="$band"
+-		channel="$chan"
 +		channel="auto"
- 		htmode=""
- 		ht_capab=""
- 
-@@ -84,13 +84,13 @@ detect_mac80211() {
- 
- 		iw phy "$dev" info | grep -q '\* 5... MHz \[' && {
- 			mode_band="a"
--			channel=$(iw phy "$dev" info | grep '\* 5... MHz \[' | grep '(disabled)' -v -m 1 | sed 's/[^[]*\[\|\].*//g')
-+			channel="auto"
- 			iw phy "$dev" info | grep -q 'VHT Capabilities' && htmode="VHT80"
- 		}
- 
- 		iw phy "$dev" info | grep -q '\* 5.... MHz \[' && {
- 			mode_band="ad"
--			channel=$(iw phy "$dev" info | grep '\* 5.... MHz \[' | grep '(disabled)' -v -m 1 | sed 's/[^[]*\[\|\|\].*//g')
-+			channel="auto"
- 			iw phy "$dev" info | grep -q 'Capabilities:' && htmode="HT20"
- 		}
- 
-@@ -110,14 +110,15 @@ detect_mac80211() {
- 			set wireless.radio${devidx}.hwmode=11${mode_band}
- 			${dev_id}
- 			${ht_capab}
+ 		htmode="$mode"
+ 	done
+ }
+@@ -174,14 +174,17 @@ detect_mac80211() {
+ 			set wireless.radio${devidx}.channel=${channel}
+ 			set wireless.radio${devidx}.band=${mode_band}
+ 			set wireless.radio${devidx}.htmode=$htmode
 -			set wireless.radio${devidx}.disabled=1
++			set wireless.radio${devidx}.disabled=0
++			set wireless.radio${devidx}.country=US
  
  			set wireless.default_radio${devidx}=wifi-iface
  			set wireless.default_radio${devidx}.device=radio${devidx}

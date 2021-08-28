@@ -2,14 +2,14 @@ Index: luci/modules/luci-mod-network/htdocs/luci-static/resources/view/network/i
 ===================================================================
 --- luci.orig/modules/luci-mod-network/htdocs/luci-static/resources/view/network/interfaces.js
 +++ luci/modules/luci-mod-network/htdocs/luci-static/resources/view/network/interfaces.js
-@@ -552,6 +552,10 @@ return L.view.extend({
- 					// XXX: is this actually useful?
- 					//ss.taboption('advanced', form.Value, 'name', _('Name'), _('Define a name for this network.'));
+@@ -688,6 +688,10 @@ return view.extend({
+ 						// XXX: is this actually useful?
+ 						//ss.taboption('advanced', form.Value, 'name', _('Name'), _('Define a name for this network.'));
  
-+					so = ss.taboption('advanced', form.Value, 'subnet', _('<abbr title="Internet Protocol Version 4">IPv4</abbr>-Subnet'), _('Specify the subnet to serve in case multiple subnets are configured, for example "<code>192.168.5.0</code>". Can also specify the subnet mask in CIDR or dot notation, for example "<code>192.168.5.0/24</code>"'));
-+					so.optional = true;
-+					so.datatype = 'or(cidr4,ipnet4,ip4addr)';
++						so = ss.taboption('advanced', form.Value, 'subnet', _('<abbr title="Internet Protocol Version 4">IPv4</abbr>-Subnet'), _('Specify the subnet to serve in case multiple subnets are configured, for example "<code>192.168.5.0</code>". Can also specify the subnet mask in CIDR or dot notation, for example "<code>192.168.5.0/24</code>"'));
++						so.optional = true;
++						so.datatype = 'or(cidr4,ipnet4,ip4addr)';
 +
- 					so = ss.taboption('advanced', form.Value, 'netmask', _('<abbr title="Internet Protocol Version 4">IPv4</abbr>-Netmask'), _('Override the netmask sent to clients. Normally it is calculated from the subnet that is served.'));
- 					so.optional = true;
- 					so.datatype = 'ip4addr';
+ 						so = ss.taboption('advanced', form.Value, 'netmask', _('<abbr title="Internet Protocol Version 4">IPv4</abbr>-Netmask'), _('Override the netmask sent to clients. Normally it is calculated from the subnet that is served.'));
+ 						so.optional = true;
+ 						so.datatype = 'ip4addr';

@@ -1,5 +1,7 @@
+Index: build_dir/package/network/config/firewall/patches/001-scott-fix-musl-errno-options-parsing.patch
+===================================================================
 --- /dev/null
-+++ b/package/network/config/firewall/patches/001-scott-fix-musl-errno-options-parsing.patch
++++ build_dir/package/network/config/firewall/patches/001-scott-fix-musl-errno-options-parsing.patch
 @@ -0,0 +1,47 @@
 +--- a/options.c
 ++++ b/options.c

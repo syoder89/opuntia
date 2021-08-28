@@ -1,28 +1,40 @@
---- a/package/network/services/hostapd/files/hostapd.sh
-+++ b/package/network/services/hostapd/files/hostapd.sh
-@@ -176,6 +176,8 @@ hostapd_common_add_bss_config() {
- 	config_add_string iapp_interface
- 	config_add_string eap_type ca_cert client_cert identity anonymous_identity auth priv_key priv_key_pwd
+Index: build_dir/package/network/services/hostapd/files/hostapd.sh
+===================================================================
+--- build_dir.orig/package/network/services/hostapd/files/hostapd.sh
++++ build_dir/package/network/services/hostapd/files/hostapd.sh
+@@ -257,6 +257,8 @@ hostapd_common_add_bss_config() {
+ 	config_add_string 'auth_server:host' 'server:host'
+ 	config_add_string auth_secret key
+ 	config_add_int 'auth_port:port' 'port:port'
++	config_add_string radius_auth_req_attr
++	config_add_string radius_acct_req_attr
+ 
+ 	config_add_string acct_server
+ 	config_add_string acct_secret
+@@ -279,6 +281,8 @@ hostapd_common_add_bss_config() {
+ 	config_add_array altsubject_match altsubject_match2
+ 	config_add_array domain_match domain_match2 domain_suffix_match domain_suffix_match2
  	config_add_string ieee80211w_mgmt_cipher
 +	config_add_string radius_auth_req_attr
 +	config_add_string radius_acct_req_attr
  
- 	config_add_int dynamic_vlan vlan_naming
+ 	config_add_int dynamic_vlan vlan_naming vlan_no_bridge
  	config_add_string vlan_tagged_interface vlan_bridge
-@@ -307,6 +309,7 @@ hostapd_set_bss_options() {
+@@ -653,6 +657,7 @@ hostapd_set_bss_options() {
+ 			json_get_vars \
  				auth_server auth_secret auth_port \
  				dae_client dae_secret dae_port \
- 				ownip radius_client_addr \
 +				radius_auth_req_attr radius_acct_req_attr \
- 				eap_reauth_period
+ 				ownip radius_client_addr \
+ 				eap_reauth_period request_cui
  
- 			# radius can provide VLAN ID for clients
-@@ -324,6 +327,8 @@ hostapd_set_bss_options() {
- 			append bss_conf "auth_server_addr=$auth_server" "$N"
- 			append bss_conf "auth_server_port=$auth_port" "$N"
- 			append bss_conf "auth_server_shared_secret=$auth_secret" "$N"
+@@ -668,6 +673,9 @@ hostapd_set_bss_options() {
+ 			set_default dae_port 3799
+ 			set_default request_cui 0
+ 
 +			[ -n "$radius_auth_req_attr" ] && append bss_conf "radius_auth_req_attr=$radius_auth_req_attr" "$N"
 +			[ -n "$radius_acct_req_attr" ] && append bss_conf "radius_acct_req_attr=$radius_acct_req_attr" "$N"
- 
- 			[ -n "$eap_reauth_period" ] && append bss_conf "eap_reauth_period=$eap_reauth_period" "$N"
- 
++
+ 			[ "$eap_server" -eq 0 ] && {
+ 				append bss_conf "auth_server_addr=$auth_server" "$N"
+ 				append bss_conf "auth_server_port=$auth_port" "$N"

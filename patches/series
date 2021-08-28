@@ -58,7 +58,6 @@ packages/0221-add-telit-lte-modem-support.patch
 packages/0222-remove-broken-mbim-pin-required-check.patch
 packages/0224-mwan3-check-dynamic-interfaces.patch
 packages/0225-gcom-ndis-check-no-carrier.patch
-packages/0231-netifd-infinite-wireless-retries.patch
 packages/0232-decrease-ath10k-ct-buffers.patch
 packages/0237-strongswan-increase-starter-timeout.patch
 packages/0238-nodogsplash-imagestream
@@ -94,7 +93,4 @@ kernel/0092-vrf.patch
 0235-Add-APB3500.patch
 0236-Add-APB3350.patch
 packages/0260-mt7915-resolve-wds-intermittent-on-ap.patch
-kernel/0091-mt7915-ack-status-unreliable.patch
-packages/0261-iw-fix-failed-to-parse-nested-attributes-802.11s-mesh.patch
 0237-Support-multiple-dts-compex-mips.patch
-kernel/0093-update-rpi-firmware.patch

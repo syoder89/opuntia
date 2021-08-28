@@ -488,9 +488,9 @@ Index: build_dir/target/linux/ath79/image/generic.mk
 ===================================================================
 --- build_dir.orig/target/linux/ath79/image/generic.mk
 +++ build_dir/target/linux/ath79/image/generic.mk
-@@ -654,74 +654,21 @@ define Device/compex_wpj563
+@@ -717,74 +717,21 @@ define Device/devolo_dlan-pro-1200plus-a
  endef
- TARGET_DEVICES += compex_wpj563
+ TARGET_DEVICES += devolo_dlan-pro-1200plus-ac
  
 -define Device/wpj-16m
 -  $(Device/CpxImageParams16M)
@@ -769,7 +769,7 @@ Index: build_dir/target/linux/ath79/generic/base-files/etc/board.d/01_leds
 ===================================================================
 --- build_dir.orig/target/linux/ath79/generic/base-files/etc/board.d/01_leds
 +++ build_dir/target/linux/ath79/generic/base-files/etc/board.d/01_leds
-@@ -166,13 +166,16 @@ openmesh,mr1750-v1|\
+@@ -171,13 +171,16 @@ openmesh,mr1750-v1|\
  openmesh,mr1750-v2)
  	ucidef_set_led_netdev "lan" "LAN" "blue:lan" "eth0"
  	;;
@@ -789,30 +789,26 @@ Index: build_dir/target/linux/ath79/generic/base-files/etc/board.d/01_leds
 +	ucidef_set_led_rssi "rssimediumhigh" "RSSIMEDIUMHIGH" "green:sig3" "wlan1" "51" "100"
 +	ucidef_set_led_rssi "rssihigh" "RSSIHIGH" "green:sig4" "wlan1" "76" "100"
  	;;
+ devolo,dlan-pro-1200plus-ac|\
  devolo,magic-2-wifi)
- 	ucidef_set_led_netdev "plcw" "dLAN" "white:dlan" "eth0.1" "rx"
 Index: build_dir/target/linux/ath79/generic/base-files/etc/board.d/02_network
 ===================================================================
 --- build_dir.orig/target/linux/ath79/generic/base-files/etc/board.d/02_network
 +++ build_dir/target/linux/ath79/generic/base-files/etc/board.d/02_network
-@@ -169,6 +169,7 @@ ath79_setup_interfaces()
+@@ -180,6 +180,7 @@ ath79_setup_interfaces()
  	comfast,cf-e110n-v2|\
  	comfast,cf-e120a-v3|\
  	comfast,cf-e314n-v2|\
 +	compex,wpj531|\
  	compex,wpj531-16m|\
- 	openmesh,om2p-v4|\
- 	openmesh,om2p-hs-v4|\
-@@ -197,11 +198,34 @@ ath79_setup_interfaces()
+ 	openmesh,a40|\
+ 	openmesh,a60|\
+@@ -217,14 +218,29 @@ ath79_setup_interfaces()
  		ucidef_add_switch "switch0" \
  			"0@eth0" "1:lan" "2:lan" "3:lan" "4:lan" "5:wan" "6@eth1"
  		;;
 -	compex,wpj344-16m|\
 -	compex,wpj563)
-+	compex,wpj344-16m)
- 		ucidef_add_switch "switch0" \
- 			"0@eth0" "3:lan" "2:wan"
- 		;;
 +	compex,wpj344)
 +		ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
 +		ucidef_add_switch "switch0" \
@@ -823,29 +819,22 @@ Index: build_dir/target/linux/ath79/generic/base-files/etc/board.d/02_network
 +		;;
 +	compex,wpj558)
 +		ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
-+		ucidef_add_switch "switch0" \
+ 		ucidef_add_switch "switch0" \
+-			"0@eth0" "3:lan" "2:wan"
 +			"1:lan:1:4001" "5:wan:2:4000" "6@eth0"
 +		ucidef_add_switch_extra_attr "switch0" "alias_cpu" "6"
 +		ucidef_add_switch_extra_attr "switch0" "alias_wan" "5"
 +		ucidef_add_switch_extra_attr "switch0" "alias_lan" "1"
-+		;;
+ 		;;
+-	compex,wpj558-16m)
 +	compex,wpj563)
 +		ucidef_set_interfaces_lan_wan "eth0.4001" "eth0.4000"
-+		ucidef_add_switch "switch0" \
+ 		ucidef_add_switch "switch0" \
+-			"1:wan" "5:lan" "6@eth0"
 +			"2:lan:1:4001" "3:wan:2:4000" "0@eth0"
 +		ucidef_add_switch_extra_attr "switch0" "alias_cpu" "0"
 +		ucidef_add_switch_extra_attr "switch0" "alias_wan" "3"
 +		ucidef_add_switch_extra_attr "switch0" "alias_lan" "2"
-+		;;
+ 		;;
+ 	devolo,dlan-pro-1200plus-ac|\
  	devolo,magic-2-wifi)
- 		ucidef_add_switch "switch0" \
- 			"0@eth0" "2:wan" "3:lan" "4:lan"
-@@ -488,6 +512,8 @@ ath79_setup_macs()
- 		wan_mac=$(fritz_tffs -n macb -i $(find_mtd_part "tffs (1)"))
- 		;;
- 	compex,wpj344-16m|\
-+	compex,wpj344|\
-+	compex,wpj558|\
- 	compex,wpj563)
- 		wan_mac=$(mtd_get_mac_binary u-boot 0x2e018)
- 		;;

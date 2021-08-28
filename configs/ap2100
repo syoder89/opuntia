@@ -444,18 +444,6 @@ CONFIG_PACKAGE_libqrencode=y
 CONFIG_PACKAGE_qrencode=y
 CONFIG_PACKAGE_kmod-gpio-nct5104d=y
 
-CONFIG_PACKAGE_kmod-openvswitch=y
-CONFIG_PACKAGE_openvswitch=y
-CONFIG_PACKAGE_openvswitch-base=y
-CONFIG_PACKAGE_openvswitch-benchmark=y
-# CONFIG_PACKAGE_openvswitch-ipsec is not set
-CONFIG_PACKAGE_openvswitch-ovs-appctl=y
-CONFIG_PACKAGE_openvswitch-ovs-dpctl=y
-CONFIG_PACKAGE_openvswitch-ovs-ofctl=y
-CONFIG_PACKAGE_openvswitch-ovs-vsctl=y
-CONFIG_PACKAGE_openvswitch-ovsdb-client=y
-CONFIG_PACKAGE_kmod-openvswitch-vxlan=y
-# CONFIG_PACKAGE_openvswitch-python is not set
 CONFIG_PACKAGE_kmod-fs-ext4=y
 CONFIG_PACKAGE_kmod-fs-f2fs=y
 # CONFIG_PACKAGE_openssh-client is not set

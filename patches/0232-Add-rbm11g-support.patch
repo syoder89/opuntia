@@ -2,10 +2,10 @@ Index: build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
 ===================================================================
 --- build_dir.orig/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
 +++ build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
-@@ -23,8 +23,14 @@ ramips_setup_interfaces()
- 	xiaomi,mi-router-4a-gigabit)
- 		ucidef_set_interfaces_lan_wan "lan1 lan2" "wan"
- 		;;
+@@ -8,9 +8,15 @@ ramips_setup_interfaces()
+ 	local board="$1"
+ 
+ 	case $board in
 +	mikrotik,routerboard-m11g)
 +		ucidef_set_interface_lan "eth0.4001"
 +        	ucidef_add_switch "switch0" \
@@ -13,12 +13,13 @@ Index: build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/02_network
 +        	ucidef_add_switch_extra_attr "switch0" "alias_cpu" "6"
 +        	ucidef_add_switch_extra_attr "switch0" "alias_lan" "0"
 +        	;;
+ 	ampedwireless,ally-00x19k|\
  	edimax,re23s|\
 -	mikrotik,routerboard-m11g|\
  	netgear,ex6150|\
+ 	sercomm,na502|\
  	thunder,timecloud|\
- 	tplink,re350-v1|\
-@@ -135,7 +141,7 @@ ramips_setup_macs()
+@@ -153,7 +159,7 @@ ramips_setup_macs()
  	mikrotik,routerboard-760igs|\
  	mikrotik,routerboard-m11g|\
  	mikrotik,routerboard-m33g)
@@ -31,7 +32,7 @@ Index: build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
 ===================================================================
 --- build_dir.orig/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
 +++ build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
-@@ -4,6 +4,7 @@
+@@ -3,6 +3,7 @@
  . /lib/functions/uci-defaults.sh
  
  board=$(board_name)
@@ -39,7 +40,7 @@ Index: build_dir/target/linux/ramips/mt7621/base-files/etc/board.d/01_leds
  
  board_config_update
  
-@@ -55,10 +56,10 @@ mikrotik,routerboard-760igs)
+@@ -72,10 +73,10 @@ mikrotik,routerboard-760igs)
  mikrotik,routerboard-m11g)
  	ucidef_set_rssimon "wlan0" "200000" "1"
  	ucidef_set_led_rssi "rssilow" "RSSILOW" "green:rssi0" "wlan0" "1" "100"

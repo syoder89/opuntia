@@ -2,9 +2,9 @@
 
 # 10 units
 # Done in pairs. Don't ask about the options. I really wanted to use getoptlong but ran out of time to figure it out
-NUM_PAIR=5
-SN=24803082
-MAC_VAL=194137739821154
+NUM_PAIR=1
+SN=24803100
+MAC_VAL=194137739821194
 while [ $((NUM_PAIR)) -gt 0 ] ; do
 	MAC=$(printf "%02X\n" $MAC_VAL | sed -e 's/[0-9A-F]\{2\}/&:/g' -e 's/:$//')
 	RND=$(openssl rand -hex 4)

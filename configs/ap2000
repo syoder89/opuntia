@@ -352,6 +352,4 @@ CONFIG_USE_UCLIBCXX=y
 # CONFIG_USE_MIPS16=y
 CONFIG_ATH10K_MAC_OVERRIDE=y
 # CONFIG_PACKAGE_kmod-shortcut_fe is not set
-CONFIG_PACKAGE_openvswitch=y
-CONFIG_PACKAGE_kmod-openvswitch=y
 CONFIG_PACKAGE_kmod-nft-offload=y

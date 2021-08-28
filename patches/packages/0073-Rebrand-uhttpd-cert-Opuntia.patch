@@ -28,16 +28,16 @@ Index: build_dir/package/network/services/uhttpd/files/uhttpd.init
 ===================================================================
 --- build_dir.orig/package/network/services/uhttpd/files/uhttpd.init
 +++ build_dir/package/network/services/uhttpd/files/uhttpd.init
-@@ -56,7 +56,7 @@ generate_keys() {
+@@ -57,7 +57,7 @@ generate_keys() {
  	[ -n "$GENKEY_CMD" ] && {
  		$GENKEY_CMD \
  			-days ${days:-730} -newkey ${KEY_OPTS} -keyout "${UHTTPD_KEY}.new" -out "${UHTTPD_CERT}.new" \
--			-subj /C="${country:-ZZ}"/ST="${state:-Somewhere}"/L="${location:-Unknown}"/O="${commonname:-OpenWrt}$UNIQUEID"/CN="${commonname:-OpenWrt}"
-+			-subj /C="${country:-ZZ}"/ST="${state:-Somewhere}"/L="${location:-Unknown}"/O="${commonname:-Opuntia}$UNIQUEID"/CN="${commonname:-Opuntia}"
+-			-subj /C="${country:-ZZ}"/ST="${state:-Somewhere}"/L="${location:-Unknown}"/O="${organization:-OpenWrt$UNIQUEID}"/CN="${commonname:-OpenWrt}"
++			-subj /C="${country:-ZZ}"/ST="${state:-Somewhere}"/L="${location:-Unknown}"/O="${organization:-Opuntia$UNIQUEID}"/CN="${commonname:-Opuntia}"
  		sync
  		mv "${UHTTPD_KEY}.new" "${UHTTPD_KEY}"
  		mv "${UHTTPD_CERT}.new" "${UHTTPD_CERT}"
-@@ -117,7 +117,7 @@ start_instance()
+@@ -122,7 +122,7 @@ start_instance()
  	fi
  
  	append_arg "$cfg" home "-h"

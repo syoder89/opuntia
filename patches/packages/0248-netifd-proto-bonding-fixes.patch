@@ -2,14 +2,14 @@ Index: build_dir/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
 ===================================================================
 --- build_dir.orig/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
 +++ build_dir/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
-@@ -79,19 +79,24 @@ proto_bonding_add_slave() {
+@@ -79,19 +79,25 @@ proto_bonding_add_slave() {
  		return
  	fi
  
 -	ip link set dev "$slave" down
 +	let retries=5
 +	while [ $((retries)) -gt 0 ] ; do
-+		ifconfig "$slave" down
++		ip link set dev "$slave" down
 +		echo "+$slave" > /sys/class/net/"$link"/bonding/slaves && break
 +		let retries=retries-1
 +		sleep 1
@@ -25,24 +25,16 @@ Index: build_dir/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
  
  proto_bonding_setup() {
  	local cfg="$1"
- 	local link="bonding-$cfg"
+ 	local link="bond-$cfg"
  
 +	json_get_vars ifname
 +	[ -z "$ifname" ] || link="$ifname"
 +
++
  	# Check for loaded kernel bonding driver (/sys/class/net/bonding_masters exists)
  	[ -f "$BONDING_MASTERS" ] || {
  		echo "$cfg" "setup: bonding_masters does not exist in sysfs (kernel module not loaded?)"
-@@ -111,7 +116,7 @@ proto_bonding_setup() {
- 
- 		802.3ad)
- 			echo "$bonding_policy" > /sys/class/net/"$link"/bonding/mode
--			set_driver_values min_links ad_actor_sys_prio ad_actor_system ad_select lacp_rate
-+			set_driver_values min_links ad_actor_sys_prio ad_actor_system ad_select lacp_rate xmit_hash_policy
- 		;;
- 
- 		balance-rr)
-@@ -193,16 +198,10 @@ proto_bonding_setup() {
+@@ -193,16 +199,10 @@ proto_bonding_setup() {
  
  	proto_init_update "$link" 1
  
@@ -61,9 +53,9 @@ Index: build_dir/feeds/packages/net/bonding/files/lib/netifd/proto/bonding.sh
  	proto_send_update "$cfg"
  }
  
-@@ -210,6 +209,9 @@ proto_bonding_teardown() {
+@@ -210,6 +210,9 @@ proto_bonding_teardown() {
  	local cfg="$1"
- 	local link="bonding-$cfg"
+ 	local link="bond-$cfg"
  
 +	json_get_vars ifname
 +	[ -z "$ifname" ] || link="$ifname"
