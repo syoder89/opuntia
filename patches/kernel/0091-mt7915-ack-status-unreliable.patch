@@ -3,16 +3,16 @@ Index: build_dir/package/kernel/mt76/patches/0091-mt7915-ack-status-unreliable.p
 --- /dev/null
 +++ build_dir/package/kernel/mt76/patches/0091-mt7915-ack-status-unreliable.patch
 @@ -0,0 +1,13 @@
-+Index: mt76-2021-04-11-bf45b30d/mac80211.c
++Index: mt76-2021-07-15-bbebea7d/mac80211.c
 +===================================================================
-+--- mt76-2021-04-11-bf45b30d.orig/mac80211.c
-++++ mt76-2021-04-11-bf45b30d/mac80211.c
-+@@ -314,7 +314,7 @@ mt76_phy_init(struct mt76_phy *phy, stru
++--- mt76-2021-07-15-bbebea7d.orig/mac80211.c
+++++ mt76-2021-07-15-bbebea7d/mac80211.c
++@@ -345,7 +345,7 @@ mt76_phy_init(struct mt76_phy *phy, stru
 + 
 + 	ieee80211_hw_set(hw, MFP_CAPABLE);
 + 	ieee80211_hw_set(hw, AP_LINK_PS);
 +-	ieee80211_hw_set(hw, REPORTS_TX_ACK_STATUS);
 ++//	ieee80211_hw_set(hw, REPORTS_TX_ACK_STATUS);
++ }
 + 
-+ 	wiphy->flags |= WIPHY_FLAG_IBSS_RSN;
-+ 	wiphy->interface_modes =
++ struct mt76_phy *
