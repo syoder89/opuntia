@@ -93,3 +93,4 @@ kernel/0092-vrf.patch
 0235-Add-APB3500.patch
 0236-Add-APB3350.patch
 0237-Support-multiple-dts-compex-mips.patch
+packages/0260-mt7915-resolve-wds-intermittent-on-ap.patch

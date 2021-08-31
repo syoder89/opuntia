@@ -2,22 +2,18 @@ Index: build_dir/package/network/services/hostapd/patches/999-scott-fix-mt7915-w
 ===================================================================
 --- /dev/null
 +++ build_dir/package/network/services/hostapd/patches/999-scott-fix-mt7915-wds-intermittent.patch
-@@ -0,0 +1,18 @@
-+Index: hostapd-2020-06-08-5a8b3662/src/ap/ieee802_11.c
+@@ -0,0 +1,14 @@
++Index: hostapd-2021-05-22-b102f19b/src/drivers/driver_nl80211.c
 +===================================================================
-+--- hostapd-2020-06-08-5a8b3662.orig/src/ap/ieee802_11.c
-++++ hostapd-2020-06-08-5a8b3662/src/ap/ieee802_11.c
-+@@ -5244,6 +5244,13 @@ static void handle_assoc_cb(struct hosta
-+ 		sta->flags |= WLAN_STA_WDS;
-+ 	}
++--- hostapd-2021-05-22-b102f19b.orig/src/drivers/driver_nl80211.c
+++++ hostapd-2021-05-22-b102f19b/src/drivers/driver_nl80211.c
++@@ -7542,7 +7542,8 @@ static int i802_set_wds_sta(void *priv,
++ 			if (bridge_ifname &&
++ 			    linux_br_add_if(drv->global->ioctl_sock,
++ 					    bridge_ifname, name) < 0)
++-				return -1;
+++				;; /* Ignore */
+++//				return -1;
 + 
-++	if (hapd->conf->wds_sta) {
-++		wpa_printf(MSG_DEBUG, "Enable 4-address WDS mode for STA "
-++			   MACSTR " based on BSS config",
-++			   MAC2STR(sta->addr));
-++		sta->flags |= WLAN_STA_WDS;
-++	}
-++
-+ 	if (sta->flags & (WLAN_STA_WDS | WLAN_STA_MULTI_AP)) {
-+ 		int ret;
-+ 		char ifname_wds[IFNAMSIZ + 1];
++ 			os_memset(&event, 0, sizeof(event));
++ 			event.wds_sta_interface.sta_addr = addr;
