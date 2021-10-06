@@ -96,3 +96,4 @@ kernel/0092-vrf.patch
 packages/0260-mt7915-resolve-wds-intermittent-on-ap.patch
 packages/0262-update-frr-8.0.1.patch
 packages/0263-add-rpi-cm4-wifi-firmware.patch
+0238-Add-APB2000.patch

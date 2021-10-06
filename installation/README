@@ -3,3 +3,6 @@ To write use:
 dd if=AP2100-24803058 of=/dev/mmcblk0 bs=1k seek=$(($(awk '$4 == "mmcblk0" { print $3}' < /proc/partitions) - 4))
 
 dd if=/tmp/license.bin of=/dev/mmcblk0 bs=1k seek=$(($(awk '$4 == "mmcblk0" { print $3}' < /proc/partitions) - 4))
+
+To read the JSON part use:
+dd if=/dev/mmcblk0 bs=1k count=4 skip=$(($(awk '$4 == "mmcblk0" { print $3}' < /proc/partitions) - 4)) | dd bs=1 skip=256 2>/dev/null

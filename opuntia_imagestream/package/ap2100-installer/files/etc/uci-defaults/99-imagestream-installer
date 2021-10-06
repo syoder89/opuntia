@@ -12,6 +12,7 @@
 
 # Create the product_id.txt from the firmware release
 . /etc/opuntia_release 
+PRODUCT_NAME="$DISTRIB_PRODUCT"
 cat << EOM > /etc/product_id.txt
 $PRODUCT_NAME
 $DISTRIB_PRODUCT
@@ -21,7 +22,6 @@ EOM
 URL="http://router-updates.imagestream.com/opuntia/${DISTRIB_PRODUCT}-v${DISTRIB_HWREV}/"
 INSTALL_URL="http://install1.imagestream.com/ap2100-installer/"
 RC_POSTINSTALL="rc.postinstall"
-PRODUCT_NAME="AP2100"
 
 do_fetch() {
         fetch_url="$1"
