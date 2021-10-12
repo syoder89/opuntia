@@ -112,10 +112,12 @@ Index: build_dir/package/network/config/netifd/patches/003-replace-bridge-with-o
 ===================================================================
 --- /dev/null
 +++ build_dir/package/network/config/netifd/patches/003-replace-bridge-with-ovs.patch
-@@ -0,0 +1,339 @@
-+--- a/system-linux.c
-++++ b/system-linux.c
-+@@ -619,13 +619,188 @@ static int system_rtnl_call(struct nl_ms
+@@ -0,0 +1,345 @@
++Index: netifd-2021-09-29-448ffc15/system-linux.c
++===================================================================
++--- netifd-2021-09-29-448ffc15.orig/system-linux.c
+++++ netifd-2021-09-29-448ffc15/system-linux.c
++@@ -832,13 +832,188 @@ static int system_rtnl_call(struct nl_ms
 + 	return nl_wait_for_ack(sock_rtnl);
 + }
 + 
@@ -304,17 +306,17 @@ Index: build_dir/package/network/config/netifd/patches/003-replace-bridge-with-o
 + 	struct ifreq ifr;
 + 
 + 	memset(&ifr, 0, sizeof(ifr));
-+@@ -639,6 +811,9 @@ static int system_bridge_if(const char *
++@@ -852,6 +1027,9 @@ static int system_bridge_if(const char *
 + 
-+ static bool system_is_bridge(const char *name, char *buf, int buflen)
++ static bool system_is_bridge(const char *name)
 + {
 ++	if (has_ovs()) {
 ++		return ovs_br_exists(name);
 ++	}
 + 	struct stat st;
 + 
-+ 	snprintf(buf, buflen, "/sys/devices/virtual/net/%s/bridge", name);
-+@@ -650,6 +825,9 @@ static bool system_is_bridge(const char
++ 	return stat(dev_sysfs_path(name, "bridge"), &st) >= 0;
++@@ -859,6 +1037,9 @@ static bool system_is_bridge(const char
 + 
 + static char *system_get_bridge(const char *name, char *buf, int buflen)
 + {
@@ -324,17 +326,17 @@ Index: build_dir/package/network/config/netifd/patches/003-replace-bridge-with-o
 + 	char *path;
 + 	ssize_t len = -1;
 + 	glob_t gl;
-+@@ -981,6 +1159,9 @@ static void system_bridge_conf_multicast
++@@ -1360,6 +1541,9 @@ static void system_bridge_conf_multicast
 + 					 char *buf,
 + 					 int buf_len)
 + {
 ++	if (has_ovs()) {
 ++		return;
 ++	}
-+ 	system_set_dev_sysctl("/sys/devices/virtual/net/%s/bridge/multicast_snooping",
++ 	system_set_dev_sysfs("bridge/multicast_snooping",
 + 		bridge->ifname, cfg->igmp_snoop ? "1" : "0");
 + 
-+@@ -1021,6 +1202,9 @@ static void system_bridge_conf_multicast
++@@ -1400,6 +1584,9 @@ static void system_bridge_conf_multicast
 + 
 + int system_bridge_addbr(struct device *bridge, struct bridge_config *cfg)
 + {
@@ -342,9 +344,9 @@ Index: build_dir/package/network/config/netifd/patches/003-replace-bridge-with-o
 ++		return ovs_br_add(bridge->ifname);
 ++	}
 + 	char buf[64];
-+ 	unsigned long args[4] = {};
 + 
-+@@ -2255,6 +2439,45 @@ static int tunnel_ioctl(const char *name
++ 	if (ioctl(sock_ioctl, SIOCBRADDBR, bridge->ifname) < 0)
++@@ -2989,6 +3176,45 @@ static int tunnel_ioctl(const char *name
 + 	return ioctl(sock_ioctl, cmd, &ifr);
 + }
 + 
@@ -388,9 +390,9 @@ Index: build_dir/package/network/config/netifd/patches/003-replace-bridge-with-o
 ++}
 ++
 + #ifdef IFLA_IPTUN_MAX
-+ #define IP6_FLOWINFO_TCLASS	htonl(0x0FF00000)
-+ static int system_add_gre_tunnel(const char *name, const char *kind,
-+@@ -2771,7 +2996,9 @@ static int __system_del_ip_tunnel(const
++ static int system_add_ip6_tunnel(const char *name, const unsigned int link,
++ 				 struct blob_attr **tb)
++@@ -3862,7 +4088,9 @@ static int __system_del_ip_tunnel(const
 + 		return -EINVAL;
 + 	str = blobmsg_data(cur);
 + 
@@ -400,8 +402,8 @@ Index: build_dir/package/network/config/netifd/patches/003-replace-bridge-with-o
 ++	else if (!strcmp(str, "greip") || !strcmp(str, "gretapip") ||
 + 	    !strcmp(str, "greip6") || !strcmp(str, "gretapip6") ||
 + 	    !strcmp(str, "vtiip") || !strcmp(str, "vtiip6") ||
-+ 	    !strcmp(str, "vxlan") || !strcmp(str, "vxlan6"))
-+@@ -3007,6 +3234,8 @@ failure:
++ 	    !strcmp(str, "vxlan") || !strcmp(str, "vxlan6") ||
++@@ -3973,6 +4201,8 @@ int system_add_ip_tunnel(const char *nam
 + #endif
 + 	} else if (!strcmp(str, "ipip")) {
 + 		return system_add_proto_tunnel(name, IPPROTO_IPIP, link, tb);
@@ -410,9 +412,11 @@ Index: build_dir/package/network/config/netifd/patches/003-replace-bridge-with-o
 + 	}
 + 	else
 + 		return -EINVAL;
-+--- a/system.c
-++++ b/system.c
-+@@ -35,6 +35,16 @@ const struct uci_blob_param_list tunnel_
++Index: netifd-2021-09-29-448ffc15/system.c
++===================================================================
++--- netifd-2021-09-29-448ffc15.orig/system.c
+++++ netifd-2021-09-29-448ffc15/system.c
++@@ -32,6 +32,16 @@ const struct uci_blob_param_list tunnel_
 + 	.params = tunnel_attrs,
 + };
 + 
@@ -429,9 +433,11 @@ Index: build_dir/package/network/config/netifd/patches/003-replace-bridge-with-o
 + static const struct blobmsg_policy vxlan_data_attrs[__VXLAN_DATA_ATTR_MAX] = {
 + 	[VXLAN_DATA_ATTR_ID] = { .name = "id", .type = BLOBMSG_TYPE_INT32 },
 + 	[VXLAN_DATA_ATTR_PORT] = { .name = "port", .type = BLOBMSG_TYPE_INT32 },
-+--- a/system.h
-++++ b/system.h
-+@@ -40,6 +40,12 @@ enum tunnel_param {
++Index: netifd-2021-09-29-448ffc15/system.h
++===================================================================
++--- netifd-2021-09-29-448ffc15.orig/system.h
+++++ netifd-2021-09-29-448ffc15/system.h
++@@ -38,6 +38,12 @@ enum tunnel_param {
 + 
 + extern const struct uci_blob_param_list tunnel_attr_list;
 + 
@@ -444,8 +450,8 @@ Index: build_dir/package/network/config/netifd/patches/003-replace-bridge-with-o
 + enum vxlan_data {
 + 	VXLAN_DATA_ATTR_ID,
 + 	VXLAN_DATA_ATTR_PORT,
-+@@ -63,6 +69,7 @@ enum vti_data {
-+ 	__VTI_DATA_ATTR_MAX
++@@ -99,6 +105,7 @@ enum fmr_data {
++ 	__FMR_DATA_ATTR_MAX
 + };
 + 
 ++extern const struct uci_blob_param_list ovs_vxlan_data_attr_list;
@@ -456,9 +462,9 @@ Index: build_dir/package/network/config/netifd/Makefile
 ===================================================================
 --- build_dir.orig/package/network/config/netifd/Makefile
 +++ build_dir/package/network/config/netifd/Makefile
-@@ -41,6 +41,7 @@ define Package/netifd/install
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/netifd $(1)/sbin/
+@@ -45,6 +45,7 @@ define Package/netifd/install
  	$(CP) ./files/* $(1)/
+ 	$(INSTALL_DIR) $(1)/etc/udhcpc.user.d/
  	$(CP) $(PKG_BUILD_DIR)/scripts/* $(1)/lib/netifd/
 +	$(INSTALL_BIN) ./files/lib/netifd/proto/* $(1)/lib/netifd/proto/
  endef

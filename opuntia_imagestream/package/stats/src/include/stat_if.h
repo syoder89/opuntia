@@ -8,18 +8,19 @@
 
 #include <sys/time.h>
 #include <string.h>
+#include <stdint.h>
 #ifndef u64
 #include <linux/types.h>
 typedef unsigned long long u64;         /* hack, so we may include kernel's ethtool.h */
 #endif
 #ifndef u32
-typedef __uint32_t u32;         /* ditto */
+typedef uint32_t u32;         /* ditto */
 #endif
 #ifndef u16
-typedef __uint16_t u16;         /* ditto */
+typedef uint16_t u16;         /* ditto */
 #endif
 #ifndef u8
-typedef __uint8_t u8;           /* ditto */
+typedef uint8_t u8;           /* ditto */
 #endif
 #include <linux/ethtool.h>
 #include <linux/sockios.h>
