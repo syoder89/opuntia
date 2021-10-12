@@ -34,19 +34,16 @@ Index: build_dir/package/base-files/Makefile
 ===================================================================
 --- build_dir.orig/package/base-files/Makefile
 +++ build_dir/package/base-files/Makefile
-@@ -151,11 +151,11 @@ define Package/base-files/install
- 
+@@ -151,8 +151,8 @@ define Package/base-files/install
  	$(VERSION_SED_SCRIPT) \
  		$(1)/etc/banner \
+ 		$(1)/etc/device_info \
+-		$(1)/etc/openwrt_release \
 -		$(1)/etc/openwrt_version \
++		$(1)/etc/opuntia_release \
 +		$(1)/etc/opuntia_version \
  		$(1)/usr/lib/os-release
  
- 	$(VERSION_SED_SCRIPT) \
--		$(1)/etc/openwrt_release \
-+		$(1)/etc/opuntia_release \
- 		$(1)/etc/device_info \
- 		$(1)/usr/lib/os-release
  
 Index: build_dir/package/base-files/files/etc/openwrt_version
 ===================================================================
@@ -90,16 +87,16 @@ Index: build_dir/package/base-files/files/bin/config_generate
 ===================================================================
 --- build_dir.orig/package/base-files/files/bin/config_generate
 +++ build_dir/package/base-files/files/bin/config_generate
-@@ -60,7 +60,7 @@ generate_static_network() {
+@@ -89,7 +89,7 @@ generate_static_network() {
  	fi
  }
  
 -addr_offset=2
 +addr_offset=200
  generate_network() {
- 	local ifname macaddr protocol type ipaddr netmask
- 
-@@ -100,8 +100,8 @@ generate_network() {
+ 	local ports device macaddr protocol type ipaddr netmask vlan
+ 	local bridge=$2
+@@ -161,8 +161,8 @@ generate_network() {
  		static)
  			local ipad
  			case "$1" in
@@ -110,7 +107,7 @@ Index: build_dir/package/base-files/files/bin/config_generate
  			esac
  
  			netm=${netmask:-"255.255.255.0"}
-@@ -241,8 +241,8 @@ generate_static_system() {
+@@ -301,8 +301,8 @@ generate_static_system() {
  	uci -q batch <<-EOF
  		delete system.@system[0]
  		add system system
@@ -125,7 +122,7 @@ Index: build_dir/config/Config-images.in
 ===================================================================
 --- build_dir.orig/config/Config-images.in
 +++ build_dir/config/Config-images.in
-@@ -234,10 +234,10 @@ menu "Target Images"
+@@ -250,10 +250,10 @@ menu "Target Images"
  	config GRUB_TITLE
  		string "Title for the menu entry in GRUB"
  		depends on GRUB_IMAGES || GRUB_EFI_IMAGES

@@ -380,5 +380,5 @@ CONFIG_PACKAGE_kmod-rtl8821ae=y
 CONFIG_PACKAGE_rtl8821ae-firmware=y
 CONFIG_PACKAGE_kmod-mt7915e=y
 CONFIG_PACKAGE_losetup=y
-CONFIG_PACKAGE_kmod-brcmfmac=y
+# CONFIG_PACKAGE_kmod-brcmfmac is not set
 # CONFIG_PACKAGE_kismet-remotecap is not set

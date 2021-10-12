@@ -2,7 +2,7 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000
 ===================================================================
 --- /dev/null
 +++ build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
-@@ -0,0 +1,596 @@
+@@ -0,0 +1,597 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/dts-v1/;
 +#include "bcm2711.dtsi"
@@ -32,28 +32,29 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000
 +
 +	leds {
 +		act {
++			label = "act";
 +			gpios = <&gpio 42 GPIO_ACTIVE_HIGH>;
 +		};
 +
 +		pwr {
-+			label = "PWR";
++			label = "pwr";
 +			gpios = <&expgpio 2 GPIO_ACTIVE_LOW>;
 +			default-state = "keep";
 +			linux,default-trigger = "default-on";
 +		};
 +
 +		usr1 {
-+			label = "USR1";
++			label = "usr1";
 +			gpios = <&gpio 2 GPIO_ACTIVE_LOW>;
 +		};
 +
 +		usr2 {
-+			label = "USR2";
++			label = "usr2";
 +			gpios = <&gpio 3 GPIO_ACTIVE_LOW>;
 +		};
 +
 +		usr3 {
-+			label = "USR3";
++			label = "usr3";
 +			gpios = <&gpio 4 GPIO_ACTIVE_LOW>;
 +		};
 +	};
@@ -475,20 +476,20 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000
 +
 +&leds {
 +	act_led: act {
-+		label = "led0";
++		label = "act";
 +		linux,default-trigger = "mmc0";
 +		gpios = <&gpio 42 GPIO_ACTIVE_HIGH>;
 +	};
 +
 +	pwr_led: pwr {
-+		label = "led1";
-+		linux,default-trigger = "default-on";
++		label = "pwr";
++		linux,default-trigger = "heartbeat";
 +		gpios = <&expgpio 2 GPIO_ACTIVE_LOW>;
 +	};
 +
 +	usr1_led: usr1 {
 +		label = "usr1";
-+		linux,default-trigger = "heartbeat";
++		linux,default-trigger = "none";
 +		gpios = <&gpio 2 GPIO_ACTIVE_LOW>;
 +	};
 +
@@ -675,3 +676,19 @@ Index: build_dir/target/linux/bcm27xx/image/Makefile
 +  TARGET_DEVICES += apb3350
 +endif
  $(eval $(call BuildImage))
+Index: build_dir/target/linux/bcm27xx/image/distroconfig.txt
+===================================================================
+--- build_dir.orig/target/linux/bcm27xx/image/distroconfig.txt
++++ build_dir/target/linux/bcm27xx/image/distroconfig.txt
+@@ -12,3 +12,11 @@ dtoverlay=disable-bt
+ dtoverlay=disable-bt
+ [pi4]
+ dtoverlay=disable-bt
++[all]
++dtoverlay=gpio-led,gpio=2,label=usr1,trigger=none,active_low=1
++dtoverlay=gpio-led,gpio=3,label=usr2,trigger=none,active_low=1
++dtoverlay=gpio-led,gpio=4,label=usr3,trigger=none,active_low=1
++dtoverlay=gpio-led,gpio=17,label=usr4,trigger=none,active_low=1
++dtoverlay=gpio-led,gpio=27,label=usr5,trigger=none,active_low=1
++dtoverlay=gpio-led,gpio=22,label=usr6,trigger=none,active_low=1
++dtoverlay=gpio-key,gpio=10,label=reset,keycode=0x198,active_low=1
