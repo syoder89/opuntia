@@ -3062,13 +3062,13 @@ Index: build_dir/feeds/packages/libs/libyang/Makefile
  
  PKG_NAME:=libyang
 -PKG_VERSION:=1.0.225
-+PKG_VERSION:=2.0.7
++PKG_VERSION:=2.0.97
  PKG_RELEASE:=$(AUTORELEASE)
  
  PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
  PKG_SOURCE_URL:=https://codeload.github.com/CESNET/libyang/tar.gz/v$(PKG_VERSION)?
 -PKG_HASH:=1b736443d2c69b5d7a71ac412655e6edab0647b18f35f7bf504b0a24e06cb046
-+PKG_HASH:=b3b74ce39406db7c1e440b675fb4c2d87b042667ed17bcd77c70f77230afb41c
++PKG_HASH:=91f5db0bc3799170d1e480abfc08a7fe7e50ce07a5433b5e32e93418314d48f9
  
  PKG_MAINTAINER:=Jakov Smolic <jakov.smolic@sartura.hr>
  PKG_LICENSE:=BSD-3-Clause
