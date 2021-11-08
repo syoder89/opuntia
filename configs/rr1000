@@ -460,8 +460,10 @@ CONFIG_PACKAGE_f2fsck=y
 CONFIG_PACKAGE_collectd-mod-thermal=y
 CONFIG_PACKAGE_flashrom=y
 CONFIG_PACKAGE_dmidecode=y
-CONFIG_PACKAGE_kmod-ipt-netflow=y
-CONFIG_PACKAGE_iptables-mod-netflow=y
+# Netflow is broken now in kernels 5.x
+# CONFIG_PACKAGE_kmod-ipt-netflow is not set
+# CONFIG_PACKAGE_iptables-mod-netflow is not set
 CONFIG_PACKAGE_kmod-rtl8821ae=y
 CONFIG_PACKAGE_rtl8821ae-firmware=y
 CONFIG_PACKAGE_kmod-mt7915e=y
+# CONFIG_PACKAGE_kismet-remotecap is not set
