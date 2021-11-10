@@ -33,10 +33,8 @@ packages/0174-netifd-support-hostapd-radius-extra-attrs.patch
 packages/0175-netifd-multiple-radius-servers.patch
 packages/0176-dnsmasq-add-user-group-to-init.patch
 packages/0177-firewall-fix-musl-errno-options-parsing.patch
-packages/0175-hostapd-ovs-support.patch
 packages/0178-procps-ng-disable-modern-top.patch
 packages/0150-Add-vid-option-to-switch-config.patch
-packages/0176-netifd-replace-bridge-with-ovs.patch
 packages/0178-hostapd-enable-qca-nl80211-extensions.patch
 packages/0176-openvswitch-conf-symlink-to-tmp.patch
 packages/0181-netifd-wireless-fix-isolate-parameter.patch

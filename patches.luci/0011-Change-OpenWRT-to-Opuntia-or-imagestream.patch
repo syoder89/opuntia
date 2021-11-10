@@ -39,10 +39,10 @@ Index: luci/modules/luci-mod-network/htdocs/luci-static/resources/view/network/d
 ===================================================================
 --- luci.orig/modules/luci-mod-network/htdocs/luci-static/resources/view/network/diagnostics.js
 +++ luci/modules/luci-mod-network/htdocs/luci-static/resources/view/network/diagnostics.js
-@@ -58,9 +58,9 @@ return L.view.extend({
- 	render: function(res) {
- 		var has_ping6 = res[0].path || res[1].path,
+@@ -71,9 +71,9 @@ return view.extend({
  		    has_traceroute6 = res[2].path || res[3].path,
+ 		    has_arpscan = res[4].path,
+ 		    devices = res[5],
 -			dns_host = uci.get('luci', 'diag', 'dns') || 'openwrt.org',
 -			ping_host = uci.get('luci', 'diag', 'ping') || 'openwrt.org',
 -			route_host = uci.get('luci', 'diag', 'route') || 'openwrt.org';
