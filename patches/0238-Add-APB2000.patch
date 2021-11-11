@@ -2,7 +2,7 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000
 ===================================================================
 --- /dev/null
 +++ build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
-@@ -0,0 +1,597 @@
+@@ -0,0 +1,593 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/dts-v1/;
 +#include "bcm2711.dtsi"
@@ -209,7 +209,7 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000
 +
 +/ {
 +	chosen {
-+		bootargs = "coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1 uart_2ndstage=1 earlycon=pl011,mmio32,0xfe201000 console=ttyAMA0,115200 pci=nomsi";
++		bootargs = "coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1 uart_2ndstage=1 earlycon=pl011,mmio32,0xfe201000 console=ttyAMA0,115200";
 +	};
 +
 +	aliases {
@@ -227,10 +227,6 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000
 +	};
 +
 +	/delete-node/ wifi-pwrseq;
-+};
-+
-+&pcie0 {
-+	brcm,enable-l1ss;
 +};
 +
 +&mmcnr {

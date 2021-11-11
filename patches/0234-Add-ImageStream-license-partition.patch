@@ -182,7 +182,7 @@ Index: build_dir/target/linux/bcm27xx/base-files/etc/hotplug.d/ieee80211/10_fix_
 +               # Use our reserved MAC address instead of the card's MAC
 +               process_imagestream || return 0
 +
-+	       mac=$(eval echo \$mac$((PHYNBR+3)))
++	       mac=$(eval echo \$mac$((PHYNBR+2)))
 +               if [ -n "${mac}" ]; then
 +			echo "${mac}" > /sys${DEVPATH}/macaddress
 +		fi
