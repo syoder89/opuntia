@@ -37,7 +37,6 @@ packages/0178-procps-ng-disable-modern-top.patch
 packages/0150-Add-vid-option-to-switch-config.patch
 packages/0178-hostapd-enable-qca-nl80211-extensions.patch
 packages/0176-openvswitch-conf-symlink-to-tmp.patch
-packages/0181-netifd-wireless-fix-isolate-parameter.patch
 kernel/0076-ar8327-fix-init-bug.patch
 packages/0182-netifd-wireless-add-radius-macfilter.patch
 packages/0182-ath10k-ct-licensed-channels.patch
