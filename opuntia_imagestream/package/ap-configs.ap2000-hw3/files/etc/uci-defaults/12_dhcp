@@ -14,6 +14,13 @@
 #
 #uci commit dhcp
 
+# If lan ignore is not set we set it. Generally you shouldn't run DHCP server on a single
+# ethernet interface AP.
+uci get dhcp.lan.ignore > /dev/null 2>&1 || {
+	uci set dhcp.lan.ignore='1'
+	uci commit dhcp
+}
+
 exit 0
 
 
