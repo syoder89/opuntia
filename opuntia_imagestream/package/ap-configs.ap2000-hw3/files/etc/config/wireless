@@ -1,0 +1,18 @@
+config wifi-device 'radio0'
+        option type 'mac80211'
+        option path 'scb/fd500000.pcie/pci0000:00/0000:00:00.0/0000:01:00.0'
+        option cell_density '0'
+        option channel 'auto'
+        option hwmode '11g'
+        option htmode 'HE20'
+        option country 'MX'
+
+config wifi-device 'radio1'
+        option type 'mac80211'
+        option path 'scb/fd500000.pcie/pci0000:00/0000:00:00.0/0000:01:00.0+1'
+        option cell_density '0'
+        option channel 'auto'
+        option band '5g'
+        option htmode 'HE80'
+        option country 'MX'
+

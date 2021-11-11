@@ -1,0 +1,23 @@
+config interface 'loopback'
+        option ifname 'lo'
+        option proto 'static'
+        option ipaddr '127.0.0.1'
+        option netmask '255.0.0.0'
+
+config globals 'globals'
+        option ula_prefix 'auto'
+	option packet_steering '1'
+
+config interface 'lan'
+        option type 'bridge'
+        option ifname 'eth0'
+        option proto 'dhcp'
+        option fb_ipaddr '10.10.199.1'
+        option fb_netmask '255.255.255.0'
+        option fb_delay '30'
+
+config interface 'wan'
+        option proto 'dhcp'
+
+config interface 'wan6'
+        option proto 'dhcpv6'
