@@ -2,11 +2,12 @@ Index: build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-
 ===================================================================
 --- /dev/null
 +++ build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
-@@ -0,0 +1,658 @@
+@@ -0,0 +1,672 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/dts-v1/;
 +#include "bcm2711.dtsi"
 +#include "bcm2835-rpi.dtsi"
++#include <dt-bindings/input/input.h>
 +
 +#include <dt-bindings/reset/raspberrypi,firmware-reset.h>
 +
@@ -28,7 +29,7 @@ Index: build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-
 +	aliases {
 +		emmc2bus = &emmc2bus;
 +		ethernet0 = &genet;
-+		pcie0 = &pcie0;
++		pcie0 = "";
 +		blconfig = &blconfig;
 +	};
 +
@@ -41,6 +42,19 @@ Index: build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-
 +			label = "PWR";
 +			gpios = <&expgpio 2 GPIO_ACTIVE_LOW>;
 +			linux,default-trigger = "heartbeat";
++		};
++	};
++
++        gpio-keys-polled {
++		compatible = "gpio-keys-polled";
++		#address-cells = <1>;
++		#size-cells = <0>;
++		poll-interval = <100>;
++
++		reset {
++			label = "reset";
++			linux,code = <KEY_RESTART>;
++			gpios = <&gpio 10 GPIO_ACTIVE_LOW>;
 +		};
 +	};
 +
