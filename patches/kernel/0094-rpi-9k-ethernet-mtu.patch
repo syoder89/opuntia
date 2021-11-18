@@ -1,0 +1,45 @@
+Index: build_dir/target/linux/bcm27xx/patches-5.10/999-0001-Scott-rpi-9k-ethernet-mtu.patch
+===================================================================
+--- /dev/null
++++ build_dir/target/linux/bcm27xx/patches-5.10/999-0001-Scott-rpi-9k-ethernet-mtu.patch
+@@ -0,0 +1,40 @@
++Index: linux-5.10.78/drivers/net/ethernet/broadcom/genet/bcmgenet.c
++===================================================================
++--- linux-5.10.78.orig/drivers/net/ethernet/broadcom/genet/bcmgenet.c
+++++ linux-5.10.78/drivers/net/ethernet/broadcom/genet/bcmgenet.c
++@@ -52,7 +52,7 @@
++ #define GENET_Q16_TX_BD_CNT	\
++ 	(TOTAL_DESC - priv->hw_params->tx_queues * priv->hw_params->tx_bds_per_q)
++ 
++-#define RX_BUF_LENGTH		2048
+++#define RX_BUF_LENGTH		10240
++ #define SKB_ALIGNMENT		32
++ 
++ /* Tx/Rx DMA register offset, skip 256 descriptors */
++@@ -3976,6 +3976,10 @@ static int bcmgenet_probe(struct platfor
++ 	dev->hw_features |= dev->features;
++ 	dev->vlan_features |= dev->features;
++ 
+++	/* MTU range: 68 - 9216 */
+++	dev->min_mtu = ETH_MIN_MTU;
+++	dev->max_mtu = 9216;
+++
++ 	/* Request the WOL interrupt and advertise suspend if available */
++ 	priv->wol_irq_disabled = true;
++ 	err = devm_request_irq(&pdev->dev, priv->wol_irq, bcmgenet_wol_isr, 0,
++Index: linux-5.10.78/drivers/net/ethernet/broadcom/genet/bcmgenet.h
++===================================================================
++--- linux-5.10.78.orig/drivers/net/ethernet/broadcom/genet/bcmgenet.h
+++++ linux-5.10.78/drivers/net/ethernet/broadcom/genet/bcmgenet.h
++@@ -27,8 +27,9 @@
++  */
++ #define ENET_BRCM_TAG_LEN	6
++ #define ENET_PAD		8
++-#define ENET_MAX_MTU_SIZE	(ETH_DATA_LEN + ETH_HLEN + VLAN_HLEN + \
++-				 ENET_BRCM_TAG_LEN + ETH_FCS_LEN + ENET_PAD)
+++#define ENET_MAX_MTU_SIZE	10240
+++//#define ENET_MAX_MTU_SIZE	(ETH_DATA_LEN + ETH_HLEN + VLAN_HLEN + \
+++//				 ENET_BRCM_TAG_LEN + ETH_FCS_LEN + ENET_PAD)
++ #define DMA_MAX_BURST_LENGTH    0x08
++ 
++ /* misc. configuration */
