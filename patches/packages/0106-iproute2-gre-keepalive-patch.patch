@@ -14,19 +14,19 @@ Index: build_dir/package/network/utils/iproute2/patches/901-scott-gre-keepalive.
 --- /dev/null
 +++ build_dir/package/network/utils/iproute2/patches/901-scott-gre-keepalive.patch
 @@ -0,0 +1,46 @@
-+Index: iproute2-5.3.0/ip/iptunnel.c
++Index: iproute2-5.15.0/ip/iptunnel.c
 +===================================================================
-+--- iproute2-5.3.0.orig/ip/iptunnel.c
-++++ iproute2-5.3.0/ip/iptunnel.c
-+@@ -39,6 +39,7 @@ static void usage(void)
-+ 		"	 [ prl-default ADDR ] [ prl-nodefault ADDR ] [ prl-delete ADDR ]\n"
-+ 		"	 [ 6rd-prefix ADDR ] [ 6rd-relay_prefix ADDR ] [ 6rd-reset ]\n"
-+ 		"	 [ ttl TTL ] [ tos TOS ] [ [no]pmtudisc ] [ dev PHYS_DEV ]\n"
++--- iproute2-5.15.0.orig/ip/iptunnel.c
+++++ iproute2-5.15.0/ip/iptunnel.c
++@@ -40,6 +40,7 @@ static void usage(void)
++ 		"        [ prl-default ADDR ] [ prl-nodefault ADDR ] [ prl-delete ADDR ]\n"
++ 		"        [ 6rd-prefix ADDR ] [ 6rd-relay_prefix ADDR ] [ 6rd-reset ]\n"
++ 		"        [ ttl TTL ] [ tos TOS ] [ [no]pmtudisc ] [ dev PHYS_DEV ]\n"
 ++		"        [ keepalive NUMBER ] [ retries NUMBER ]\n"
 + 		"\n"
-+ 		"Where:	NAME := STRING\n"
-+ 		"	ADDR := { IP_ADDRESS | any }\n"
-+@@ -165,6 +166,18 @@ static int parse_args(int argc, char **a
++ 		"Where: NAME := STRING\n"
++ 		"       ADDR := { IP_ADDRESS | any }\n"
++@@ -166,6 +167,18 @@ static int parse_args(int argc, char **a
 + 					invarg("bad TOS value", *argv);
 + 				p->iph.tos |= uval;
 + 			}
@@ -45,10 +45,10 @@ Index: build_dir/package/network/utils/iproute2/patches/901-scott-gre-keepalive.
 + 		} else {
 + 			if (strcmp(*argv, "name") == 0)
 + 				NEXT_ARG();
-+Index: iproute2-5.3.0/include/uapi/linux/if_tunnel.h
++Index: iproute2-5.15.0/include/uapi/linux/if_tunnel.h
 +===================================================================
-+--- iproute2-5.3.0.orig/include/uapi/linux/if_tunnel.h
-++++ iproute2-5.3.0/include/uapi/linux/if_tunnel.h
++--- iproute2-5.15.0.orig/include/uapi/linux/if_tunnel.h
+++++ iproute2-5.15.0/include/uapi/linux/if_tunnel.h
 +@@ -53,6 +53,10 @@ struct ip_tunnel_parm {
 + 	__be32			i_key;
 + 	__be32			o_key;

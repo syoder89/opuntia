@@ -2,7 +2,7 @@ Index: build_dir/package/kernel/mt76/patches/0001-mt7915-fix-sta-mode-connection
 ===================================================================
 --- /dev/null
 +++ build_dir/package/kernel/mt76/patches/0001-mt7915-fix-sta-mode-connection-on-DFS-channels.patch
-@@ -0,0 +1,76 @@
+@@ -0,0 +1,80 @@
 +From: Ben Greear <greearb@xxxxxxxxxxxxxxx>
 +
 +Only AP, adhoc and mesh mode needs to check CAC.
@@ -20,7 +20,7 @@ Index: build_dir/package/kernel/mt76/patches/0001-mt7915-fix-sta-mode-connection
 +index 8747e452e114..a6e142d27b60 100644
 +--- a/mt7915/mac.c
 ++++ b/mt7915/mac.c
-+@@ -2455,6 +2455,32 @@ static int mt7915_dfs_start_radar_detector(struct mt7915_phy *phy)
++@@ -2455,6 +2455,36 @@ static int mt7915_dfs_start_radar_detector(struct mt7915_phy *phy)
 + 	return 0;
 + }
 + 
@@ -28,6 +28,7 @@ Index: build_dir/package/kernel/mt76/patches/0001-mt7915-fix-sta-mode-connection
 ++	u32 mesh;
 ++	u32 adhoc;
 ++	u32 ap;
+++	u32 sta;
 ++};
 ++
 ++static void
@@ -44,6 +45,9 @@ Index: build_dir/package/kernel/mt76/patches/0001-mt7915-fix-sta-mode-connection
 ++		break;
 ++	case NL80211_IFTYPE_AP:
 ++		counts->ap++;
+++		break;
+++	case NL80211_IFTYPE_STATION:
+++		counts->sta++;
 ++		break;
 ++	default:
 ++		break;
@@ -83,7 +87,7 @@ Index: build_dir/package/kernel/mt76/patches/0002-mt7915-fix-sta-mode-connection
 ===================================================================
 --- /dev/null
 +++ build_dir/package/kernel/mt76/patches/0002-mt7915-fix-sta-mode-connection-on-DFS-channels.patch
-@@ -0,0 +1,284 @@
+@@ -0,0 +1,282 @@
 +From: Ben Greear <greearb@xxxxxxxxxxxxxxx>
 +
 +Before this patch, if AP went from ch 100 to ch 36, the radar detector
@@ -194,7 +198,7 @@ Index: build_dir/package/kernel/mt76/patches/0002-mt7915-fix-sta-mode-connection
 + }
 + 
 + static int mt7915_dfs_start_radar_detector(struct mt7915_phy *phy)
-+@@ -2234,49 +2253,70 @@ int mt7915_dfs_init_radar_detector(struc
++@@ -2234,47 +2253,69 @@ int mt7915_dfs_init_radar_detector(struc
 + 	int err;
 + 	struct mt7915_vif_counts counts = {0};
 + 
@@ -231,8 +235,9 @@ Index: build_dir/package/kernel/mt76/patches/0002-mt7915-fix-sta-mode-connection
 ++					    IEEE80211_IFACE_ITER_RESUME_ALL,
 ++					    mt7915_vif_counts, &counts);
 ++
-++	if (!(counts.ap + counts.adhoc + counts.mesh)) {
-++		/* No beaconning interfaces, do not start CAC */
+++//	if (!(counts.ap + counts.adhoc + counts.mesh)) {
+++	if (counts.sta) {
+++		/* Has STA + DFS bug. No beaconning interfaces, do not start CAC */
 ++		dev_dbg(dev->mt76.dev,
 ++			"dfs-init-radar, no AP/Mesh/Adhoc vifs active, stop radar.");
 ++		goto stop;
@@ -292,8 +297,6 @@ Index: build_dir/package/kernel/mt76/patches/0002-mt7915-fix-sta-mode-connection
 +-	return 0;
 ++	return mt7915_dfs_stop_radar_detector(phy, ext_phy);
 + }
-+ 
-+ static int
 +Index: mt76-2021-10-23.1-f6bde7ba/mt7915/main.c
 +===================================================================
 +--- mt76-2021-10-23.1-f6bde7ba.orig/mt7915/main.c
@@ -367,4 +370,3 @@ Index: build_dir/package/kernel/mt76/patches/0002-mt7915-fix-sta-mode-connection
 ++int mt7915_dfs_stop_radar_detector(struct mt7915_phy *phy, bool ext_phy);
 + int mt7915_init_debugfs(struct mt7915_phy *phy);
 + #ifdef CONFIG_MAC80211_DEBUGFS
-+ void mt7915_sta_add_debugfs(struct ieee80211_hw *hw, struct ieee80211_vif *vif,
