@@ -19,6 +19,5 @@ function index()
 		return
 	end
 	
-	page = entry({"admin", "network", "snmp"}, cbi("snmp"), _("SNMP"))
-
+	entry({"admin", "network", "snmp"}, cbi("snmp"), _("SNMP")).acl_depends = { "luci-app-snmp" }
 end

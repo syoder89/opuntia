@@ -15,34 +15,17 @@ $Id:
 module("luci.controller.ipsec", package.seeall)
 
 function index()
-	local page
 	if not nixio.fs.access("/etc/config/ipsec_pre") then
 		return
 	end
 
-
-	page = node("admin", "network", "ipsec")
-	page.target = cbi("ipsec/overview")
-	page.title  = _("IPSEC")
-	page.index  = true
-
-	page = entry({"admin", "network", "ipsec", "advanced_status"}, call("ipsec_advanced_status"), "IPSEC Advanced Status")
-
-	page = entry({"admin", "network", "ipsec", "tunnel_form"}, cbi("ipsec/tunnel_form", {autoapply=true}), nil)
-	page.leaf = true
-
-	page = entry({"admin", "network", "ipsec", "tunnel_delete"}, call("tunnel_delete"), nil)
-	page.leaf = true
-
-	page = entry({"admin", "network", "ipsec", "tunnel_status"}, call("tunnel_status"), nil)
-	page.leaf = true
-
-	page = entry({"admin", "network", "ipsec", "tunnel_reconnect"}, call("tunnel_reconnect"), nil)
-	page.leaf = true
-
-	page = entry({"admin", "network", "ipsec", "tunnel_shutdown"}, call("tunnel_shutdown"), nil)
-	page.leaf = true
-
+        entry( {"admin", "network", "ipsec"}, cbi("ipsec/overview"), _("IPSEC") ).acl_depends = { "luci-app-ipsec" }
+        entry( {"admin", "network", "ipsec", "advanced_status"}, cbi("ipsec_advanced_status", "IPSEC Advanced Status"), nil )
+        entry( {"admin", "network", "ipsec", "tunnel_form"}, cbi("ipsec/tunnel_form", {autoapply=true}), nil ).leaf = true
+        entry( {"admin", "network", "ipsec", "tunnel_delete"}, call("tunnel_delete"), nil ).leaf = true
+        entry( {"admin", "network", "ipsec", "tunnel_status"}, call("tunnel_status"), nil ).leaf = true
+        entry( {"admin", "network", "ipsec", "tunnel_reconnect"}, call("tunnel_reconnect"), nil ).leaf = true
+        entry( {"admin", "network", "ipsec", "tunnel_shutdown"}, call("tunnel_shutdown"), nil ).leaf = true
 end
 
 function ipsec_advanced_status()

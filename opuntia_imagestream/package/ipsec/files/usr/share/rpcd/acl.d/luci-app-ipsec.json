@@ -1,0 +1,14 @@
+{
+        "luci-app-ipsec": {
+                "description": "Grant access to IPSec configuration",
+                "read": {
+                        "uci": [ "ipsec", "ipsec" ]
+                },
+                "write": {
+                        "file": {
+                                "/etc/ipsec/*": [ "write" ]
+                        },
+                        "uci": [ "ipsec" ]
+                }
+        }
+}

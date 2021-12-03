@@ -1,0 +1,12 @@
+Index: build_dir/target/linux/bcm27xx/image/gen_rpi_sdcard_img.sh
+===================================================================
+--- build_dir.orig/target/linux/bcm27xx/image/gen_rpi_sdcard_img.sh
++++ build_dir/target/linux/bcm27xx/image/gen_rpi_sdcard_img.sh
+@@ -24,6 +24,7 @@ ROOTFSSIZE="$(($4 / 512))"
+ 
+ dd bs=512 if="$BOOTFS" of="$OUTPUT" seek="$BOOTOFFSET" conv=notrunc
+ dd bs=512 if="$ROOTFS" of="$OUTPUT" seek="$ROOTFSOFFSET" conv=notrunc
++dd bs=512 if="/dev/zero" of="$OUTPUT" seek="$((ROOTFSOFFSET+ROOTFSSIZE))" conv=notrunc count=256
+ 
+ 
+ 
