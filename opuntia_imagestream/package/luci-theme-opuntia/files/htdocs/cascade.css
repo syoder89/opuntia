@@ -2545,7 +2545,7 @@ div.cbi-value var.cbi-tooltip-container,
 
 /* Start of Opuntia modifications */
 #background {
-	background-image: url("<%=media%>/opuntia_background.png");
+	background-image: url("/luci-static/opuntia/opuntia_background.png");
 	background-size: contain;
 	background-repeat: repeat-x;
         min-height: 100vh;
