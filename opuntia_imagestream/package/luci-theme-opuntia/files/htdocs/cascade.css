@@ -2548,9 +2548,8 @@ div.cbi-value var.cbi-tooltip-container,
 	background-image: url("/luci-static/opuntia/opuntia_background.png");
 	background-size: contain;
 	background-repeat: repeat-x;
-        min-height: 100vh;
+        min-height: calc(100% - 40px);
         padding: 4px 5px 5px;
-	margin-top: -40px;
 }
 #maincontent {
 	background: #fff;
