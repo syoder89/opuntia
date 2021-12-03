@@ -2550,6 +2550,7 @@ div.cbi-value var.cbi-tooltip-container,
 	background-repeat: repeat-x;
         min-height: 100vh;
         padding: 4px 5px 5px;
+	margin-top: -40px;
 }
 #maincontent {
 	background: #fff;
