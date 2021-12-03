@@ -1,0 +1,11 @@
+{
+        "luci-app-snmp": {
+                "description": "Grant access to SNMP configuration",
+                "read": {
+                        "uci": [ "snmp", "snmp" ]
+                },
+                "write": {
+                        "uci": [ "snmp" ]
+                }
+        }
+}
