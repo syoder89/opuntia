@@ -1,0 +1,77 @@
+#!/bin/bash /etc/rc.common
+# Copyright (C) 2006-2011 OpenWrt.org
+
+START=10
+STOP=90
+
+. /usr/share/libubox/jshn.sh
+
+
+pcie_set_speed() {
+	dev=$1
+	speed=$2
+ 
+	if [ -z "$dev" ]; then
+    		logger "Error: no device specified"
+    		exit 1
+	fi
+ 
+	if [ ! -e "/sys/bus/pci/devices/$dev" ]; then
+    		dev="0000:$dev"
+	fi
+ 
+	if [ ! -e "/sys/bus/pci/devices/$dev" ]; then
+    		logger "Error: device $dev not found"
+    		exit 1
+	fi
+ 
+	pciec=$(setpci -s $dev CAP_EXP+02.W)
+	pt=$((("0x$pciec" & 0xF0) >> 4))
+ 
+	port=$(basename $(dirname $(readlink "/sys/bus/pci/devices/$dev")))
+ 
+	if (($pt == 0)) || (($pt == 1)) || (($pt == 5)); then
+    		dev=$port
+	fi
+ 
+	lc=$(setpci -s $dev CAP_EXP+0c.L)
+	ls=$(setpci -s $dev CAP_EXP+12.W)
+ 
+	max_speed=$(("0x$lc" & 0xF))
+ 
+	if [ -z "$speed" ]; then
+    		speed=$max_speed
+	fi
+	if (($speed > $max_speed)); then
+    		speed=$max_speed
+	fi
+ 
+	logger "Configuring $dev..."
+	lc2=$(setpci -s $dev CAP_EXP+30.L)
+	logger "Original link control 2:" $lc2
+	logger "Original link target speed:" $(("0x$lc2" & 0xF))
+	lc2n=$(printf "%08x" $((("0x$lc2" & 0xFFFFFFF0) | $speed)))
+	logger "New target link speed:" $speed
+	setpci -s $dev CAP_EXP+30.L=$lc2n
+	logger "Triggering link retraining..."
+	lc=$(setpci -s $dev CAP_EXP+10.L)
+	lcn=$(printf "%08x" $(("0x$lc" | 0x20)))
+	setpci -s $dev CAP_EXP+10.L=$lcn
+	sleep 1
+	ls=$(setpci -s $dev CAP_EXP+12.W)
+	logger "Link status:" $ls
+	logger "Current link speed:" $(("0x$ls" & 0xF))
+}
+
+boot() {
+        case $(board_name) in
+	raspberrypi,4-compute-module)
+		# Downgrade any Mediatek 7915 802.11ax wireless cards to pcie gen 1 (2.5 GT/s)
+		for id in $(lspci -d 14c3:7915 -mm | awk '{print $1}'); do
+			logger "Downgrading Mediatek 7915 PCIe link for stability..."
+			pcie_set_speed $id 1
+		done
+	;;
+        esac
+}
+
