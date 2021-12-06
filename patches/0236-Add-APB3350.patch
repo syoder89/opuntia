@@ -42,11 +42,14 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
 ===================================================================
 --- /dev/null
 +++ build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350.dts
-@@ -0,0 +1,627 @@
+@@ -0,0 +1,672 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/dts-v1/;
 +#include "bcm2711.dtsi"
 +#include "bcm2835-rpi.dtsi"
++#include <dt-bindings/input/input.h>
++
++#include <dt-bindings/reset/raspberrypi,firmware-reset.h>
 +
 +/ {
 +	compatible = "raspberrypi,4-compute-module", "brcm,bcm2711";
@@ -67,48 +70,31 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
 +		emmc2bus = &emmc2bus;
 +		ethernet0 = &genet;
 +		pcie0 = "";
++		blconfig = &blconfig;
 +	};
 +
 +	leds {
-+		act {
++		led-act {
 +			gpios = <&gpio 42 GPIO_ACTIVE_HIGH>;
 +		};
 +
-+		pwr {
++		led-pwr {
 +			label = "PWR";
 +			gpios = <&expgpio 2 GPIO_ACTIVE_LOW>;
-+			default-state = "keep";
-+			linux,default-trigger = "default-on";
++			linux,default-trigger = "heartbeat";
 +		};
++	};
 +
-+		status {
-+			label = "STATUS";
-+			gpios = <&gpio 2 GPIO_ACTIVE_LOW>;
-+		};
++        gpio-keys-polled {
++		compatible = "gpio-keys-polled";
++		#address-cells = <1>;
++		#size-cells = <0>;
++		poll-interval = <100>;
 +
-+		rssi1 {
-+			label = "RSSI1";
-+			gpios = <&gpio 3 GPIO_ACTIVE_LOW>;
-+		};
-+
-+		rssi2 {
-+			label = "RSSI2";
-+			gpios = <&gpio 4 GPIO_ACTIVE_LOW>;
-+		};
-+
-+		rssi3 {
-+			label = "RSSI3";
-+			gpios = <&gpio 17 GPIO_ACTIVE_LOW>;
-+		};
-+
-+		rssi4 {
-+			label = "RSSI4";
-+			gpios = <&gpio 27 GPIO_ACTIVE_LOW>;
-+		};
-+
-+		rssi5 {
-+			label = "RSSI5";
-+			gpios = <&gpio 22 GPIO_ACTIVE_LOW>;
++		reset {
++			label = "reset";
++			linux,code = <KEY_RESTART>;
++			gpios = <&gpio 10 GPIO_ACTIVE_LOW>;
 +		};
 +	};
 +
@@ -130,9 +116,32 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
 +			  3300000 0x0>;
 +		status = "okay";
 +	};
++
++	sd_vcc_reg: sd_vcc_reg {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc-sd";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-boot-on;
++		enable-active-high;
++		gpio = <&expgpio 6 GPIO_ACTIVE_HIGH>;
++	};
++};
++
++&ddc0 {
++	status = "okay";
++};
++
++&ddc1 {
++	status = "okay";
 +};
 +
 +&firmware {
++	firmware_clocks: clocks {
++		compatible = "raspberrypi,firmware-clocks";
++		#clock-cells = <1>;
++	};
++
 +	expgpio: gpio {
 +		compatible = "raspberrypi,firmware-gpio";
 +		gpio-controller;
@@ -159,12 +168,140 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
 +			output-low;
 +		};
 +	};
++
++	reset: reset {
++		compatible = "raspberrypi,firmware-reset";
++		#reset-cells = <1>;
++	};
++};
++
++&gpio {
++	/*
++	 * Parts taken from rpi_SCH_4b_4p0_reduced.pdf and
++	 * the official GPU firmware DT blob.
++	 *
++	 * Legend:
++	 * "FOO" = GPIO line named "FOO" on the schematic
++	 * "FOO_N" = GPIO line named "FOO" on schematic, active low
++	 */
++	gpio-line-names = "ID_SDA",
++			  "ID_SCL",
++			  "SDA1",
++			  "SCL1",
++			  "GPIO_GCLK",
++			  "GPIO5",
++			  "GPIO6",
++			  "SPI_CE1_N",
++			  "SPI_CE0_N",
++			  "SPI_MISO",
++			  "SPI_MOSI",
++			  "SPI_SCLK",
++			  "GPIO12",
++			  "GPIO13",
++			  /* Serial port */
++			  "TXD1",
++			  "RXD1",
++			  "GPIO16",
++			  "GPIO17",
++			  "GPIO18",
++			  "GPIO19",
++			  "GPIO20",
++			  "GPIO21",
++			  "GPIO22",
++			  "GPIO23",
++			  "GPIO24",
++			  "GPIO25",
++			  "GPIO26",
++			  "GPIO27",
++			  "RGMII_MDIO",
++			  "RGMIO_MDC",
++			  /* Used by BT module */
++			  "CTS0",
++			  "RTS0",
++			  "TXD0",
++			  "RXD0",
++			  /* Used by Wifi */
++			  "SD1_CLK",
++			  "SD1_CMD",
++			  "SD1_DATA0",
++			  "SD1_DATA1",
++			  "SD1_DATA2",
++			  "SD1_DATA3",
++			  /* Shared with SPI flash */
++			  "PWM0_MISO",
++			  "PWM1_MOSI",
++			  "STATUS_LED_G_CLK",
++			  "SPIFLASH_CE_N",
++			  "SDA0",
++			  "SCL0",
++			  "RGMII_RXCLK",
++			  "RGMII_RXCTL",
++			  "RGMII_RXD0",
++			  "RGMII_RXD1",
++			  "RGMII_RXD2",
++			  "RGMII_RXD3",
++			  "RGMII_TXCLK",
++			  "RGMII_TXCTL",
++			  "RGMII_TXD0",
++			  "RGMII_TXD1",
++			  "RGMII_TXD2",
++			  "RGMII_TXD3";
++};
++
++&hdmi0 {
++	clocks = <&firmware_clocks 13>, <&firmware_clocks 14>, <&dvp 0>, <&clk_27MHz>;
++	clock-names = "hdmi", "bvb", "audio", "cec";
++	wifi-2.4ghz-coexistence;
++	status = "okay";
++};
++
++&hdmi1 {
++	clocks = <&firmware_clocks 13>, <&firmware_clocks 14>, <&dvp 1>, <&clk_27MHz>;
++	clock-names = "hdmi", "bvb", "audio", "cec";
++	wifi-2.4ghz-coexistence;
++	status = "okay";
++};
++
++&hvs {
++	clocks = <&firmware_clocks 4>;
++};
++
++&pixelvalve0 {
++	status = "okay";
++};
++
++&pixelvalve1 {
++	status = "okay";
++};
++
++&pixelvalve2 {
++	status = "okay";
++};
++
++&pixelvalve4 {
++	status = "okay";
 +};
 +
 +&pwm1 {
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&pwm1_0_gpio40 &pwm1_1_gpio41>;
 +	status = "okay";
++};
++
++&rmem {
++	/*
++	 * RPi4's co-processor will copy the board's bootloader configuration
++	 * into memory for the OS to consume. It'll also update this node with
++	 * its placement information.
++	 */
++	blconfig: nvram@0 {
++		compatible = "raspberrypi,bootloader-config", "nvmem-rmem";
++		#address-cells = <1>;
++		#size-cells = <1>;
++		reg = <0x0 0x0 0x0>;
++		no-map;
++		status = "disabled";
++	};
 +};
 +
 +/* SDHCI is used to control the SDIO for wireless */
@@ -184,9 +321,11 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
 +	};
 +};
 +
-+/* EMMC2 is used to drive the SD card */
++/* EMMC2 is used to drive the EMMC card */
 +&emmc2 {
++	bus-width = <8>;
 +	vqmmc-supply = <&sd_io_1v8_reg>;
++	vmmc-supply = <&sd_vcc_reg>;
 +	broken-cd;
 +	status = "okay";
 +};
@@ -198,9 +337,24 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
 +};
 +
 +&genet_mdio {
-+	phy1: ethernet-phy@1 {
++	phy1: ethernet-phy@0 {
 +		/* No PHY interrupt */
-+		reg = <0x1>;
++		reg = <0x0>;
++	};
++};
++
++&pcie0 {
++	pci@1,0 {
++		#address-cells = <3>;
++		#size-cells = <2>;
++		ranges;
++
++		reg = <0 0 0 0 0>;
++
++		usb@1,0 {
++			reg = <0x10000 0 0 0 0>;
++			resets = <&reset RASPBERRYPI_FIRMWARE_RESET_ID_USB>;
++		};
 +	};
 +};
 +
@@ -229,8 +383,18 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
 +	interrupts = <GIC_SPI 34 IRQ_TYPE_LEVEL_HIGH>;
 +};
 +
++&vc4 {
++	status = "okay";
++};
++
++&vec {
++	status = "disabled";
++};
++
 +// =============================================
 +// Downstream rpi- changes
++
++#define BCM2711
 +
 +#include "bcm270x.dtsi"
 +#include "bcm271x-rpi-bt.dtsi"
@@ -246,10 +410,11 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
 +#include "bcm283x-rpi-csi0-2lane.dtsi"
 +#include "bcm283x-rpi-csi1-4lane.dtsi"
 +#include "bcm283x-rpi-i2c0mux_0_44.dtsi"
++#include "bcm283x-rpi-cam1-regulator.dtsi"
 +
 +/ {
 +	chosen {
-+		bootargs = "coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1 uart_2ndstage=1 earlycon=pl011,mmio32,0xfe201000 console=ttyAMA0,115200 pci=nomsi";
++		bootargs = "coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1 uart_2ndstage=1 earlycon=pl011,mmio32,0xfe201000 console=ttyAMA0,115200";
 +	};
 +
 +	aliases {
@@ -258,19 +423,20 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
 +		mmc0 = &emmc2;
 +		mmc1 = &mmcnr;
 +		mmc2 = &sdhost;
-+		/delete-property/ i2c2;
 +		i2c3 = &i2c3;
 +		i2c4 = &i2c4;
 +		i2c5 = &i2c5;
 +		i2c6 = &i2c6;
++		i2c20 = &ddc0;
++		i2c21 = &ddc1;
++		spi3 = &spi3;
++		spi4 = &spi4;
++		spi5 = &spi5;
++		spi6 = &spi6;
 +		/delete-property/ intc;
 +	};
 +
 +	/delete-node/ wifi-pwrseq;
-+};
-+
-+&pcie0 {
-+	brcm,enable-l1ss;
 +};
 +
 +&mmcnr {
@@ -468,39 +634,15 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
 +	pinctrl-0 = <&i2s_pins>;
 +};
 +
-+/ {
-+	__overrides__ {
-+		/delete-property/ i2c2_baudrate;
-+		/delete-property/ i2c2_iknowwhatimdoing;
-+	};
-+};
-+
-+&firmwarekms {
-+	compatible = "raspberrypi,rpi-firmware-kms-2711";
-+};
-+
 +// =============================================
 +// Board specific stuff here
 +
-+/ {
-+	sd_vcc_reg: sd_vcc_reg {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vcc-sd";
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+		regulator-boot-on;
-+		enable-active-high;
-+		gpio = <&expgpio 6 GPIO_ACTIVE_HIGH>;
-+	};
++&pcie0 {
++       brcm,enable-l1ss;
 +};
 +
 +&sdhost {
 +	status = "disabled";
-+};
-+
-+&emmc2 {
-+	vmmc-supply = <&sd_vcc_reg>;
-+	bus-width = <8>;
 +};
 +
 +&phy1 {
@@ -515,52 +657,16 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
 +};
 +
 +&leds {
-+	act_led: act {
++	act_led: led-act {
 +		label = "led0";
 +		linux,default-trigger = "mmc0";
 +		gpios = <&gpio 42 GPIO_ACTIVE_HIGH>;
 +	};
 +
-+	pwr_led: pwr {
++	pwr_led: led-pwr {
 +		label = "led1";
-+		linux,default-trigger = "default-on";
-+		gpios = <&expgpio 2 GPIO_ACTIVE_LOW>;
-+	};
-+
-+	status_led: status {
-+		label = "status";
 +		linux,default-trigger = "heartbeat";
-+		gpios = <&gpio 2 GPIO_ACTIVE_LOW>;
-+	};
-+
-+	rssi1_led: rssi1 {
-+		label = "rssi1";
-+		linux,default-trigger = "none";
-+		gpios = <&gpio 3 GPIO_ACTIVE_LOW>;
-+	};
-+
-+	rssi2_led: rssi2 {
-+		label = "rssi2";
-+		linux,default-trigger = "none";
-+		gpios = <&gpio 4 GPIO_ACTIVE_LOW>;
-+	};
-+
-+	rssi3_led: rssi3 {
-+		label = "rssi3";
-+		linux,default-trigger = "none";
-+		gpios = <&gpio 17 GPIO_ACTIVE_LOW>;
-+	};
-+
-+	rssi4_led: rssi4 {
-+		label = "rssi4";
-+		linux,default-trigger = "none";
-+		gpios = <&gpio 27 GPIO_ACTIVE_LOW>;
-+	};
-+
-+	rssi5_led: rssi5 {
-+		label = "rssi5";
-+		linux,default-trigger = "none";
-+		gpios = <&gpio 22 GPIO_ACTIVE_LOW>;
++		gpios = <&expgpio 2 GPIO_ACTIVE_LOW>;
 +	};
 +};
 +
@@ -574,48 +680,11 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
 +	brcm,disable-headphones = <1>;
 +};
 +
-+&vc4 {
-+	status = "disabled";
-+};
-+
-+&pixelvalve0 {
-+	status = "disabled";
-+};
-+
-+&pixelvalve1 {
-+	status = "disabled";
-+};
-+
-+&pixelvalve2 {
-+	status = "disabled";
-+};
-+
-+&pixelvalve3 {
-+	status = "disabled";
-+};
-+
-+&pixelvalve4 {
-+	status = "disabled";
-+};
-+
-+&hdmi0 {
-+	status = "disabled";
-+};
-+
-+&ddc0 {
-+	status = "disabled";
-+};
-+
-+&hdmi1 {
-+	status = "disabled";
-+};
-+
-+&ddc1 {
-+	status = "disabled";
++cam0_reg: &cam1_reg {
++	gpio = <&expgpio 5 GPIO_ACTIVE_HIGH>;
 +};
 +
 +/ {
-+
 +	__overrides__ {
 +		act_led_gpio = <&act_led>,"gpios:4";
 +		act_led_activelow = <&act_led>,"gpios:8";
@@ -624,30 +693,6 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
 +		pwr_led_gpio = <&pwr_led>,"gpios:4";
 +		pwr_led_activelow = <&pwr_led>,"gpios:8";
 +		pwr_led_trigger = <&pwr_led>,"linux,default-trigger";
-+
-+		status_led_gpio = <&status_led>,"gpios:4";
-+		status_led_activelow = <&status_led>,"gpios:8";
-+		status_led_trigger = <&status_led>,"linux,default-trigger";
-+
-+		rssi1_led_gpio = <&rssi1_led>,"gpios:4";
-+		rssi1_led_activelow = <&rssi1_led>,"gpios:8";
-+		rssi1_led_trigger = <&rssi1_led>,"linux,default-trigger";
-+
-+		rssi2_led_gpio = <&rssi2_led>,"gpios:4";
-+		rssi2_led_activelow = <&rssi2_led>,"gpios:8";
-+		rssi2_led_trigger = <&rssi2_led>,"linux,default-trigger";
-+
-+		rssi3_led_gpio = <&rssi3_led>,"gpios:4";
-+		rssi3_led_activelow = <&rssi3_led>,"gpios:8";
-+		rssi3_led_trigger = <&rssi3_led>,"linux,default-trigger";
-+
-+		rssi4_led_gpio = <&rssi4_led>,"gpios:4";
-+		rssi4_led_activelow = <&rssi4_led>,"gpios:8";
-+		rssi4_led_trigger = <&rssi4_led>,"linux,default-trigger";
-+
-+		rssi5_led_gpio = <&rssi5_led>,"gpios:4";
-+		rssi5_led_activelow = <&rssi5_led>,"gpios:8";
-+		rssi5_led_trigger = <&rssi5_led>,"linux,default-trigger";
 +
 +		eth_led0 = <&phy1>,"led-modes:0";
 +		eth_led1 = <&phy1>,"led-modes:4";
