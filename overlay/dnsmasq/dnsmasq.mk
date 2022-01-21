@@ -20,7 +20,11 @@ HWREV := $(firstword $(subst -, ,$(CONFIG_VERSION_HWREV)))
 ifeq ($(PRODUCT_VER), "RR1000")
 Package/dnsmasq/install += $(newline)$(custom_install_commands_rebel)
 else ifeq ($(PRODUCT_VER), "EV1000")
+ifeq ($(HWREV), "2")
+Package/dnsmasq/install += $(newline)$(custom_install_commands)
+else
 Package/dnsmasq/install += $(newline)$(custom_install_commands_envoy)
+endif
 else ifeq ($(PRODUCT_VER), "TR1000")
 Package/dnsmasq/install += $(newline)$(custom_install_commands_envoy)
 else ifeq ($(PRODUCT_VER), "AP2100")
