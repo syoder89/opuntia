@@ -2,39 +2,36 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
 ===================================================================
 --- build_dir.orig/package/network/services/hostapd/files/hostapd.sh
 +++ build_dir/package/network/services/hostapd/files/hostapd.sh
-@@ -257,6 +257,8 @@ hostapd_common_add_bss_config() {
- 	config_add_string 'auth_server:host' 'server:host'
- 	config_add_string auth_secret key
- 	config_add_int 'auth_port:port' 'port:port'
-+	config_add_string radius_auth_req_attr
-+	config_add_string radius_acct_req_attr
+@@ -507,14 +507,6 @@ append_hs20_conn_capab() {
+ 	[ -n "$1" ] && append bss_conf "hs20_conn_capab=$1" "$N"
+ }
  
- 	config_add_string acct_server
- 	config_add_string acct_secret
-@@ -279,6 +281,8 @@ hostapd_common_add_bss_config() {
- 	config_add_array altsubject_match altsubject_match2
- 	config_add_array domain_match domain_match2 domain_suffix_match domain_suffix_match2
- 	config_add_string ieee80211w_mgmt_cipher
-+	config_add_string radius_auth_req_attr
-+	config_add_string radius_acct_req_attr
- 
- 	config_add_int dynamic_vlan vlan_naming vlan_no_bridge
- 	config_add_string vlan_tagged_interface vlan_bridge
-@@ -653,6 +657,7 @@ hostapd_set_bss_options() {
- 			json_get_vars \
- 				auth_server auth_secret auth_port \
- 				dae_client dae_secret dae_port \
-+				radius_auth_req_attr radius_acct_req_attr \
- 				ownip radius_client_addr \
- 				eap_reauth_period request_cui
- 
-@@ -668,6 +673,9 @@ hostapd_set_bss_options() {
- 			set_default dae_port 3799
- 			set_default request_cui 0
- 
-+			[ -n "$radius_auth_req_attr" ] && append bss_conf "radius_auth_req_attr=$radius_auth_req_attr" "$N"
-+			[ -n "$radius_acct_req_attr" ] && append bss_conf "radius_acct_req_attr=$radius_acct_req_attr" "$N"
+-append_radius_acct_req_attr() {
+-	[ -n "$1" ] && append bss_conf "radius_acct_req_attr=$1" "$N"
+-}
+-
+-append_radius_auth_req_attr() {
+-	[ -n "$1" ] && append bss_conf "radius_auth_req_attr=$1" "$N"
+-}
+-
+ append_airtime_sta_weight() {
+ 	[ -n "$1" ] && append bss_conf "airtime_sta_weight=$1" "$N"
+ }
+@@ -722,7 +714,16 @@ hostapd_set_bss_options() {
+ 				append bss_conf "radius_das_port=$dae_port" "$N"
+ 				append bss_conf "radius_das_client=$dae_client $dae_secret" "$N"
+ 			}
+-			json_for_each_item append_radius_auth_req_attr radius_auth_req_attr
 +
- 			[ "$eap_server" -eq 0 ] && {
- 				append bss_conf "auth_server_addr=$auth_server" "$N"
- 				append bss_conf "auth_server_port=$auth_port" "$N"
++			json_get_values radius_auth_req_attr radius_auth_req_attr
++			json_get_values radius_acct_req_attr radius_acct_req_attr
++
++			for attr in $radius_auth_req_attr; do
++				append bss_conf "radius_auth_req_attr=$attr" "$N"
++			done
++			for attr in $radius_acct_req_attr; do
++				append bss_conf "radius_acct_req_attr=$attr" "$N"
++			done
+ 
+ 			[ -n "$ownip" ] && append bss_conf "own_ip_addr=$ownip" "$N"
+ 			[ -n "$radius_client_addr" ] && append bss_conf "radius_client_addr=$radius_client_addr" "$N"

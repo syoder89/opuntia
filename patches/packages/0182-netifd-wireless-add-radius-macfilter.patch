@@ -2,31 +2,25 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
 ===================================================================
 --- build_dir.orig/package/network/services/hostapd/files/hostapd.sh
 +++ build_dir/package/network/services/hostapd/files/hostapd.sh
-@@ -284,8 +284,8 @@ hostapd_common_add_bss_config() {
- 	config_add_array altsubject_match altsubject_match2
- 	config_add_array domain_match domain_match2 domain_suffix_match domain_suffix_match2
- 	config_add_string ieee80211w_mgmt_cipher
--	config_add_string radius_auth_req_attr
--	config_add_string radius_acct_req_attr
-+	config_add_array radius_auth_req_attr
-+	config_add_array radius_acct_req_attr
- 
- 	config_add_int dynamic_vlan vlan_naming vlan_no_bridge
- 	config_add_string vlan_tagged_interface vlan_bridge
-@@ -538,6 +538,9 @@ hostapd_set_bss_options() {
- 		airtime_bss_weight airtime_bss_limit airtime_sta_weight \
- 		multicast_to_unicast proxy_arp per_sta_vif \
- 		eap_server eap_user_file ca_cert server_cert private_key private_key_passwd server_id \
+@@ -536,6 +536,9 @@ hostapd_set_bss_options() {
+ 		wep_rekey wpa_group_rekey wpa_pair_rekey wpa_master_rekey wpa_strict_rekey \
+ 		wpa_disable_eapol_key_retries tdls_prohibit \
+ 		maxassoc max_inactivity disassoc_low_ack isolate auth_cache \
 +		ieee80211w auth_servers acct_servers auth_server auth_secret \
 +		auth_port dae_client dae_secret dae_port ownip \
 +		request_cui radius_client_addr \
- 		vendor_elements
+ 		wps_pushbutton wps_label ext_registrar wps_pbc_in_m1 wps_ap_setup_locked \
+ 		wps_independent wps_device_type wps_device_name wps_manufacturer wps_pin \
+ 		macfilter ssid utf8_ssid wmm uapsd hidden short_preamble rsn_preauth \
+@@ -634,6 +637,79 @@ hostapd_set_bss_options() {
  
- 	set_default isolate 0
-@@ -608,6 +611,78 @@ hostapd_set_bss_options() {
- 		json_for_each_item append_radius_acct_req_attr radius_acct_req_attr
- 	}
+ 	local vlan_possible=""
  
++	# legacy compatibility
++	[ -n "$auth_server" ] || json_get_var auth_server server
++	[ -n "$auth_port" ] || json_get_var auth_port port
++	[ -n "$auth_secret" ] || json_get_var auth_secret key
++
 +	set_default auth_port 1812
 +	set_default dae_port 3799
 +	set_default request_cui 0
@@ -58,16 +52,9 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
 +		json_select ".."
 +	}
 +
-+	json_get_values radius_auth_req_attr radius_auth_req_attr
-+	json_get_values radius_acct_req_attr radius_acct_req_attr
-+
-+	for attr in $radius_auth_req_attr; do
-+		append bss_conf "radius_auth_req_attr=$attr" "$N"
-+	done
-+	for attr in $radius_acct_req_attr; do
-+		append bss_conf "radius_acct_req_attr=$attr" "$N"
-+	done
-+
++ 	[ -n "$radius_auth_req_attr" ] && append bss_conf "radius_auth_req_attr=$radius_auth_req_attr" "$N"
++ 	[ -n "$radius_acct_req_attr" ] && append bss_conf "radius_acct_req_attr=$radius_acct_req_attr" "$N"
++ 
 +	# List of fallback RADIUS servers, ip_add@secret[:port]
 +	[ -n "$acct_servers" ] && {
 +		json_select "acct_servers"
@@ -90,30 +77,22 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
 +		json_select ".."
 +	}
 +
++	[ "$request_cui" -gt 0 ] && append bss_conf "radius_request_cui=$request_cui" "$N"
++	[ -n "$eap_reauth_period" ] && append bss_conf "eap_reauth_period=$eap_reauth_period" "$N"
++
 +	[ -n "$dae_client" -a -n "$dae_secret" ] && {
 +		append bss_conf "radius_das_port=$dae_port" "$N"
 +		append bss_conf "radius_das_client=$dae_client $dae_secret" "$N"
 +	}
++	json_for_each_item append_radius_auth_req_attr radius_auth_req_attr
 +
 +	[ -n "$ownip" ] && append bss_conf "own_ip_addr=$ownip" "$N"
-+	 "$request_cui" -gt 0 ] && append bss_conf "radius_request_cui=$request_cui" "$N"
 +	[ -n "$radius_client_addr" ] && append bss_conf "radius_client_addr=$radius_client_addr" "$N"
 +
  	case "$auth_type" in
- 		sae|owe|eap192|eap-eap192)
- 			set_default ieee80211w 2
-@@ -657,92 +732,12 @@ hostapd_set_bss_options() {
- 			wps_possible=1
- 		;;
- 		eap|eap192|eap-eap192)
--			json_get_vars \
--				auth_servers acct_servers \
--				auth_server auth_secret auth_port \
--				dae_client dae_secret dae_port \
--				radius_auth_req_attr radius_acct_req_attr \
--				ownip radius_client_addr \
--				eap_reauth_period request_cui
--
+ 		none|owe)
+ 			json_get_vars owe_transition_bssid owe_transition_ssid
+@@ -680,11 +756,6 @@ hostapd_set_bss_options() {
  			# radius can provide VLAN ID for clients
  			vlan_possible=1
  
@@ -122,12 +101,16 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
 -			[ -n "$auth_port" ] || json_get_var auth_port port
 -			[ -n "$auth_secret" ] || json_get_var auth_secret key
 -
+ 			[ "$fils" -gt 0 ] && {
+ 				set_default erp_domain "$mobility_domain"
+ 				set_default erp_domain "$(echo "$ssid" | md5sum | head -c 8)"
+@@ -709,73 +780,6 @@ hostapd_set_bss_options() {
+ 				[ -n "$fils_dhcp" ] && append bss_conf "dhcp_server=$fils_dhcp" "$N"
+ 			}
+ 
 -			set_default auth_port 1812
 -			set_default dae_port 3799
 -			set_default request_cui 0
--
--			[ -n "$radius_auth_req_attr" ] && append bss_conf "radius_auth_req_attr=$radius_auth_req_attr" "$N"
--			[ -n "$radius_acct_req_attr" ] && append bss_conf "radius_acct_req_attr=$radius_acct_req_attr" "$N"
 -
 -                        # leave the default option for legacy compatibility
 -                        [ -z "$auth_server" ] || append bss_conf "auth_server_addr=$auth_server" "$N"
@@ -182,9 +165,8 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
 -			}
 -
 -			[ "$request_cui" -gt 0 ] && append bss_conf "radius_request_cui=$request_cui" "$N"
-+			json_get_vars eap_reauth_period eapol_version
- 			[ -n "$eap_reauth_period" ] && append bss_conf "eap_reauth_period=$eap_reauth_period" "$N"
- 
+-			[ -n "$eap_reauth_period" ] && append bss_conf "eap_reauth_period=$eap_reauth_period" "$N"
+-
 -			[ -n "$dae_client" -a -n "$dae_secret" ] && {
 -				append bss_conf "radius_das_port=$dae_port" "$N"
 -				append bss_conf "radius_das_client=$dae_client $dae_secret" "$N"
@@ -196,14 +178,15 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
  			append bss_conf "eapol_key_index_workaround=1" "$N"
  			append bss_conf "ieee8021x=1" "$N"
  
-@@ -965,6 +960,10 @@ hostapd_set_bss_options() {
- 			append bss_conf "macaddr_acl=0" "$N"
- 			append bss_conf "deny_mac_file=$_macfile" "$N"
+@@ -788,6 +792,11 @@ hostapd_set_bss_options() {
+ 			append bss_conf "wep_default_key=$wep_keyidx" "$N"
+ 			[ -n "$wep_rekey" ] && append bss_conf "wep_rekey_period=$wep_rekey" "$N"
  		;;
 +		radius)
 +			append bss_conf "macaddr_acl=2" "$N"
 +			vlan_possible=1
 +		;;
- 		*)
- 			_macfile=""
- 		;;
++
+ 	esac
+ 
+ 	local auth_algs=$((($auth_mode_shared << 1) | $auth_mode_open))
