@@ -488,7 +488,7 @@ Index: build_dir/target/linux/ath79/image/generic.mk
 ===================================================================
 --- build_dir.orig/target/linux/ath79/image/generic.mk
 +++ build_dir/target/linux/ath79/image/generic.mk
-@@ -717,74 +717,21 @@ define Device/devolo_dlan-pro-1200plus-a
+@@ -722,74 +722,21 @@ define Device/devolo_dlan-pro-1200plus-a
  endef
  TARGET_DEVICES += devolo_dlan-pro-1200plus-ac
  
@@ -578,19 +578,19 @@ Index: build_dir/target/linux/ath79/patches-5.10/999-scott-cpx-mips-multi-dtb.pa
 --- /dev/null
 +++ build_dir/target/linux/ath79/patches-5.10/999-scott-cpx-mips-multi-dtb.patch
 @@ -0,0 +1,91 @@
-+Index: linux-5.4.115/arch/mips/ath79/setup.c
++Index: linux-5.10.96/arch/mips/ath79/setup.c
 +===================================================================
-+--- linux-5.4.115.orig/arch/mips/ath79/setup.c
-++++ linux-5.4.115/arch/mips/ath79/setup.c
++--- linux-5.10.96.orig/arch/mips/ath79/setup.c
+++++ linux-5.10.96/arch/mips/ath79/setup.c
 +@@ -18,6 +18,7 @@
-+ #include <linux/clk-provider.h>
++ #include <linux/of_clk.h>
 + #include <linux/of_fdt.h>
 + #include <linux/irqchip.h>
 ++#include <linux/libfdt.h>
 + 
 + #include <asm/bootinfo.h>
 + #include <asm/idle.h>
-+@@ -213,24 +214,72 @@ unsigned int get_c0_compare_int(void)
++@@ -211,24 +212,72 @@ unsigned int get_c0_compare_int(void)
 + 	return CP0_LEGACY_COMPARE_IRQ;
 + }
 + 
@@ -623,9 +623,9 @@ Index: build_dir/target/linux/ath79/patches-5.10/999-scott-cpx-mips-multi-dtb.pa
 + 
 + 	set_io_port_base(KSEG1);
 + 
-++	ath79_reset_base = ioremap_nocache(AR71XX_RESET_BASE,
+++	ath79_reset_base = ioremap(AR71XX_RESET_BASE,
 ++					   AR71XX_RESET_SIZE);
-++	ath79_pll_base = ioremap_nocache(AR71XX_PLL_BASE,
+++	ath79_pll_base = ioremap(AR71XX_PLL_BASE,
 ++					 AR71XX_PLL_SIZE);
 ++	ath79_detect_sys_type();
 ++
@@ -661,9 +661,9 @@ Index: build_dir/target/linux/ath79/patches-5.10/999-scott-cpx-mips-multi-dtb.pa
 ++		__dt_setup_arch((void *)KSEG0ADDR(dtb_src));
 ++	}
 + 
-+-	ath79_reset_base = ioremap_nocache(AR71XX_RESET_BASE,
++-	ath79_reset_base = ioremap(AR71XX_RESET_BASE,
 +-					   AR71XX_RESET_SIZE);
-+-	ath79_pll_base = ioremap_nocache(AR71XX_PLL_BASE,
++-	ath79_pll_base = ioremap(AR71XX_PLL_BASE,
 +-					 AR71XX_PLL_SIZE);
 +-	ath79_detect_sys_type();
 + 	ath79_ddr_ctrl_init();
@@ -769,8 +769,8 @@ Index: build_dir/target/linux/ath79/generic/base-files/etc/board.d/01_leds
 ===================================================================
 --- build_dir.orig/target/linux/ath79/generic/base-files/etc/board.d/01_leds
 +++ build_dir/target/linux/ath79/generic/base-files/etc/board.d/01_leds
-@@ -171,13 +171,16 @@ openmesh,mr1750-v1|\
- openmesh,mr1750-v2)
+@@ -183,13 +183,16 @@ openmesh,mr1750-v2|\
+ tplink,cpe710-v1)
  	ucidef_set_led_netdev "lan" "LAN" "blue:lan" "eth0"
  	;;
 +compex,wpj344|\
@@ -795,7 +795,7 @@ Index: build_dir/target/linux/ath79/generic/base-files/etc/board.d/02_network
 ===================================================================
 --- build_dir.orig/target/linux/ath79/generic/base-files/etc/board.d/02_network
 +++ build_dir/target/linux/ath79/generic/base-files/etc/board.d/02_network
-@@ -180,6 +180,7 @@ ath79_setup_interfaces()
+@@ -185,6 +185,7 @@ ath79_setup_interfaces()
  	comfast,cf-e110n-v2|\
  	comfast,cf-e120a-v3|\
  	comfast,cf-e314n-v2|\
@@ -803,7 +803,7 @@ Index: build_dir/target/linux/ath79/generic/base-files/etc/board.d/02_network
  	compex,wpj531-16m|\
  	openmesh,a40|\
  	openmesh,a60|\
-@@ -217,14 +218,29 @@ ath79_setup_interfaces()
+@@ -223,14 +224,29 @@ ath79_setup_interfaces()
  		ucidef_add_switch "switch0" \
  			"0@eth0" "1:lan" "2:lan" "3:lan" "4:lan" "5:wan" "6@eth1"
  		;;

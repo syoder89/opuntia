@@ -89,5 +89,4 @@ packages/0260-mt7915-resolve-wds-intermittent-on-ap.patch
 packages/0263-add-rpi-cm4-wifi-firmware.patch
 0238-Add-APB2000.patch
 kernel/0094-rpi-9k-ethernet-mtu.patch
-packages/0264-mt7915-fix-sta-mode-connection-on-DFS-channels.patch
 0239-Fix-bcm27xx-f2fs-potential-garbage-overlay.patch
