@@ -2,7 +2,7 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
 ===================================================================
 --- build_dir.orig/package/network/services/hostapd/files/hostapd.sh
 +++ build_dir/package/network/services/hostapd/files/hostapd.sh
-@@ -254,6 +254,9 @@ hostapd_common_add_bss_config() {
+@@ -263,6 +263,9 @@ hostapd_common_add_bss_config() {
  	config_add_int ieee80211w
  	config_add_int eapol_version
  
@@ -12,17 +12,29 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
  	config_add_string 'auth_server:host' 'server:host'
  	config_add_string auth_secret key
  	config_add_int 'auth_port:port' 'port:port'
-@@ -655,6 +658,7 @@ hostapd_set_bss_options() {
+@@ -666,6 +669,7 @@ hostapd_set_bss_options() {
  		;;
  		eap|eap192|eap-eap192)
  			json_get_vars \
 +				auth_servers acct_servers \
  				auth_server auth_secret auth_port \
  				dae_client dae_secret dae_port \
- 				radius_auth_req_attr radius_acct_req_attr \
-@@ -676,10 +680,56 @@ hostapd_set_bss_options() {
- 			[ -n "$radius_auth_req_attr" ] && append bss_conf "radius_auth_req_attr=$radius_auth_req_attr" "$N"
- 			[ -n "$radius_acct_req_attr" ] && append bss_conf "radius_acct_req_attr=$radius_acct_req_attr" "$N"
+ 				ownip radius_client_addr \
+@@ -676,11 +680,6 @@ hostapd_set_bss_options() {
+ 			# radius can provide VLAN ID for clients
+ 			vlan_possible=1
+ 
+-			# legacy compatibility
+-			[ -n "$auth_server" ] || json_get_var auth_server server
+-			[ -n "$auth_port" ] || json_get_var auth_port port
+-			[ -n "$auth_secret" ] || json_get_var auth_secret key
+-
+ 			[ "$fils" -gt 0 ] && {
+ 				set_default erp_domain "$mobility_domain"
+ 				set_default erp_domain "$(echo "$ssid" | md5sum | head -c 8)"
+@@ -709,10 +708,56 @@ hostapd_set_bss_options() {
+ 			set_default dae_port 3799
+ 			set_default request_cui 0
  
 -			[ "$eap_server" -eq 0 ] && {
 -				append bss_conf "auth_server_addr=$auth_server" "$N"

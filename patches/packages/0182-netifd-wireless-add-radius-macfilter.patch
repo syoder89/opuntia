@@ -12,15 +12,10 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
  		wps_pushbutton wps_label ext_registrar wps_pbc_in_m1 wps_ap_setup_locked \
  		wps_independent wps_device_type wps_device_name wps_manufacturer wps_pin \
  		macfilter ssid utf8_ssid wmm uapsd hidden short_preamble rsn_preauth \
-@@ -634,6 +637,79 @@ hostapd_set_bss_options() {
+@@ -634,6 +637,74 @@ hostapd_set_bss_options() {
  
  	local vlan_possible=""
  
-+	# legacy compatibility
-+	[ -n "$auth_server" ] || json_get_var auth_server server
-+	[ -n "$auth_port" ] || json_get_var auth_port port
-+	[ -n "$auth_secret" ] || json_get_var auth_secret key
-+
 +	set_default auth_port 1812
 +	set_default dae_port 3799
 +	set_default request_cui 0
@@ -92,19 +87,7 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
  	case "$auth_type" in
  		none|owe)
  			json_get_vars owe_transition_bssid owe_transition_ssid
-@@ -680,11 +756,6 @@ hostapd_set_bss_options() {
- 			# radius can provide VLAN ID for clients
- 			vlan_possible=1
- 
--			# legacy compatibility
--			[ -n "$auth_server" ] || json_get_var auth_server server
--			[ -n "$auth_port" ] || json_get_var auth_port port
--			[ -n "$auth_secret" ] || json_get_var auth_secret key
--
- 			[ "$fils" -gt 0 ] && {
- 				set_default erp_domain "$mobility_domain"
- 				set_default erp_domain "$(echo "$ssid" | md5sum | head -c 8)"
-@@ -709,73 +780,6 @@ hostapd_set_bss_options() {
+@@ -704,73 +775,6 @@ hostapd_set_bss_options() {
  				[ -n "$fils_dhcp" ] && append bss_conf "dhcp_server=$fils_dhcp" "$N"
  			}
  
@@ -178,7 +161,7 @@ Index: build_dir/package/network/services/hostapd/files/hostapd.sh
  			append bss_conf "eapol_key_index_workaround=1" "$N"
  			append bss_conf "ieee8021x=1" "$N"
  
-@@ -788,6 +792,11 @@ hostapd_set_bss_options() {
+@@ -783,6 +787,11 @@ hostapd_set_bss_options() {
  			append bss_conf "wep_default_key=$wep_keyidx" "$N"
  			[ -n "$wep_rekey" ] && append bss_conf "wep_rekey_period=$wep_rekey" "$N"
  		;;
