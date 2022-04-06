@@ -90,3 +90,5 @@ packages/0263-add-rpi-cm4-wifi-firmware.patch
 0238-Add-APB2000.patch
 kernel/0094-rpi-9k-ethernet-mtu.patch
 0239-Fix-bcm27xx-f2fs-potential-garbage-overlay.patch
+0240-CM4-disable-msi-interrupts-for-unstable-pcie.patch
+0241-change-nodogsplash-restart-to-inifinite.patch

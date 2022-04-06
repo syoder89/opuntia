@@ -1,0 +1,69 @@
+Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
+===================================================================
+--- build_dir.orig/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
++++ build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
+@@ -369,7 +369,7 @@
+ 
+ / {
+ 	chosen {
+-		bootargs = "coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1 uart_2ndstage=1 earlycon=pl011,mmio32,0xfe201000 console=ttyAMA0,115200";
++		bootargs = "coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1 uart_2ndstage=1 earlycon=pl011,mmio32,0xfe201000 console=ttyAMA0,115200 pci=nomsi";
+ 	};
+ 
+ 	aliases {
+@@ -593,7 +593,8 @@
+ // Board specific stuff here
+ 
+ &pcie0 {
+-       brcm,enable-l1ss;
++       /delete-property/ brcm,enable-ssc;
++       /delete-property/ brcm,enable-l1ss;
+        max-link-speed = <1>;
+ };
+ 
+Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350.dts
+===================================================================
+--- build_dir.orig/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350.dts
++++ build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350.dts
+@@ -369,7 +369,7 @@
+ 
+ / {
+ 	chosen {
+-		bootargs = "coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1 uart_2ndstage=1 earlycon=pl011,mmio32,0xfe201000 console=ttyAMA0,115200";
++		bootargs = "coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1 uart_2ndstage=1 earlycon=pl011,mmio32,0xfe201000 console=ttyAMA0,115200 pci=nomsi";
+ 	};
+ 
+ 	aliases {
+@@ -593,7 +593,8 @@
+ // Board specific stuff here
+ 
+ &pcie0 {
+-       brcm,enable-l1ss;
++       /delete-property/ brcm,enable-ssc;
++       /delete-property/ brcm,enable-l1ss;
+        max-link-speed = <1>;
+ };
+ 
+Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500.dts
+===================================================================
+--- build_dir.orig/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500.dts
++++ build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500.dts
+@@ -369,7 +369,7 @@
+ 
+ / {
+ 	chosen {
+-		bootargs = "coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1 uart_2ndstage=1 earlycon=pl011,mmio32,0xfe201000 console=ttyAMA0,115200";
++		bootargs = "coherent_pool=1M 8250.nr_uarts=1 snd_bcm2835.enable_compat_alsa=0 snd_bcm2835.enable_hdmi=1 uart_2ndstage=1 earlycon=pl011,mmio32,0xfe201000 console=ttyAMA0,115200 pci=nomsi";
+ 	};
+ 
+ 	aliases {
+@@ -593,7 +593,8 @@
+ // Board specific stuff here
+ 
+ &pcie0 {
+-       brcm,enable-l1ss;
++       /delete-property/ brcm,enable-ssc;
++       /delete-property/ brcm,enable-l1ss;
+        max-link-speed = <1>;
+ };
+ 

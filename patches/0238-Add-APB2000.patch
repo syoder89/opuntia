@@ -2,7 +2,7 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000
 ===================================================================
 --- /dev/null
 +++ build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
-@@ -0,0 +1,672 @@
+@@ -0,0 +1,673 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/dts-v1/;
 +#include "bcm2711.dtsi"
@@ -599,6 +599,7 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000
 +
 +&pcie0 {
 +       brcm,enable-l1ss;
++       max-link-speed = <1>;
 +};
 +
 +&sdhost {

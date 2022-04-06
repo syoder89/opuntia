@@ -1,0 +1,20 @@
+Index: build_dir/feeds/routing/nodogsplash/Makefile
+===================================================================
+--- build_dir.orig/feeds/routing/nodogsplash/Makefile
++++ build_dir/feeds/routing/nodogsplash/Makefile
+@@ -8,12 +8,12 @@ include $(TOPDIR)/rules.mk
+ PKG_NAME:=nodogsplash
+ PKG_FIXUP:=autoreconf
+ PKG_VERSION:=5.0.0
+-PKG_RELEASE:=1
++PKG_RELEASE:=2
+ 
+ PKG_SOURCE_URL:=https://github.com/imagestream/nodogsplash.git
+ PKG_SOURCE_PROTO:=git
+-PKG_SOURCE_DATE:=2020-02-04
+-PKG_SOURCE_VERSION:=8519b8d44664cb45ffefd0fb6470e58babac2b52
++PKG_SOURCE_DATE:=2022-04-06
++PKG_SOURCE_VERSION:=2260e08738369b8c774f20ec9755436b6688d875
+ PKG_BUILD_DIR:=$(BUILD_DIR)/nodogsplash-$(PKG_VERSION)
+ 
+ PKG_MAINTAINER:=Moritz Warning <moritzwarning@web.de>
