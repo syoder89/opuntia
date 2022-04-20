@@ -1,7 +1,7 @@
-Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
+Index: build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
 ===================================================================
---- build_dir.orig/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
-+++ build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
+--- build_dir.ap2000.orig/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
++++ build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
 @@ -369,7 +369,7 @@
  
  / {
@@ -11,20 +11,22 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000
  	};
  
  	aliases {
-@@ -593,7 +593,8 @@
+@@ -593,7 +593,10 @@
  // Board specific stuff here
  
  &pcie0 {
 -       brcm,enable-l1ss;
-+       /delete-property/ brcm,enable-ssc;
-+       /delete-property/ brcm,enable-l1ss;
-        max-link-speed = <1>;
++	/delete-property/ brcm,enable-ssc;
++	/delete-property/ brcm,enable-l1ss;
++	brcm,aspm-no-l0s;
++	max-link-speed = <1>;
  };
  
-Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350.dts
+ &sdhost {
+Index: build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350.dts
 ===================================================================
---- build_dir.orig/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350.dts
-+++ build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350.dts
+--- build_dir.ap2000.orig/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350.dts
++++ build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350.dts
 @@ -369,7 +369,7 @@
  
  / {
@@ -34,20 +36,22 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
  	};
  
  	aliases {
-@@ -593,7 +593,8 @@
+@@ -593,7 +593,10 @@
  // Board specific stuff here
  
  &pcie0 {
 -       brcm,enable-l1ss;
-+       /delete-property/ brcm,enable-ssc;
-+       /delete-property/ brcm,enable-l1ss;
-        max-link-speed = <1>;
++	/delete-property/ brcm,enable-ssc;
++	/delete-property/ brcm,enable-l1ss;
++	brcm,aspm-no-l0s;
++	max-link-speed = <1>;
  };
  
-Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500.dts
+ &sdhost {
+Index: build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500.dts
 ===================================================================
---- build_dir.orig/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500.dts
-+++ build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500.dts
+--- build_dir.ap2000.orig/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500.dts
++++ build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500.dts
 @@ -369,7 +369,7 @@
  
  / {
@@ -57,13 +61,15 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
  	};
  
  	aliases {
-@@ -593,7 +593,8 @@
+@@ -593,7 +593,10 @@
  // Board specific stuff here
  
  &pcie0 {
 -       brcm,enable-l1ss;
-+       /delete-property/ brcm,enable-ssc;
-+       /delete-property/ brcm,enable-l1ss;
-        max-link-speed = <1>;
++	/delete-property/ brcm,enable-ssc;
++	/delete-property/ brcm,enable-l1ss;
++	brcm,aspm-no-l0s;
++	max-link-speed = <1>;
  };
  
+ &sdhost {

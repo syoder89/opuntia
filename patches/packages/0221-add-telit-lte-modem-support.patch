@@ -533,71 +533,20 @@ Index: build_dir/package/network/utils/comgt/files/man3g
 +		usage
 +	;;
 +esac
-Index: build_dir/package/network/utils/comgt/files/ncm.json
-===================================================================
---- build_dir.orig/package/network/utils/comgt/files/ncm.json
-+++ build_dir/package/network/utils/comgt/files/ncm.json
-@@ -74,5 +74,46 @@
- 		"connect": "AT+CGACT=1,${profile}",
- 		"finalize": "AT+CGDATA=\\\"M-MBIM\\\",${profile},1",
- 		"disconnect": "AT+CGACT=0,${profile}"
-+	},
-+	"telit": {
-+		"initialize": [
-+			"AT+CFUN=1"
-+		],
-+		"modes": {
-+			"umts": "AT+WS46=22",
-+			"lte": "AT+WS46=28",
-+			"preferlte": "AT+WS46=31",
-+			"preferumts": "AT+WS46=22",
-+			"gsm": "AT+WS46=31",
-+			"auto": "AT+WS46=31"
-+		},
-+		"configure": [
-+			"AT+CGDCONT=${profile},\\\"${pdptype}\\\",\\\"${apn}\\\"",
-+			"AT#NCMD=0"
-+		],
-+		"connect": "AT#NCM=2,${profile}",
-+		"disconnect": "AT#NCMD=0",
-+		"getaddrs": "/etc/gcom/telit-getaddrs.gcom"
-+	},
-+	"oldtelit": {
-+		"initialize": [
-+			"AT+CFUN=1"
-+		],
-+		"modes": {
-+			"umts": "AT+WS46=22",
-+			"lte": "AT+WS46=28",
-+			"preferlte": "AT+WS46=31",
-+			"preferumts": "AT+WS46=22",
-+			"gsm": "AT+WS46=31",
-+			"auto": "AT+WS46=31"
-+		},
-+		"configure": [
-+			"AT+CGDCONT=${profile},\\\"${pdptype}\\\",\\\"${apn}\\\"",
-+			"AT#NCM=1,${profile}",
-+			"AT+CGACT=1,${profile}"
-+		],
-+		"connect": "AT+CGDATA=\\\"M-RAW_IP\\\",1",
-+		"disconnect": "AT#NCMD=0",
-+		"getaddrs": "/etc/gcom/telit-getaddrs.gcom"
- 	}
- }
 Index: build_dir/package/network/utils/comgt/files/ncm.sh
 ===================================================================
 --- build_dir.orig/package/network/utils/comgt/files/ncm.sh
 +++ build_dir/package/network/utils/comgt/files/ncm.sh
-@@ -25,7 +25,7 @@ proto_ncm_init_config() {
+@@ -26,7 +26,7 @@ proto_ncm_init_config() {
  proto_ncm_setup() {
  	local interface="$1"
  
--	local manufacturer initialize setmode connect finalize ifname devname devpath
-+	local manufacturer initialize setmode connect finalize ifname devname devpath getaddrs
+-	local manufacturer initialize setmode connect finalize devname devpath ifpath
++	local manufacturer initialize setmode connect finalize devname devpath ifpath getaddrs
  
- 	local device apn auth username password pincode delay mode pdptype profile $PROTO_DEFAULT_OPTIONS
- 	json_get_vars device apn auth username password pincode delay mode pdptype profile $PROTO_DEFAULT_OPTIONS
-@@ -33,6 +33,7 @@ proto_ncm_setup() {
+ 	local device ifname  apn auth username password pincode delay mode pdptype profile $PROTO_DEFAULT_OPTIONS
+ 	json_get_vars device ifname apn auth username password pincode delay mode pdptype profile $PROTO_DEFAULT_OPTIONS
+@@ -34,6 +34,7 @@ proto_ncm_setup() {
  	[ "$metric" = "" ] && metric="0"
  
  	[ -n "$profile" ] || profile=1
@@ -605,30 +554,7 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  
  	pdptype=$(echo "$pdptype" | awk '{print toupper($0)}')
  	[ "$pdptype" = "IP" -o "$pdptype" = "IPV6" -o "$pdptype" = "IPV4V6" ] || pdptype="IP"
-@@ -57,11 +58,21 @@ proto_ncm_setup() {
- 	case "$devname" in
- 	'tty'*)
- 		devpath="$(readlink -f /sys/class/tty/$devname/device)"
--		ifname="$( ls "$devpath"/../../*/net )"
-+		ifname="$( ls "$devpath"/../*/net )"
-+		# On module reset the device might not be present yet
-+		[ -n "$ifname" ] || {
-+			sleep 1
-+			ifname="$( ls "$devpath"/../*/net )"
-+		}
- 		;;
- 	*)
- 		devpath="$(readlink -f /sys/class/usbmisc/$devname/device/)"
- 		ifname="$( ls "$devpath"/net )"
-+		# On module reset the device might not be present yet
-+		[ -n "$ifname" ] || {
-+			sleep 1
-+			ifname="$( ls "$devpath"/net )"
-+		}
- 		;;
- 	esac
- 	[ -n "$ifname" ] || {
-@@ -73,25 +84,37 @@ proto_ncm_setup() {
+@@ -82,25 +83,37 @@ proto_ncm_setup() {
  
  	[ -n "$delay" ] && sleep "$delay"
  
@@ -672,7 +598,7 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  			echo "Failed to initialize modem"
  			proto_notify_error "$interface" INITIALIZE_FAILED
  			return 1
-@@ -100,6 +123,7 @@ proto_ncm_setup() {
+@@ -109,6 +122,7 @@ proto_ncm_setup() {
  
  	[ -n "$pincode" ] && {
  		PINCODE="$pincode" gcom -d "$device" -s /etc/gcom/setpin.gcom || {
@@ -680,7 +606,7 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  			echo "Unable to verify PIN"
  			proto_notify_error "$interface" PIN_FAILED
  			proto_block_restart "$interface"
-@@ -111,6 +135,7 @@ proto_ncm_setup() {
+@@ -120,6 +134,7 @@ proto_ncm_setup() {
  	echo "Configuring modem"
  	for i in $configure; do
  		eval COMMAND="$i" gcom -d "$device" -s /etc/gcom/runcommand.gcom || {
@@ -688,7 +614,7 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  			echo "Failed to configure modem"
  			proto_notify_error "$interface" CONFIGURE_FAILED
  			return 1
-@@ -120,73 +145,89 @@ proto_ncm_setup() {
+@@ -129,73 +144,89 @@ proto_ncm_setup() {
  	[ -n "$mode" ] && {
  		json_select modes
  		json_get_var setmode "$mode"
@@ -766,7 +692,10 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
 +			echo "Failed to get IP address information"
 +			proto_notify_error "$interface" GETADDRS_FAILED
 +			return 1
-+		}
+ 		}
+-		json_close_object
+-		ubus call network add_dynamic "$(json_dump)"
+-	}
 +
 +		proto_add_ipv4_address "$ip" "$subnet"
 +                [ "$defaultroute" = 0 ] || proto_add_ipv4_route "0.0.0.0" 0 "$gateway" "" "$metric"
@@ -787,10 +716,7 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
 +				json_add_string zone "$zone"
 +			}
 +			ubus call network add_dynamic "$(json_dump)"
- 		}
--		json_close_object
--		ubus call network add_dynamic "$(json_dump)"
--	}
++		}
 +
 +		[ "$pdptype" = "IPV6" -o "$pdptype" = "IPV4V6" ] && {
 +			json_init
@@ -818,7 +744,7 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  }
  
  proto_ncm_teardown() {
-@@ -199,20 +240,6 @@ proto_ncm_teardown() {
+@@ -208,20 +239,6 @@ proto_ncm_teardown() {
  
  	[ -n "$ctl_device" ] && device=$ctl_device
  
@@ -839,7 +765,7 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  	[ -n "$profile" ] || profile=1
  
  	echo "Stopping network $interface"
-@@ -220,16 +247,6 @@ proto_ncm_teardown() {
+@@ -229,16 +246,6 @@ proto_ncm_teardown() {
  	json_load "$(ubus call network.interface.$interface status)"
  	json_select data
  	json_get_vars manufacturer
@@ -856,7 +782,7 @@ Index: build_dir/package/network/utils/comgt/files/ncm.sh
  
  	json_load "$(cat /etc/gcom/ncm.json)"
  	json_select "$manufacturer" || {
-@@ -239,17 +256,68 @@ proto_ncm_teardown() {
+@@ -248,17 +255,68 @@ proto_ncm_teardown() {
  	}
  
  	json_get_vars disconnect

@@ -2,17 +2,17 @@ Index: build_dir/feeds/routing/nodogsplash/Makefile
 ===================================================================
 --- build_dir.orig/feeds/routing/nodogsplash/Makefile
 +++ build_dir/feeds/routing/nodogsplash/Makefile
-@@ -10,9 +10,10 @@ PKG_FIXUP:=autoreconf
+@@ -9,9 +9,10 @@ PKG_NAME:=nodogsplash
  PKG_VERSION:=5.0.0
  PKG_RELEASE:=1
  
+-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 -PKG_SOURCE_URL:=https://codeload.github.com/nodogsplash/nodogsplash/tar.gz/v$(PKG_VERSION)?
--PKG_SOURCE:=nodogsplash-$(PKG_VERSION).tar.gz
 -PKG_HASH:=a7665f4a42997746a31e9217f2f54e360aa7fc4bc72bd89faa08f1ccf7875b5e
 +PKG_SOURCE_URL:=https://github.com/imagestream/nodogsplash.git
 +PKG_SOURCE_PROTO:=git
 +PKG_SOURCE_DATE:=2020-02-04
 +PKG_SOURCE_VERSION:=8519b8d44664cb45ffefd0fb6470e58babac2b52
- PKG_BUILD_DIR:=$(BUILD_DIR)/nodogsplash-$(PKG_VERSION)
  
  PKG_MAINTAINER:=Moritz Warning <moritzwarning@web.de>
+ PKG_LICENSE:=GPL-2.0-or-later

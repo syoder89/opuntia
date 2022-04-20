@@ -1,8 +1,8 @@
-Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
+Index: build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
 ===================================================================
 --- /dev/null
-+++ build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
-@@ -0,0 +1,673 @@
++++ build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000.dts
+@@ -0,0 +1,672 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/dts-v1/;
 +#include "bcm2711.dtsi"
@@ -599,7 +599,6 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000
 +
 +&pcie0 {
 +       brcm,enable-l1ss;
-+       max-link-speed = <1>;
 +};
 +
 +&sdhost {
@@ -676,16 +675,16 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb2000
 +			   <&spi0>, "dmas:8=", <&dma40>;
 +	};
 +};
-Index: build_dir/target/linux/bcm27xx/files/arch/arm64/boot/dts/broadcom/bcm2711-is-apb2000.dts
+Index: build_dir.ap2000/target/linux/bcm27xx/files/arch/arm64/boot/dts/broadcom/bcm2711-is-apb2000.dts
 ===================================================================
 --- /dev/null
-+++ build_dir/target/linux/bcm27xx/files/arch/arm64/boot/dts/broadcom/bcm2711-is-apb2000.dts
++++ build_dir.ap2000/target/linux/bcm27xx/files/arch/arm64/boot/dts/broadcom/bcm2711-is-apb2000.dts
 @@ -0,0 +1 @@
 +#include "../../../../arm/boot/dts/bcm2711-is-apb2000.dts"
-Index: build_dir/target/linux/bcm27xx/image/Makefile
+Index: build_dir.ap2000/target/linux/bcm27xx/image/Makefile
 ===================================================================
---- build_dir.orig/target/linux/bcm27xx/image/Makefile
-+++ build_dir/target/linux/bcm27xx/image/Makefile
+--- build_dir.ap2000.orig/target/linux/bcm27xx/image/Makefile
++++ build_dir.ap2000/target/linux/bcm27xx/image/Makefile
 @@ -59,6 +59,7 @@ define Device/Default
    DEVICE_VENDOR := Raspberry Pi
    KERNEL := kernel-bin
@@ -752,10 +751,10 @@ Index: build_dir/target/linux/bcm27xx/image/Makefile
 +  TARGET_DEVICES += apb3350
 +endif
  $(eval $(call BuildImage))
-Index: build_dir/target/linux/bcm27xx/image/distroconfig.txt
+Index: build_dir.ap2000/target/linux/bcm27xx/image/distroconfig.txt
 ===================================================================
---- build_dir.orig/target/linux/bcm27xx/image/distroconfig.txt
-+++ build_dir/target/linux/bcm27xx/image/distroconfig.txt
+--- build_dir.ap2000.orig/target/linux/bcm27xx/image/distroconfig.txt
++++ build_dir.ap2000/target/linux/bcm27xx/image/distroconfig.txt
 @@ -14,3 +14,11 @@ dtoverlay=disable-bt
  dtoverlay=disable-bt
  # Run as fast as firmware / board allows

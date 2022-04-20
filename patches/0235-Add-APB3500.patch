@@ -1,7 +1,7 @@
-Index: build_dir/target/linux/bcm27xx/image/Makefile
+Index: build_dir.ap2000/target/linux/bcm27xx/image/Makefile
 ===================================================================
---- build_dir.orig/target/linux/bcm27xx/image/Makefile
-+++ build_dir/target/linux/bcm27xx/image/Makefile
+--- build_dir.ap2000.orig/target/linux/bcm27xx/image/Makefile
++++ build_dir.ap2000/target/linux/bcm27xx/image/Makefile
 @@ -23,7 +23,8 @@ define Build/boot-common
  	mcopy -i $@.boot config.txt ::
  	mcopy -i $@.boot distroconfig.txt ::
@@ -48,10 +48,10 @@ Index: build_dir/target/linux/bcm27xx/image/Makefile
 +endef
 +
  $(eval $(call BuildImage))
-Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500.dts
+Index: build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500.dts
 ===================================================================
 --- /dev/null
-+++ build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500.dts
++++ build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500.dts
 @@ -0,0 +1,672 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/dts-v1/;
@@ -725,16 +725,16 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3500
 +			   <&spi0>, "dmas:8=", <&dma40>;
 +	};
 +};
-Index: build_dir/target/linux/bcm27xx/files/arch/arm64/boot/dts/broadcom/bcm2711-is-apb3500.dts
+Index: build_dir.ap2000/target/linux/bcm27xx/files/arch/arm64/boot/dts/broadcom/bcm2711-is-apb3500.dts
 ===================================================================
 --- /dev/null
-+++ build_dir/target/linux/bcm27xx/files/arch/arm64/boot/dts/broadcom/bcm2711-is-apb3500.dts
++++ build_dir.ap2000/target/linux/bcm27xx/files/arch/arm64/boot/dts/broadcom/bcm2711-is-apb3500.dts
 @@ -0,0 +1 @@
 +#include "../../../../arm/boot/dts/bcm2711-is-apb3500.dts"
-Index: build_dir/target/linux/bcm27xx/image/config.txt
+Index: build_dir.ap2000/target/linux/bcm27xx/image/config.txt
 ===================================================================
---- build_dir.orig/target/linux/bcm27xx/image/config.txt
-+++ build_dir/target/linux/bcm27xx/image/config.txt
+--- build_dir.ap2000.orig/target/linux/bcm27xx/image/config.txt
++++ build_dir.ap2000/target/linux/bcm27xx/image/config.txt
 @@ -12,3 +12,5 @@ include distroconfig.txt
  
  [all]

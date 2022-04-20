@@ -22,7 +22,6 @@ kernel/0059-wpj558-mac-fixes.patch
 packages/0186-squid-reduce-size.patch
 packages/0063-Ipsec-remove-init-script.patch
 packages/0066-conntrack-tools-logging.patch
-packages/0067-mrd6-disable-logging.patch
 packages/0187-collectd-iwinfo-morestats.patch
 packages/0188-net-snmp-5.7.3.patch
 packages/0191-ntpdate-missing-lib.patch

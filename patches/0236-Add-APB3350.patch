@@ -1,7 +1,7 @@
-Index: build_dir/target/linux/bcm27xx/image/Makefile
+Index: build_dir.ap2000/target/linux/bcm27xx/image/Makefile
 ===================================================================
---- build_dir.orig/target/linux/bcm27xx/image/Makefile
-+++ build_dir/target/linux/bcm27xx/image/Makefile
+--- build_dir.ap2000.orig/target/linux/bcm27xx/image/Makefile
++++ build_dir.ap2000/target/linux/bcm27xx/image/Makefile
 @@ -166,6 +166,7 @@ define Device/rpi-4
  endef
  ifeq ($(SUBTARGET),bcm2711)
@@ -38,10 +38,10 @@ Index: build_dir/target/linux/bcm27xx/image/Makefile
  	raspberrypi,4-compute-module \
  	raspberrypi,4-model-b
    DEVICE_PACKAGES := \
-Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350.dts
+Index: build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350.dts
 ===================================================================
 --- /dev/null
-+++ build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350.dts
++++ build_dir.ap2000/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350.dts
 @@ -0,0 +1,672 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/dts-v1/;
@@ -715,9 +715,9 @@ Index: build_dir/target/linux/bcm27xx/files/arch/arm/boot/dts/bcm2711-is-apb3350
 +			   <&spi0>, "dmas:8=", <&dma40>;
 +	};
 +};
-Index: build_dir/target/linux/bcm27xx/files/arch/arm64/boot/dts/broadcom/bcm2711-is-apb3350.dts
+Index: build_dir.ap2000/target/linux/bcm27xx/files/arch/arm64/boot/dts/broadcom/bcm2711-is-apb3350.dts
 ===================================================================
 --- /dev/null
-+++ build_dir/target/linux/bcm27xx/files/arch/arm64/boot/dts/broadcom/bcm2711-is-apb3350.dts
++++ build_dir.ap2000/target/linux/bcm27xx/files/arch/arm64/boot/dts/broadcom/bcm2711-is-apb3350.dts
 @@ -0,0 +1 @@
 +#include "../../../../arm/boot/dts/bcm2711-is-apb3350.dts"

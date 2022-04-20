@@ -1,0 +1,39 @@
+Index: build_dir/target/linux/bcm27xx/patches-5.10/999-0002-Scott-rpi-pcie-retries.patch
+===================================================================
+--- /dev/null
++++ build_dir/target/linux/bcm27xx/patches-5.10/999-0002-Scott-rpi-pcie-retries.patch
+@@ -0,0 +1,34 @@
++Index: linux-5.10.100/drivers/pci/controller/pcie-brcmstb.c
++===================================================================
++--- linux-5.10.100.orig/drivers/pci/controller/pcie-brcmstb.c
+++++ linux-5.10.100/drivers/pci/controller/pcie-brcmstb.c
++@@ -867,9 +867,10 @@
++        struct resource *res;
++        int num_out_wins = 0;
++        u16 nlw, cls, lnksta;
++-       int i, ret, memc;
+++       int i, ret, memc, retries=10;
++        u32 tmp, burst, aspm_support;
++ 
+++retry:
++        /* Reset the bridge */
++        pcie->bridge_sw_init_set(pcie, 1);
++        pcie->perst_set(pcie, 1);
++@@ -965,8 +966,14 @@
++                msleep(5);
++ 
++        if (!brcm_pcie_link_up(pcie)) {
++-               dev_err(dev, "link down\n");
++-               return -ENODEV;
+++               if (retries-- > 0) {
+++                       dev_err(dev, "Failed to bring link up, try again (%d/10)\n", 10-retries);
+++                       goto retry;
+++               }
+++               else {
+++                       dev_err(dev, "link down\n");
+++                       return -ENODEV;
+++               }
++        }
++ 
++        if (!brcm_pcie_rc_mode(pcie)) {
++
