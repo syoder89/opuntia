@@ -1,69 +1,69 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# LEDE Configuration
+# OpenWrt Configuration
 #
 CONFIG_MODULES=y
 CONFIG_HAVE_DOT_CONFIG=y
-# CONFIG_TARGET_ppc40x is not set
-# CONFIG_TARGET_ppc44x is not set
-# CONFIG_TARGET_arm64 is not set
+CONFIG_HOST_OS_LINUX=y
+# CONFIG_HOST_OS_MACOS is not set
 # CONFIG_TARGET_sunxi is not set
 # CONFIG_TARGET_apm821xx is not set
 # CONFIG_TARGET_ath25 is not set
-# CONFIG_TARGET_ar71xx is not set
-# CONFIG_TARGET_at91 is not set
-# CONFIG_TARGET_brcm2708 is not set
+# CONFIG_TARGET_ath79 is not set
+# CONFIG_TARGET_bcm27xx is not set
 # CONFIG_TARGET_bcm53xx is not set
-# CONFIG_TARGET_brcm47xx is not set
-# CONFIG_TARGET_brcm63xx is not set
-# CONFIG_TARGET_cns3xxx is not set
+# CONFIG_TARGET_bcm47xx is not set
+# CONFIG_TARGET_bcm4908 is not set
+# CONFIG_TARGET_bcm63xx is not set
+# CONFIG_TARGET_bmips is not set
 # CONFIG_TARGET_octeon is not set
 # CONFIG_TARGET_gemini is not set
 # CONFIG_TARGET_mpc85xx is not set
-# CONFIG_TARGET_imx6 is not set
 # CONFIG_TARGET_mxs is not set
-# CONFIG_TARGET_adm8668 is not set
-# CONFIG_TARGET_adm5120 is not set
-# CONFIG_TARGET_xburst is not set
-# CONFIG_TARGET_ixp4xx is not set
 # CONFIG_TARGET_lantiq is not set
 # CONFIG_TARGET_malta is not set
 # CONFIG_TARGET_pistachio is not set
 # CONFIG_TARGET_mvebu is not set
 # CONFIG_TARGET_kirkwood is not set
-# CONFIG_TARGET_orion is not set
 # CONFIG_TARGET_mediatek is not set
 # CONFIG_TARGET_ramips is not set
-# CONFIG_TARGET_rb532 is not set
-# CONFIG_TARGET_mcs814x is not set
+# CONFIG_TARGET_at91 is not set
+# CONFIG_TARGET_tegra is not set
 # CONFIG_TARGET_layerscape is not set
+# CONFIG_TARGET_imx is not set
+# CONFIG_TARGET_octeontx is not set
 # CONFIG_TARGET_oxnas is not set
 # CONFIG_TARGET_armvirt is not set
+# CONFIG_TARGET_ipq40xx is not set
 # CONFIG_TARGET_ipq806x is not set
-# CONFIG_TARGET_au1000 is not set
+# CONFIG_TARGET_ipq807x is not set
+# CONFIG_TARGET_realtek is not set
+# CONFIG_TARGET_rockchip is not set
 # CONFIG_TARGET_arc770 is not set
 # CONFIG_TARGET_archs38 is not set
-# CONFIG_TARGET_ar7 is not set
-# CONFIG_TARGET_omap24xx is not set
 # CONFIG_TARGET_omap is not set
 # CONFIG_TARGET_uml is not set
 # CONFIG_TARGET_zynq is not set
 CONFIG_TARGET_x86=y
 # CONFIG_TARGET_x86_generic is not set
 # CONFIG_TARGET_x86_legacy is not set
-# CONFIG_TARGET_x86_geode is not set
-CONFIG_TARGET_x86_64=y
-CONFIG_TARGET_x86_64_Generic=y
+CONFIG_TARGET_x86_geode=y
+# CONFIG_TARGET_x86_64 is not set
+# CONFIG_TARGET_MULTI_PROFILE is not set
+CONFIG_TARGET_x86_geode_DEVICE_generic=y
+# CONFIG_TARGET_x86_geode_DEVICE_geos is not set
 CONFIG_HAS_SUBTARGETS=y
+CONFIG_HAS_DEVICES=y
 CONFIG_TARGET_BOARD="x86"
-CONFIG_TARGET_SUBTARGET="64"
-CONFIG_TARGET_PROFILE="Generic"
-CONFIG_TARGET_ARCH_PACKAGES="x86_64"
-CONFIG_DEFAULT_TARGET_OPTIMIZATION="-Os -pipe"
-CONFIG_CPU_TYPE=" "
-CONFIG_LINUX_4_9=y
+CONFIG_TARGET_SUBTARGET="geode"
+CONFIG_TARGET_PROFILE="DEVICE_generic"
+CONFIG_TARGET_ARCH_PACKAGES="i386_pentium-mmx"
+CONFIG_DEFAULT_TARGET_OPTIMIZATION="-Os -pipe -march=pentium-mmx"
+CONFIG_CPU_TYPE="pentium-mmx"
+CONFIG_LINUX_5_10=y
 CONFIG_DEFAULT_base-files=y
 CONFIG_DEFAULT_busybox=y
+CONFIG_DEFAULT_ca-bundle=y
 CONFIG_DEFAULT_dnsmasq=y
 CONFIG_DEFAULT_dropbear=y
 CONFIG_DEFAULT_e2fsprogs=y
@@ -72,39 +72,43 @@ CONFIG_DEFAULT_fstools=y
 CONFIG_DEFAULT_ip6tables=y
 CONFIG_DEFAULT_iptables=y
 CONFIG_DEFAULT_kmod-button-hotplug=y
-CONFIG_DEFAULT_kmod-e1000=y
-CONFIG_DEFAULT_kmod-e1000e=y
-CONFIG_DEFAULT_kmod-igb=y
-CONFIG_DEFAULT_kmod-r8169=y
+CONFIG_DEFAULT_kmod-crypto-cbc=y
+CONFIG_DEFAULT_kmod-crypto-hw-geode=y
+CONFIG_DEFAULT_kmod-ipt-offload=y
+CONFIG_DEFAULT_kmod-ledtrig-gpio=y
 CONFIG_DEFAULT_libc=y
 CONFIG_DEFAULT_libgcc=y
+CONFIG_DEFAULT_libustream-wolfssl=y
 CONFIG_DEFAULT_logd=y
 CONFIG_DEFAULT_mkf2fs=y
 CONFIG_DEFAULT_mtd=y
 CONFIG_DEFAULT_netifd=y
 CONFIG_DEFAULT_odhcp6c=y
-CONFIG_DEFAULT_odhcpd=y
+CONFIG_DEFAULT_odhcpd-ipv6only=y
 CONFIG_DEFAULT_opkg=y
 CONFIG_DEFAULT_partx-utils=y
 CONFIG_DEFAULT_ppp=y
 CONFIG_DEFAULT_ppp-mod-pppoe=y
+CONFIG_DEFAULT_procd=y
+CONFIG_DEFAULT_procd-ujail=y
 CONFIG_DEFAULT_uci=y
 CONFIG_DEFAULT_uclient-fetch=y
+CONFIG_DEFAULT_urandom-seed=y
+CONFIG_DEFAULT_urngd=y
 CONFIG_HAS_FPU=y
 CONFIG_AUDIO_SUPPORT=y
 CONFIG_GPIO_SUPPORT=y
 CONFIG_PCI_SUPPORT=y
-CONFIG_PCIE_SUPPORT=y
 CONFIG_PCMCIA_SUPPORT=y
 CONFIG_USB_SUPPORT=y
 CONFIG_RTC_SUPPORT=y
 CONFIG_USES_SQUASHFS=y
 CONFIG_USES_EXT4=y
 CONFIG_USES_TARGZ=y
-CONFIG_ARCH_64BIT=y
-CONFIG_VIRTIO_SUPPORT=y
-CONFIG_x86_64=y
-CONFIG_ARCH="x86_64"
+CONFIG_USES_ROOTFS_PART=y
+CONFIG_USES_BOOT_PART=y
+CONFIG_i386=y
+CONFIG_ARCH="i386"
 
 #
 # Target Images
@@ -146,7 +150,7 @@ CONFIG_TARGET_ROOTFS_PARTSIZE=256
 CONFIG_TARGET_ROOTFS_PARTNAME=""
 
 CONFIG_VERSION_PRODUCT="EV1000"
-CONFIG_VERSION_HWREV="4"
+CONFIG_VERSION_HWREV="2"
 
 #
 # Editors
@@ -233,7 +237,7 @@ CONFIG_PACKAGE_imagestream-snmp-mibs=y
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs is not set
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs-i is not set
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs-i.v3 is not set
-CONFIG_PACKAGE_imagestream-envoy-configs=y
+CONFIG_PACKAGE_imagestream-envoy-configs-hw2=y
 CONFIG_PACKAGE_imagestream-wifi-ap-bootstrap=y
 # CONFIG_PACKAGE_imagestream-wifi-ap-configs.v3 is not set
 # CONFIG_PACKAGE_imagestream-wifi-ap-installer is not set
@@ -321,7 +325,6 @@ CONFIG_PACKAGE_kmod-usb3=y
 
 CONFIG_PACKAGE_comgt=y
 CONFIG_PACKAGE_kmod-cryptodev=y
-CONFIG_PACKAGE_kmod-leds-apu2=y
 CONFIG_PACKAGE_kmod-leds-gpio=y
 CONFIG_PACKAGE_kmod-ledtrig-gpio=y
 CONFIG_PACKAGE_kmod-ledtrig-heartbeat=y
@@ -463,9 +466,6 @@ CONFIG_KERNEL_DEVKMEM=y
 # Netflow is broken now in kernels 5.x
 # CONFIG_PACKAGE_kmod-ipt-netflow is not set
 # CONFIG_PACKAGE_iptables-mod-netflow is not set
-CONFIG_PACKAGE_kmod-rtl8821ae=y
-CONFIG_PACKAGE_rtl8821ae-firmware=y
-CONFIG_PACKAGE_kmod-mt7915e=y
 # CONFIG_PACKAGE_kismet-remotecap is not set
 CONFIG_PACKAGE_jool-tools-netfilter=y
 CONFIG_PACKAGE_kmod-jool-netfilter=y

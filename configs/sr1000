@@ -483,3 +483,5 @@ CONFIG_PACKAGE_kmod-rtl8821ae=y
 CONFIG_PACKAGE_rtl8821ae-firmware=y
 CONFIG_PACKAGE_kmod-mt7915e=y
 # CONFIG_PACKAGE_kismet-remotecap is not set
+CONFIG_PACKAGE_jool-tools-netfilter=y
+CONFIG_PACKAGE_kmod-jool-netfilter=y
