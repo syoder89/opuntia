@@ -3,7 +3,6 @@ pipeline {
         dockerfile {
             filename 'Dockerfile'
             dir 'docker'
-            label 'opuntia'
         }
     }
     stages {
